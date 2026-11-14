@@ -30,8 +30,31 @@ const CSS = `
 #setup .bar { position:fixed; left:0; right:0; bottom:0; display:flex; gap:8px; padding:10px 14px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); background:#121820; border-top:1px solid #2a3644; }
 #setup .bar button, #setup .big { flex:1; background:#2a3644; color:#e8edf2; border:0; border-radius:12px; padding:13px; font:inherit; font-weight:700; cursor:pointer; }
 #setup .bar .go { background:#d33; } #setup .bar .go:disabled { opacity:.4; }
+#setup .filters { position:sticky; top:-14px; z-index:2; background:#0d1014; padding:10px 0 8px; display:flex; flex-direction:column; gap:8px; }
+#setup .filters input { width:100%; box-sizing:border-box; }
+#setup .fchip { background:#151d27; color:#e8edf2; border:2px solid #2a3644; border-left:6px solid var(--c); border-radius:999px; padding:5px 10px; font:inherit; font-size:13px; cursor:pointer; }
+#setup .fchip.on { background:var(--c); color:#111; border-color:#fff; font-weight:700; }
+#setup .none { color:#5d6b7a; padding:8px; }
 #setup .big { display:block; width:100%; margin:8px 0; font-size:18px; }
 `;
+
+const ALL = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
+const NAMES = { pyrus: /pyrus/i, aquos: /aquos|auqos/i, subterra: /sub ?t?terra/i, haos: /haos/i, darkus: /darkus/i, ventus: /ventus/i };
+// attributes a card's text asks for ("…with one of your Haos or Ventus…")
+const mentioned = card => ALL.filter(a => NAMES[a].test(card.text || ''));
+// a card fits if it doesn't ask for an attribute, or asks for one of these; bonus cards need a bonus for one of them
+function fitsAttrs(card, attrs) {
+  const m = mentioned(card);
+  if (m.length && !m.some(a => attrs.includes(a))) return false;
+  const b = card.bonus || {};
+  if (Object.values(b).some(v => v > 0) && !attrs.some(a => (b[a] || 0) > 0)) return false;
+  return true;
+}
+function abilityScore(card, attrs) {
+  const b = card.bonus || {};
+  const avg = attrs.reduce((n, a) => n + (b[a] || 0), 0) / attrs.length;
+  return avg + (card.extraBonus || 0) + (mentioned(card).some(a => attrs.includes(a)) ? 40 : 0);
+}
 
 function lastTeam(i) { try { return JSON.parse(localStorage.getItem('marbles-team-' + i) || 'null'); } catch { return null; } }
 function saveTeam(i, t) { try { localStorage.setItem('marbles-team-' + i, JSON.stringify(t)); } catch {} }
@@ -68,9 +91,33 @@ export function setupTeams(cat) {
     return t;
   };
 
+  // Auto finish: keep what's picked and fill the rest to suit it.
+  // Toys: the team's main attribute (or the attribute filter), strongest first. Cards: the best fit for the team's attributes.
+  const topPick = (arr, score) => { const s = [...arr].sort((a, b) => score(b) - score(a)).slice(0, 3); return s[rand(s.length)]; };
+  function autoFinish(t, fa) {
+    const counts = {}; t.toys.forEach(x => counts[x.attr] = (counts[x.attr] || 0) + 1);
+    const main = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || fa[0];
+    while (t.toys.length < 3) {
+      const taken = new Set(t.toys.map(x => x.id));
+      let pool = toys.filter(d => !taken.has(d.id) && (main ? d.attributes[main] : true));
+      if (!pool.length) pool = toys.filter(d => !taken.has(d.id));
+      const d = topPick(pool, d => d.baseG ?? 250);
+      t.toys.push({ id: d.id, attr: main && d.attributes[main] ? main : Object.keys(d.attributes)[0] });
+    }
+    const attrs = t.toys.map(x => x.attr);
+    for (const c of GATE_COLORS) if (!t.gates[c])
+      t.gates[c] = topPick(gates.filter(g => g.color === c), g => attrs.reduce((n, a) => n + (g.bonus[a] || 0), 0)).id;
+    const team = [...new Set(attrs)];
+    for (const c of AB_COLORS) if (!t.abilities[c]) {
+      const pool = abilities.filter(a => a.color === c && fitsAttrs(a, team));
+      t.abilities[c] = topPick(pool.length ? pool : abilities.filter(a => a.color === c), a => abilityScore(a, attrs)).id;
+    }
+  }
+
   return new Promise(resolve => {
     const teams = [restore(lastTeam(0), 0), restore(lastTeam(1), 1)];
     let who = 0, gateTab = 'gold', abTab = 'red', search = '';
+    const filt = new Set();   // attribute filter (empty = all)
 
     const complete = t => t.toys.length === 3 && GATE_COLORS.every(c => t.gates[c]) && AB_COLORS.every(c => t.abilities[c]);
     const attrsOf = t => [...new Set(t.toys.map(x => x.attr))];
@@ -88,30 +135,36 @@ export function setupTeams(cat) {
           <div class="dots">${Object.keys(d.attributes).map(a => `<span class="dot ${a === x.attr ? 'on' : ''}" title="${cap(a)}" data-k="${k}" data-attr="${a}" style="background:${ATTR_COLOR[a]}"></span>`).join('')}</div></div>`;
       }).join('');
       const q = search.trim().toLowerCase();
-      const toyList = toys.filter(d => !q || d.name.toLowerCase().includes(q)).map(d =>
+      const hit = (...texts) => !q || texts.some(x => String(x || '').toLowerCase().includes(q));
+      const fa = [...filt];
+      const toyList = toys.filter(d => hit(d.name) && (!fa.length || fa.some(a => d.attributes[a]))).map(d =>
         `<button class="item" data-add="${d.id}" style="--c:${ATTR_COLOR[Object.keys(d.attributes)[0]]}"><b>${esc(d.name)}</b><span>${d.baseG ?? 250}G · ${Object.keys(d.attributes).map(cap).join(', ')}</span><span>Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</span></button>`).join('');
       // Gate cards: sorted by the best bonus for your toys' attributes
-      const score = g => Math.max(0, ...(mine.length ? mine : ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus']).map(a => g.bonus[a] || 0));
-      const gateList = gates.filter(g => g.color === gateTab).sort((a, b) => score(b) - score(a)).map(g =>
+      const focus = fa.length ? fa : mine.length ? mine : ALL;
+      const score = g => Math.max(0, ...focus.map(a => g.bonus[a] || 0));
+      const gateList = gates.filter(g => g.color === gateTab && hit(g.name, g.text) && (!fa.length || score(g) > 0)).sort((a, b) => score(b) - score(a)).map(g =>
         `<button class="item ${t.gates[gateTab] === g.id ? 'sel' : ''}" data-gate="${esc(g.id)}" style="--c:${COLOR_HEX[g.color]}"><b>${esc(g.name)}</b>
-          <span>${(mine.length ? mine : Object.keys(g.bonus)).map(a => `${cap(a)} +${g.bonus[a] || 0}`).join(' · ')}</span>${g.text ? `<span>${esc(g.text)}</span>` : ''}</button>`).join('');
-      const abList = abilities.filter(a => a.color === abTab).map(a =>
+          <span>${focus.map(a => `${cap(a)} +${g.bonus[a] || 0}`).join(' · ')}</span>${g.text ? `<span>${esc(g.text)}</span>` : ''}</button>`).join('');
+      const abList = abilities.filter(a => a.color === abTab && hit(a.name, a.text) && (!fa.length || fitsAttrs(a, fa))).map(a =>
         `<button class="item ${t.abilities[abTab] === a.id ? 'sel' : ''}" data-ab="${esc(a.id)}" style="--c:${COLOR_HEX[a.color]}"><b>${esc(a.name)}</b><span>${esc(a.text)}</span></button>`).join('');
       const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}</small></button>`;
       root.innerHTML = `
         <h2>${esc(t.name)}: set up your team</h2>
         <div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>
+        <div class="filters">
+          <input type="search" id="ssearch" placeholder="Search toys and cards" value="${esc(search)}">
+          <div class="row">${ALL.map(a => `<button class="fchip ${filt.has(a) ? 'on' : ''}" data-f="${a}" style="--c:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>
+        </div>
         <h3>Toys (${t.toys.length}/3)</h3>
         <div class="row">${slots}</div>
-        <div class="row" style="margin-top:8px"><input type="search" id="ssearch" placeholder="Search toys" value="${esc(search)}" style="flex:1"></div>
-        <div class="list">${toyList}</div>
+        <div class="list">${toyList || '<span class="none">No matches</span>'}</div>
         <h3>Gate cards</h3>
         <div class="tabs">${GATE_COLORS.map(c => tab('g', c, t.gates[c], c === gateTab)).join('')}</div>
-        <div class="list">${gateList}</div>
+        <div class="list">${gateList || '<span class="none">No matches</span>'}</div>
         <h3>Ability cards</h3>
         <div class="tabs">${AB_COLORS.map(c => tab('a', c, t.abilities[c], c === abTab)).join('')}</div>
-        <div class="list">${abList}</div>
-        <div class="bar"><button id="srand">Random</button><button class="go" id="sdone" ${complete(t) ? '' : 'disabled'}>${who === 0 ? 'Next player' : 'Done'}</button></div>`;
+        <div class="list">${abList || '<span class="none">No matches</span>'}</div>
+        <div class="bar"><button id="srand">Random</button><button id="sauto">Auto finish</button><button class="go" id="sdone" ${complete(t) ? '' : 'disabled'}>${who === 0 ? 'Next player' : 'Done'}</button></div>`;
       const $ = s => root.querySelector(s);
       $('#sname').oninput = e => { t.name = e.target.value || `Player ${who + 1}`; root.querySelector('h2').textContent = `${t.name}: set up your team`; };
       $('#ssearch').oninput = e => { search = e.target.value; const pos = e.target.selectionStart; render(); const s = root.querySelector('#ssearch'); s.focus(); s.setSelectionRange(pos, pos); };
@@ -132,9 +185,11 @@ export function setupTeams(cat) {
       root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { gateTab = b.dataset.gtab; render(); });
       root.querySelectorAll('[data-atab]').forEach(b => b.onclick = () => { abTab = b.dataset.atab; render(); });
       $('#srand').onclick = () => { Object.assign(t, randomTeam()); render(); };
+      $('#sauto').onclick = () => { autoFinish(t, fa); render(); };
+      root.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt.has(b.dataset.f) ? filt.delete(b.dataset.f) : filt.add(b.dataset.f); render(); });
       $('#sdone').onclick = () => {
         if (!complete(t)) return;
-        saveTeam(who, t); who++; search = ''; gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
+        saveTeam(who, t); who++; search = ''; filt.clear(); gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
       };
     }
 
