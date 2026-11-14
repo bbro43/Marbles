@@ -37,7 +37,7 @@
   <p class="sub" id="tagline">Getting the asset pack…</p>
 
   <div class="menu">
-    <button class="btn" id="btnBattle" disabled>Battle <small>2 players, this device</small></button>
+    <button class="btn" id="btnBattle" disabled>Battle <small>2 players, this device — pick your teams</small></button>
     <button class="btn" id="btnChars" disabled>Characters <small>later</small></button>
     <button class="btn" id="btnShop" disabled>Shop <small>later</small></button>
   </div>
@@ -69,7 +69,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 18;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 19;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null };
 
 async function openPack(blob) {

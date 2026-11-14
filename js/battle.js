@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
 import * as R from './rules.js';
+import { setupTeams } from './setup.js';
 
 // ---------- real-world scale
 // The Arena mat is 56 cm square = 285 model units, so 1 cm = 285/56 ≈ 5.09 units.
@@ -626,24 +627,7 @@ renderer.setAnimationLoop(() => {
   renderer.render(scene, camera);
 });
 
-// ---------- setup: quick match, two players on one device
-function randomTeam(cat) {
-  const pool = cat.toys.filter(t => t.game === 'bb' && Object.keys(t.attributes || {}).length);
-  return pickN(pool, 3).map(t => {
-    const attr = pickN(Object.keys(t.attributes), 1)[0];
-    return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: { speed: 3, defense: 3, magnet: 3, ...(t.stats || {}) }, model: t.model, attrTexture: t.attributes[attr] };
-  });
-}
-function randomGates(cat) {
-  const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus);
-  return ['gold', 'silver', 'copper'].map(col => pickN(gates.filter(c => c.color === col), 1)[0]);
-}
-
-function randomAbilities(cat) {
-  const coded = cat.cards.filter(c => c.type === 'ability' && R.isCoded(c));
-  return ['red', 'blue', 'green'].map(col => pickN(coded.filter(c => c.color === col), 1)[0]).filter(Boolean);
-}
-
+// ---------- setup: teams are picked on the setup screen (setup.js)
 async function start() {
   try { pack = await Pack.fromDevice(); } catch (e) { pack = null; }
   if (!pack) { $('loading').textContent = 'No asset pack on this device yet. Go back and load it first.'; return; }
@@ -657,11 +641,13 @@ async function start() {
     gateBack.colorSpace = THREE.SRGBColorSpace; gateBack.anisotropy = 4;
   }
   const cat = pack.catalog;
-  const players = [0, 1].map(i => ({ name: `Player ${i + 1}`, toys: randomTeam(cat), gates: randomGates(cat), abilities: randomAbilities(cat) }));
-  state = R.newMatch(players);
+  $('loading').hidden = true;
+  const { players, first } = await setupTeams(cat);
+  $('loading').hidden = false;
+  state = R.newMatch(players, { first });
   $('loading').textContent = 'Loading toys…';
   for (let p = 0; p < 2; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
-  cameraFor(0); camera.position.copy(camGoal);
+  cameraFor(first); camera.position.copy(camGoal);
   $('loading').hidden = true;
   hud(); nextTurn();
 }
