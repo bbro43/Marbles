@@ -1,6 +1,6 @@
 // Run: node tests/rules.test.mjs
 import assert from 'node:assert/strict';
-import { newMatch, startTurn, land, computeBattle, resolveBattle } from '../js/rules.js';
+import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff } from '../js/rules.js';
 
 const gate = (name, bonus) => ({ name, bonus });
 const toy = (name, attr, g) => ({ name, attr, g });
@@ -90,6 +90,30 @@ test('clear toy takes opponent attribute', () => {
   startTurn(s); land(s, 0, 0); startTurn(s); const r = land(s, 0, 0);
   const b = computeBattle(s, r.battle.fieldIdx);
   assert.equal(b.sides[1].attr, 'darkus'); assert.equal(b.result, 'tie');
+});
+
+test('knockout: opponent toy knocked off -> thrower wins the card regardless of G-Power', () => {
+  const s = newMatch([
+    { name: 'A', toys: [toy('weak', 'pyrus', 250), toy('weak2', 'pyrus', 250)], gates: [gate('Ga', {})] },
+    { name: 'B', toys: [toy('strong', 'haos', 600)], gates: [gate('Gb', {})] },
+  ]);
+  startTurn(s); land(s, 0, null); startTurn(s);       // A misses
+  land(s, 0, 0); startTurn(s);                        // B stands on A's card Ga (field 0)
+  const card = s.field[0].card;
+  const ev = knockOff(s, [{ p: 1, t: 0, card }]);
+  assert.ok(ev.some(e => e.type === 'capture' && e.how === 'knockout' && e.p === 0));
+  assert.equal(s.players[0].captured[0].name, 'Ga');
+  const r = land(s, 0, null);                          // A's ball then rolls off the mat area -> miss
+  assert.equal(r.events[0].type, 'miss');
+});
+
+test('knocking your own toy off just removes it from the card', () => {
+  const s = match(); startTurn(s);
+  land(s, 0, 0); startTurn(s); land(s, 0, null); startTurn(s);
+  const card = s.field[0].card;
+  const ev = knockOff(s, [{ p: 0, t: 0, card }]);
+  assert.ok(!ev.some(e => e.type === 'capture'));
+  assert.equal(s.field[0].toys.length, 0);
 });
 
 console.log(`\n${n} tests passed`);

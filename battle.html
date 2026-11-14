@@ -22,6 +22,10 @@
   .dot.on { background:#d4af37; }
   #back { position:absolute; bottom:10px; left:10px; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:8px 12px; font:inherit; text-decoration:none; }
   #msg { position:absolute; left:0; right:0; top:64px; text-align:center; font-weight:600; text-shadow:0 2px 6px #000; padding:0 12px; pointer-events:none; }
+  #flash { position:absolute; left:0; right:0; top:38%; text-align:center; font-size:54px; font-weight:900; letter-spacing:2px; color:#ffd54a;
+            text-shadow:0 0 18px #d8322b, 0 4px 0 #7a0f0b; pointer-events:none; opacity:0; z-index:3; }
+  #flash.go { animation: flash 1.4s ease-out; }
+  @keyframes flash { 0% { opacity:0; transform:scale(.4); } 15% { opacity:1; transform:scale(1.15); } 30% { transform:scale(1); } 80% { opacity:1; } 100% { opacity:0; } }
   #picker { display:flex; gap:8px; padding:10px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); background:#121820; border-top:1px solid var(--line); overflow-x:auto; min-height:64px; }
   #picker.off { opacity:.4; pointer-events:none; }
   .chip { flex:1 0 auto; text-align:left; background:#1b2430; color:var(--text); border:2px solid #2a3644; border-left:8px solid var(--c); border-radius:12px; padding:8px 12px; font:inherit; cursor:pointer; }
@@ -53,6 +57,7 @@
       <div class="pl" id="p1"><div class="n" id="p1name">Player 2</div><div id="p1gates"></div></div>
     </div>
     <div id="msg"></div>
+    <div id="flash"></div>
     <a id="back" href="./">Home</a>
     <div id="loading">Loading…</div>
     <div class="overlay" id="battle" hidden><div class="box">

@@ -136,6 +136,8 @@ function addGateMesh(card, owner) {
 }
 function flipGate(card) { const m = gateMesh.get(card); if (m) { m.material.map = cardTexture(card, true); m.material.needsUpdate = true; } }
 function removeGate(card) { const m = gateMesh.get(card); if (m) { scene.remove(m); gateMesh.delete(card); } }
+let inFlight = null;   // the thrown toy while its throw is being resolved
+function cardAt(pos) { const i = fieldIndexAt(pos); return i === null ? null : state.field[i].card; }
 function fieldIndexAt(pos) {
   for (let i = 0; i < state.field.length; i++) {
     const l = cardLocal(state.field[i].owner, pos);
@@ -158,6 +160,9 @@ function hud() {
   });
 }
 function say(msg) { $('msg').textContent = msg; }
+function flash(text) {
+  const f = $('flash'); f.textContent = text; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+}
 function showPicker() {
   const p = state.turn, pl = state.players[p];
   $('picker').innerHTML = pl.unused.map(t => {
@@ -194,7 +199,12 @@ async function nextTurn() {
 }
 
 // ---------- throwing
-let roll = null;   // { tm, pos, vel }
+let roll = null;   // { ball: body, stands: [body] } while a throw is in motion
+// A body: { tm, pos, vel, p, t, kind: 'ball' | 'stand', card (stands only), moved, done }
+const STAND_FRICTION = 520;   // standing (open) toys grip the mat: they slide, not roll
+const STAND_R = RADIUS * 1.15; // open toys are a bit wider than the closed ball
+const MASS = { ball: 1, stand: 1.6 };
+const BOUNCE = 0.65;          // how bouncy toy-on-toy hits are
 let pointer = null;
 renderer.domElement.addEventListener('pointerdown', e => {
   if (busy || selected === null || state.winner !== null) return;
@@ -224,14 +234,35 @@ function throwToy(vel) {
   if (vel.length() > MAX_SPEED) vel.setLength(MAX_SPEED);
   busy = true; $('picker').classList.add('off');
   const tm = toysMesh[state.turn][selected];
-  roll = { tm, pos: tm.holder.position.clone(), vel, t: selected };
+  const ball = { tm, pos: tm.holder.position.clone(), vel, p: state.turn, t: selected, kind: 'ball' };
+  const stands = state.field.flatMap(f => f.toys.map(x => {
+    const stm = toysMesh[x.p][x.t];
+    return { tm: stm, pos: stm.holder.position.clone(), vel: new THREE.Vector3(), p: x.p, t: x.t, kind: 'stand', card: f.card, moved: false };
+  }));
+  roll = { ball, stands };
   say('');
 }
 async function rollStopped() {
-  const { tm, pos, t } = roll; roll = null;
-  const fieldIdx = fieldIndexAt(pos);
+  const { ball, stands } = roll; roll = null;
+  const { tm, pos, t } = ball;
   const p = state.turn;
+  inFlight = tm;
+  // Knockouts first: any standing toy that got pushed off the card it was on.
+  const knocked = stands.filter(b => b.moved && cardAt(b.pos) !== b.card).map(b => ({ p: b.p, t: b.t, card: b.card }));
+  if (knocked.length) {
+    for (const e of R.knockOff(state, knocked)) {
+      if (e.type === 'knockedOff') {
+        const ktm = toysMesh[e.p][e.t];
+        if (e.p !== p) { say(''); flash('KNOCKOUT!'); } else say(`${state.players[e.p].toys[e.t].name} got knocked off its card.`);
+        await animateOpen(ktm, 0, 300); ktm.holder.visible = false; await sleep(700);
+      }
+      if (e.type === 'capture') await captured(e);
+    }
+    if (state.winner !== null) { inFlight = null; return afterTurn(); }
+  }
+  const fieldIdx = fieldIndexAt(pos);
   const res = R.land(state, t, fieldIdx);
+  inFlight = null;
   for (const e of res.events) {
     if (e.type === 'miss') { say('Missed the Gate cards — back to your hand.'); await sleep(900); tm.holder.visible = false; }
     if (e.type === 'stand') { await animateOpen(tm, 1); say(`${state.players[p].toys[t].name} opens on the Gate card!`); await sleep(600); }
@@ -252,14 +283,15 @@ async function rollStopped() {
 }
 async function captured(e, b) {
   const card = e.card;
-  say(`${state.players[e.p].name} wins ${card.name}${e.how === 'uncontested' ? ' (uncontested)' : ''}!`);
+  const how = e.how === 'uncontested' ? ' (uncontested)' : e.how === 'knockout' ? ' by knockout' : '';
+  say(`${state.players[e.p].name} wins ${card.name}${how}!`);
   clearGate(card, b && b.sides);
   hud(); await sleep(1300);
 }
 function clearGate(card) {
   removeGate(card);
   // toys that were on that card leave the field
-  for (const p of [0, 1]) toysMesh[p].forEach((tm, t) => { if (tm.holder.visible && !isStanding(p, t)) { tm.holder.visible = false; setOpen(tm, 0); } });
+  for (const p of [0, 1]) toysMesh[p].forEach((tm, t) => { if (tm !== inFlight && tm.holder.visible && !isStanding(p, t)) { tm.holder.visible = false; setOpen(tm, 0); } });
 }
 function afterTurn() {
   hud();
@@ -314,33 +346,67 @@ function gameOver() {
 }
 
 // ---------- render loop
+const lim = MAT - RADIUS;
+function bounceRails(b, r) {
+  const L = MAT - r;
+  if (Math.abs(b.pos.x) > L) { b.pos.x = Math.sign(b.pos.x) * L; b.vel.x *= -0.6; }
+  if (Math.abs(b.pos.z) > L) { b.pos.z = Math.sign(b.pos.z) * L; b.vel.z *= -0.6; }
+}
+function stepPhysics(dt) {
+  const { ball, stands } = roll;
+  // 1) the thrown ball rolls
+  if (!ball.done) {
+    const { tm, pos, vel } = ball;
+    const sp = vel.length();
+    const ns = Math.max(0, sp - (sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION) * dt);
+    if (sp > 0) vel.multiplyScalar(ns / sp);
+    pos.addScaledVector(vel, dt); bounceRails(ball, RADIUS);
+    tm.holder.position.copy(pos);
+    if (ns > 0) tm.obj.rotateOnWorldAxis(new THREE.Vector3(vel.z, 0, -vel.x).normalize(), (ns * dt) / RADIUS);
+    if (ns < SETTLE_SPEED) {                               // ease onto its base as it slows
+      const k = 1 - ns / SETTLE_SPEED;
+      tm.obj.quaternion.slerp(UPRIGHT, Math.min(1, 0.05 + k * k * 0.35));
+    }
+    if (ns < 3) { tm.obj.quaternion.copy(UPRIGHT); vel.set(0, 0, 0); ball.done = true; }
+  }
+  // 2) standing toys that were hit slide and slow down quickly
+  for (const b of stands) {
+    const sp = b.vel.length(); if (sp === 0) continue;
+    const ns = Math.max(0, sp - STAND_FRICTION * dt);
+    b.vel.multiplyScalar(sp ? ns / sp : 0);
+    b.pos.addScaledVector(b.vel, dt); bounceRails(b, STAND_R);
+    b.tm.holder.position.copy(b.pos);
+  }
+  // 3) toys are solid: bounce off each other
+  const all = [ball, ...stands];
+  for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+    const a = all[i], c = all[j];
+    const ra = a.kind === 'ball' ? RADIUS : STAND_R, rc = c.kind === 'ball' ? RADIUS : STAND_R;
+    const n = new THREE.Vector3(c.pos.x - a.pos.x, 0, c.pos.z - a.pos.z); const d = n.length();
+    if (d === 0 || d >= ra + rc) continue;
+    n.divideScalar(d);
+    // a settled ball acts like a wall; otherwise use the toys' masses
+    const ia = a.kind === 'ball' && a.done ? 0 : 1 / MASS[a.kind], ic = c.kind === 'ball' && c.done ? 0 : 1 / MASS[c.kind];
+    if (ia + ic === 0) continue;
+    const overlap = ra + rc - d;                           // push apart so they never pass through
+    a.pos.addScaledVector(n, -overlap * ia / (ia + ic)); c.pos.addScaledVector(n, overlap * ic / (ia + ic));
+    const rel = a.vel.clone().sub(c.vel).dot(n);
+    if (rel > 0) {
+      const jmp = (1 + BOUNCE) * rel / (ia + ic);
+      a.vel.addScaledVector(n, -jmp * ia); c.vel.addScaledVector(n, jmp * ic);
+    }
+    for (const b of [a, c]) { if (b.kind === 'stand') b.moved = true; b.tm.holder.position.copy(b.pos); }
+  }
+  // 4) done when everything has stopped
+  if (ball.done && stands.every(b => b.vel.lengthSq() < 1)) rollStopped();
+}
 const clock = new THREE.Clock();
 const UPRIGHT = new THREE.Quaternion();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
   camera.position.lerp(camGoal, 0.08);
   camera.lookAt(camTarget);
-  if (roll) {
-    const { tm, pos, vel } = roll;
-    const sp = vel.length();
-    const ns = Math.max(0, sp - (sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION) * dt);
-    if (sp > 0) vel.multiplyScalar(ns / sp);
-    pos.addScaledVector(vel, dt);
-    const lim = MAT - RADIUS;
-    if (Math.abs(pos.x) > lim) { pos.x = Math.sign(pos.x) * lim; vel.x *= -0.6; }
-    if (Math.abs(pos.z) > lim) { pos.z = Math.sign(pos.z) * lim; vel.z *= -0.6; }
-    tm.holder.position.copy(pos);
-    if (ns > 0) {
-      const axis = new THREE.Vector3(vel.z, 0, -vel.x).normalize();
-      tm.obj.rotateOnWorldAxis(axis, (ns * dt) / RADIUS);
-    }
-    // Easing onto its base: as it slows, blend the roll back to upright so it stops standing.
-    if (ns < SETTLE_SPEED) {
-      const k = 1 - ns / SETTLE_SPEED;                    // 0 -> 1 as it comes to rest
-      tm.obj.quaternion.slerp(UPRIGHT, Math.min(1, 0.05 + k * k * 0.35));
-    }
-    if (ns < 3) { tm.obj.quaternion.copy(UPRIGHT); rollStopped(); }
-  }
+  if (roll) stepPhysics(dt);
   for (const side of toysMesh) for (const tm of side) {
     if (tm.anim) {
       const k = Math.min(1, (performance.now() - tm.anim.t0) / tm.anim.ms);

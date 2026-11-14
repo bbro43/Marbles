@@ -103,6 +103,27 @@ export function land(s, t, fieldIdx) {
   return endTurn(s, ev);
 }
 
+// Knockout: the active player's throw knocked toys off their Gate cards.
+// knocked: [{ p, t, card }] — card = the Gate card each toy was standing on.
+// - Opponent's toy knocked off -> the thrower wins that Gate card, no matter the G-Power.
+// - Your own toy knocked off -> it just leaves the card (already in your used pile).
+// Call this before land() for the thrown toy. Returns events.
+export function knockOff(s, knocked) {
+  const ev = [];
+  for (const k of knocked) {
+    const idx = s.field.findIndex(f => f.card === k.card);
+    if (idx < 0) continue;                                   // card already taken by an earlier knockout
+    const g = s.field[idx];
+    g.toys = g.toys.filter(x => !(x.p === k.p && x.t === k.t));
+    ev.push({ type: 'knockedOff', p: k.p, t: k.t, card: k.card });
+    if (k.p !== s.turn) {
+      ev.push(...capture(s, s.turn, idx, 'knockout'));
+      if (s.winner !== null) break;
+    }
+  }
+  return ev;
+}
+
 // Works out a battle on one Gate card. Returns the steps for the screen to animate.
 // abilities: optional extra steps [{ side, label, amount }] (card effects, later).
 export function computeBattle(s, fieldIdx, abilities = []) {
