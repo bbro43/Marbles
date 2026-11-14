@@ -19,17 +19,19 @@ const DIR = [new THREE.Vector3(1, 0, 1).normalize(), new THREE.Vector3(-1, 0, -1
 const START = (MAT - RADIUS - 2) * Math.SQRT2;   // distance from center to the throw spot in the corner
 const SETTLE_SPEED = 70;                          // below this the ball eases onto its base
 const FRICTION = 260;     // units/s^2
-// Toy stats (upgradeable, 0-10 each; 0 = a new toy):
+// Toy stats, 1-5 like the original DS game: 1 = terrible, 3 = average, 5 = maxed.
 //   speed   -> the hardest it can be thrown
 //   defense -> how well it holds its ground when crashed into (knockouts)
 //   magnet  -> how well it grabs a Gate card it's rolling over
-const STAT_MAX = 10;
-const maxSpeed = st => 400 + 12 * (st.speed || 0);               // 400 .. 520
-const standMass = st => 1.6 * (1 + 0.12 * (st.defense || 0));     // 1.6 .. 3.5
-const standGrip = st => 520 * (1 + 0.06 * (st.defense || 0));     // slide friction 520 .. 832
-const MAGNET_SPEED = 160;                                         // magnet kicks in below this speed, over a card
-const magnetBrake = st => 45 * (st.magnet || 0);                  // extra slowdown 0 .. 450
-const magnetPull = st => 6 * (st.magnet || 0);                    // pull toward card center 0 .. 60
+// Every toy is 3/3/3 until per-Bakugan base stats are added.
+const STAT_MIN = 1, STAT_MAX = 5, STAT_AVG = 3;
+const lv = (st, k) => Math.min(STAT_MAX, Math.max(STAT_MIN, st[k] ?? STAT_AVG));
+const maxSpeed = st => 340 + 30 * (lv(st, 'speed') - 1);              // 340 / 370 / 400 / 430 / 460
+const standMass = st => 1.6 * (1 + 0.25 * (lv(st, 'defense') - 3));   // 0.8 .. 2.4
+const standGrip = st => 520 * (1 + 0.15 * (lv(st, 'defense') - 3));   // 364 .. 676
+const MAGNET_SPEED = 160;                                              // magnet works below this speed, over a card
+const magnetBrake = st => 110 * (lv(st, 'magnet') - 1);                // 0 .. 440 extra slowdown
+const magnetPull = st => 15 * (lv(st, 'magnet') - 1);                  // 0 .. 60 pull toward card center
 const statsOf = (p, t) => state.players[p].toys[t].stats || {};
 const FLICK = 115;        // world speed per (screen heights / second)
 const ATTR_COLOR = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d', clear: '#cfd8dc' };
@@ -373,7 +375,7 @@ function stepPhysics(dt) {
     let decel = sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION;
     // Magnet: over a Gate card and slowing down -> brakes harder and drifts toward the card's center.
     const st = statsOf(ball.p, ball.t), under = sp < MAGNET_SPEED ? fieldIndexAt(pos) : null;
-    if (under !== null && st.magnet) {
+    if (under !== null && lv(st, 'magnet') > 1) {
       decel += magnetBrake(st);
       const c = gateCenter(state.field[under].owner);
       vel.add(new THREE.Vector3(c.x - pos.x, 0, c.z - pos.z).normalize().multiplyScalar(magnetPull(st) * dt));
@@ -448,7 +450,7 @@ function randomTeam(cat) {
   const pool = cat.toys.filter(t => t.game === 'bb' && Object.keys(t.attributes || {}).length);
   return pickN(pool, 3).map(t => {
     const attr = pickN(Object.keys(t.attributes), 1)[0];
-    return { id: t.id, name: t.name, attr, g: 250, stats: { speed: 0, defense: 0, magnet: 0 }, model: t.model, attrTexture: t.attributes[attr] };
+    return { id: t.id, name: t.name, attr, g: 250, stats: { speed: 3, defense: 3, magnet: 3 }, model: t.model, attrTexture: t.attributes[attr] };
   });
 }
 function randomGates(cat) {
