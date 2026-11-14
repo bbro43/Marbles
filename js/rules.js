@@ -11,6 +11,9 @@
 //              so the starting rectangle is the four cells [-1|0, -1|0] around the center.
 //   captured = Gate cards you've won (3 wins the match)
 
+import { effectOf } from './abilities.js';
+export { isCoded } from './abilities.js';
+
 export const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
 export const WIN_GATES = 3;
 
@@ -21,6 +24,7 @@ export const DEFAULT_CORNERS = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
 export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DEFAULT_CORNERS } = {}) {
   return {
     turn: first, grid, corners, placed: false,
+    pending: [],          // Red "before you throw" cards played this turn: { p, t, card }
     players: players.map(p => ({
       name: p.name,
       toys: p.toys.map(t => ({ ...t })),
@@ -28,6 +32,7 @@ export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DE
       used: [],
       gateHand: [...p.gates],
       abilityHand: [...(p.abilities || [])],
+      abilityUsed: [],
       captured: [],
     })),
     field: [],
@@ -184,33 +189,102 @@ export function knockOff(s, knocked) {
   return ev;
 }
 
-// Works out a battle on one Gate card. Returns the steps for the screen to animate.
-// abilities: optional extra steps [{ side, label, amount }] (card effects, later).
-export function computeBattle(s, fieldIdx, abilities = []) {
+// ---------- Ability cards
+// Before throwing: Red cards you could play with toy t (indexes into your Ability hand).
+export function throwOptions(s, t, p = s.turn) {
+  const toy = s.players[p].toys[t];
+  return s.players[p].abilityHand.map((c, i) => i).filter(i => {
+    const e = effectOf(s.players[p].abilityHand[i]);
+    return e && e.when === 'throw' && e.forToy(toy);
+  });
+}
+export function playBeforeThrow(s, handIdx, t, p = s.turn) {
+  if (!throwOptions(s, t, p).includes(handIdx)) throw new Error('cannot play that card now');
+  const card = s.players[p].abilityHand.splice(handIdx, 1)[0];
+  s.players[p].abilityUsed.push(card);
+  s.pending.push({ p, t, card });
+  return [{ type: 'ability', p, card, when: 'throw' }];
+}
+
+// During a battle: players take turns playing Ability cards (active player first). Playing a card
+// passes the chance to the other player; the window closes when both pass in a row.
+export function startBattle(s, fieldIdx) { return { fieldIdx, plays: [], next: s.turn, passes: 0 }; }
+export const abilityDone = b => b.passes >= 2;
+export function abilityOptions(s, b, p = b.next) {
+  const hand = s.players[p].abilityHand;
+  return hand.map((c, i) => i).filter(i => {
+    const e = effectOf(hand[i]);
+    if (!e || e.when !== 'battle') return false;
+    const w = build(s, b.fieldIdx, b.plays);
+    return e.can(w.ctx({ p, card: hand[i] }));
+  });
+}
+export function playAbility(s, b, handIdx, p = b.next) {
+  if (!abilityOptions(s, b, p).includes(handIdx)) throw new Error('cannot play that card now');
+  const card = s.players[p].abilityHand.splice(handIdx, 1)[0];
+  s.players[p].abilityUsed.push(card);
+  b.plays.push({ p, card });
+  b.passes = 0; b.next = 1 - p;
+  return [{ type: 'ability', p, card, when: 'battle' }];
+}
+export function passAbility(s, b) { b.passes++; b.next = 1 - b.next; }
+
+// Sets up both sides and runs the attribute / Gate-table / Gate-use steps of every played card.
+function build(s, fieldIdx, plays) {
   const g = s.field[fieldIdx];
   const a = g.toys.find(x => x.p === s.turn);
   const b = g.toys.find(x => x.p !== s.turn);
   const sides = [a, b].map(x => {
     const toy = s.players[x.p].toys[x.t];
-    return { p: x.p, t: x.t, name: toy.name, attr: toy.attr, start: toy.g, total: toy.g, steps: [] };
+    return { p: x.p, t: x.t, name: toy.name, attr: toy.attr, printed: toy.g, start: toy.g, total: toy.g, steps: [],
+      noGate: false, useHighest: false, gateMult: 1, abilityMult: 1 };
   });
   // Clear toys take the opponent's attribute.
   if (sides[0].attr === 'clear' && sides[1].attr !== 'clear') sides[0].attr = sides[1].attr;
   if (sides[1].attr === 'clear' && sides[0].attr !== 'clear') sides[1].attr = sides[0].attr;
+  const table = { ...(g.card.bonus || {}) };
+  const ctx = play => {
+    const me = sides.find(x => x.p === play.p), opp = sides.find(x => x !== me);
+    return { s, field: g, gateCard: g.card, table, me, opp, card: play.card };
+  };
+  for (const phase of ['attr', 'table', 'gate'])
+    for (const play of plays) { const e = effectOf(play.card); if (e && e[phase]) e[phase](ctx(play)); }
+  return { g, sides, table, ctx };
+}
 
-  for (const ab of abilities) {
-    const sd = sides[ab.side];
-    sd.steps.push({ label: ab.label, amount: ab.amount, from: sd.total, to: sd.total + ab.amount });
-    sd.total += ab.amount;
+// Works out a battle on one Gate card. Returns the steps for the screen to animate.
+// b = a battle from startBattle() (with its played cards), or just the Gate card's field index.
+export function computeBattle(s, b) {
+  if (typeof b === 'number') b = startBattle(s, b);
+  const { g, sides, table, ctx } = build(s, b.fieldIdx, b.plays);
+  const step = (sd, label, amount, note) => {
+    sd.steps.push({ label, amount, note, from: sd.total, to: sd.total + amount });
+    sd.total += amount;
+  };
+  // Red cards played before the throw this turn
+  for (const pend of s.pending) {
+    const e = effectOf(pend.card);
+    for (const sd of sides) {
+      const other = sides.find(x => x !== sd);
+      const amt = e.bonus({ side: sd, other, mine: sd.p === pend.p && sd.t === pend.t }) * sd.abilityMult;
+      if (amt) step(sd, pend.card.name, amt);
+    }
   }
-  const bonus = g.card.bonus || {};
+  // Ability cards played in this battle, in order
+  for (const play of b.plays) {
+    const e = effectOf(play.card), c = ctx(play);
+    if (e.add) step(c.me, play.card.name, e.add(c) * c.me.abilityMult);
+    else step(c.me, play.card.name, 0, 'played');
+  }
+  // Gate bonus
+  const highest = Math.max(0, ...ATTRS.map(a => table[a] || 0));
   for (const sd of sides) {
-    const amt = bonus[sd.attr] || 0;
-    sd.steps.push({ label: `Gate card: ${g.card.name}`, amount: amt, from: sd.total, to: sd.total + amt });
-    sd.total += amt;
+    let amt = sd.noGate ? 0 : (sd.useHighest ? highest : (table[sd.attr] || 0)) * sd.gateMult;
+    const notes = [sd.noGate && 'blocked', sd.useHighest && !sd.noGate && 'highest bonus', sd.gateMult > 1 && !sd.noGate && 'x' + sd.gateMult].filter(Boolean);
+    step(sd, `Gate card: ${g.card.name}`, amt, notes.join(', ') || undefined);
   }
   const result = sides[0].total === sides[1].total ? 'tie' : (sides[0].total > sides[1].total ? sides[0].p : sides[1].p);
-  return { fieldIdx, card: g.card, sides, result };
+  return { fieldIdx: b.fieldIdx, card: g.card, sides, result };
 }
 
 // Applies a computed battle to the state.
@@ -237,6 +311,7 @@ function capture(s, p, fieldIdx, how) {
 }
 
 function endTurn(s, ev) {
+  s.pending = [];
   if (s.winner === null) {
     // If both players are out of Gate cards and the field is empty, the match can't continue:
     // most captured wins; equal = draw.

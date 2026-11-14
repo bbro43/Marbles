@@ -199,14 +199,30 @@ function showPicker() {
     return `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')}</span></button>`;
   }).join('');
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));
+  armed = null;
   if (pl.unused.length === 1) select(pl.unused[0]);
+}
+// Red "before you throw" cards that work with the selected toy, shown after the toys. Tap to arm, tap again to cancel.
+let armed = null;   // index into the Ability hand of the armed Red card
+function showThrowCards() {
+  $('picker').querySelectorAll('.chip.red').forEach(b => b.remove());
+  if (selected === null) return;
+  const hand = state.players[state.turn].abilityHand;
+  for (const i of R.throwOptions(state, selected)) {
+    const b = document.createElement('button');
+    b.className = 'chip red' + (armed === i ? ' sel' : ''); b.dataset.a = i; b.style.setProperty('--c', ABILITY_COLOR.red);
+    b.innerHTML = `<b>${hand[i].name}</b><span>Red · play with this throw</span><span class="st">${hand[i].text || ''}</span>`;
+    b.onclick = () => { armed = armed === i ? null : i; showThrowCards(); };
+    $('picker').append(b);
+  }
 }
 function select(t) {
   if (busy) return;
   const p = state.turn;
   if (selected !== null) { const prev = toysMesh[p][selected]; if (!isStanding(p, selected)) prev.holder.visible = false; }
   selected = t;
-  $('picker').querySelectorAll('button').forEach(b => b.classList.toggle('sel', +b.dataset.t === t));
+  $('picker').querySelectorAll('button[data-t]').forEach(b => b.classList.toggle('sel', +b.dataset.t === t));
+  armed = null; showThrowCards();
   const tm = toysMesh[p][t]; setOpen(tm, 0);
   tm.holder.position.copy(DIR[p]).multiplyScalar(START).setY(RADIUS);
   tm.holder.rotation.set(0, Math.atan2(-DIR[p].x, -DIR[p].z), 0);    // facing the center
@@ -348,6 +364,7 @@ function throwToy(vel) {
   const top = maxSpeed(statsOf(state.turn, selected));
   if (vel.length() > top) vel.setLength(top);
   busy = true; $('picker').classList.add('off');
+  if (armed !== null) { const card = state.players[state.turn].abilityHand[armed]; R.playBeforeThrow(state, armed, selected); armed = null; flash(card.name); }
   const tm = toysMesh[state.turn][selected];
   const ball = { tm, pos: tm.holder.position.clone(), vel, p: state.turn, t: selected, kind: 'ball' };
   const stands = state.field.flatMap(f => f.toys.map(x => {
@@ -406,8 +423,10 @@ async function rollStopped() {
     if (e.type === 'capture') await captured(e);
   }
   if (res.battle) {
-    const b = R.computeBattle(state, res.battle.fieldIdx);
-    flipGate(b.card); await sleep(700);
+    const bt = R.startBattle(state, res.battle.fieldIdx);
+    flipGate(state.field[bt.fieldIdx].card); await sleep(700);
+    await abilityPhase(bt);
+    const b = R.computeBattle(state, bt);
     await showBattle(b);
     const ev = R.resolveBattle(state, b);
     for (const e of ev) {
@@ -440,6 +459,45 @@ function glide(tm, to, ms = 350) {
 }
 
 // ---------- battle overlay with the count-up
+// ---------- Ability cards during a battle: active player first, then back and forth until both pass.
+const ABILITY_COLOR = { red: '#d9534f', blue: '#4a8fe0', green: '#4caf6a' };
+let abilityResolve = null;
+async function abilityPhase(bt) {
+  const o = $('battle'); o.hidden = false; $('bnext').hidden = true;
+  const g = state.field[bt.fieldIdx];
+  $('bcard').textContent = `Gate card: ${g.card.name}`;
+  const preview = () => {
+    const c = R.computeBattle(state, bt);    // shows attributes after any changes
+    const col = (sd, i) => `<div class="side"><div class="who">${state.players[sd.p].name}</div>
+      <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
+      <div class="g">${sd.start}G</div>
+      <div class="steps">${bt.plays.filter(x => x.p === sd.p).map(x => `<div class="step">${x.card.name}</div>`).join('')}</div></div>`;
+    $('bbody').innerHTML = col(c.sides[0], 0) + `<div class="vs">vs</div>` + col(c.sides[1], 1);
+  };
+  while (!R.abilityDone(bt)) {
+    preview();
+    const p = bt.next, opts = R.abilityOptions(state, bt);
+    if (!opts.length) { R.passAbility(state, bt); continue; }
+    const hand = state.players[p].abilityHand;
+    $('bplay').innerHTML = `<div class="who2">${state.players[p].name}: play an Ability card?</div>` +
+      opts.map(i => {
+        // what it would do: change in the G-Power gap, worked out with the card added
+        const gap = c => { const me = c.sides.find(x => x.p === p), op = c.sides.find(x => x.p !== p); return me.total - op.total; };
+        const d = gap(R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] })) - gap(R.computeBattle(state, bt));
+        const tag = d > 0 ? `+${d} for you` : d < 0 ? `${d} for you` : 'no change right now';
+        return `<button class="chip" data-a="${i}" style="--c:${ABILITY_COLOR[hand[i].color] || '#888'}"><b>${hand[i].name} <em>${tag}</em></b><span class="st">${hand[i].text || ''}</span></button>`;
+      }).join('') +
+      `<button class="chip skip" data-a="-1"><b>Pass</b></button>`;
+    const i = await new Promise(res => {
+      abilityResolve = res;
+      $('bplay').querySelectorAll('button').forEach(b => b.onclick = () => { abilityResolve = null; res(+b.dataset.a); });
+    });
+    if (i < 0) R.passAbility(state, bt);
+    else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(500); }
+  }
+  $('bplay').innerHTML = '';
+}
+
 async function showBattle(b) {
   const o = $('battle'); o.hidden = false;
   const col = (sd, i) => `<div class="side" id="side${i}">
@@ -455,7 +513,8 @@ async function showBattle(b) {
   for (let i = 0; i < 2; i++) {
     for (const st of b.sides[i].steps) {
       const line = document.createElement('div'); line.className = 'step';
-      line.textContent = `${st.label}  +${st.amount}`; $('steps' + i).append(line);
+      line.textContent = st.note ? `${st.label} (${st.note})${st.amount ? '  +' + st.amount : ''}` : `${st.label}  +${st.amount}`;
+      $('steps' + i).append(line);
       await countUp($('g' + i), st.from, st.to);
       await sleep(250);
     }
@@ -580,6 +639,11 @@ function randomGates(cat) {
   return ['gold', 'silver', 'copper'].map(col => pickN(gates.filter(c => c.color === col), 1)[0]);
 }
 
+function randomAbilities(cat) {
+  const coded = cat.cards.filter(c => c.type === 'ability' && R.isCoded(c));
+  return ['red', 'blue', 'green'].map(col => pickN(coded.filter(c => c.color === col), 1)[0]).filter(Boolean);
+}
+
 async function start() {
   try { pack = await Pack.fromDevice(); } catch (e) { pack = null; }
   if (!pack) { $('loading').textContent = 'No asset pack on this device yet. Go back and load it first.'; return; }
@@ -593,7 +657,7 @@ async function start() {
     gateBack.colorSpace = THREE.SRGBColorSpace; gateBack.anisotropy = 4;
   }
   const cat = pack.catalog;
-  const players = [0, 1].map(i => ({ name: `Player ${i + 1}`, toys: randomTeam(cat), gates: randomGates(cat) }));
+  const players = [0, 1].map(i => ({ name: `Player ${i + 1}`, toys: randomTeam(cat), gates: randomGates(cat), abilities: randomAbilities(cat) }));
   state = R.newMatch(players);
   $('loading').textContent = 'Loading toys…';
   for (let p = 0; p < 2; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
@@ -617,6 +681,9 @@ window.MARBLES = {
   // tap a choice in the bottom bar (Gate card index, or -1 = Skip) / tap a spot on the mat
   get choosing() { return spotTap ? 'spot' : gateResolve ? 'gate' : null; },
   pickGate: i => { const b = $('picker').querySelector(`[data-g="${i}"]`); if (b) b.click(); },
+  get abilityChoices() { return abilityResolve ? [...$('bplay').querySelectorAll('button')].map(b => +b.dataset.a) : null; },
+  playAbility: i => { const b = $('bplay').querySelector(`[data-a="${i}"]`); if (b) b.click(); },
+  armThrowCard: () => { const b = $('picker').querySelector('.chip.red'); if (b) { b.click(); return true; } return false; },
   takeCard: () => { const b = $('picker').querySelector('[data-g="-2"]'); if (b) b.click(); },
   get spots() { return spotTap ? spotTap.cells : []; },
   tapSpot: cell => spotTap && spotTap.finish(cell),

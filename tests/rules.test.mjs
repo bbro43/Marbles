@@ -1,6 +1,8 @@
 // Run: node tests/rules.test.mjs
 import assert from 'node:assert/strict';
-import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff, placeCells, placeGate, moveOptions, openingCell } from '../js/rules.js';
+import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff, placeCells, placeGate, moveOptions, openingCell,
+  startBattle, abilityOptions, playAbility, passAbility, abilityDone, throwOptions, playBeforeThrow, isCoded } from '../js/rules.js';
+import { EFFECTS } from '../js/abilities.js';
 
 const gate = (name, bonus) => ({ name, bonus });
 const toy = (name, attr, g) => ({ name, attr, g });
@@ -176,6 +178,66 @@ test('field empty again, nobody has won: cards are set like the first turn', () 
   const ev = startTurn(s);
   assert.equal(ev.filter(e => e.type === 'gateSet').length, 2);
   assert.deepEqual(s.field.map(f => f.cell).sort(), [[-1, -1], [0, 0]]);
+});
+
+const ab = (name, bonus = {}, color = 'blue') => ({ name, type: 'ability', color, bonus });
+function battleSetup(aAbilities, bAbilities, gateBonus = { pyrus: 100, haos: 50 }) {
+  const s = newMatch([
+    { name: 'A', toys: [toy('a', 'pyrus', 300), toy('a2', 'haos', 300)], gates: [gate('Ga', gateBonus)], abilities: aAbilities },
+    { name: 'B', toys: [toy('b', 'haos', 350)], gates: [gate('Gb', {})], abilities: bAbilities },
+  ]);
+  startTurn(s); land(s, 0, null); startTurn(s);    // A misses
+  land(s, 0, 0); startTurn(s);                     // B stands on A's card (owner A)
+  const r = land(s, 0, 0);                         // A lands there -> battle
+  return { s, b: startBattle(s, r.battle.fieldIdx) };
+}
+
+test('ability cards: take turns, active player first, both pass to finish', () => {
+  const { s, b } = battleSetup([ab('G-Power Boost', { pyrus: 80 })], [ab('Shadowfire'), ab('Solar Winds')]);
+  assert.equal(b.next, 0);
+  assert.deepEqual(abilityOptions(s, b), [0]);
+  playAbility(s, b, 0);                             // A: +80
+  assert.equal(b.next, 1);
+  assert.deepEqual(abilityOptions(s, b), [1]);      // B (Haos): Solar Winds yes; Shadowfire needs Darkus/Pyrus
+  playAbility(s, b, 1);                             // B uses the highest bonus (100) instead of Haos 50
+  passAbility(s, b); assert.ok(!abilityDone(b)); passAbility(s, b); assert.ok(abilityDone(b));
+  const c = computeBattle(s, b);
+  assert.equal(c.sides[0].total, 300 + 80 + 100);
+  assert.equal(c.sides[1].total, 350 + 100);
+  assert.equal(s.players[0].abilityUsed.length, 1); assert.equal(s.players[0].abilityHand.length, 0);
+});
+
+test('Shadowfire: on the opponent\'s Gate, their toy gets no Gate bonus', () => {
+  const { s, b } = battleSetup([ab('Shadowfire')], []);
+  // A's pyrus toy is on A's own card -> can't play it there
+  assert.deepEqual(abilityOptions(s, b), []);
+  const s2 = newMatch([
+    { name: 'A', toys: [toy('a', 'pyrus', 300)], gates: [gate('Ga', {})], abilities: [ab('Shadowfire')] },
+    { name: 'B', toys: [toy('b', 'haos', 350)], gates: [gate('Gb', { haos: 200 })] },
+  ]);
+  startTurn(s2); land(s2, 0, null); startTurn(s2); land(s2, 0, 1); startTurn(s2);   // B on its own card Gb
+  const r = land(s2, 0, 1); const b2 = startBattle(s2, r.battle.fieldIdx);
+  playAbility(s2, b2, 0);
+  const c = computeBattle(s2, b2);
+  assert.equal(c.sides[1].total, 350); assert.equal(c.result, 1);
+});
+
+test('red card before the throw: bonus only if that toy battles this turn', () => {
+  const s = newMatch([
+    { name: 'A', toys: [toy('a', 'pyrus', 300)], gates: [gate('Ga', {})], abilities: [ab('Sun Fire Master', {}, 'red')] },
+    { name: 'B', toys: [toy('b', 'haos', 350)], gates: [gate('Gb', {})] },
+  ]);
+  startTurn(s); land(s, 0, null); startTurn(s); land(s, 0, 0); startTurn(s);   // A misses, B stands on Ga
+  assert.deepEqual(throwOptions(s, 0), [0]);
+  playBeforeThrow(s, 0, 0);
+  const r = land(s, 0, 0);
+  const c = computeBattle(s, startBattle(s, r.battle.fieldIdx));
+  assert.equal(c.sides[0].total, 400); assert.equal(c.result, 0);
+});
+
+test('every coded card has a known kind', () => {
+  for (const [name, e] of Object.entries(EFFECTS)) assert.ok(['battle', 'throw'].includes(e.when), name);
+  assert.ok(isCoded({ name: 'G-Power Boost' })); assert.ok(!isCoded({ name: 'Dharak' }));
 });
 
 console.log(`\n${n} tests passed`);

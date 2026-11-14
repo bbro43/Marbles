@@ -31,11 +31,17 @@
   .chip { flex:1 0 auto; text-align:left; background:#1b2430; color:var(--text); border:2px solid #2a3644; border-left:8px solid var(--c); border-radius:12px; padding:8px 12px; font:inherit; cursor:pointer; }
   .chip b { display:block; } .chip span { color:var(--dim); font-size:13px; display:block; } .chip .st { font-size:12px; }
   .chip.sel { border-color:#fff; border-left-color:var(--c); }
+  #bplay { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; } #bplay:empty { display:none; }
+  #bplay .chip em { font-style:normal; font-weight:600; color:#9fe39f; margin-left:6px; }
+  #bplay .who2 { width:100%; font-weight:700; }
+  #bplay .chip { flex:1 1 100%; } #bplay .chip.skip { flex:0 0 auto; }
+  .chip .st { white-space:normal; }
+  #picker .chip.red .st { max-width:220px; max-height:3.6em; overflow:hidden; }
   .chip.skip { flex:0 0 auto; border-left-color:#2a3644; }
   #loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; background:#0d1014; z-index:5; }
   .overlay { position:absolute; inset:0; background:rgba(5,8,12,.78); display:flex; align-items:center; justify-content:center; z-index:4; padding:12px; }
   .overlay[hidden] { display:none; }
-  .box { background:#141b23; border:1px solid var(--line); border-radius:16px; padding:16px; width:min(560px,100%); }
+  .box { max-height:92vh; overflow:auto; background:#141b23; border:1px solid var(--line); border-radius:16px; padding:16px; width:min(560px,100%); }
   #bcard { text-align:center; color:var(--dim); margin-bottom:10px; }
   #bbody { display:flex; align-items:flex-start; gap:8px; }
   .side { flex:1; text-align:center; min-width:0; }
@@ -62,7 +68,7 @@
     <a id="back" href="./">Home</a>
     <div id="loading">Loading…</div>
     <div class="overlay" id="battle" hidden><div class="box">
-      <div id="bcard"></div><div id="bbody"></div>
+      <div id="bcard"></div><div id="bbody"></div><div id="bplay"></div>
       <button class="btn" id="bnext" hidden>Continue</button>
     </div></div>
     <div class="overlay" id="over" hidden><div class="box">
