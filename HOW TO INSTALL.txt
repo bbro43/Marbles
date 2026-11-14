@@ -1,0 +1,22 @@
+MARBLES — HOW TO INSTALL (Android, Fire tablet, Windows)
+
+1) TURN ON GITHUB PAGES (one time)
+   Repo Settings > Pages > Branch: main, folder: / (root) > Save.
+   The address is: https://bbro43.github.io/marbles/
+
+2) ANDROID PHONE
+   Open the address in Chrome > ⋮ menu > "Install app" (or "Add to Home screen").
+
+3) FIRE TABLET
+   Open the address in Silk > menu > "Add to Home Screen".
+
+4) WINDOWS (touchscreen laptop)
+   Edge: ⋯ menu > Apps > "Install this site as an app".
+   Chrome: install icon at the right end of the address bar.
+
+5) ASSET PACK (each device, one time)
+   Open the app > Load asset pack > pick the pack .zip.
+   It is stored on that device only. It is never uploaded anywhere.
+
+6) UPDATES
+   Installed apps pick up new versions the next time they open online.

@@ -1,0 +1,7 @@
+# Game assets never go in this repo. They live in a local asset pack loaded on each device.
+assets/
+*.nds
+*.zip
+*.pack
+node_modules/
+.DS_Store

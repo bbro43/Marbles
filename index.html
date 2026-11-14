@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1417">
+<title>Marbles</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root { color-scheme: dark; --bg:#0f1417; --panel:#182028; --line:#2a3644; --text:#e8edf2; --dim:#93a2b2; --accent:#d8322b; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  main { max-width: 520px; margin: 0 auto; padding: 28px 18px; }
+  h1 { font-size: 34px; letter-spacing: .5px; margin: 8px 0 4px; }
+  .sub { color: var(--dim); margin: 0 0 24px; }
+  .menu { display: grid; gap: 12px; }
+  .btn { display:flex; align-items:center; justify-content:space-between; width:100%; padding:18px; font:inherit; font-size:18px; color:var(--text);
+         background:var(--panel); border:1px solid var(--line); border-radius:14px; cursor:pointer; text-align:left; }
+  .btn:disabled { opacity:.45; cursor:default; }
+  .btn small { color: var(--dim); font-size: 13px; }
+  .btn.primary { border-color: var(--accent); }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; margin-top:22px; }
+  .card h2 { font-size:15px; margin:0 0 8px; color:var(--dim); font-weight:600; text-transform:uppercase; letter-spacing:.6px; }
+  .row { display:flex; justify-content:space-between; padding:4px 0; }
+  .row span:last-child { color: var(--dim); }
+  .msg { color: var(--dim); font-size: 14px; margin-top: 10px; min-height: 1.4em; }
+  input[type=file] { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="appName">Marbles</h1>
+  <p class="sub" id="tagline">Load your asset pack to begin.</p>
+
+  <div class="menu">
+    <button class="btn" id="btnBattle" disabled>Battle <small>coming next</small></button>
+    <button class="btn" id="btnChars" disabled>Characters <small>later</small></button>
+    <button class="btn" id="btnShop" disabled>Shop <small>later</small></button>
+  </div>
+
+  <div class="card">
+    <h2>Asset pack</h2>
+    <div id="packInfo"><div class="row"><span>Status</span><span>Not loaded</span></div></div>
+    <div class="menu" style="margin-top:12px">
+      <label class="btn primary" for="packFile">Load asset pack <small>.zip, stays on this device</small></label>
+      <input type="file" id="packFile" accept=".zip,application/zip">
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+</main>
+
+<script src="vendor/jszip.min.js"></script>
+<script>
+// ---- Asset pack storage (IndexedDB). Nothing here ever leaves the device.
+const DB_NAME = 'marbles', STORE = 'pack';
+function db() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+async function idbPut(key, val) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE, 'readwrite'); t.objectStore(STORE).put(val, key); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+
+const $ = id => document.getElementById(id);
+const Pack = { zip: null, info: null };
+
+async function openPack(blob) {
+  const zip = await JSZip.loadAsync(blob);
+  const infoFile = zip.file('pack.json');
+  if (!infoFile) throw new Error('This zip is not an asset pack (no pack.json).');
+  Pack.zip = zip; Pack.info = JSON.parse(await infoFile.async('string'));
+  showPack();
+}
+function showPack() {
+  const i = Pack.info;
+  if (i.appName) { $('appName').textContent = i.appName; document.title = i.appName; }
+  $('tagline').textContent = 'Ready.';
+  const rows = [['Pack version', i.version], ...Object.entries(i.counts || {})];
+  $('packInfo').innerHTML = rows.map(([k, v]) => `<div class="row"><span>${k}</span><span>${v}</span></div>`).join('');
+  $('btnBattle').disabled = false;
+}
+
+$('packFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('msg').textContent = 'Loading…';
+  try { await openPack(f); await idbPut('pack', f); $('msg').textContent = 'Saved on this device.'; }
+  catch (err) { $('msg').textContent = err.message; }
+  e.target.value = '';
+});
+$('btnBattle').addEventListener('click', () => { $('msg').textContent = 'Battle screen is the next build.'; });
+
+(async () => {
+  try { const saved = await idbGet('pack'); if (saved) await openPack(saved); } catch {}
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
