@@ -69,6 +69,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
+const APP_BUILD = 16;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null };
 
 async function openPack(blob) {
@@ -82,7 +83,7 @@ function showPack() {
   const i = Pack.info;
   if (i.appName) { $('appName').textContent = i.appName; document.title = i.appName; }
   $('tagline').textContent = 'Ready.';
-  const rows = [['Pack version', i.version], ...Object.entries(i.counts || {})];
+  const rows = [['App build', APP_BUILD], ['Pack version', i.version], ...Object.entries(i.counts || {})];
   $('packInfo').innerHTML = rows.map(([k, v]) => `<div class="row"><span>${k}</span><span>${v}</span></div>`).join('');
   $('btnBattle').disabled = false;
 }
