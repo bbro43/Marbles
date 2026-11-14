@@ -2,7 +2,7 @@ MARBLES — HOW TO INSTALL (Android, Fire tablet, Windows)
 
 1) TURN ON GITHUB PAGES (one time)
    Repo Settings > Pages > Branch: main, folder: / (root) > Save.
-   The address is: https://bbro43.github.io/marbles/
+   The address is: https://bbro43.github.io/Marbles/  (capital M — the address is case-sensitive)
 
 2) ANDROID PHONE
    Open the address in Chrome > ⋮ menu > "Install app" (or "Add to Home screen").
