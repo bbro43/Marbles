@@ -19,7 +19,18 @@ const DIR = [new THREE.Vector3(1, 0, 1).normalize(), new THREE.Vector3(-1, 0, -1
 const START = (MAT - RADIUS - 2) * Math.SQRT2;   // distance from center to the throw spot in the corner
 const SETTLE_SPEED = 70;                          // below this the ball eases onto its base
 const FRICTION = 260;     // units/s^2
-const MAX_SPEED = 460;
+// Toy stats (upgradeable, 0-10 each; 0 = a new toy):
+//   speed   -> the hardest it can be thrown
+//   defense -> how well it holds its ground when crashed into (knockouts)
+//   magnet  -> how well it grabs a Gate card it's rolling over
+const STAT_MAX = 10;
+const maxSpeed = st => 400 + 12 * (st.speed || 0);               // 400 .. 520
+const standMass = st => 1.6 * (1 + 0.12 * (st.defense || 0));     // 1.6 .. 3.5
+const standGrip = st => 520 * (1 + 0.06 * (st.defense || 0));     // slide friction 520 .. 832
+const MAGNET_SPEED = 160;                                         // magnet kicks in below this speed, over a card
+const magnetBrake = st => 45 * (st.magnet || 0);                  // extra slowdown 0 .. 450
+const magnetPull = st => 6 * (st.magnet || 0);                    // pull toward card center 0 .. 60
+const statsOf = (p, t) => state.players[p].toys[t].stats || {};
 const FLICK = 115;        // world speed per (screen heights / second)
 const ATTR_COLOR = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d', clear: '#cfd8dc' };
 const CARD_COLOR = { gold: '#d4af37', silver: '#b8c0c8', copper: '#c46f3a' };
@@ -201,9 +212,9 @@ async function nextTurn() {
 // ---------- throwing
 let roll = null;   // { ball: body, stands: [body] } while a throw is in motion
 // A body: { tm, pos, vel, p, t, kind: 'ball' | 'stand', card (stands only), moved, done }
-const STAND_FRICTION = 520;   // standing (open) toys grip the mat: they slide, not roll
 const STAND_R = RADIUS * 1.15; // open toys are a bit wider than the closed ball
-const MASS = { ball: 1, stand: 1.6 };
+const BALL_MASS = 1;
+const massOf = b => b.kind === 'ball' ? BALL_MASS : standMass(statsOf(b.p, b.t));
 const BOUNCE = 0.65;          // how bouncy toy-on-toy hits are
 let pointer = null;
 renderer.domElement.addEventListener('pointerdown', e => {
@@ -231,7 +242,8 @@ renderer.domElement.addEventListener('pointerup', e => {
 
 function throwToy(vel) {
   if (busy || selected === null) return;
-  if (vel.length() > MAX_SPEED) vel.setLength(MAX_SPEED);
+  const top = maxSpeed(statsOf(state.turn, selected));
+  if (vel.length() > top) vel.setLength(top);
   busy = true; $('picker').classList.add('off');
   const tm = toysMesh[state.turn][selected];
   const ball = { tm, pos: tm.holder.position.clone(), vel, p: state.turn, t: selected, kind: 'ball' };
@@ -358,8 +370,17 @@ function stepPhysics(dt) {
   if (!ball.done) {
     const { tm, pos, vel } = ball;
     const sp = vel.length();
-    const ns = Math.max(0, sp - (sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION) * dt);
-    if (sp > 0) vel.multiplyScalar(ns / sp);
+    let decel = sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION;
+    // Magnet: over a Gate card and slowing down -> brakes harder and drifts toward the card's center.
+    const st = statsOf(ball.p, ball.t), under = sp < MAGNET_SPEED ? fieldIndexAt(pos) : null;
+    if (under !== null && st.magnet) {
+      decel += magnetBrake(st);
+      const c = gateCenter(state.field[under].owner);
+      vel.add(new THREE.Vector3(c.x - pos.x, 0, c.z - pos.z).normalize().multiplyScalar(magnetPull(st) * dt));
+    }
+    const ns = Math.max(0, vel.length() - decel * dt);
+    const sp2 = vel.length();
+    if (sp2 > 0) vel.multiplyScalar(ns / sp2);
     pos.addScaledVector(vel, dt); bounceRails(ball, RADIUS);
     tm.holder.position.copy(pos);
     if (ns > 0) tm.obj.rotateOnWorldAxis(new THREE.Vector3(vel.z, 0, -vel.x).normalize(), (ns * dt) / RADIUS);
@@ -372,7 +393,7 @@ function stepPhysics(dt) {
   // 2) standing toys that were hit slide and slow down quickly
   for (const b of stands) {
     const sp = b.vel.length(); if (sp === 0) continue;
-    const ns = Math.max(0, sp - STAND_FRICTION * dt);
+    const ns = Math.max(0, sp - standGrip(statsOf(b.p, b.t)) * dt);
     b.vel.multiplyScalar(sp ? ns / sp : 0);
     b.pos.addScaledVector(b.vel, dt); bounceRails(b, STAND_R);
     b.tm.holder.position.copy(b.pos);
@@ -386,7 +407,7 @@ function stepPhysics(dt) {
     if (d === 0 || d >= ra + rc) continue;
     n.divideScalar(d);
     // a settled ball acts like a wall; otherwise use the toys' masses
-    const ia = a.kind === 'ball' && a.done ? 0 : 1 / MASS[a.kind], ic = c.kind === 'ball' && c.done ? 0 : 1 / MASS[c.kind];
+    const ia = a.kind === 'ball' && a.done ? 0 : 1 / massOf(a), ic = c.kind === 'ball' && c.done ? 0 : 1 / massOf(c);
     if (ia + ic === 0) continue;
     const overlap = ra + rc - d;                           // push apart so they never pass through
     a.pos.addScaledVector(n, -overlap * ia / (ia + ic)); c.pos.addScaledVector(n, overlap * ic / (ia + ic));
@@ -427,7 +448,7 @@ function randomTeam(cat) {
   const pool = cat.toys.filter(t => t.game === 'bb' && Object.keys(t.attributes || {}).length);
   return pickN(pool, 3).map(t => {
     const attr = pickN(Object.keys(t.attributes), 1)[0];
-    return { id: t.id, name: t.name, attr, g: 250, model: t.model, attrTexture: t.attributes[attr] };
+    return { id: t.id, name: t.name, attr, g: 250, stats: { speed: 0, defense: 0, magnet: 0 }, model: t.model, attrTexture: t.attributes[attr] };
   });
 }
 function randomGates(cat) {
@@ -469,5 +490,6 @@ window.MARBLES = {
     const dist = d.length() + overshoot; throwToy(d.setLength(Math.sqrt(2 * FRICTION * dist) * 0.97));
   },
   select, get busy() { return busy; },
+  setStats: (p, t, st) => { state.players[p].toys[t].stats = { ...state.players[p].toys[t].stats, ...st }; },
 };
 start();
