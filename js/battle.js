@@ -56,6 +56,7 @@ function cameraFor(p) {
 }
 
 // ---------- game state
+let gateBack = null;   // card back image from the asset pack (face-down Gate cards)
 let pack, state, toysMesh = [[], []], gateMesh = new Map(), busy = false, selected = null;
 const loader = new GLTFLoader();
 const mixers = new Set();
@@ -119,7 +120,7 @@ function cardLocal(owner, pos) {
   return { along: dx * d.x + dz * d.z, across: dx * -d.z + dz * d.x };
 }
 function addGateMesh(card, owner) {
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W, GATE_D), new THREE.MeshBasicMaterial({ map: cardTexture(card, false) }));
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W, GATE_D), new THREE.MeshBasicMaterial({ map: gateBack || cardTexture(card, false) }));
   m.rotation.order = 'YXZ'; m.rotation.x = -Math.PI / 2;
   m.rotation.y = Math.atan2(DIR[0].x, DIR[0].z) + (owner === 1 ? Math.PI : 0);   // card set by p reads right-way-up for p
   m.position.copy(gateCenter(owner)); scene.add(m); gateMesh.set(card, m);
@@ -365,6 +366,11 @@ async function start() {
   const arena = await loader.loadAsync(await pack.url(pack.catalog.arenas[0].model));
   arena.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   scene.add(arena.scene);
+  const backPath = (pack.catalog.cardBacks || {}).gate;
+  if (backPath) {
+    gateBack = await new THREE.TextureLoader().loadAsync(await pack.url(backPath));
+    gateBack.colorSpace = THREE.SRGBColorSpace; gateBack.anisotropy = 4;
+  }
   const cat = pack.catalog;
   const players = [0, 1].map(i => ({ name: `Player ${i + 1}`, toys: randomTeam(cat), gates: randomGates(cat) }));
   state = R.newMatch(players);
