@@ -1,5 +1,5 @@
 // Offline cache for the app shell. The asset pack lives in IndexedDB, not here.
-const CACHE = 'marbles-v11';
+const CACHE = 'marbles-v12';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'vendor/jszip.min.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png',
   'battle.html', 'js/battle.js', 'js/rules.js', 'js/pack.js',
@@ -16,6 +16,7 @@ self.addEventListener('activate', e => {
 // Network first (so updates show up when online), cache as fallback (so it works offline).
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (new URL(e.request.url).pathname.includes('/pack/')) return; // the pack is kept in IndexedDB, don't store it twice
   e.respondWith(fetch(e.request).then(r => {
     const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r;
   }).catch(() => caches.match(e.request)));

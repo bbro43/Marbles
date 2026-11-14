@@ -1,7 +1,8 @@
-# Game assets never go in this repo. They live in a local asset pack loaded on each device.
+# Raw game assets stay out. The built asset pack is published in pack/ so devices can auto-update.
 assets/
 *.nds
 *.zip
 *.pack
 node_modules/
 .DS_Store
+!pack/marbles-pack.zip

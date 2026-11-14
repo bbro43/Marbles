@@ -34,7 +34,7 @@
 <body>
 <main>
   <h1 id="appName">Marbles</h1>
-  <p class="sub" id="tagline">Load your asset pack to begin.</p>
+  <p class="sub" id="tagline">Getting the asset pack…</p>
 
   <div class="menu">
     <button class="btn" id="btnBattle" disabled>Battle <small>2 players, this device</small></button>
@@ -46,7 +46,8 @@
     <h2>Asset pack</h2>
     <div id="packInfo"><div class="row"><span>Status</span><span>Not loaded</span></div></div>
     <div class="menu" style="margin-top:12px">
-      <label class="btn primary" for="packFile">Load asset pack <small>.zip, stays on this device</small></label>
+      <button class="btn primary" id="btnUpdate">Check for update <small>downloads only when there's a new pack</small></button>
+      <label class="btn" for="packFile">Load pack from file <small>backup option</small></label>
       <input type="file" id="packFile" accept=".zip,application/zip">
     </div>
     <div class="msg" id="msg"></div>
@@ -93,10 +94,27 @@ $('packFile').addEventListener('change', async e => {
   catch (err) { $('msg').textContent = err.message; }
   e.target.value = '';
 });
+// ---- Auto-update: download the pack from this site only when its version changed.
+async function checkUpdate(manual) {
+  let remote;
+  try { remote = await (await fetch('pack/version.json', { cache: 'no-store' })).json(); }
+  catch { if (manual) $('msg').textContent = 'Offline. Using the pack on this device.'; return; }
+  if (Pack.info && Pack.info.version === remote.version) { if (manual) $('msg').textContent = 'Up to date (v' + remote.version + ').'; return; }
+  $('msg').textContent = 'Downloading pack v' + remote.version + '…';
+  try {
+    const r = await fetch('pack/marbles-pack.zip?v=' + encodeURIComponent(remote.version), { cache: 'no-store' });
+    if (!r.ok) throw new Error('Download failed (' + r.status + ').');
+    const blob = await r.blob();
+    await openPack(blob); await idbPut('pack', blob);
+    $('msg').textContent = 'Updated to v' + remote.version + '.';
+  } catch (err) { $('msg').textContent = err.message; }
+}
+$('btnUpdate').addEventListener('click', () => checkUpdate(true));
 $('btnBattle').addEventListener('click', () => { location.href = 'battle.html'; });
 
 (async () => {
   try { const saved = await idbGet('pack'); if (saved) await openPack(saved); } catch {}
+  checkUpdate(false);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
