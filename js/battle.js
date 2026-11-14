@@ -13,7 +13,11 @@ const TOY_SCALE = TOY_D / 11.2;        // DS ball model is 11.2 units across clo
 const RADIUS = TOY_D / 2;
 const GATE_W = 7 * CM, GATE_D = 9.4 * CM;   // Gate cards are 7 x 9.4 cm
 const GATE_Z = GATE_D / 2;             // two cards, tips touching at the center
-const START_Z = MAT - RADIUS - 1;      // rulebook: throw from at least two card lengths away -> the rail
+// Players throw from opposite corners (the openings in the Arena rails).
+// DIR[p] points from the center toward player p's corner.
+const DIR = [new THREE.Vector3(1, 0, 1).normalize(), new THREE.Vector3(-1, 0, -1).normalize()];
+const START = (MAT - RADIUS - 2) * Math.SQRT2;   // distance from center to the throw spot in the corner
+const SETTLE_SPEED = 70;                          // below this the ball eases onto its base
 const FRICTION = 260;     // units/s^2
 const MAX_SPEED = 460;
 const FLICK = 115;        // world speed per (screen heights / second)
@@ -43,10 +47,12 @@ new ResizeObserver(resize).observe($('view')); resize();
 
 let camTarget = new THREE.Vector3(), camGoal = new THREE.Vector3();
 function cameraFor(p) {
-  const s = p === 0 ? 1 : -1;
   const portrait = camera.aspect < 1;
-  camGoal.set(0, portrait ? 330 : 230, s * (portrait ? 250 : 230));
-  camTarget.set(0, 0, -s * (portrait ? 18 : 10));
+  // Behind and above the thrower's corner, looking at a point a little in front of the center,
+  // so the thrower's corner (with the waiting toy) and both Gate cards are on screen.
+  const back = portrait ? 360 : 330, up = portrait ? 380 : 300;
+  camGoal.copy(DIR[p]).multiplyScalar(back).setY(up);
+  camTarget.copy(DIR[p]).multiplyScalar(portrait ? 45 : 62);
 }
 
 // ---------- game state
@@ -104,25 +110,32 @@ function cardTexture(card, faceUp) {
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   return tex;
 }
-function gateCenter(owner) { return new THREE.Vector3(0, 0.6, owner === 0 ? -GATE_Z : GATE_Z); }
+// Gate cards sit on the diagonal between the players, tips touching at the center.
+// A player's card goes on the opponent's side.
+function gateCenter(owner) { return DIR[1 - owner].clone().multiplyScalar(GATE_Z).setY(0.6); }
+// Position relative to a card: along = toward the corners, across = sideways.
+function cardLocal(owner, pos) {
+  const c = gateCenter(owner), d = DIR[0], dx = pos.x - c.x, dz = pos.z - c.z;
+  return { along: dx * d.x + dz * d.z, across: dx * -d.z + dz * d.x };
+}
 function addGateMesh(card, owner) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W, GATE_D), new THREE.MeshBasicMaterial({ map: cardTexture(card, false) }));
-  m.rotation.x = -Math.PI / 2; if (owner === 1) m.rotation.z = Math.PI;   // face the opponent who has to read it
+  m.rotation.order = 'YXZ'; m.rotation.x = -Math.PI / 2;
+  m.rotation.y = Math.atan2(DIR[0].x, DIR[0].z) + (owner === 1 ? Math.PI : 0);   // card set by p reads right-way-up for p
   m.position.copy(gateCenter(owner)); scene.add(m); gateMesh.set(card, m);
 }
 function flipGate(card) { const m = gateMesh.get(card); if (m) { m.material.map = cardTexture(card, true); m.material.needsUpdate = true; } }
 function removeGate(card) { const m = gateMesh.get(card); if (m) { scene.remove(m); gateMesh.delete(card); } }
 function fieldIndexAt(pos) {
   for (let i = 0; i < state.field.length; i++) {
-    const c = gateCenter(state.field[i].owner);
-    if (Math.abs(pos.x - c.x) <= GATE_W / 2 + RADIUS * 0.3 && Math.abs(pos.z - c.z) <= GATE_D / 2 + RADIUS * 0.3) return i;
+    const l = cardLocal(state.field[i].owner, pos);
+    if (Math.abs(l.across) <= GATE_W / 2 + RADIUS * 0.3 && Math.abs(l.along) <= GATE_D / 2 + RADIUS * 0.3) return i;
   }
   return null;
 }
-function standSpot(owner, k) {                  // k: 0 = first toy on the card, 1 = second
-  const c = gateCenter(owner);
-  const dx = GATE_W / 2 - RADIUS * 0.9, dz = GATE_D / 4;   // two toys share a card side by side
-  return new THREE.Vector3(c.x + (k === 0 ? -dx : dx), RADIUS, c.z + (k === 0 ? dz : -dz) * 0.5);
+function standSpot(owner, k) {                  // only used when the rules move a toy to the other card
+  const c = gateCenter(owner), d = DIR[0], side = new THREE.Vector3(-d.z, 0, d.x);
+  return c.clone().addScaledVector(side, (k === 0 ? -1 : 1) * (GATE_W / 2 - RADIUS * 0.9)).setY(RADIUS);
 }
 
 // ---------- HUD
@@ -150,7 +163,9 @@ function select(t) {
   selected = t;
   $('picker').querySelectorAll('button').forEach(b => b.classList.toggle('sel', +b.dataset.t === t));
   const tm = toysMesh[p][t]; setOpen(tm, 0);
-  tm.holder.position.set(0, RADIUS, p === 0 ? START_Z : -START_Z); tm.holder.rotation.set(0, p === 0 ? Math.PI : 0, 0);
+  tm.holder.position.copy(DIR[p]).multiplyScalar(START).setY(RADIUS);
+  tm.holder.rotation.set(0, Math.atan2(-DIR[p].x, -DIR[p].z), 0);    // facing the center
+  tm.obj.quaternion.identity();
   tm.holder.visible = true;
   say(`${state.players[p].name}: swipe up to throw ${state.players[p].toys[t].name}`);
 }
@@ -189,8 +204,8 @@ renderer.domElement.addEventListener('pointerup', e => {
   const h = $('view').clientHeight;
   const sx = (b.x - a.x) / h / dt, sy = (b.y - a.y) / h / dt;
   if (sy > -0.4) return;                         // must be an upward flick
-  const s = state.turn === 0 ? 1 : -1;
-  throwToy(new THREE.Vector3(sx * FLICK * s, 0, sy * FLICK * s));
+  const fwd = DIR[state.turn].clone().negate(), right = new THREE.Vector3(-fwd.z, 0, fwd.x);
+  throwToy(right.multiplyScalar(sx * FLICK).addScaledVector(fwd, -sy * FLICK));
 });
 
 function throwToy(vel) {
@@ -208,7 +223,7 @@ async function rollStopped() {
   const res = R.land(state, t, fieldIdx);
   for (const e of res.events) {
     if (e.type === 'miss') { say('Missed the Gate cards — back to your hand.'); await sleep(900); tm.holder.visible = false; }
-    if (e.type === 'stand') { await glide(tm, standSpot(e.owner, e.slot)); await animateOpen(tm, 1); say(`${state.players[p].toys[t].name} opens on the Gate card!`); await sleep(600); }
+    if (e.type === 'stand') { await animateOpen(tm, 1); say(`${state.players[p].toys[t].name} opens on the Gate card!`); await sleep(600); }
     if (e.type === 'moved') { say('Already have a toy there — moves to the other Gate card.'); await sleep(500); await glide(tm, standSpot(e.owner, e.slot)); await animateOpen(tm, 1); await sleep(400); }
     if (e.type === 'capture') await captured(e);
   }
@@ -289,6 +304,7 @@ function gameOver() {
 
 // ---------- render loop
 const clock = new THREE.Clock();
+const UPRIGHT = new THREE.Quaternion();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
   camera.position.lerp(camGoal, 0.08);
@@ -296,7 +312,7 @@ renderer.setAnimationLoop(() => {
   if (roll) {
     const { tm, pos, vel } = roll;
     const sp = vel.length();
-    const ns = Math.max(0, sp - FRICTION * dt);
+    const ns = Math.max(0, sp - (sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION) * dt);
     if (sp > 0) vel.multiplyScalar(ns / sp);
     pos.addScaledVector(vel, dt);
     const lim = MAT - RADIUS;
@@ -307,7 +323,12 @@ renderer.setAnimationLoop(() => {
       const axis = new THREE.Vector3(vel.z, 0, -vel.x).normalize();
       tm.obj.rotateOnWorldAxis(axis, (ns * dt) / RADIUS);
     }
-    if (ns < 6) { tm.obj.rotation.set(0, 0, 0); rollStopped(); }
+    // Easing onto its base: as it slows, blend the roll back to upright so it stops standing.
+    if (ns < SETTLE_SPEED) {
+      const k = 1 - ns / SETTLE_SPEED;                    // 0 -> 1 as it comes to rest
+      tm.obj.quaternion.slerp(UPRIGHT, Math.min(1, 0.05 + k * k * 0.35));
+    }
+    if (ns < 3) { tm.obj.quaternion.copy(UPRIGHT); rollStopped(); }
   }
   for (const side of toysMesh) for (const tm of side) {
     if (tm.anim) {
@@ -359,6 +380,12 @@ $('again').onclick = () => location.reload();
 window.MARBLES = {
   get state() { return state; },
   throwWith: (vx, vz) => throwToy(new THREE.Vector3(vx, 0, vz)),
+  // aim at a Gate card (or overshoot it) with just enough speed to stop there
+  throwAt: (fieldIdx, overshoot = 0) => {
+    const tm = toysMesh[state.turn][selected]; const from = tm.holder.position;
+    const to = gateCenter(state.field[fieldIdx].owner); const d = new THREE.Vector3(to.x - from.x, 0, to.z - from.z);
+    const dist = d.length() + overshoot; throwToy(d.setLength(Math.sqrt(2 * FRICTION * dist) * 0.97));
+  },
   select, get busy() { return busy; },
 };
 start();
