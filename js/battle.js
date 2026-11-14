@@ -159,6 +159,21 @@ function fieldIndexAt(pos) {
   }
   return null;
 }
+// Where the thrown toy landed: any card it stopped over, even partly (the most-overlapped one).
+function landingIndexAt(pos) {
+  let best = null, bestOut = Infinity;
+  state.field.forEach((f, i) => {
+    const l = cardLocal(f, pos);
+    const out = Math.max(Math.abs(l.across) - GATE_W / 2, Math.abs(l.along) - GATE_D / 2);   // <0 = center is on the card
+    if (out < RADIUS && out < bestOut) { best = i; bestOut = out; }
+  });
+  return best;
+}
+// The nearest spot fully on that card.
+function onCardSpot(f, pos) {
+  const c = cellCenter(f.cell), mx = GATE_W / 2 - RADIUS * 0.9, mz = GATE_D / 2 - RADIUS * 0.9;
+  return new THREE.Vector3(c.x + Math.max(-mx, Math.min(mx, pos.x - c.x)), RADIUS, c.z + Math.max(-mz, Math.min(mz, pos.z - c.z)));
+}
 function standSpot(cell, k) {                   // only used when the rules move a toy to another card
   const c = cellCenter(cell);
   return new THREE.Vector3(c.x + (k === 0 ? -1 : 1) * (GATE_W / 2 - RADIUS * 0.9), RADIUS, c.z);
@@ -296,6 +311,8 @@ let roll = null;   // { ball: body, stands: [body] } while a throw is in motion
 const STAND_R = RADIUS * 1.15; // open toys are a bit wider than the closed ball
 const BALL_MASS = 1;
 const massOf = b => b.kind === 'ball' ? BALL_MASS : standMass(statsOf(b.p, b.t));
+// A settled ball, and the thrower's own standing toys, act like walls: you can't knock your own toys around.
+const invMass = b => (b.kind === 'ball' && b.done) || (b.kind === 'stand' && b.p === state.turn) ? 0 : 1 / massOf(b);
 const BOUNCE = 0.65;          // how bouncy toy-on-toy hits are
 let pointer = null;
 renderer.domElement.addEventListener('pointerdown', e => {
@@ -346,7 +363,7 @@ async function rollStopped() {
   const p = state.turn;
   inFlight = tm;
   // Knockouts first: any standing toy that got pushed off the card it was on.
-  const knocked = stands.filter(b => b.moved && cardAt(b.pos) !== b.card).map(b => ({ p: b.p, t: b.t, card: b.card }));
+  const knocked = stands.filter(b => b.p !== p && b.moved && cardAt(b.pos) !== b.card).map(b => ({ p: b.p, t: b.t, card: b.card }));
   if (knocked.length) {
     for (const e of R.knockOff(state, knocked)) {
       if (e.type === 'knockedOff') {
@@ -358,27 +375,34 @@ async function rollStopped() {
     }
     if (state.winner !== null) { inFlight = null; return afterTurn(); }
   }
-  const fieldIdx = fieldIndexAt(pos);
-  // Landed on your own toy with more than one card to move to: you pick which.
+  const fieldIdx = landingIndexAt(pos);
+  if (fieldIdx !== null) {                                   // partly over a card still counts: settle it onto the card
+    const spot = onCardSpot(state.field[fieldIdx], pos);
+    if (spot.distanceTo(new THREE.Vector3(pos.x, RADIUS, pos.z)) > 0.5) await glide(tm, spot, 250);
+    tm.obj.quaternion.copy(UPRIGHT);
+  }
+  // Landed on a card with your own toy: take the card, or move to a touching card.
   let moveTo = null;
   const f = fieldIdx === null ? null : state.field[fieldIdx];
   if (f && f.toys.some(x => x.p === p) && !f.toys.some(x => x.p !== p)) {
     const opts = R.moveOptions(state, fieldIdx);
-    if (opts.length > 1) {
+    if (opts.length) {
       await animateOpen(tm, 1);
       const glow = showSpots(opts.map(k => state.field[k].cell), p);
-      say('Already have a toy here — tap the Gate card to move it to');
-      const cell = await tapSpot(opts.map(k => state.field[k].cell));
-      clearSpots(glow);
-      moveTo = state.field.findIndex(g => g.cell[0] === cell[0] && g.cell[1] === cell[1]);
+      say('Two of your toys here — take the card, or tap a glowing card to move to');
+      $('picker').classList.remove('off');
+      $('picker').innerHTML = `<button class="chip" data-g="-2" style="--c:${playerColor(p)}"><b>Take the card</b><span>${f.card.name}</span></button>`;
+      const cell = await tapSpot(opts.map(k => state.field[k].cell), () => new Promise(res => { gateResolve = res; $('picker').querySelector('button').onclick = () => { const r = gateResolve; gateResolve = null; r && r('take'); }; }));
+      clearSpots(glow); $('picker').classList.add('off');
+      moveTo = cell === 'take' ? null : state.field.findIndex(g => g.cell[0] === cell[0] && g.cell[1] === cell[1]);
     }
   }
-  const res = R.land(state, t, fieldIdx, opts => moveTo ?? opts[0]);
+  const res = R.land(state, t, fieldIdx, () => moveTo);
   inFlight = null;
   for (const e of res.events) {
     if (e.type === 'miss') { say('Missed the Gate cards — back to your hand.'); await sleep(900); tm.holder.visible = false; }
     if (e.type === 'stand') { await animateOpen(tm, 1); say(`${state.players[p].toys[t].name} opens on the Gate card!`); await sleep(600); }
-    if (e.type === 'moved') { say('Already have a toy there — moves to another Gate card.'); await sleep(500); await glide(tm, standSpot(e.cell, e.slot)); await animateOpen(tm, 1); await sleep(400); }
+    if (e.type === 'moved') { say('Moving to the touching Gate card.'); await sleep(500); await glide(tm, standSpot(e.cell, e.slot)); await animateOpen(tm, 1); await sleep(400); }
     if (e.type === 'capture') await captured(e);
   }
   if (res.battle) {
@@ -507,7 +531,7 @@ function stepPhysics(dt) {
     if (d === 0 || d >= ra + rc) continue;
     n.divideScalar(d);
     // a settled ball acts like a wall; otherwise use the toys' masses
-    const ia = a.kind === 'ball' && a.done ? 0 : 1 / massOf(a), ic = c.kind === 'ball' && c.done ? 0 : 1 / massOf(c);
+    const ia = invMass(a), ic = invMass(c);
     if (ia + ic === 0) continue;
     const overlap = ra + rc - d;                           // push apart so they never pass through
     a.pos.addScaledVector(n, -overlap * ia / (ia + ic)); c.pos.addScaledVector(n, overlap * ic / (ia + ic));
@@ -593,6 +617,7 @@ window.MARBLES = {
   // tap a choice in the bottom bar (Gate card index, or -1 = Skip) / tap a spot on the mat
   get choosing() { return spotTap ? 'spot' : gateResolve ? 'gate' : null; },
   pickGate: i => { const b = $('picker').querySelector(`[data-g="${i}"]`); if (b) b.click(); },
+  takeCard: () => { const b = $('picker').querySelector('[data-g="-2"]'); if (b) b.click(); },
   get spots() { return spotTap ? spotTap.cells : []; },
   tapSpot: cell => spotTap && spotTap.finish(cell),
   setStats: (p, t, st) => { state.players[p].toys[t].stats = { ...state.players[p].toys[t].stats, ...st }; },

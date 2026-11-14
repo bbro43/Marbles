@@ -101,10 +101,14 @@ export function placeGate(s, handIdx, cell) {
   return [{ type: 'gateSet', p, card, cell, fieldIdx: s.field.length - 1 }];
 }
 
-// Landed on a card that already holds one of your own toys: the Gate cards it can move to
-// (any other card without one of your toys). Empty list = you win the card uncontested.
+// Landed on a card that already holds one of your own toys. You choose:
+//   A) take the card (uncontested), or
+//   B) move the new toy to a card touching it (sharing a side) that has none of your toys.
+// This lists the cards for B. Empty list = only A.
+const touching = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
 export function moveOptions(s, fieldIdx, p = s.turn) {
-  return s.field.map((f, k) => k).filter(k => k !== fieldIdx && !s.field[k].toys.some(x => x.p === p));
+  const here = s.field[fieldIdx].cell;
+  return s.field.map((f, k) => k).filter(k => k !== fieldIdx && touching(here, s.field[k].cell) && !s.field[k].toys.some(x => x.p === p));
 }
 
 export function canThrow(s, p = s.turn) {
@@ -112,7 +116,8 @@ export function canThrow(s, p = s.turn) {
 }
 
 // A throw landed. fieldIdx = index of the Gate card it opened on, or null for a miss.
-// chooseMove(options) picks where it moves when it lands on your own toy (see moveOptions).
+// chooseMove(options) decides when it lands on your own toy (see moveOptions):
+// return one of the options to move there, or null to take the card.
 // Returns { events, battle } where battle (if any) must be resolved with resolveBattle().
 export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
   const p = s.turn, me = s.players[p];
@@ -143,7 +148,8 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
   }
   // Landed on a Gate card that already holds one of my own toys.
   const opts = moveOptions(s, fieldIdx, p);
-  const otherIdx = opts.length ? (opts.length === 1 ? opts[0] : chooseMove(opts)) : -1;
+  const pick = opts.length ? chooseMove(opts) : null;
+  const otherIdx = opts.includes(pick) ? pick : -1;
   const otherGate = s.field[otherIdx];
   if (!otherGate) {
     g.toys.push({ p, t });

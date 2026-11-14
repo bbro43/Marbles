@@ -26,6 +26,8 @@ test('rulebook example: Dan wins 660 vs 620 on High Energy', () => {
   r = land(s, 0, 0); assert.equal(s.turn, 0);
   startTurn(s);
   // Dan rolls Haos Serpenoid onto Runo's gate where his own Fear Ripper is -> moves to the other gate -> battle
+  // (the two opening cards sit diagonally, so for this example put Dan's card beside Runo's)
+  s.field[0].cell = [0, -1];
   r = land(s, 1, 1);
   assert.equal(r.events.find(e => e.type === 'moved').fieldIdx, 0);
   assert.deepEqual(r.battle, { fieldIdx: 0 });
@@ -138,12 +140,22 @@ test('place one Gate card per turn, touching a side of one already on the field'
   assert.throws(() => placeGate(s, 0, [0, -1]));
 });
 
-test('own toy already there with several cards: player picks where it moves', () => {
-  const s = match(); startTurn(s);
-  land(s, 0, 1); startTurn(s);                          // P1 on card 1
-  placeGate(s, 0, [1, 0]); land(s, 0, null); startTurn(s); // P2 adds a 3rd card, misses
-  assert.deepEqual(moveOptions(s, 1), [0, 2]);
-  const r = land(s, 1, 1, opts => opts[1]);
+test('two of my toys on a card: take it, or move to a touching card', () => {
+  const s = match(); startTurn(s);                       // cards at [-1,-1] (P1's) and [0,0] (P2's) — diagonal, not touching
+  land(s, 0, 1); startTurn(s); land(s, 0, null); startTurn(s);   // P1 on card 1 [0,0]; P2 misses
+  assert.deepEqual(moveOptions(s, 1), []);                // nothing touching -> only "take"
+  let r = land(s, 1, 1);
+  assert.ok(r.events.some(e => e.type === 'capture' && e.how === 'uncontested'));
+  // Now with a touching card
+  const s2 = match(); startTurn(s2);
+  land(s2, 0, 1); startTurn(s2);                          // P1 on [0,0]
+  placeGate(s2, 0, [0, -1]); land(s2, 0, null); startTurn(s2);   // P2 sets a card at [0,-1], touching [0,0]
+  assert.deepEqual(moveOptions(s2, 1), [2]);
+  r = land(s2, 1, 1, () => null);                         // choose A: take it
+  assert.ok(r.events.some(e => e.type === 'capture' && e.how === 'uncontested'));
+  const s3 = match(); startTurn(s3);
+  land(s3, 0, 1); startTurn(s3); placeGate(s3, 0, [0, -1]); land(s3, 0, null); startTurn(s3);
+  r = land(s3, 1, 1, opts => opts[0]);                    // choose B: move to the touching card
   assert.equal(r.events.find(e => e.type === 'moved').fieldIdx, 2);
 });
 
@@ -152,7 +164,8 @@ test('field empty again, nobody has won: cards are set like the first turn', () 
     { name: 'A', toys: [toy('a', 'pyrus', 500), toy('a2', 'pyrus', 500)], gates: [gate('A1', {}), gate('A2', {})] },
     { name: 'B', toys: [toy('b', 'haos', 300)], gates: [gate('B1', {}), gate('B2', {})] },
   ]);
-  startTurn(s); land(s, 0, 1); startTurn(s);            // A on B's card
+  startTurn(s); s.field[0].cell = [0, -1];             // put A's card beside B's so A can move between them
+  land(s, 0, 1); startTurn(s);                          // A on B's card
   land(s, 0, 0); startTurn(s);                          // B on A's card
   let r = land(s, 1, 1);                                // A onto own toy -> moves to card 0 -> battle 500 vs 300
   resolveBattle(s, computeBattle(s, r.battle.fieldIdx));
