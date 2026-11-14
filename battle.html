@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1417">
+<title>Marbles — Battle</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root { color-scheme: dark; --panel: rgba(18,24,31,.88); --line:#2a3644; --text:#e8edf2; --dim:#93a2b2; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin:0; height:100%; background:#0d1014; color:var(--text); font:15px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; }
+  #wrap { position:fixed; inset:0; display:flex; flex-direction:column; padding-top: env(safe-area-inset-top); }
+  #view { flex:1; position:relative; min-height:0; }
+  canvas { display:block; width:100%; height:100%; touch-action:none; }
+  .top { position:absolute; top:8px; left:8px; right:8px; display:flex; justify-content:space-between; gap:8px; pointer-events:none; }
+  .pl { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:6px 10px; min-width:110px; }
+  .pl.active { border-color:#d8322b; box-shadow:0 0 0 1px #d8322b; }
+  .pl .n { font-weight:700; } .dot { display:inline-block; width:12px; height:12px; border-radius:50%; border:2px solid #d4af37; margin-right:4px; }
+  .dot.on { background:#d4af37; }
+  #back { position:absolute; bottom:10px; left:10px; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:8px 12px; font:inherit; text-decoration:none; }
+  #msg { position:absolute; left:0; right:0; top:64px; text-align:center; font-weight:600; text-shadow:0 2px 6px #000; padding:0 12px; pointer-events:none; }
+  #picker { display:flex; gap:8px; padding:10px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); background:#121820; border-top:1px solid var(--line); overflow-x:auto; min-height:64px; }
+  #picker.off { opacity:.4; pointer-events:none; }
+  .chip { flex:1 0 auto; text-align:left; background:#1b2430; color:var(--text); border:2px solid #2a3644; border-left:8px solid var(--c); border-radius:12px; padding:8px 12px; font:inherit; cursor:pointer; }
+  .chip b { display:block; } .chip span { color:var(--dim); font-size:13px; }
+  .chip.sel { border-color:#fff; border-left-color:var(--c); }
+  #loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; background:#0d1014; z-index:5; }
+  .overlay { position:absolute; inset:0; background:rgba(5,8,12,.78); display:flex; align-items:center; justify-content:center; z-index:4; padding:12px; }
+  .overlay[hidden] { display:none; }
+  .box { background:#141b23; border:1px solid var(--line); border-radius:16px; padding:16px; width:min(560px,100%); }
+  #bcard { text-align:center; color:var(--dim); margin-bottom:10px; }
+  #bbody { display:flex; align-items:flex-start; gap:8px; }
+  .side { flex:1; text-align:center; min-width:0; }
+  .who { color:var(--dim); font-size:13px; } .toy { font-weight:700; margin:4px 0; }
+  .attr { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:-1px; }
+  .g { font-size:42px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .steps { min-height:44px; } .step { font-size:13px; color:#cfe3ff; margin-top:4px; }
+  .winner { margin-top:8px; font-size:22px; font-weight:900; color:#ffd54a; letter-spacing:1px; min-height:28px; }
+  .vs { align-self:center; font-size:22px; color:var(--dim); width:44px; text-align:center; }
+  .vs.big { font-size:56px; color:#fff; font-weight:900; }
+  .btn { display:block; width:100%; margin-top:14px; padding:14px; font:inherit; font-size:17px; font-weight:700; color:#fff; background:#d8322b; border:0; border-radius:12px; cursor:pointer; }
+  #overText { font-size:30px; font-weight:900; text-align:center; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="view">
+    <div class="top">
+      <div class="pl" id="p0"><div class="n" id="p0name">Player 1</div><div id="p0gates"></div></div>
+      <div class="pl" id="p1"><div class="n" id="p1name">Player 2</div><div id="p1gates"></div></div>
+    </div>
+    <div id="msg"></div>
+    <a id="back" href="./">Home</a>
+    <div id="loading">Loading…</div>
+    <div class="overlay" id="battle" hidden><div class="box">
+      <div id="bcard"></div><div id="bbody"></div>
+      <button class="btn" id="bnext" hidden>Continue</button>
+    </div></div>
+    <div class="overlay" id="over" hidden><div class="box">
+      <div id="overText"></div>
+      <button class="btn" id="again">Play again</button>
+      <a class="btn" href="./" style="text-align:center;text-decoration:none;background:#2a3644">Home</a>
+    </div></div>
+  </div>
+  <div id="picker"></div>
+</div>
+<script src="vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/build/three.module.js",
+  "three/addons/": "./vendor/three/examples/jsm/"
+} }
+</script>
+<script type="module" src="js/battle.js"></script>
+</body>
+</html>

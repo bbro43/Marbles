@@ -11,6 +11,7 @@
 <style>
   :root { color-scheme: dark; --bg:#0f1417; --panel:#182028; --line:#2a3644; --text:#e8edf2; --dim:#93a2b2; --accent:#d8322b; }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
   body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
   main { max-width: 520px; margin: 0 auto; padding: 28px 18px; }
@@ -36,7 +37,7 @@
   <p class="sub" id="tagline">Load your asset pack to begin.</p>
 
   <div class="menu">
-    <button class="btn" id="btnBattle" disabled>Battle <small>coming next</small></button>
+    <button class="btn" id="btnBattle" disabled>Battle <small>2 players, this device</small></button>
     <button class="btn" id="btnChars" disabled>Characters <small>later</small></button>
     <button class="btn" id="btnShop" disabled>Shop <small>later</small></button>
   </div>
@@ -92,7 +93,7 @@ $('packFile').addEventListener('change', async e => {
   catch (err) { $('msg').textContent = err.message; }
   e.target.value = '';
 });
-$('btnBattle').addEventListener('click', () => { $('msg').textContent = 'Battle screen is the next build.'; });
+$('btnBattle').addEventListener('click', () => { location.href = 'battle.html'; });
 
 (async () => {
   try { const saved = await idbGet('pack'); if (saved) await openPack(saved); } catch {}

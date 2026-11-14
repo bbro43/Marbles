@@ -1,7 +1,10 @@
 // Offline cache for the app shell. The asset pack lives in IndexedDB, not here.
-const CACHE = 'marbles-v1';
+const CACHE = 'marbles-v3';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'vendor/jszip.min.js',
-  'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'];
+  'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png',
+  'battle.html', 'js/battle.js', 'js/rules.js', 'js/pack.js',
+  'vendor/three/build/three.module.js', 'vendor/three/examples/jsm/loaders/GLTFLoader.js',
+  'vendor/three/examples/jsm/utils/BufferGeometryUtils.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
