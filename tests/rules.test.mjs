@@ -1,6 +1,6 @@
 // Run: node tests/rules.test.mjs
 import assert from 'node:assert/strict';
-import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff } from '../js/rules.js';
+import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff, placeCells, placeGate, moveOptions, openingCell } from '../js/rules.js';
 
 const gate = (name, bonus) => ({ name, bonus });
 const toy = (name, attr, g) => ({ name, attr, g });
@@ -114,6 +114,55 @@ test('knocking your own toy off just removes it from the card', () => {
   const ev = knockOff(s, [{ p: 0, t: 0, card }]);
   assert.ok(!ev.some(e => e.type === 'capture'));
   assert.equal(s.field[0].toys.length, 0);
+});
+
+const has = (cells, c) => cells.some(x => x[0] === c[0] && x[1] === c[1]);
+
+test('opening: each card goes in the center-rectangle spot farthest from its thrower', () => {
+  const s = match(); const ev = startTurn(s);
+  assert.deepEqual(s.field.map(f => f.cell), [[-1, -1], [0, 0]]);   // P1 throws from +x/+z, P2 from -x/-z
+  assert.ok(ev.every(e => e.opening));
+  assert.deepEqual(openingCell({ corners: [[1, -1]] }, 0), [-1, 0]); // a 3rd/4th corner gets its own far spot
+  assert.deepEqual(placeCells(s), []);                               // opening counts as this turn's card
+});
+
+test('place one Gate card per turn, touching a side of one already on the field', () => {
+  const s = match(); startTurn(s); land(s, 0, null);   // P1 misses
+  startTurn(s);                                        // P2's turn: may place
+  const cells = placeCells(s);
+  assert.ok(has(cells, [0, -1]) && has(cells, [-1, 0]) && has(cells, [1, 0]));
+  assert.ok(!has(cells, [1, 1]) && !has(cells, [0, 0]));            // diagonal-only and taken spots aren't allowed
+  placeGate(s, 0, [1, 0]);
+  assert.equal(s.field.length, 3); assert.equal(s.players[1].gateHand.length, 1);
+  assert.deepEqual(placeCells(s), []);
+  assert.throws(() => placeGate(s, 0, [0, -1]));
+});
+
+test('own toy already there with several cards: player picks where it moves', () => {
+  const s = match(); startTurn(s);
+  land(s, 0, 1); startTurn(s);                          // P1 on card 1
+  placeGate(s, 0, [1, 0]); land(s, 0, null); startTurn(s); // P2 adds a 3rd card, misses
+  assert.deepEqual(moveOptions(s, 1), [0, 2]);
+  const r = land(s, 1, 1, opts => opts[1]);
+  assert.equal(r.events.find(e => e.type === 'moved').fieldIdx, 2);
+});
+
+test('field empty again, nobody has won: cards are set like the first turn', () => {
+  const s = newMatch([
+    { name: 'A', toys: [toy('a', 'pyrus', 500), toy('a2', 'pyrus', 500)], gates: [gate('A1', {}), gate('A2', {})] },
+    { name: 'B', toys: [toy('b', 'haos', 300)], gates: [gate('B1', {}), gate('B2', {})] },
+  ]);
+  startTurn(s); land(s, 0, 1); startTurn(s);            // A on B's card
+  land(s, 0, 0); startTurn(s);                          // B on A's card
+  let r = land(s, 1, 1);                                // A onto own toy -> moves to card 0 -> battle 500 vs 300
+  resolveBattle(s, computeBattle(s, r.battle.fieldIdx));
+  assert.equal(s.field.length, 1);
+  // A captured card 0; card 1 still has A's first toy. B knocks it off and takes it.
+  startTurn(s); knockOff(s, [{ p: 0, t: 0, card: s.field[0].card }]); land(s, 0, null);
+  assert.equal(s.field.length, 0);
+  const ev = startTurn(s);
+  assert.equal(ev.filter(e => e.type === 'gateSet').length, 2);
+  assert.deepEqual(s.field.map(f => f.cell).sort(), [[-1, -1], [0, 0]]);
 });
 
 console.log(`\n${n} tests passed`);

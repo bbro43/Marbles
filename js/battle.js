@@ -124,12 +124,13 @@ function cardTexture(card, faceUp) {
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   return tex;
 }
-// Gate cards sit parallel to the walls, tips touching at the center.
-// A player's card goes on the opponent's half.
-function gateCenter(owner) { return new THREE.Vector3(0, 0.6, owner === 0 ? -GATE_Z : GATE_Z); }
+// Gate cards sit parallel to the walls on a grid of card-sized spots (see rules.js: cell [c, r]).
+// The opening four spots make a rectangle around the mat's center.
+function cellCenter(cell) { return new THREE.Vector3((cell[0] + 0.5) * GATE_W, 0.6, (cell[1] + 0.5) * GATE_D); }
+const cellAt = pos => [Math.floor(pos.x / GATE_W), Math.floor(pos.z / GATE_D)];
 // Position relative to a card: along = the card's long side (z), across = its short side (x).
-function cardLocal(owner, pos) {
-  const c = gateCenter(owner);
+function cardLocal(f, pos) {
+  const c = cellCenter(f.cell);
   return { along: pos.z - c.z, across: pos.x - c.x };
 }
 // Each player's color = their main attribute (the one most of their toys share; ties -> first toy's).
@@ -139,13 +140,13 @@ function mainAttr(pl) {
 }
 const playerColor = p => ATTR_COLOR[mainAttr(state.players[p])];
 const BORDER = 0.35 * CM;   // colored frame around a player's Gate cards
-function addGateMesh(card, owner) {
+function addGateMesh(card, owner, cell) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W, GATE_D), new THREE.MeshBasicMaterial({ map: gateBack || cardTexture(card, false) }));
   m.rotation.x = -Math.PI / 2; if (owner === 1) m.rotation.z = Math.PI;   // card set by p reads right-way-up for p
   const frame = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W + 2 * BORDER, GATE_D + 2 * BORDER),
     new THREE.MeshBasicMaterial({ color: playerColor(owner) }));
   frame.position.z = -0.15; m.add(frame);                                  // sits just under the card
-  m.position.copy(gateCenter(owner)); scene.add(m); gateMesh.set(card, m);
+  m.position.copy(cellCenter(cell)); scene.add(m); gateMesh.set(card, m);
 }
 function flipGate(card) { const m = gateMesh.get(card); if (m) { m.material.map = cardTexture(card, true); m.material.needsUpdate = true; } }
 function removeGate(card) { const m = gateMesh.get(card); if (m) { scene.remove(m); gateMesh.delete(card); } }
@@ -153,13 +154,13 @@ let inFlight = null;   // the thrown toy while its throw is being resolved
 function cardAt(pos) { const i = fieldIndexAt(pos); return i === null ? null : state.field[i].card; }
 function fieldIndexAt(pos) {
   for (let i = 0; i < state.field.length; i++) {
-    const l = cardLocal(state.field[i].owner, pos);
+    const l = cardLocal(state.field[i], pos);
     if (Math.abs(l.across) <= GATE_W / 2 + RADIUS * 0.3 && Math.abs(l.along) <= GATE_D / 2 + RADIUS * 0.3) return i;
   }
   return null;
 }
-function standSpot(owner, k) {                  // only used when the rules move a toy to the other card
-  const c = gateCenter(owner);
+function standSpot(cell, k) {                   // only used when the rules move a toy to another card
+  const c = cellCenter(cell);
   return new THREE.Vector3(c.x + (k === 0 ? -1 : 1) * (GATE_W / 2 - RADIUS * 0.9), RADIUS, c.z);
 }
 
@@ -202,13 +203,91 @@ const isStanding = (p, t) => state.field.some(f => f.toys.some(x => x.p === p &&
 
 // ---------- turn flow
 async function nextTurn() {
-  const ev = R.startTurn(state, (p, hand) => rand(hand.length));
+  cameraFor(state.turn); hud(); selected = null;
+  // Opening (first turn, or the field is empty again): everyone picks a Gate card for their opening spot.
+  const picks = {};
+  for (const p of R.openingPlayers(state)) {
+    const glow = showSpots([R.openingCell(state, p)], p);
+    picks[p] = await chooseGate(p, `${state.players[p].name}: pick a Gate card to set in the glowing spot`, false);
+    clearSpots(glow);
+  }
+  const ev = R.startTurn(state, p => picks[p]);
   for (const e of ev) {
-    if (e.type === 'gateSet') addGateMesh(e.card, e.p);
+    if (e.type === 'gateSet') addGateMesh(e.card, e.p, e.cell);
     if (e.type === 'recycle') say(`${state.players[e.p].name}'s toys come back from the used pile`);
   }
   if (ev.some(e => e.type === 'gateSet')) { say('Gate cards — set!'); await sleep(900); }
-  cameraFor(state.turn); hud(); selected = null; showPicker();
+  // After the opening: may set one more Gate card next to one already on the field.
+  if (R.placeCells(state).length) {
+    const pl = state.players[state.turn];
+    let i = await chooseGate(state.turn, `${pl.name}: set another Gate card? Pick one, or skip`, true);
+    while (i !== null) {
+      const cells = R.placeCells(state), glow = showSpots(cells, state.turn);
+      say('Tap a glowing spot to set it there (or pick another card)');
+      const r = await tapSpot(cells, () => chooseGate(state.turn, null, true).then(j => ({ again: j })));
+      clearSpots(glow);
+      if (r.again !== undefined) { i = r.again; continue; }
+      const e = R.placeGate(state, i, r)[0];
+      addGateMesh(e.card, e.p, e.cell); say(`${e.card.name} — set!`); await sleep(600);
+      break;
+    }
+  }
+  hud(); showPicker();
+}
+
+// ---------- choosing Gate cards and spots
+const COLOR_HEX = { gold: '#e2b84a', silver: '#c9d1da', copper: '#c67a43' };
+function gateChip(card, i) {
+  const top = Object.entries(card.bonus || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([a, v]) => `${a[0].toUpperCase() + a.slice(1)} +${v}`).join(' · ');
+  return `<button class="chip" data-g="${i}" style="--c:${COLOR_HEX[card.color] || '#888'}"><b>${card.name}</b><span>${card.color || ''} Gate</span><span class="st">${top || 'effect card'}</span></button>`;
+}
+// Shows player p's Gate cards in the bottom bar. Resolves with the hand index, or null for Skip.
+// msg = null keeps the current message and the current bar (used while a spot is being picked).
+let gateResolve = null;
+function chooseGate(p, msg, canSkip) {
+  return new Promise(res => {
+    gateResolve = res;
+    if (msg !== null) {
+      say(msg);
+      const hand = state.players[p].gateHand;
+      $('picker').innerHTML = hand.map(gateChip).join('') + (canSkip ? `<button class="chip skip" data-g="-1"><b>Skip</b><span>throw a toy</span></button>` : '');
+      $('picker').classList.remove('off');
+    }
+    $('picker').querySelectorAll('button').forEach(b => b.onclick = () => {
+      $('picker').querySelectorAll('button').forEach(x => x.classList.toggle('sel', x === b && b.dataset.g !== '-1'));
+      const r = gateResolve; gateResolve = null; if (r) r(+b.dataset.g < 0 ? null : +b.dataset.g);
+    });
+  });
+}
+// Glowing spots on the mat.
+const spotMeshes = [];
+function showSpots(cells, p) {
+  const ms = cells.map(cell => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W - 0.4 * CM, GATE_D - 0.4 * CM),
+      new THREE.MeshBasicMaterial({ color: playerColor(p), transparent: true, opacity: 0.45, depthWrite: false }));
+    m.rotation.x = -Math.PI / 2; m.position.copy(cellCenter(cell)).setY(0.5); scene.add(m); spotMeshes.push(m);
+    return m;
+  });
+  return ms;
+}
+function clearSpots(ms) { for (const m of ms) { scene.remove(m); spotMeshes.splice(spotMeshes.indexOf(m), 1); } }
+// Waits for a tap on one of the cells. other() = a competing promise (e.g. picking a different card).
+let spotTap = null;
+function tapSpot(cells, other) {
+  return new Promise(res => {
+    let done = false;
+    const finish = v => { if (!done) { done = true; spotTap = null; gateResolve = null; res(v); } };
+    spotTap = { cells, finish };
+    if (other) other().then(finish);
+  });
+}
+const raycaster = new THREE.Raycaster(), matPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+function tapToCell(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  raycaster.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+  const hit = new THREE.Vector3();
+  return raycaster.ray.intersectPlane(matPlane, hit) ? cellAt(hit) : null;
 }
 
 // ---------- throwing
@@ -220,6 +299,11 @@ const massOf = b => b.kind === 'ball' ? BALL_MASS : standMass(statsOf(b.p, b.t))
 const BOUNCE = 0.65;          // how bouncy toy-on-toy hits are
 let pointer = null;
 renderer.domElement.addEventListener('pointerdown', e => {
+  if (spotTap) {
+    const c = tapToCell(e), hit = c && spotTap.cells.find(x => x[0] === c[0] && x[1] === c[1]);
+    if (hit) spotTap.finish(hit);
+    return;
+  }
   if (busy || selected === null || state.winner !== null) return;
   pointer = { pts: [{ x: e.clientX, y: e.clientY, t: performance.now() }] };
   renderer.domElement.setPointerCapture(e.pointerId);
@@ -275,12 +359,26 @@ async function rollStopped() {
     if (state.winner !== null) { inFlight = null; return afterTurn(); }
   }
   const fieldIdx = fieldIndexAt(pos);
-  const res = R.land(state, t, fieldIdx);
+  // Landed on your own toy with more than one card to move to: you pick which.
+  let moveTo = null;
+  const f = fieldIdx === null ? null : state.field[fieldIdx];
+  if (f && f.toys.some(x => x.p === p) && !f.toys.some(x => x.p !== p)) {
+    const opts = R.moveOptions(state, fieldIdx);
+    if (opts.length > 1) {
+      await animateOpen(tm, 1);
+      const glow = showSpots(opts.map(k => state.field[k].cell), p);
+      say('Already have a toy here — tap the Gate card to move it to');
+      const cell = await tapSpot(opts.map(k => state.field[k].cell));
+      clearSpots(glow);
+      moveTo = state.field.findIndex(g => g.cell[0] === cell[0] && g.cell[1] === cell[1]);
+    }
+  }
+  const res = R.land(state, t, fieldIdx, opts => moveTo ?? opts[0]);
   inFlight = null;
   for (const e of res.events) {
     if (e.type === 'miss') { say('Missed the Gate cards — back to your hand.'); await sleep(900); tm.holder.visible = false; }
     if (e.type === 'stand') { await animateOpen(tm, 1); say(`${state.players[p].toys[t].name} opens on the Gate card!`); await sleep(600); }
-    if (e.type === 'moved') { say('Already have a toy there — moves to the other Gate card.'); await sleep(500); await glide(tm, standSpot(e.owner, e.slot)); await animateOpen(tm, 1); await sleep(400); }
+    if (e.type === 'moved') { say('Already have a toy there — moves to another Gate card.'); await sleep(500); await glide(tm, standSpot(e.cell, e.slot)); await animateOpen(tm, 1); await sleep(400); }
     if (e.type === 'capture') await captured(e);
   }
   if (res.battle) {
@@ -377,7 +475,7 @@ function stepPhysics(dt) {
     const st = statsOf(ball.p, ball.t), under = sp < MAGNET_SPEED ? fieldIndexAt(pos) : null;
     if (under !== null && lv(st, 'magnet') > 1) {
       decel += magnetBrake(st);
-      const c = gateCenter(state.field[under].owner);
+      const c = cellCenter(state.field[under].cell);
       vel.add(new THREE.Vector3(c.x - pos.x, 0, c.z - pos.z).normalize().multiplyScalar(magnetPull(st) * dt));
     }
     const ns = Math.max(0, vel.length() - decel * dt);
@@ -488,10 +586,15 @@ window.MARBLES = {
   // aim at a Gate card (or overshoot it) with just enough speed to stop there
   throwAt: (fieldIdx, overshoot = 0) => {
     const tm = toysMesh[state.turn][selected]; const from = tm.holder.position;
-    const to = gateCenter(state.field[fieldIdx].owner); const d = new THREE.Vector3(to.x - from.x, 0, to.z - from.z);
+    const to = cellCenter(state.field[fieldIdx].cell); const d = new THREE.Vector3(to.x - from.x, 0, to.z - from.z);
     const dist = d.length() + overshoot; throwToy(d.setLength(Math.sqrt(2 * FRICTION * dist) * 0.97));
   },
   select, get busy() { return busy; },
+  // tap a choice in the bottom bar (Gate card index, or -1 = Skip) / tap a spot on the mat
+  get choosing() { return spotTap ? 'spot' : gateResolve ? 'gate' : null; },
+  pickGate: i => { const b = $('picker').querySelector(`[data-g="${i}"]`); if (b) b.click(); },
+  get spots() { return spotTap ? spotTap.cells : []; },
+  tapSpot: cell => spotTap && spotTap.finish(cell),
   setStats: (p, t, st) => { state.players[p].toys[t].stats = { ...state.players[p].toys[t].stats, ...st }; },
 };
 start();

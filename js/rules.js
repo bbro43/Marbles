@@ -6,15 +6,21 @@
 //   unused   = toys you can still throw this round
 //   used     = toys that already landed / battled
 //   gateHand = your Gate cards not yet set
-//   field    = Gate cards set on the mat: { card, owner, toys: [{p, t}] }
+//   field    = Gate cards set on the mat: { card, owner, cell: [c, r], toys: [{p, t}] }
+//   cell     = a spot on the card grid. Cells are card-sized; [0,0] is the cell just +x/+z of the mat's center,
+//              so the starting rectangle is the four cells [-1|0, -1|0] around the center.
 //   captured = Gate cards you've won (3 wins the match)
 
 export const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
 export const WIN_GATES = 3;
 
-export function newMatch(players, { first = 0 } = {}) {
+// Grid of card spots that fit on the mat (columns c, rows r), and each player's throwing corner as [sx, sz].
+export const DEFAULT_GRID = { cMin: -3, cMax: 2, rMin: -2, rMax: 1 };
+export const DEFAULT_CORNERS = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
+
+export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DEFAULT_CORNERS } = {}) {
   return {
-    turn: first,
+    turn: first, grid, corners, placed: false,
     players: players.map(p => ({
       name: p.name,
       toys: p.toys.map(t => ({ ...t })),
@@ -31,18 +37,37 @@ export function newMatch(players, { first = 0 } = {}) {
 
 const other = p => 1 - p;
 
+// The opening spot for a player: the cell of the center rectangle farthest from their throwing corner.
+export function openingCell(s, p) {
+  const [sx, sz] = s.corners[p];
+  return [sx > 0 ? -1 : 0, sz > 0 ? -1 : 0];
+}
+const key = c => c[0] + ',' + c[1];
+export function cellTaken(s, cell) { return s.field.some(f => key(f.cell) === key(cell)); }
+const inGrid = (s, [c, r]) => c >= s.grid.cMin && c <= s.grid.cMax && r >= s.grid.rMin && r <= s.grid.rMax;
+
+// Field empty and nobody has won: everyone with Gate cards left sets one in their opening spot.
+export function needsOpening(s) {
+  return s.winner === null && s.field.length === 0 && s.players.some(pl => pl.gateHand.length);
+}
+export function openingPlayers(s) {
+  if (!needsOpening(s)) return [];
+  const order = s.players.map((_, i) => (s.turn + i) % s.players.length);
+  return order.filter(p => s.players[p].gateHand.length);
+}
+
 // Start of a turn. Returns events describing what happened.
-// pickGate(p, hand) chooses which Gate card a player sets (index into hand).
+// pickGate(p, hand) chooses which Gate card a player sets in the opening (index into hand).
 export function startTurn(s, pickGate = () => 0) {
   const ev = [];
-  if (s.field.length === 0) {
-    for (const p of [s.turn, other(s.turn)]) {
-      const hand = s.players[p].gateHand;
-      if (!hand.length) continue;
-      const card = hand.splice(pickGate(p, hand), 1)[0];
-      s.field.push({ card, owner: p, toys: [] });
-      ev.push({ type: 'gateSet', p, card, fieldIdx: s.field.length - 1 });
-    }
+  s.placed = false;
+  for (const p of openingPlayers(s)) {
+    const hand = s.players[p].gateHand;
+    const card = hand.splice(pickGate(p, hand), 1)[0];
+    const cell = openingCell(s, p);
+    s.field.push({ card, owner: p, cell, toys: [] });
+    ev.push({ type: 'gateSet', p, card, cell, fieldIdx: s.field.length - 1, opening: true });
+    if (p === s.turn) s.placed = true;            // the opening counts as this turn's Gate card
   }
   const me = s.players[s.turn];
   if (me.unused.length === 0) {
@@ -55,13 +80,41 @@ export function startTurn(s, pickGate = () => 0) {
   return ev;
 }
 
+// After the opening: once per turn, before throwing, the active player may set one Gate card
+// in any free spot that shares a side with a Gate card already on the field.
+export function placeCells(s, p = s.turn) {
+  if (s.winner !== null || s.placed || p !== s.turn || !s.players[p].gateHand.length || !s.field.length) return [];
+  const out = new Map();
+  for (const f of s.field) for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const cell = [f.cell[0] + dc, f.cell[1] + dr];
+    if (inGrid(s, cell) && !cellTaken(s, cell)) out.set(key(cell), cell);
+  }
+  return [...out.values()];
+}
+export function placeGate(s, handIdx, cell) {
+  const p = s.turn, hand = s.players[p].gateHand;
+  if (!placeCells(s, p).some(c => key(c) === key(cell))) throw new Error('cannot set a Gate card there');
+  if (!hand[handIdx]) throw new Error('no such Gate card');
+  const card = hand.splice(handIdx, 1)[0];
+  s.field.push({ card, owner: p, cell, toys: [] });
+  s.placed = true;
+  return [{ type: 'gateSet', p, card, cell, fieldIdx: s.field.length - 1 }];
+}
+
+// Landed on a card that already holds one of your own toys: the Gate cards it can move to
+// (any other card without one of your toys). Empty list = you win the card uncontested.
+export function moveOptions(s, fieldIdx, p = s.turn) {
+  return s.field.map((f, k) => k).filter(k => k !== fieldIdx && !s.field[k].toys.some(x => x.p === p));
+}
+
 export function canThrow(s, p = s.turn) {
   return s.winner === null && s.players[p].unused.length > 0 && s.field.length > 0;
 }
 
 // A throw landed. fieldIdx = index of the Gate card it opened on, or null for a miss.
+// chooseMove(options) picks where it moves when it lands on your own toy (see moveOptions).
 // Returns { events, battle } where battle (if any) must be resolved with resolveBattle().
-export function land(s, t, fieldIdx) {
+export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
   const p = s.turn, me = s.players[p];
   const i = me.unused.indexOf(t);
   if (i < 0) throw new Error('toy is not unused');
@@ -77,7 +130,7 @@ export function land(s, t, fieldIdx) {
   const mine = g.toys.filter(x => x.p === p);
   const theirs = g.toys.filter(x => x.p !== p);
 
-  const at = (gate) => ({ owner: gate.owner, slot: gate.toys.length - 1 });   // where on the mat (for drawing)
+  const at = (gate) => ({ cell: gate.cell, slot: gate.toys.length - 1 });   // where on the mat (for drawing)
   if (theirs.length) {
     g.toys.push({ p, t });
     ev.push({ type: 'stand', p, t, fieldIdx, ...at(g) });
@@ -89,9 +142,10 @@ export function land(s, t, fieldIdx) {
     return endTurn(s, ev);
   }
   // Landed on a Gate card that already holds one of my own toys.
-  const otherIdx = s.field.findIndex((f, k) => k !== fieldIdx);
+  const opts = moveOptions(s, fieldIdx, p);
+  const otherIdx = opts.length ? (opts.length === 1 ? opts[0] : chooseMove(opts)) : -1;
   const otherGate = s.field[otherIdx];
-  if (!otherGate || otherGate.toys.some(x => x.p === p)) {
+  if (!otherGate) {
     g.toys.push({ p, t });
     ev.push({ type: 'stand', p, t, fieldIdx, ...at(g) });
     ev.push(...capture(s, p, fieldIdx, 'uncontested'));
