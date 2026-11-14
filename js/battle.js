@@ -111,18 +111,27 @@ function cardTexture(card, faceUp) {
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   return tex;
 }
-// Gate cards sit on the diagonal between the players, tips touching at the center.
-// A player's card goes on the opponent's side.
-function gateCenter(owner) { return DIR[1 - owner].clone().multiplyScalar(GATE_Z).setY(0.6); }
-// Position relative to a card: along = toward the corners, across = sideways.
+// Gate cards sit parallel to the walls, tips touching at the center.
+// A player's card goes on the opponent's half.
+function gateCenter(owner) { return new THREE.Vector3(0, 0.6, owner === 0 ? -GATE_Z : GATE_Z); }
+// Position relative to a card: along = the card's long side (z), across = its short side (x).
 function cardLocal(owner, pos) {
-  const c = gateCenter(owner), d = DIR[0], dx = pos.x - c.x, dz = pos.z - c.z;
-  return { along: dx * d.x + dz * d.z, across: dx * -d.z + dz * d.x };
+  const c = gateCenter(owner);
+  return { along: pos.z - c.z, across: pos.x - c.x };
 }
+// Each player's color = their main attribute (the one most of their toys share; ties -> first toy's).
+function mainAttr(pl) {
+  const n = {}; pl.toys.forEach(t => n[t.attr] = (n[t.attr] || 0) + 1);
+  return pl.toys.map(t => t.attr).sort((a, b) => n[b] - n[a])[0];
+}
+const playerColor = p => ATTR_COLOR[mainAttr(state.players[p])];
+const BORDER = 0.35 * CM;   // colored frame around a player's Gate cards
 function addGateMesh(card, owner) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W, GATE_D), new THREE.MeshBasicMaterial({ map: gateBack || cardTexture(card, false) }));
-  m.rotation.order = 'YXZ'; m.rotation.x = -Math.PI / 2;
-  m.rotation.y = Math.atan2(DIR[0].x, DIR[0].z) + (owner === 1 ? Math.PI : 0);   // card set by p reads right-way-up for p
+  m.rotation.x = -Math.PI / 2; if (owner === 1) m.rotation.z = Math.PI;   // card set by p reads right-way-up for p
+  const frame = new THREE.Mesh(new THREE.PlaneGeometry(GATE_W + 2 * BORDER, GATE_D + 2 * BORDER),
+    new THREE.MeshBasicMaterial({ color: playerColor(owner) }));
+  frame.position.z = -0.15; m.add(frame);                                  // sits just under the card
   m.position.copy(gateCenter(owner)); scene.add(m); gateMesh.set(card, m);
 }
 function flipGate(card) { const m = gateMesh.get(card); if (m) { m.material.map = cardTexture(card, true); m.material.needsUpdate = true; } }
@@ -135,8 +144,8 @@ function fieldIndexAt(pos) {
   return null;
 }
 function standSpot(owner, k) {                  // only used when the rules move a toy to the other card
-  const c = gateCenter(owner), d = DIR[0], side = new THREE.Vector3(-d.z, 0, d.x);
-  return c.clone().addScaledVector(side, (k === 0 ? -1 : 1) * (GATE_W / 2 - RADIUS * 0.9)).setY(RADIUS);
+  const c = gateCenter(owner);
+  return new THREE.Vector3(c.x + (k === 0 ? -1 : 1) * (GATE_W / 2 - RADIUS * 0.9), RADIUS, c.z);
 }
 
 // ---------- HUD
@@ -145,6 +154,7 @@ function hud() {
     $('p' + p + 'name').textContent = pl.name;
     $('p' + p + 'gates').innerHTML = [0, 1, 2].map(i => `<span class="dot ${i < pl.captured.length ? 'on' : ''}"></span>`).join('');
     $('p' + p).classList.toggle('active', state.turn === p && state.winner === null);
+    $('p' + p).style.setProperty('--pc', playerColor(p));
   });
 }
 function say(msg) { $('msg').textContent = msg; }
