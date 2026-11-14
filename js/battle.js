@@ -450,7 +450,7 @@ function randomTeam(cat) {
   const pool = cat.toys.filter(t => t.game === 'bb' && Object.keys(t.attributes || {}).length);
   return pickN(pool, 3).map(t => {
     const attr = pickN(Object.keys(t.attributes), 1)[0];
-    return { id: t.id, name: t.name, attr, g: 250, stats: { speed: 3, defense: 3, magnet: 3 }, model: t.model, attrTexture: t.attributes[attr] };
+    return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: { speed: 3, defense: 3, magnet: 3 }, model: t.model, attrTexture: t.attributes[attr] };
   });
 }
 function randomGates(cat) {
