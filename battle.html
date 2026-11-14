@@ -29,7 +29,7 @@
   #picker { display:flex; gap:8px; padding:10px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); background:#121820; border-top:1px solid var(--line); overflow-x:auto; min-height:64px; }
   #picker.off { opacity:.4; pointer-events:none; }
   .chip { flex:1 0 auto; text-align:left; background:#1b2430; color:var(--text); border:2px solid #2a3644; border-left:8px solid var(--c); border-radius:12px; padding:8px 12px; font:inherit; cursor:pointer; }
-  .chip b { display:block; } .chip span { color:var(--dim); font-size:13px; }
+  .chip b { display:block; } .chip span { color:var(--dim); font-size:13px; display:block; } .chip .st { font-size:12px; }
   .chip.sel { border-color:#fff; border-left-color:var(--c); }
   #loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; background:#0d1014; z-index:5; }
   .overlay { position:absolute; inset:0; background:rgba(5,8,12,.78); display:flex; align-items:center; justify-content:center; z-index:4; padding:12px; }

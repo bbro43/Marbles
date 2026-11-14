@@ -180,7 +180,7 @@ function showPicker() {
   const p = state.turn, pl = state.players[p];
   $('picker').innerHTML = pl.unused.map(t => {
     const toy = pl.toys[t];
-    return `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span></button>`;
+    return `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')}</span></button>`;
   }).join('');
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));
   if (pl.unused.length === 1) select(pl.unused[0]);
@@ -450,7 +450,7 @@ function randomTeam(cat) {
   const pool = cat.toys.filter(t => t.game === 'bb' && Object.keys(t.attributes || {}).length);
   return pickN(pool, 3).map(t => {
     const attr = pickN(Object.keys(t.attributes), 1)[0];
-    return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: { speed: 3, defense: 3, magnet: 3 }, model: t.model, attrTexture: t.attributes[attr] };
+    return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: { speed: 3, defense: 3, magnet: 3, ...(t.stats || {}) }, model: t.model, attrTexture: t.attributes[attr] };
   });
 }
 function randomGates(cat) {
