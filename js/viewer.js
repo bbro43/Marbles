@@ -8,7 +8,7 @@ const ATTR_COLOR = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', ha
 const ALL = Object.keys(ATTR_COLOR);
 const cap = s => s[0].toUpperCase() + s.slice(1);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const MAXUS_G = { 'Maxus Dragonoid': 3400, 'Maxus Helios': 3700 };
+const MAXUS_G = {};
 
 // ---- 3D stage ----
 const stage = $('stage');
