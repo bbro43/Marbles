@@ -160,7 +160,7 @@ export async function setupTeams(cat, pack) {
       const mine = attrsOf(t);
       const slots = [0, 1, 2].map(k => {
         const x = t.toys[k];
-        if (!x) return `<div class="slot empty">Pick a toy below</div>`;
+        if (!x) return `<div class="slot empty">Pick a Bakugan below</div>`;
         const d = toyById.get(x.id);
         return `<div class="slot" style="--c:${ATTR_COLOR[x.attr]}"><button class="x" data-rm="${k}">✕</button><img class="tpic" src="${thumb(d, x.attr)}" alt=""><b>${esc(d.name)}</b>
           <small>${d.baseG ?? 250}G · Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</small>
@@ -185,10 +185,10 @@ export async function setupTeams(cat, pack) {
         <h2>${esc(t.name)}: set up your team</h2>
         <div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>
         <div class="filters">
-          <input type="search" id="ssearch" placeholder="Search toys and cards" value="${esc(search)}">
+          <input type="search" id="ssearch" placeholder="Search Bakugan and cards" value="${esc(search)}">
           <div class="row">${ALL.map(a => `<button class="fchip ${filt.has(a) ? 'on' : ''}" data-f="${a}" style="--c:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>
         </div>
-        <h3>Toys (${t.toys.length}/3)</h3>
+        <h3>Bakugan (${t.toys.length}/3)</h3>
         <div class="row">${slots}</div>
         <div class="list">${toyList || '<span class="none">No matches</span>'}</div>
         <h3>Gate cards</h3>

@@ -202,7 +202,10 @@ function showPicker() {
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));
   armed = null;
   if (pl.unused.length === 1) select(pl.unused[0]);
+  fieldPhase = 'pre'; refreshAbilityButton();
+  if (promptOn() && !promptedPre && R.fieldCardOptions(state, 'pre').length) { promptedPre = true; openAbilityPanel(); }
 }
+let promptedPre = false;
 // Red "before you throw" cards that work with the selected toy, shown after the toys. Tap to arm, tap again to cancel.
 let armed = null;   // index into the Ability hand of the armed Red card
 function showThrowCards() {
@@ -235,6 +238,7 @@ const isStanding = (p, t) => state.field.some(f => f.toys.some(x => x.p === p &&
 
 // ---------- turn flow
 async function nextTurn() {
+  promptedPre = false;
   cameraFor(state.turn); hud(); selected = null;
   // Opening (first turn, or the field is empty again): everyone picks a Gate card for their opening spot.
   const picks = {};
@@ -246,7 +250,7 @@ async function nextTurn() {
   const ev = R.startTurn(state, p => picks[p]);
   for (const e of ev) {
     if (e.type === 'gateSet') addGateMesh(e.card, e.p, e.cell);
-    if (e.type === 'recycle') say(`${state.players[e.p].name}'s toys come back from the used pile`);
+    if (e.type === 'recycle') say(`${state.players[e.p].name}'s Bakugan come back from the used pile`);
   }
   if (ev.some(e => e.type === 'gateSet')) { say('Gate cards — set!'); await sleep(900); }
   // After the opening: may set one more Gate card next to one already on the field.
@@ -283,7 +287,7 @@ function chooseGate(p, msg, canSkip) {
     if (msg !== null) {
       say(msg);
       const hand = state.players[p].gateHand;
-      $('picker').innerHTML = hand.map(gateChip).join('') + (canSkip ? `<button class="chip skip" data-g="-1"><b>Skip</b><span>throw a toy</span></button>` : '');
+      $('picker').innerHTML = hand.map(gateChip).join('') + (canSkip ? `<button class="chip skip" data-g="-1"><b>Skip</b><span>throw a Bakugan</span></button>` : '');
       $('picker').classList.remove('off');
     }
     $('picker').querySelectorAll('button').forEach(b => b.onclick = () => {
@@ -329,7 +333,8 @@ const STAND_R = RADIUS * 1.15; // open toys are a bit wider than the closed ball
 const BALL_MASS = 1;
 const massOf = b => b.kind === 'ball' ? BALL_MASS : standMass(statsOf(b.p, b.t));
 // A settled ball, and the thrower's own standing toys, act like walls: you can't knock your own toys around.
-const invMass = b => (b.kind === 'ball' && b.done) || (b.kind === 'stand' && b.p === state.turn) ? 0 : 1 / massOf(b);
+const isInvulnerable = b => !!state.invulnerable && state.invulnerable.p === b.p && state.invulnerable.t === b.t;
+const invMass = b => (b.kind === 'ball' && b.done) || (b.kind === 'stand' && (b.p === state.turn || isInvulnerable(b))) ? 0 : 1 / massOf(b);
 const BOUNCE = 0.65;          // how bouncy toy-on-toy hits are
 let pointer = null;
 renderer.domElement.addEventListener('pointerdown', e => {
@@ -373,13 +378,21 @@ function throwToy(vel) {
     return { tm: stm, pos: stm.holder.position.clone(), vel: new THREE.Vector3(), p: x.p, t: x.t, kind: 'stand', card: f.card, moved: false };
   }));
   roll = { ball, stands };
+  // for Second Chance: where everything was before the throw
+  snapshot = { t: selected, toys: [0, 1].flatMap(p => toysMesh[p].map((m, t) => ({ m, pos: m.holder.position.clone(), q: m.obj.quaternion.clone(), vis: m.holder.visible }))) };
+  fieldPhase = null; refreshAbilityButton();
   say('');
 }
+let snapshot = null;
 async function rollStopped() {
   const { ball, stands } = roll; roll = null;
-  const { tm, pos, t } = ball;
+  let { tm, pos, t } = ball;
   const p = state.turn;
   inFlight = tm;
+  // After the Bakugan stops: Ability cards that work now (Second Chance, Trickster, Sleight of Hand, Road Trip)
+  const post = await postThrowCards(ball, stands);
+  if (post === 'redo') return;
+  ({ tm, pos, t } = ball); inFlight = tm;
   // Knockouts first: any standing toy that got pushed off the card it was on.
   const knocked = stands.filter(b => b.p !== p && b.moved && cardAt(b.pos) !== b.card).map(b => ({ p: b.p, t: b.t, card: b.card }));
   if (knocked.length) {
@@ -407,7 +420,7 @@ async function rollStopped() {
     if (opts.length) {
       await animateOpen(tm, 1);
       const glow = showSpots(opts.map(k => state.field[k].cell), p);
-      say('Two of your toys here — take the card, or tap a glowing card to move to');
+      say('Two of your Bakugan here — take the card, or tap a glowing card to move to');
       $('picker').classList.remove('off');
       $('picker').innerHTML = `<button class="chip" data-g="-2" style="--c:${playerColor(p)}"><b>Take the card</b><span>${f.card.name}</span></button>`;
       const cell = await tapSpot(opts.map(k => state.field[k].cell), () => new Promise(res => { gateResolve = res; $('picker').querySelector('button').onclick = () => { const r = gateResolve; gateResolve = null; r && r('take'); }; }));
@@ -423,8 +436,13 @@ async function rollStopped() {
     if (e.type === 'moved') { say('Moving to the touching Gate card.'); await sleep(500); await glide(tm, standSpot(e.cell, e.slot)); await animateOpen(tm, 1); await sleep(400); }
     if (e.type === 'capture') await captured(e);
   }
-  if (res.battle) {
-    const bt = R.startBattle(state, res.battle.fieldIdx);
+  if (res.battle) await runBattle(res.battle.fieldIdx);
+  if (res.events.some(e => e.type === 'extraThrow')) { say(`Another Throw — ${state.players[p].name} throws again!`); await sleep(900); }
+  afterTurn();
+}
+async function runBattle(fieldIdx) {
+  {
+    const bt = R.startBattle(state, fieldIdx);
     flipGate(state.field[bt.fieldIdx].card); await sleep(700);
     for (const e of bt.events) if (e.type === 'regain') {
       say(`${state.players[e.p].name} gets ${e.cards.map(c => c.name).join(', ')} back`); await sleep(1200);
@@ -438,11 +456,10 @@ async function rollStopped() {
       if (e.type === 'tie') { clearGate(b.card, b.sides); say(`Tie — nobody wins. ${b.card.name} goes back to ${state.players[e.returnedTo].name}.`); await sleep(1300); }
     }
   }
-  afterTurn();
 }
 async function captured(e, b) {
   const card = e.card;
-  const how = e.how === 'uncontested' ? ' (uncontested)' : e.how === 'knockout' ? ' by knockout' : '';
+  const how = e.how === 'uncontested' ? ' (uncontested)' : e.how === 'knockout' ? ' by knockout' : e.how === 'early victory' ? ' — Early Victory!' : '';
   say(`${state.players[e.p].name} wins ${card.name}${how}!`);
   clearGate(card, b && b.sides);
   hud(); await sleep(1300);
@@ -460,6 +477,137 @@ function afterTurn() {
 }
 function glide(tm, to, ms = 350) {
   return new Promise(res => { tm.glide = { from: tm.holder.position.clone(), to, t0: performance.now(), ms, res }; });
+}
+
+// ---------- Ability card button: cards used outside battle
+// 'pre' = before you throw, 'post' = after your Bakugan stops (stands or misses), before it opens / battles.
+let fieldPhase = null, postCtx = null, postResolve = null, pickWait = false;
+const promptOn = () => { try { return localStorage.getItem('marbles-prompt-abilities') !== '0'; } catch { return true; } };
+const setPrompt = on => { try { localStorage.setItem('marbles-prompt-abilities', on ? '1' : '0'); } catch {} };
+const fieldOpts = () => fieldPhase ? R.fieldCardOptions(state, fieldPhase, postCtx && postCtx.landing) : [];
+function refreshAbilityButton() {
+  const b = $('abtn'); if (!b || !state) return;
+  b.disabled = !fieldPhase;
+  b.classList.toggle('ready', fieldOpts().length > 0);
+}
+function openAbilityPanel() {
+  const p = state.turn, hand = state.players[p].abilityHand, opts = fieldOpts();
+  const when = fieldPhase === 'pre' ? 'before you throw' : fieldPhase === 'post' ? 'after your Bakugan stopped' : '';
+  $('apanel').hidden = false;
+  $('alist').innerHTML = `<div class="ahead">${state.players[p].name}: Ability cards ${when}</div>` +
+    (hand.length ? hand.map((c, i) => `<button class="chip ${opts.includes(i) ? '' : 'dim'}" data-a="${i}" style="--c:${ABILITY_COLOR[c.color]}" ${opts.includes(i) ? '' : 'disabled'}><b>${c.name}</b><span class="st">${c.text || ''}</span></button>`).join('')
+      : '<div class="ahead" style="font-weight:400">No Ability cards left.</div>');
+  $('aprompt').checked = promptOn();
+  $('aclose').textContent = fieldPhase === 'post' ? 'Continue' : 'Close';
+  $('alist').querySelectorAll('button[data-a]').forEach(b => b.onclick = () => useFieldCard(+b.dataset.a));
+}
+function closeAbilityPanel() {
+  $('apanel').hidden = true;
+  if (fieldPhase === 'post' && postResolve) { const r = postResolve; postResolve = null; r('continue'); }
+}
+async function useFieldCard(i) {
+  const p = state.turn, card = state.players[p].abilityHand[i];
+  $('apanel').hidden = true;
+  const phase = fieldPhase, landing = phase === 'post' ? postCtx.landing : null;
+  // find the card again at play time (the hand can change while the player is picking)
+  const play = target => { const r = R.playFieldCard(state, state.players[p].abilityHand.indexOf(card), phase, landing, target); flash(card.name); return r; };
+  const myCells = q => state.field.filter(f => f.toys.some(x => x.p === q)).map(f => f.cell);
+  const cellIdx = cell => state.field.findIndex(f => f.cell[0] === cell[0] && f.cell[1] === cell[1]);
+  switch (card.name) {
+    case 'Another Throw': play(); say('You get another throw after this one.'); break;
+    case 'Early Victory': play(); say('If this throw stands on an empty Gate card, you win it.'); break;
+    case 'Invulnerable': {
+      say('Tap the Gate card with your Bakugan to protect');
+      const glow = showSpots(myCells(p), p); const cell = await tapSpot(myCells(p)); clearSpots(glow);
+      const f = state.field[cellIdx(cell)], x = f.toys.find(y => y.p === p);
+      play({ t: x.t }); say(`${state.players[p].toys[x.t].name} can't be knocked off until your next turn.`); break;
+    }
+    case 'Surprise Attack': {
+      say('Tap your Gate card to battle on');
+      let glow = showSpots(myCells(p), p); const mine = await tapSpot(myCells(p)); clearSpots(glow);
+      say("Tap the opponent's Bakugan to pull in");
+      const theirCells = myCells(1 - p).filter(c => c[0] !== mine[0] || c[1] !== mine[1]);
+      if (!theirCells.length) { say('No other opponent Bakugan to pull in.'); break; }
+      glow = showSpots(theirCells, 1 - p); const theirs = await tapSpot(theirCells); clearSpots(glow);
+      const fi = cellIdx(theirs), ot = state.field[fi].toys.find(y => y.p !== p).t;
+      const r = play({ mine: cellIdx(mine), theirs: { t: ot, fieldIdx: fi } });
+      const ev = r.events.find(e => e.type === 'surprise');
+      busy = true; fieldPhase = null; refreshAbilityButton(); $('picker').classList.add('off');
+      say('Surprise Attack!'); await glide(toysMesh[1 - p][ot], standSpot(mine, ev.slot)); await sleep(400);
+      await runBattle(r.battle.fieldIdx);
+      return afterTurn();
+    }
+    case 'Second Chance': play(); if (postResolve) { const r = postResolve; postResolve = null; r('redo'); } return;
+    case 'Trickster': {
+      say('Pick the Bakugan to switch in');
+      const pl = state.players[p], others = pl.unused.filter(t => t !== postCtx.ball.t);
+      $('picker').classList.remove('off');
+      $('picker').innerHTML = others.map(t => `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[pl.toys[t].attr]}"><b>${pl.toys[t].name}</b><span>${pl.toys[t].g}G</span></button>`).join('');
+      pickWait = true;
+      const t2 = await new Promise(res => $('picker').querySelectorAll('button').forEach(b => b.onclick = () => res(+b.dataset.t)));
+      pickWait = false;
+      $('picker').classList.add('off');
+      play();
+      const b = postCtx.ball, old = b.tm, tm2 = toysMesh[p][t2];
+      tm2.holder.position.copy(old.holder.position); tm2.obj.quaternion.copy(UPRIGHT); tm2.holder.visible = true; setOpen(tm2, 0);
+      old.holder.visible = false; setOpen(old, 0);
+      b.tm = tm2; b.t = t2; inFlight = tm2;
+      say(`Switched to ${pl.toys[t2].name}!`);
+      break;
+    }
+    case 'Sleight of Hand': {
+      say('Pick one of your Gate cards to switch in');
+      const gh = state.players[p].gateHand;
+      $('picker').classList.remove('off'); $('picker').innerHTML = gh.map(gateChip).join('');
+      pickWait = true;
+      const gi = await new Promise(res => $('picker').querySelectorAll('button').forEach(b => b.onclick = () => res(+b.dataset.g)));
+      pickWait = false;
+      $('picker').classList.add('off');
+      const r = play({ gateIdx: gi, fieldIdx: landing.fieldIdx });
+      const e = r.events.find(x => x.type === 'gateSwapped');
+      removeGate(e.old); addGateMesh(e.card, p, state.field[e.fieldIdx].cell);
+      say(`${e.old.name} goes back to ${state.players[e.returnedTo].name}.`);
+      break;
+    }
+    case 'Road Trip': {
+      play();
+      const others = state.field.map((f, k) => k).filter(k => k !== landing.fieldIdx), k = others[Math.floor(Math.random() * others.length)];
+      say('Road Trip!');
+      const to = cellCenter(state.field[k].cell).setY(RADIUS);
+      await glide(postCtx.ball.tm, to, 600);
+      postCtx.ball.pos.copy(to); landing.fieldIdx = k;
+      break;
+    }
+  }
+  refreshAbilityButton();
+  if (fieldPhase === 'post') {            // keep the window open: more cards, or Continue
+    if (promptOn()) openAbilityPanel(); else showContinue();
+  }
+}
+// Shown in the bottom bar after a throw when prompts are off and a card could be used.
+function showContinue() {
+  $('picker').classList.remove('off');
+  $('picker').innerHTML = `<button class="chip skip" id="contBtn"><b>Continue ▶</b><span>or tap Ability cards first</span></button>`;
+  $('contBtn').onclick = () => { $('picker').classList.add('off'); if (postResolve) { const r = postResolve; postResolve = null; r('continue'); } };
+}
+async function postThrowCards(ball, stands) {
+  postCtx = { ball, stands, landing: { t: ball.t, fieldIdx: landingIndexAt(ball.pos) } };
+  fieldPhase = 'post'; refreshAbilityButton();
+  if (!fieldOpts().length) { fieldPhase = null; refreshAbilityButton(); return 'continue'; }
+  const done = new Promise(res => { postResolve = res; });
+  if (promptOn()) openAbilityPanel(); else { say('Your Bakugan stopped — use an Ability card?'); showContinue(); }
+  const how = await done;
+  $('apanel').hidden = true; $('picker').classList.add('off');
+  fieldPhase = null; refreshAbilityButton();
+  if (how === 'redo') {
+    // Second Chance: everything goes back to where it was; throw again
+    for (const x of snapshot.toys) { x.m.holder.position.copy(x.pos); x.m.obj.quaternion.copy(x.q); x.m.holder.visible = x.vis; }
+    inFlight = null; busy = false; say('Second Chance — throw again!');
+    $('picker').classList.remove('off'); showPicker(); select(snapshot.t);
+    return 'redo';
+  }
+  ball.pos.copy(ball.tm.holder.position);
+  return 'continue';
 }
 
 // ---------- battle overlay with the count-up
@@ -633,7 +781,14 @@ renderer.setAnimationLoop(() => {
 });
 
 // ---------- setup: teams are picked on the setup screen (setup.js)
+function wireAbilityButton() {
+  $('abtn').onclick = () => { if (fieldPhase) openAbilityPanel(); };
+  $('aclose').onclick = closeAbilityPanel;
+  $('aprompt').onchange = e => setPrompt(e.target.checked);
+}
+
 async function start() {
+  wireAbilityButton();
   try { pack = await Pack.fromDevice(); } catch (e) { pack = null; }
   if (!pack) { $('loading').textContent = 'No asset pack on this device yet. Go back and load it first.'; return; }
   $('loading').textContent = 'Loading arena…';
@@ -650,7 +805,7 @@ async function start() {
   const { players, first } = await setupTeams(cat, pack);
   $('loading').hidden = false;
   state = R.newMatch(players, { first });
-  $('loading').textContent = 'Loading toys…';
+  $('loading').textContent = 'Loading Bakugan…';
   for (let p = 0; p < 2; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
   cameraFor(first); camera.position.copy(camGoal);
   $('loading').hidden = true;
@@ -670,7 +825,12 @@ window.MARBLES = {
   },
   select, get busy() { return busy; },
   // tap a choice in the bottom bar (Gate card index, or -1 = Skip) / tap a spot on the mat
-  get choosing() { return spotTap ? 'spot' : gateResolve ? 'gate' : null; },
+  get choosing() { return pickWait ? 'pick' : spotTap ? 'spot' : gateResolve ? 'gate' : null; },
+  get fieldPhase() { return fieldPhase; },
+  get fieldOptions() { return fieldOpts(); },
+  useFieldCard: i => useFieldCard(i),
+  giveCard: (p, name) => { const c = pack.catalog.cards.find(x => x.name === name); if (c) state.players[p].abilityHand.push(c); return !!c; },
+  closePanel: () => closeAbilityPanel(),
   pickGate: i => { const b = $('picker').querySelector(`[data-g="${i}"]`); if (b) b.click(); },
   get abilityChoices() { return abilityResolve ? [...$('bplay').querySelectorAll('button')].map(b => +b.dataset.a) : null; },
   playAbility: i => { const b = $('bplay').querySelector(`[data-a="${i}"]`); if (b) b.click(); },

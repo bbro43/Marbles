@@ -38,6 +38,7 @@
 
   <div class="menu">
     <button class="btn" id="btnBattle" disabled>Battle <small>2 players, this device — pick your teams</small></button>
+      <button class="btn" id="btnPrompt">Prompt Ability Cards: <span id="promptState">On</span> <small>ask before and after each throw</small></button>
     <button class="btn" id="btnChars" disabled>Characters <small>later</small></button>
     <button class="btn" id="btnShop" disabled>Shop <small>later</small></button>
   </div>
@@ -69,7 +70,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 24;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 25;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null };
 
 async function openPack(blob) {
@@ -111,6 +112,10 @@ async function checkUpdate(manual) {
   } catch (err) { $('msg').textContent = err.message; }
 }
 $('btnUpdate').addEventListener('click', () => checkUpdate(true));
+const promptGet = () => { try { return localStorage.getItem('marbles-prompt-abilities') !== '0'; } catch { return true; } };
+const promptShow = () => { $('promptState').textContent = promptGet() ? 'On' : 'Off'; };
+$('btnPrompt').addEventListener('click', () => { try { localStorage.setItem('marbles-prompt-abilities', promptGet() ? '0' : '1'); } catch {} promptShow(); });
+promptShow();
 $('btnBattle').addEventListener('click', () => { location.href = 'battle.html'; });
 
 (async () => {

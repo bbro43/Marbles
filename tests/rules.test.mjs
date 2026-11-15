@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff, placeCells, placeGate, moveOptions, openingCell,
   startBattle, abilityOptions, playAbility, passAbility, abilityDone, isCoded } from '../js/rules.js';
 import { EFFECTS } from '../js/abilities.js';
+import { fieldCardOptions, playFieldCard } from '../js/rules.js';
 
 const gate = (name, bonus) => ({ name, bonus });
 const toy = (name, attr, g) => ({ name, attr, g });
@@ -265,9 +266,37 @@ test('mini-game cards: Time Breaker, Double Input, Rewind, Level Field, No Backs
   assert.deepEqual(abilityOptions(s, b), []);
 });
 
+test('cards outside battle: Another Throw, Early Victory, Sleight of Hand, Surprise Attack, Invulnerable', () => {
+  const mk = abilities => newMatch([
+    { name: 'A', toys: [toy('a', 'pyrus', 300), toy('a2', 'pyrus', 300), toy('a3', 'pyrus', 300)], gates: [gate('Ga', {}), gate('Ga2', { pyrus: 50 })], abilities },
+    { name: 'B', toys: [toy('b', 'haos', 350), toy('b2', 'haos', 350)], gates: [gate('Gb', {})] },
+  ]);
+  // Another Throw: A goes again after the throw
+  let s = mk([ab('Another Throw', {}, 'red')]); startTurn(s);
+  assert.deepEqual(fieldCardOptions(s, 'pre'), [0]); playFieldCard(s, 0, 'pre');
+  let r = land(s, 0, null); assert.equal(s.turn, 0); assert.ok(r.events.some(e => e.type === 'extraThrow'));
+  land(s, 0, null); assert.equal(s.turn, 1);
+  // Early Victory: standing on an empty card wins it
+  s = mk([ab('Early Victory', {}, 'green')]); startTurn(s); playFieldCard(s, 0, 'pre');
+  r = land(s, 0, 1); assert.ok(r.events.some(e => e.type === 'capture' && e.how === 'early victory'));
+  // Sleight of Hand: on B's card, swap in one of A's Gate cards
+  s = mk([ab('Sleight of Hand', {}, 'red')]); startTurn(s);
+  const landing = { t: 0, fieldIdx: 1 };
+  assert.deepEqual(fieldCardOptions(s, 'post', landing), [0]);
+  playFieldCard(s, 0, 'post', landing, { gateIdx: 0, fieldIdx: 1 });
+  assert.equal(s.field[1].owner, 0); assert.equal(s.players[1].gateHand.length, 1);
+  // Surprise Attack + Invulnerable
+  s = mk([ab('Surprise Attack', {}, 'green'), ab('Invulnerable', {}, 'green')]); startTurn(s);
+  land(s, 0, 0); startTurn(s); land(s, 0, 1); startTurn(s);          // A on card 0, B on card 1
+  r = playFieldCard(s, 0, 'pre', null, { mine: 0, theirs: { t: 0, fieldIdx: 1 } });
+  assert.equal(r.battle.fieldIdx, 0); assert.equal(s.field[0].toys.length, 2);
+  playFieldCard(s, 0, 'pre', null, { t: 0 });
+  assert.deepEqual(knockOff(s, [{ p: 0, t: 0, card: s.field[0].card }]), []);
+});
+
 test('every coded card has a known kind', () => {
   for (const [name, e] of Object.entries(EFFECTS)) assert.ok(['battle', 'throw'].includes(e.when), name);
-  assert.ok(isCoded({ name: 'Blaze', color: 'blue', type: 'ability' })); assert.ok(!isCoded({ name: 'Another Throw', color: 'red', type: 'ability' }));
+  assert.ok(isCoded({ name: 'Blaze', color: 'blue', type: 'ability' })); assert.ok(isCoded({ name: 'Another Throw', color: 'red', type: 'ability' })); assert.ok(!isCoded({ name: 'Nope', color: 'red', type: 'ability' }));
 });
 
 console.log(`\n${n} tests passed`);

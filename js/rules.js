@@ -11,7 +11,7 @@
 //              so the starting rectangle is the four cells [-1|0, -1|0] around the center.
 //   captured = Gate cards you've won (3 wins the match)
 
-import { effectOf, gateEffectOf } from './abilities.js';
+import { effectOf, gateEffectOf, fieldEffectOf } from './abilities.js';
 export { isCoded } from './abilities.js';
 
 export const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
@@ -66,6 +66,7 @@ export function openingPlayers(s) {
 export function startTurn(s, pickGate = () => 0) {
   const ev = [];
   s.placed = false;
+  if (s.invulnerable && s.invulnerable.p === s.turn) s.invulnerable = null;   // Invulnerable lasts until its owner's next turn
   for (const p of openingPlayers(s)) {
     const hand = s.players[p].gateHand;
     const card = hand.splice(pickGate(p, hand), 1)[0];
@@ -137,6 +138,14 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
   me.unused.splice(i, 1);
   me.used.push(t);
   let g = s.field[fieldIdx];
+  // Early Victory: standing on an empty Gate card wins it right away
+  if (s.earlyVictory === p && g.toys.length === 0) {
+    s.earlyVictory = null;
+    g.toys.push({ p, t });
+    ev.push({ type: 'stand', p, t, fieldIdx, cell: g.cell, slot: 0 });
+    ev.push(...capture(s, p, fieldIdx, 'early victory'));
+    return endTurn(s, ev);
+  }
   const mine = g.toys.filter(x => x.p === p);
   const theirs = g.toys.filter(x => x.p !== p);
 
@@ -176,6 +185,7 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
 export function knockOff(s, knocked) {
   const ev = [];
   for (const k of knocked) {
+    if (s.invulnerable && s.invulnerable.p === k.p && s.invulnerable.t === k.t) continue;   // Invulnerable
     const idx = s.field.findIndex(f => f.card === k.card);
     if (idx < 0) continue;                                   // card already taken by an earlier knockout
     const g = s.field[idx];
@@ -187,6 +197,45 @@ export function knockOff(s, knocked) {
     }
   }
   return ev;
+}
+
+// ---------- Ability cards outside battle (the Ability card button)
+// phase 'pre' (before the throw) or 'post' (after the Bakugan stops, before it stands/battles).
+export function fieldCardOptions(s, phase, landing, p = s.turn) {
+  const hand = s.players[p].abilityHand;
+  return hand.map((c, i) => i).filter(i => {
+    const e = fieldEffectOf(hand[i]);
+    return e && e.when === phase && e.can({ s, p, landing });
+  });
+}
+// Plays one. target depends on the card: Invulnerable {t}; Surprise Attack {mine: fieldIdx, theirs: {t, fieldIdx}};
+// Trickster {t}; Sleight of Hand {gateIdx, fieldIdx}. Returns events; Surprise Attack returns { battle }.
+export function playFieldCard(s, handIdx, phase, landing, target = {}, p = s.turn) {
+  if (!fieldCardOptions(s, phase, landing, p).includes(handIdx)) throw new Error('cannot play that card now');
+  const card = s.players[p].abilityHand.splice(handIdx, 1)[0];
+  s.players[p].abilityUsed.push(card);
+  const ev = [{ type: 'ability', p, card, when: phase }];
+  switch (card.name) {
+    case 'Another Throw': s.extraThrow = p; break;
+    case 'Early Victory': s.earlyVictory = p; break;
+    case 'Invulnerable': s.invulnerable = { p, t: target.t }; break;
+    case 'Sleight of Hand': {
+      const f = s.field[target.fieldIdx], mine = s.players[p].gateHand.splice(target.gateIdx, 1)[0];
+      s.players[f.owner].gateHand.push(f.card);
+      ev.push({ type: 'gateSwapped', old: f.card, card: mine, fieldIdx: target.fieldIdx, returnedTo: f.owner });
+      f.card = mine; f.owner = p;
+      break;
+    }
+    case 'Surprise Attack': {
+      // the opponent's Bakugan joins yours on your card -> battle there
+      const from = s.field[target.theirs.fieldIdx], to = s.field[target.mine];
+      from.toys = from.toys.filter(x => !(x.p !== p && x.t === target.theirs.t));
+      to.toys.push({ p: 1 - p, t: target.theirs.t });
+      ev.push({ type: 'surprise', fieldIdx: target.mine, t: target.theirs.t, slot: to.toys.length - 1 });
+      return { events: ev, battle: { fieldIdx: target.mine } };
+    }
+  }
+  return { events: ev, battle: null };
 }
 
 // ---------- Ability cards
@@ -358,6 +407,12 @@ function capture(s, p, fieldIdx, how) {
 
 function endTurn(s, ev) {
   s.pending = [];
+  s.earlyVictory = null;
+  if (s.winner === null && s.extraThrow === s.turn) {        // Another Throw: same player goes again
+    s.extraThrow = null;
+    ev.push({ type: 'extraThrow', p: s.turn });
+    return { events: ev, battle: null };
+  }
   if (s.winner === null) {
     // If both players are out of Gate cards and the field is empty, the match can't continue:
     // most captured wins; equal = draw.

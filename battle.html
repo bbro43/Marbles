@@ -20,6 +20,11 @@
   .pl.active { border-color:var(--pc); box-shadow:0 0 0 2px var(--pc); }
   .pl .n { font-weight:700; } .dot { display:inline-block; width:12px; height:12px; border-radius:50%; border:2px solid #d4af37; margin-right:4px; }
   .dot.on { background:#d4af37; }
+  #abtn { position:absolute; bottom:10px; right:10px; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:8px 12px; font:inherit; }
+  #abtn:disabled { opacity:.4; } #abtn.ready { border-color:#ffd54a; box-shadow:0 0 0 2px #ffd54a55; }
+  #alist { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; } #alist .ahead { font-weight:700; }
+  #alist .chip { text-align:left; } #alist .chip.dim { opacity:.4; }
+  .aprompt { display:flex; gap:8px; align-items:center; margin:6px 0 10px; }
   #back { position:absolute; bottom:10px; left:10px; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:8px 12px; font:inherit; text-decoration:none; }
   #msg { position:absolute; left:0; right:0; top:64px; text-align:center; font-weight:600; text-shadow:0 2px 6px #000; padding:0 12px; pointer-events:none; }
   #flash { position:absolute; left:0; right:0; top:38%; text-align:center; font-size:54px; font-weight:900; letter-spacing:2px; color:#ffd54a;
@@ -66,6 +71,12 @@
     <div id="msg"></div>
     <div id="flash"></div>
     <a id="back" href="./">Home</a>
+    <button id="abtn" disabled>Ability cards</button>
+    <div class="overlay" id="apanel" hidden><div class="box">
+      <div id="alist"></div>
+      <label class="aprompt"><input type="checkbox" id="aprompt"> Prompt Ability Cards</label>
+      <button class="btn" id="aclose">Close</button>
+    </div></div>
     <div id="loading">Loading…</div>
     <div class="overlay" id="battle" hidden><div class="box">
       <div id="bcard"></div><div id="bbody"></div><div id="bplay"></div>

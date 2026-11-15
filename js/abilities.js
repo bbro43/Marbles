@@ -172,10 +172,26 @@ export const GATE_EFFECTS = {
 // Gold cards: the pictured toy gets the Gate bonus twice
 const goldEffect = card => ({ gate: c => { for (const sd of c.sides) if (toyMatches(sd.name, card.name)) sd.gateMult *= 2; } });
 
+// ---------- Cards used outside battle, from the Ability card button
+// when: 'pre'  — before you throw;  'post' — after your Bakugan stops (stands or misses), before anything else happens.
+// can(c): c = { s, p, landing } where landing = { t, fieldIdx } for 'post'. need = what the player has to pick.
+const hasStanding = (s, p) => s.field.some(f => f.toys.some(x => x.p === p));
+export const FIELD_EFFECTS = {
+  'Another Throw': { when: 'pre', can: c => c.s.players[c.p].unused.length >= 2 },
+  'Early Victory': { when: 'pre', can: () => true },
+  'Invulnerable': { when: 'pre', can: c => hasStanding(c.s, c.p), need: 'myStanding' },
+  'Surprise Attack': { when: 'pre', can: c => hasStanding(c.s, c.p) && hasStanding(c.s, 1 - c.p), need: 'surprise' },
+  'Second Chance': { when: 'post', can: () => true },
+  'Trickster': { when: 'post', can: c => c.landing.fieldIdx !== null && c.s.players[c.p].unused.length >= 2, need: 'myUnused' },
+  'Sleight of Hand': { when: 'post', can: c => c.landing.fieldIdx !== null && c.s.field[c.landing.fieldIdx].owner !== c.p && c.s.players[c.p].gateHand.length > 0, need: 'myGate' },
+  'Road Trip': { when: 'post', can: c => c.landing.fieldIdx !== null && c.s.field.length > 1 },
+};
+export const fieldEffectOf = card => FIELD_EFFECTS[card.name] || null;
+
 export const effectOf = card => EFFECTS[card.name + '|' + card.color] || EFFECTS[card.name] || null;
 export function gateEffectOf(card) {
   if (card.color === 'gold') return goldEffect(card);
   return GATE_EFFECTS[card.name] || null;
 }
 // Gate cards always work (their bonus counts); an Ability card counts as coded only if it has an effect.
-export const isCoded = card => card.type === 'gate' || !!effectOf(card);
+export const isCoded = card => card.type === 'gate' || !!effectOf(card) || !!fieldEffectOf(card);
