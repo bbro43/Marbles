@@ -49,9 +49,9 @@ const PARTNERS = {
   christopher: ['Juggernoid'], player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
   spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico'], volt: ['Brontes'], shadow: ['Hades'], lync: ['Altair'],
 };
-// New Vestroia characters' Traps (only they get one). Volt, Shadow and Lync have no Trap we can use.
+// New Vestroia characters' Traps (only they get one). Volt, Shadow and Lync's are stand-ins from the Traps we have.
 const TRAPS = { nv_dan: 'Scorpion', nv_shun: 'Hylash', nv_marucho: 'Tripod Epsilon', mira: 'Baliton', ace: 'Falcon Fly', baron: 'Piercian',
-  spectra: 'Metalfencer', gus: 'Hexados', mylene: 'Tripod Theta' };
+  spectra: 'Metalfencer', gus: 'Hexados', mylene: 'Tripod Theta', volt: 'Fencer', shadow: 'Pythantus', lync: 'Wired' };
 const TRAP_ATTRS = { easy: 2, normal: 3, hard: 4 };
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));

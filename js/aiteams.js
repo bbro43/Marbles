@@ -3891,6 +3891,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt08",
+    "name": "Fencer",
+    "color": "haos",
+    "attrs": [
+     "haos",
+     "pyrus"
+    ]
    }
   },
   "normal": {
@@ -3940,6 +3949,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt08",
+    "name": "Fencer",
+    "color": "haos",
+    "attrs": [
+     "haos",
+     "subterra",
+     "darkus"
+    ]
    }
   },
   "hard": {
@@ -3989,6 +4008,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt08",
+    "name": "Fencer",
+    "color": "haos",
+    "attrs": [
+     "haos",
+     "darkus",
+     "subterra",
+     "ventus"
+    ]
    }
   }
  },
@@ -4221,6 +4251,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt10",
+    "name": "Pythantus",
+    "color": "darkus",
+    "attrs": [
+     "darkus",
+     "haos"
+    ]
    }
   },
   "normal": {
@@ -4270,6 +4309,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt10",
+    "name": "Pythantus",
+    "color": "darkus",
+    "attrs": [
+     "darkus",
+     "haos",
+     "ventus"
+    ]
    }
   },
   "hard": {
@@ -4319,6 +4368,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt10",
+    "name": "Pythantus",
+    "color": "darkus",
+    "attrs": [
+     "darkus",
+     "subterra",
+     "pyrus",
+     "ventus"
+    ]
    }
   }
  },
@@ -4371,6 +4431,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt11",
+    "name": "Wired",
+    "color": "ventus",
+    "attrs": [
+     "ventus",
+     "haos"
+    ]
    }
   },
   "normal": {
@@ -4420,6 +4489,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt11",
+    "name": "Wired",
+    "color": "ventus",
+    "attrs": [
+     "ventus",
+     "aquos",
+     "subterra"
+    ]
    }
   },
   "hard": {
@@ -4469,6 +4548,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt11",
+    "name": "Wired",
+    "color": "ventus",
+    "attrs": [
+     "ventus",
+     "aquos",
+     "pyrus",
+     "haos"
+    ]
    }
   }
  }
