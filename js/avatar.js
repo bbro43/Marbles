@@ -17,14 +17,17 @@ export const PARTS = {
   shoes:   { styles: 4, colors: 6, label: 'Shoes' },
 };
 export const SKIN_TONES = 5;
+// the gauntlet's color is an attribute: textures gauntlet_<attribute> (made in scripts/menuart.py)
+export const BAND = { pyrus: 0, aquos: 1, subterra: 2, haos: 3, darkus: 4, ventus: 5 };
 // a starting look (Liam-like: brown hair, black top, blue jeans)
 export const DEFAULT_LOOK = { hair: [0, 0], cap: [-1, 0], glasses: [-1, 0], eye: [0, 0], eyeblow: [0, 0], facial: [0, 0],
-  top: [1, 1], down: [0, 2], shoes: [0, 1], skin: 0 };
+  top: [1, 1], down: [0, 2], shoes: [0, 1], skin: 0, band: 'pyrus' };
 const two = n => String(n).padStart(2, '0');
 export function randomLook() {
   const r = n => Math.floor(Math.random() * n), L = { skin: r(SKIN_TONES) };
   for (const [k, p] of Object.entries(PARTS)) L[k] = [p.optional && Math.random() < 0.6 ? -1 : r(p.styles), r(p.colors)];
   L.eyeblow[1] = L.hair[1];
+  L.band = Object.keys(BAND)[r(6)];
   return L;
 }
 
@@ -37,6 +40,7 @@ function models(L) {
 }
 // the texture a material should use, given the texture it was built with
 function variantFor(texName, L) {
+  if (texName === 'gauntlet') return L.band && L.band !== 'pyrus' ? `gauntlet_${L.band}` : null;   // the gauntlet's attribute color
   const m = /^([a-z]+)_(\d\d)_(\d\d)$/.exec(texName || ''); if (!m) return null;
   const kind = m[1], s = m[2];
   switch (kind) {
@@ -50,7 +54,7 @@ function variantFor(texName, L) {
     case 'facial': return `facial_${two(L.facial[0])}_${two(Math.min(4, L.facial[1]))}`;
     case 'skin': return `skin_00_${two(Math.min(4, L.skin))}`;
     case 'top': return `top_${s}_${two(L.top[1])}`;
-    case 'band': return `band_00_${two(L.top[1])}`;
+    case 'band': return `band_00_${two(L.top[1])}`;   // the gloves follow the top's color
     case 'down': return `down_${s}_${two(L.down[1])}`;
     case 'shoes': return `shoes_${s}_${two(L.shoes[1])}`;
   }

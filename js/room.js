@@ -132,10 +132,10 @@ function room() {
 }
 
 // Closet: the character creator
-const CAT = { Head: ['hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top'], 'Lower body': ['down', 'shoes'] };
+const CAT = { Head: ['hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top', 'band'], 'Lower body': ['down', 'shoes'] };
 const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: 'top', down: 'bottom', shoes: 'shoes', skin: 'skin' };
-const LABEL = { hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
-const VIEW_OF = { hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
+const LABEL = { band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
+const VIEW_OF = { band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
 let look = null, editCat = null, editPart = null, isNew = false;
 function closet(start) {
   const p = prof();
@@ -156,6 +156,13 @@ function closet(start) {
     bar(editCat);
     right(`<div class="pill" style="left:138px;top:22px;width:112px">${editCat}</div>`);
     CAT[editCat].forEach((k, i) => right(`<div class="pill tap" data-part="${k}" style="left:144px;top:${48 + i * 22}px;width:106px">${LABEL[k]}</div>`));
+  } else if (editPart === 'band') {
+    // the gauntlet: one color per attribute
+    bar('Gauntlet');
+    right(`<div class="pill" style="left:138px;top:20px;width:112px">Gauntlet</div><div class="box" style="left:136px;top:40px;width:116px;height:128px"></div>`);
+    const cur = look.band || 'pyrus';
+    ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'].forEach((a, i) => right(`<div class="tap ${cur === a ? 'sel' : ''}" data-band="${a}" style="position:absolute;left:${142 + (i % 3) * 36}px;top:${48 + Math.floor(i / 3) * 52}px;width:32px;height:46px;text-align:center;border-radius:4px;${cur === a ? 'outline:2px solid #ff8a1c;' : ''}">
+      <img src="${art('attr_' + a)}" style="position:static;width:24px;height:32px" alt=""><div style="font:800 6.5px/9px system-ui">${a[0].toUpperCase() + a.slice(1)}</div></div>`));
   } else {
     const k = editPart, def = PARTS[k];
     bar(LABEL[k]);
@@ -178,6 +185,7 @@ function closet(start) {
     editCat = b.dataset.cat; go('closet');
   });
   $('bot').querySelectorAll('[data-part]').forEach(b => b.onclick = () => { editPart = b.dataset.part; go('closet'); });
+  $('bot').querySelectorAll('[data-band]').forEach(b => b.onclick = () => { look.band = b.dataset.band; go('closet'); });
   $('bot').querySelectorAll('[data-style]').forEach(b => b.onclick = () => {
     const v = +b.dataset.style; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
     if (editPart === 'eye') look.eyeblow[0] = v;
@@ -386,7 +394,7 @@ function starter(sel = null) {
   bar('Your starter deck is 3 Bakugan and 6 cards of one attribute. Buy more in the Shop.');
   $('bot').querySelectorAll('[data-a]').forEach(b => b.onclick = () => starter(b.dataset.a));
   if ($('sOk')) $('sOk').onclick = () => {
-    P.update(act(), q => { P.ensureShop(q); q.deck = d; for (const x of d.toys) q.owned.toys[P.key(x.id, x.attr)] ||= { g: 0, st: {} };
+    P.update(act(), q => { P.ensureShop(q); q.deck = d; if (q.look && !q.look.band) q.look.band = sel; for (const x of d.toys) q.owned.toys[P.key(x.id, x.attr)] ||= { g: 0, st: {} };
       q.owned.cards = [...new Set([...q.owned.cards, ...Object.values(d.gates), ...Object.values(d.abilities)])]; });
     go('room');
   };
