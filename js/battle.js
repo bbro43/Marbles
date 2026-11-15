@@ -89,17 +89,27 @@ async function loadToy(spec) {
     obj.traverse(o => { if (o.isMesh && o.material.map) { tex.wrapS = o.material.map.wrapS; tex.wrapT = o.material.map.wrapT; o.material.map = tex; o.material.needsUpdate = true; } });
   }
   const holder = new THREE.Group(); holder.add(obj); holder.visible = false; scene.add(holder);
-  const t = { holder, obj, open: 0, anim: null };
+  const t = { holder, obj, open: 0, anim: null, from: 0, to: 0.999 };
   if (g.animations.length) {
     t.mixer = new THREE.AnimationMixer(obj); t.action = t.mixer.clipAction(g.animations[0]);
     t.action.play(); t.action.paused = true; t.dur = g.animations[0].duration;
+  }
+  // New Vestroia (DotC) models are about 30x smaller, sit on their base, and their animation first rolls the
+  // ball in, then opens it (closed at ~22% of the clip, open from ~46%). Size and center them like the others.
+  if ((spec.id || '').startsWith('dc_') && t.action) {
+    t.from = 0.22; t.to = 0.46;
+    obj.scale.setScalar(1); setOpen(t, 0);
+    obj.updateMatrixWorld(true); obj.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
+    const box = new THREE.Box3().setFromObject(obj, true), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+    const k = TOY_D / Math.max(size.x, size.z);
+    obj.scale.setScalar(k); obj.position.set(-c.x * k, -c.y * k, -c.z * k);
   }
   setOpen(t, 0);
   return t;
 }
 function setOpen(t, v) {
   t.open = v;
-  if (t.action) { t.action.time = v * t.dur * 0.999; t.mixer.update(0); }
+  if (t.action) { t.action.time = (t.from + v * (t.to - t.from)) * t.dur; t.mixer.update(0); }
 }
 function animateOpen(t, to, ms = 450) {
   return new Promise(res => { t.anim = { from: t.open, to, t0: performance.now(), ms, res }; });
