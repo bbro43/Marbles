@@ -148,13 +148,13 @@ export async function setupTeams(cat, pack, picked = null) {
   }
 
   return await new Promise(resolve => {
-    const key = i => picked && picked[i] ? 'c-' + picked[i].id : i;
+    const key = i => picked && picked[i] && !picked[i].custom ? 'c-' + picked[i].id : i;
     const teams = [0, 1].map(i => {
       const c = picked && picked[i];
       // a computer player brings its own team (js/aiteams.js)
       if (c && c.team) return { name: c.name, fixed: true, toys: c.team.toys.map(x => ({ id: x.id, attr: x.attr })),
         gates: Object.fromEntries(GATE_COLORS.map(k => [k, c.team.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, c.team.abilities[k].id])) };
-      const t = restore(lastTeam(key(i)), i); if (c) t.name = c.name; return t;
+      const t = restore(lastTeam(key(i)), i); if (c && !c.custom) t.name = c.name; return t;
     });
     const skipFixed = (w, dir) => { while (w >= 0 && w < 2 && teams[w].fixed) w += dir; return w; };
     let who = skipFixed(0, 1), gateTab = 'gold', abTab = 'red', search = '';
@@ -192,7 +192,7 @@ export async function setupTeams(cat, pack, picked = null) {
       const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${chosen ? cardPic(cardById.get(chosen)) : ''}${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}</small></button>`;
       root.innerHTML = `
         <h2>${esc(t.name)}: set up your team</h2>
-        ${picked ? '' : `<div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>`}
+        ${picked && picked[who] && !picked[who].custom ? '' : `<div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>`}
         <div class="filters">
           <input type="search" id="ssearch" placeholder="Search Bakugan and cards" value="${esc(search)}">
           <div class="row">${ALL.map(a => `<button class="fchip ${filt.has(a) ? 'on' : ''}" data-f="${a}" style="--c:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>

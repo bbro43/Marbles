@@ -559,9 +559,9 @@ async function runBattle(fieldIdx) {
     for (const e of bt.events) if (e.type === 'regain') {
       say(`${state.players[e.p].name} gets ${e.cards.map(c => c.name).join(', ')} back`); await sleep(1200);
     }
-    await abilityPhase(bt);
+    const before = await abilityPhase(bt);
     const b = R.computeBattle(state, bt);
-    await showBattle(b);
+    await showBattle(b, before);
     const ev = R.resolveBattle(state, b);
     for (const e of ev) {
       if (e.type === 'capture') await captured(e, b);
@@ -770,13 +770,37 @@ let abilityResolve = null;
 async function abilityPhase(bt) {
   const o = $('battle'); o.hidden = false; $('bnext').hidden = true;
   const g = state.field[bt.fieldIdx];
-  $('bcard').textContent = `Gate card: ${g.card.name}`;
+  // 1. the Gate card that just flipped, with its picture
+  let pic = ''; try { if (g.card.art) pic = await pack.url(g.card.art); } catch {}
+  $('bcard').innerHTML = (pic ? `<img class="gpic" src="${pic}" alt="">` : '') + `<div>Gate card: ${g.card.name}</div>`;
+  // 2. each Bakugan's base G-Power, then the Gate card bonus counts in
+  const c0 = R.computeBattle(state, { ...bt, plays: [] });
+  const head = (sd, i, total) => `<div class="side" id="side${i}"><div class="who">${state.players[sd.p].name}</div>
+      <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
+      <div class="g" id="g${i}">${total}G</div><div class="steps" id="steps${i}"></div></div>`;
+  $('bplay').innerHTML = '';
+  $('bbody').innerHTML = head(c0.sides[0], 0, c0.sides[0].start) + `<div class="vs">vs</div>` + head(c0.sides[1], 1, c0.sides[1].start);
+  await sleep(900);
+  for (let i = 0; i < 2; i++) {
+    const sd = c0.sides[i];
+    for (const st of sd.steps) {
+      const line = document.createElement('div'); line.className = 'step';
+      line.textContent = `${st.label.replace(/^Gate card: .*/, 'Gate bonus')}  ${st.amount >= 0 ? '+' : ''}${st.amount}`;
+      $('steps' + i).append(line);
+      await countUp($('g' + i), st.from, st.to); await sleep(200);
+    }
+  }
+  await sleep(600);
+  const before = Object.fromEntries(c0.sides.map(sd => [sd.p, sd.total]));
+  before.labels = Object.fromEntries(c0.sides.map(sd => [sd.p, sd.steps.map(st => st.label)]));
+  const gateLines = Object.fromEntries(c0.sides.map(sd => [sd.p, sd.steps.map(st => `${st.label.replace(/^Gate card: .*/, 'Gate bonus')}  ${st.amount >= 0 ? '+' : ''}${st.amount}`)]));
+  // 3. then the Ability cards, back and forth
   const preview = () => {
-    const c = R.computeBattle(state, bt);    // shows attributes after any changes
+    const c = R.computeBattle(state, bt);    // shows attributes and totals after any changes
     const col = (sd, i) => `<div class="side"><div class="who">${state.players[sd.p].name}</div>
       <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
-      <div class="g">${sd.start}G</div>
-      <div class="steps">${bt.plays.filter(x => x.p === sd.p).map(x => `<div class="step">${x.card.name}</div>`).join('')}</div></div>`;
+      <div class="g">${bt.plays.length ? sd.total : before[sd.p]}G</div>
+      <div class="steps">${gateLines[sd.p].map(t => `<div class="step">${t}</div>`).join('')}${bt.plays.filter(x => x.p === sd.p).map(x => `<div class="step">${x.card.name}</div>`).join('')}</div></div>`;
     $('bbody').innerHTML = col(c.sides[0], 0) + `<div class="vs">vs</div>` + col(c.sides[1], 1);
   };
   while (!R.abilityDone(bt)) {
@@ -808,29 +832,37 @@ async function abilityPhase(bt) {
     else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(500); }
   }
   $('bplay').innerHTML = '';
+  return before;
 }
 
-async function showBattle(b) {
+// The result: totals already shown (base + Gate bonus), the Ability cards played, then the final count.
+async function showBattle(b, before = null) {
   const o = $('battle'); o.hidden = false;
   const col = (sd, i) => `<div class="side" id="side${i}">
       <div class="who">${state.players[sd.p].name}</div>
       <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
-      <div class="g" id="g${i}">${sd.start}G</div>
+      <div class="g" id="g${i}">${before ? before[sd.p] : sd.start}G</div>
       <div class="steps" id="steps${i}"></div>
       <div class="winner" id="win${i}"></div></div>`;
   $('bbody').innerHTML = col(b.sides[0], 0) + `<div class="vs" id="vs">vs</div>` + col(b.sides[1], 1);
-  $('bcard').textContent = `Gate card: ${b.card.name}`;
+  if (!before) $('bcard').textContent = `Gate card: ${b.card.name}`;
   $('bnext').hidden = true;
   await sleep(500);
   for (let i = 0; i < 2; i++) {
-    for (const st of b.sides[i].steps) {
+    const sd = b.sides[i], counted = before ? [...before.labels[sd.p]] : [];
+    const gateStep = st => { const k = counted.indexOf(st.label); if (k < 0) return false; counted.splice(k, 1); return true; };
+    let shown = before ? before[sd.p] : sd.start;
+    for (const st of sd.steps) {
       const line = document.createElement('div'); line.className = 'step';
       const amt = st.amount ? '  ' + (st.amount > 0 ? '+' : '') + st.amount : '';
-      line.textContent = st.note ? `${st.label} (${st.note})${amt}` : `${st.label}${amt || '  +0'}`;
+      const label = st.label.replace(/^Gate card: .*/, 'Gate bonus');
+      line.textContent = st.note ? `${label} (${st.note})${amt}` : `${label}${amt || '  +0'}`;
       $('steps' + i).append(line);
-      await countUp($('g' + i), st.from, st.to);
+      if (before && gateStep(st)) continue;          // already counted in before the Ability cards
+      await countUp($('g' + i), shown, shown + st.amount); shown += st.amount;
       await sleep(250);
     }
+    if (shown !== sd.total) await countUp($('g' + i), shown, sd.total);   // the Gate bonus changed after Ability cards
   }
   const [x, y] = b.sides.map(s => s.total);
   $('vs').textContent = x > y ? '>' : x < y ? '<' : '=';
@@ -979,7 +1011,12 @@ async function start() {
   $('loading').hidden = true;
   let match = null; try { match = JSON.parse(sessionStorage.getItem('marbles-match') || 'null'); } catch {}
   const picked = match && match.players && match.players.length === 2 ? match.players : null;
-  if (picked) picked.forEach((c, p) => { if (c.ai && AI_TEAMS[c.id]) { aiLevel[p] = c.ai; c.team = AI_TEAMS[c.id][c.ai]; } });
+  // a character comes with its deck at the level picked (Easy / Normal / Hard); "You" builds your own
+  if (picked) picked.forEach((c, p) => {
+    const lvl = c.level || (typeof c.ai === 'string' ? c.ai : null);
+    if (lvl && AI_TEAMS[c.id]) c.team = AI_TEAMS[c.id][lvl];
+    if (c.ai) aiLevel[p] = lvl || 'normal';
+  });
   const { players, first } = await setupTeams(cat, pack, picked);
   // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap
   players.forEach((pl, p) => { const up = picked && picked[p].team ? picked[p].team.upgrades : 0; if (up) pl.toys.forEach(t => { t.g = Math.min(600, t.g + up * UPGRADE_G); }); });
