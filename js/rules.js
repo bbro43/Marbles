@@ -11,7 +11,7 @@
 //              so the starting rectangle is the four cells [-1|0, -1|0] around the center.
 //   captured = Gate cards you've won (3 wins the match)
 
-import { effectOf } from './abilities.js';
+import { effectOf, gateEffectOf } from './abilities.js';
 export { isCoded } from './abilities.js';
 
 export const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
@@ -208,14 +208,33 @@ export function playBeforeThrow(s, handIdx, t, p = s.turn) {
 
 // During a battle: players take turns playing Ability cards (active player first). Playing a card
 // passes the chance to the other player; the window closes when both pass in a row.
-export function startBattle(s, fieldIdx) { return { fieldIdx, plays: [], next: s.turn, passes: 0 }; }
+// The Gate card's effect may give players used Ability cards back first (b.events lists who got what).
+export function startBattle(s, fieldIdx) {
+  const b = { fieldIdx, plays: [], next: s.turn, passes: 0, events: [] };
+  const ge = gateEffectOf(s.field[fieldIdx].card);
+  if (ge && ge.regain) {
+    const w = build(s, fieldIdx, []);
+    for (const { p, color } of ge.regain(w.gctx())) {
+      const pl = s.players[p];
+      const back = pl.abilityUsed.filter(c => color === 'all' || c.color === color);
+      if (!back.length) continue;
+      pl.abilityUsed = pl.abilityUsed.filter(c => !back.includes(c));
+      pl.abilityHand.push(...back);
+      b.events.push({ type: 'regain', p, cards: back });
+    }
+  }
+  return b;
+}
 export const abilityDone = b => b.passes >= 2;
 export function abilityOptions(s, b, p = b.next) {
   const hand = s.players[p].abilityHand;
+  const w = build(s, b.fieldIdx, b.plays);
+  const ge = gateEffectOf(w.g.card);
+  if (ge && ge.noAbility && ge.noAbility(w.gctx(), p)) return [];          // the Gate card says no
+  const blocked = card => b.plays.some(pl => pl.p !== p && (effectOf(pl.card) || {}).blocks && effectOf(pl.card).blocks(card));
   return hand.map((c, i) => i).filter(i => {
     const e = effectOf(hand[i]);
-    if (!e || e.when !== 'battle') return false;
-    const w = build(s, b.fieldIdx, b.plays);
+    if (!e || e.when !== 'battle' || blocked(hand[i])) return false;
     return e.can(w.ctx({ p, card: hand[i] }));
   });
 }
@@ -237,7 +256,7 @@ function build(s, fieldIdx, plays) {
   const sides = [a, b].map(x => {
     const toy = s.players[x.p].toys[x.t];
     return { p: x.p, t: x.t, name: toy.name, attr: toy.attr, printed: toy.g, start: toy.g, total: toy.g, steps: [],
-      noGate: false, useHighest: false, gateMult: 1, abilityMult: 1 };
+      noGate: false, noAbility: false, useHighest: false, gateMult: 1, abilityMult: 1 };
   });
   // Clear toys take the opponent's attribute.
   if (sides[0].attr === 'clear' && sides[1].attr !== 'clear') sides[0].attr = sides[1].attr;
@@ -245,22 +264,32 @@ function build(s, fieldIdx, plays) {
   const table = { ...(g.card.bonus || {}) };
   const ctx = play => {
     const me = sides.find(x => x.p === play.p), opp = sides.find(x => x !== me);
-    return { s, field: g, gateCard: g.card, table, me, opp, card: play.card };
+    return { s, field: g, gateCard: g.card, table, me, opp, sides, card: play.card };
   };
+  const gctx = () => ({ s, field: g, gateCard: g.card, table, sides, card: g.card });
+  // Gate card effect: printed G-Power changes and per-side flags
+  const ge = gateEffectOf(g.card);
+  const printedNotes = ge && ge.printed ? ge.printed(gctx()) : [];
+  if (ge && ge.gate) ge.gate(gctx());
   for (const phase of ['attr', 'table', 'gate'])
     for (const play of plays) { const e = effectOf(play.card); if (e && e[phase]) e[phase](ctx(play)); }
-  return { g, sides, table, ctx };
+  return { g, sides, table, ctx, gctx, ge, printedNotes };
 }
 
 // Works out a battle on one Gate card. Returns the steps for the screen to animate.
 // b = a battle from startBattle() (with its played cards), or just the Gate card's field index.
 export function computeBattle(s, b) {
   if (typeof b === 'number') b = startBattle(s, b);
-  const { g, sides, table, ctx } = build(s, b.fieldIdx, b.plays);
+  const { g, sides, table, ctx, gctx, ge, printedNotes } = build(s, b.fieldIdx, b.plays);
   const step = (sd, label, amount, note) => {
     sd.steps.push({ label, amount, note, from: sd.total, to: sd.total + amount });
     sd.total += amount;
   };
+  // Gate card changed printed G-Power (swap / doubling)
+  for (const { side, note } of printedNotes) {
+    const diff = side.printed - side.total;
+    step(side, g.card.name, diff, diff ? note : note + ', no change');
+  }
   // Red cards played before the throw this turn
   for (const pend of s.pending) {
     const e = effectOf(pend.card);
@@ -273,15 +302,23 @@ export function computeBattle(s, b) {
   // Ability cards played in this battle, in order
   for (const play of b.plays) {
     const e = effectOf(play.card), c = ctx(play);
-    if (e.add) step(c.me, play.card.name, e.add(c) * c.me.abilityMult);
-    else step(c.me, play.card.name, 0, 'played');
+    if (e.add) step(c.me, play.card.name, c.me.noAbility ? 0 : e.add(c) * c.me.abilityMult, c.me.noAbility ? 'cancelled' : undefined);
+    else step(c.me, play.card.name, 0, e.swap ? 'swap at the end' : 'played');
   }
+  // Gate card extra G-Power (Trick Jump, Mega Warrior, Naga's Wrath)
+  if (ge && ge.add) for (const sd of sides) { const amt = ge.add(gctx(), sd); if (amt) step(sd, g.card.name, amt); }
   // Gate bonus
   const highest = Math.max(0, ...ATTRS.map(a => table[a] || 0));
   for (const sd of sides) {
     let amt = sd.noGate ? 0 : (sd.useHighest ? highest : (table[sd.attr] || 0)) * sd.gateMult;
     const notes = [sd.noGate && 'blocked', sd.useHighest && !sd.noGate && 'highest bonus', sd.gateMult > 1 && !sd.noGate && 'x' + sd.gateMult].filter(Boolean);
     step(sd, `Gate card: ${g.card.name}`, amt, notes.join(', ') || undefined);
+  }
+  // Swap cards: an odd number of swaps trades the two totals
+  const swaps = b.plays.filter(pl => (effectOf(pl.card) || {}).swap);
+  if (swaps.length % 2 === 1) {
+    const [a, c2] = sides, ta = a.total, tc = c2.total, label = swaps.at(-1).card.name;
+    step(a, label, tc - ta, 'totals swapped'); step(c2, label, ta - tc, 'totals swapped');
   }
   const result = sides[0].total === sides[1].total ? 'tie' : (sides[0].total > sides[1].total ? sides[0].p : sides[1].p);
   return { fieldIdx: b.fieldIdx, card: g.card, sides, result };

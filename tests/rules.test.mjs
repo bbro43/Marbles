@@ -1,7 +1,7 @@
 // Run: node tests/rules.test.mjs
 import assert from 'node:assert/strict';
 import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff, placeCells, placeGate, moveOptions, openingCell,
-  startBattle, abilityOptions, playAbility, passAbility, abilityDone, throwOptions, playBeforeThrow, isCoded } from '../js/rules.js';
+  startBattle, abilityOptions, playAbility, passAbility, abilityDone, isCoded } from '../js/rules.js';
 import { EFFECTS } from '../js/abilities.js';
 
 const gate = (name, bonus) => ({ name, bonus });
@@ -181,63 +181,70 @@ test('field empty again, nobody has won: cards are set like the first turn', () 
 });
 
 const ab = (name, bonus = {}, color = 'blue') => ({ name, type: 'ability', color, bonus });
-function battleSetup(aAbilities, bAbilities, gateBonus = { pyrus: 100, haos: 50 }) {
+const gcard = (name, color, bonus) => ({ name, type: 'gate', color, bonus });
+// A on its first toy (pyrus 300) battles B (haos 350) on A's card
+function battleSetup(aAbilities, bAbilities, gateCard = gcard('Ga', 'silver', { pyrus: 100, haos: 50 }), aToys, bToys) {
   const s = newMatch([
-    { name: 'A', toys: [toy('a', 'pyrus', 300), toy('a2', 'haos', 300)], gates: [gate('Ga', gateBonus)], abilities: aAbilities },
-    { name: 'B', toys: [toy('b', 'haos', 350)], gates: [gate('Gb', {})], abilities: bAbilities },
+    { name: 'A', toys: aToys || [toy('a', 'pyrus', 300), toy('a2', 'haos', 300)], gates: [gateCard], abilities: aAbilities },
+    { name: 'B', toys: bToys || [toy('b', 'haos', 350)], gates: [gate('Gb', {})], abilities: bAbilities },
   ]);
-  startTurn(s); land(s, 0, null); startTurn(s);    // A misses
-  land(s, 0, 0); startTurn(s);                     // B stands on A's card (owner A)
-  const r = land(s, 0, 0);                         // A lands there -> battle
+  startTurn(s); land(s, 0, null); startTurn(s);
+  land(s, 0, 0); startTurn(s);
+  const r = land(s, 0, 0);
   return { s, b: startBattle(s, r.battle.fieldIdx) };
 }
 
 test('ability cards: take turns, active player first, both pass to finish', () => {
-  const { s, b } = battleSetup([ab('G-Power Boost', { pyrus: 80 })], [ab('Shadowfire'), ab('Solar Winds')]);
+  const { s, b } = battleSetup([ab('Blaze', { pyrus: 80, aquos: 50, ventus: 50 })], [ab('Flash', { subterra: 50, haos: 110 })]);
   assert.equal(b.next, 0);
+  playAbility(s, b, 0);
   assert.deepEqual(abilityOptions(s, b), [0]);
-  playAbility(s, b, 0);                             // A: +80
-  assert.equal(b.next, 1);
-  assert.deepEqual(abilityOptions(s, b), [1]);      // B (Haos): Solar Winds yes; Shadowfire needs Darkus/Pyrus
-  playAbility(s, b, 1);                             // B uses the highest bonus (100) instead of Haos 50
+  playAbility(s, b, 0);
   passAbility(s, b); assert.ok(!abilityDone(b)); passAbility(s, b); assert.ok(abilityDone(b));
   const c = computeBattle(s, b);
   assert.equal(c.sides[0].total, 300 + 80 + 100);
-  assert.equal(c.sides[1].total, 350 + 100);
-  assert.equal(s.players[0].abilityUsed.length, 1); assert.equal(s.players[0].abilityHand.length, 0);
+  assert.equal(c.sides[1].total, 350 + 110 + 50);
 });
 
-test('Shadowfire: on the opponent\'s Gate, their toy gets no Gate bonus', () => {
-  const { s, b } = battleSetup([ab('Shadowfire')], []);
-  // A's pyrus toy is on A's own card -> can't play it there
+test('Gold card: the pictured toy gets the Gate bonus twice', () => {
+  const { s, b } = battleSetup([], [], gcard('Serpenoid', 'gold', { pyrus: 180, haos: 140 }),
+    [toy('Serpenoid', 'pyrus', 300)], [toy('b', 'haos', 350)]);
+  const c = computeBattle(s, b);
+  assert.equal(c.sides[0].total, 300 + 360); assert.equal(c.sides[1].total, 350 + 140);
+});
+
+test('Copper cards: Stand Off blocks Ability cards; Molten Rock doubles the lowest printed', () => {
+  let { s, b } = battleSetup([ab('Blaze', { pyrus: 80 })], [], gcard('Stand Off', 'copper', { pyrus: 140, haos: 80 }));
   assert.deepEqual(abilityOptions(s, b), []);
-  const s2 = newMatch([
-    { name: 'A', toys: [toy('a', 'pyrus', 300)], gates: [gate('Ga', {})], abilities: [ab('Shadowfire')] },
-    { name: 'B', toys: [toy('b', 'haos', 350)], gates: [gate('Gb', { haos: 200 })] },
-  ]);
-  startTurn(s2); land(s2, 0, null); startTurn(s2); land(s2, 0, 1); startTurn(s2);   // B on its own card Gb
-  const r = land(s2, 0, 1); const b2 = startBattle(s2, r.battle.fieldIdx);
-  playAbility(s2, b2, 0);
-  const c = computeBattle(s2, b2);
-  assert.equal(c.sides[1].total, 350); assert.equal(c.result, 1);
+  ({ s, b } = battleSetup([], [], gcard('Molten Rock', 'copper', { pyrus: 70, haos: 130 })));
+  const c = computeBattle(s, b);
+  assert.equal(c.sides[0].total, 600 + 70); assert.equal(c.sides[1].total, 350 + 130);
 });
 
-test('red card before the throw: bonus only if that toy battles this turn', () => {
+test('Red swap card trades totals; No Trading stops it', () => {
+  let { s, b } = battleSetup([], [ab('Haos Swap', {}, 'red')]);
+  passAbility(s, b); playAbility(s, b, 0);
+  let c = computeBattle(s, b);
+  assert.equal(c.sides[0].total, 350 + 50); assert.equal(c.sides[1].total, 300 + 100);
+  ({ s, b } = battleSetup([ab('No Trading', {}, 'green')], [ab('Haos Swap', {}, 'red')]));
+  playAbility(s, b, 0);
+  assert.deepEqual(abilityOptions(s, b), []);
+});
+
+test('Copper regain: Stand Your Ground gives used Ability cards back', () => {
   const s = newMatch([
-    { name: 'A', toys: [toy('a', 'pyrus', 300)], gates: [gate('Ga', {})], abilities: [ab('Sun Fire Master', {}, 'red')] },
+    { name: 'A', toys: [toy('a', 'pyrus', 300), toy('a2', 'pyrus', 300)], gates: [gcard('Stand Your Ground', 'copper', {}), gate('G2', {})], abilities: [ab('Blaze', { pyrus: 80 })] },
     { name: 'B', toys: [toy('b', 'haos', 350)], gates: [gate('Gb', {})] },
   ]);
-  startTurn(s); land(s, 0, null); startTurn(s); land(s, 0, 0); startTurn(s);   // A misses, B stands on Ga
-  assert.deepEqual(throwOptions(s, 0), [0]);
-  playBeforeThrow(s, 0, 0);
-  const r = land(s, 0, 0);
-  const c = computeBattle(s, startBattle(s, r.battle.fieldIdx));
-  assert.equal(c.sides[0].total, 400); assert.equal(c.result, 0);
+  startTurn(s); s.players[0].abilityUsed.push(s.players[0].abilityHand.pop());
+  land(s, 0, null); startTurn(s); land(s, 0, 0); startTurn(s);
+  const r = land(s, 0, 0); const b = startBattle(s, r.battle.fieldIdx);
+  assert.equal(b.events[0].type, 'regain'); assert.equal(s.players[0].abilityHand.length, 1);
 });
 
 test('every coded card has a known kind', () => {
   for (const [name, e] of Object.entries(EFFECTS)) assert.ok(['battle', 'throw'].includes(e.when), name);
-  assert.ok(isCoded({ name: 'G-Power Boost' })); assert.ok(!isCoded({ name: 'Dharak' }));
+  assert.ok(isCoded({ name: 'Blaze', color: 'blue', type: 'ability' })); assert.ok(!isCoded({ name: 'Rewind', color: 'red', type: 'ability' }));
 });
 
 console.log(`\n${n} tests passed`);

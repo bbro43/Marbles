@@ -426,6 +426,9 @@ async function rollStopped() {
   if (res.battle) {
     const bt = R.startBattle(state, res.battle.fieldIdx);
     flipGate(state.field[bt.fieldIdx].card); await sleep(700);
+    for (const e of bt.events) if (e.type === 'regain') {
+      say(`${state.players[e.p].name} gets ${e.cards.map(c => c.name).join(', ')} back`); await sleep(1200);
+    }
     await abilityPhase(bt);
     const b = R.computeBattle(state, bt);
     await showBattle(b);
@@ -514,7 +517,8 @@ async function showBattle(b) {
   for (let i = 0; i < 2; i++) {
     for (const st of b.sides[i].steps) {
       const line = document.createElement('div'); line.className = 'step';
-      line.textContent = st.note ? `${st.label} (${st.note})${st.amount ? '  +' + st.amount : ''}` : `${st.label}  +${st.amount}`;
+      const amt = st.amount ? '  ' + (st.amount > 0 ? '+' : '') + st.amount : '';
+      line.textContent = st.note ? `${st.label} (${st.note})${amt}` : `${st.label}${amt || '  +0'}`;
       $('steps' + i).append(line);
       await countUp($('g' + i), st.from, st.to);
       await sleep(250);
@@ -530,7 +534,8 @@ async function showBattle(b) {
   o.hidden = true;
 }
 async function countUp(el, from, to) {
-  for (let v = from; v <= to; v += 10) { el.textContent = v + 'G'; await sleep(35); }
+  const dir = to >= from ? 10 : -10;
+  for (let v = from; dir > 0 ? v <= to : v >= to; v += dir) { el.textContent = v + 'G'; await sleep(35); }
   el.textContent = to + 'G';
 }
 
