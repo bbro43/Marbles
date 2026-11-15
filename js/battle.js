@@ -214,6 +214,17 @@ function cardTexture(card, faceUp) {
     });
   }
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  // face up: the card's picture from the DS game replaces the bonus list once it has loaded
+  if (faceUp && card.art && pack) pack.url(card.art).then(u => {
+    const im = new Image();
+    im.onload = () => {
+      const h = 300, w = Math.round(im.width * h / im.height);
+      x.fillStyle = '#15191e'; x.fillRect(0, 0, 256, 300);
+      x.imageSmoothingEnabled = false; x.drawImage(im, (256 - w) / 2, 0, w, h);
+      tex.needsUpdate = true;
+    };
+    im.src = u;
+  }).catch(() => {});
   return tex;
 }
 // Gate cards sit parallel to the walls on a grid of card-sized spots (see rules.js: cell [c, r]).
