@@ -564,14 +564,19 @@ let trapPick = { i: 0, color: null, attrs: [] };
 function trapShop() {
   const p = prof(), traps = (pack.catalog.traps || []).filter(t => t.attributes);
   const T = traps[trapPick.i] || traps[0], color = trapPick.color || Object.keys(T.attributes).find(a => !(T.attributesMade || []).includes(a)) || 'pyrus';
-  const n = trapPick.attrs.length, price = P.trapPrice(Math.max(2, n)), mine = (p.owned.traps || []);
+  const slots = P.TRAP_SLOTS[T.name] || 0;            // 0 = any number from 2
+  if (slots === 6) trapPick.attrs = [...ATTRS];
+  if (slots && trapPick.attrs.length > slots) trapPick.attrs = trapPick.attrs.slice(-slots);
+  const need = slots || 2, n = trapPick.attrs.length, ready = slots ? n === slots : n >= 2;
+  const price = P.trapPrice(Math.max(need, n)), mine = (p.owned.traps || []);
   shopTop(false); top3d(false, 'linear-gradient(115deg,#5a0b1e 0%,#b0122a 45%,#5a0b2e 100%)');
   $('topUI').innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:22px;background:linear-gradient(#b0122a,#6b0d22);border-bottom:1px solid #fff5;font:900 11px/22px system-ui;text-align:center">
       <span style="position:absolute;left:4px;font:italic 900 7px/22px system-ui;color:#fffa">TRAP ››</span>${esc(T.name)}</div>
     <div style="position:absolute;left:126px;top:30px;width:120px;background:#2a0b1fcc;padding:6px;border-radius:3px;font:600 8.5px/12px system-ui">
       0G of its own. Once per game, add it to a battle like an Ability card: it gets the Gate card's bonus for <b>each</b> of its attributes.
-      <div style="margin-top:6px;color:#ffd0c8">Attributes: ${n ? trapPick.attrs.map(cap).join(', ') : 'pick 2 or more'}</div>
-      <div style="margin-top:4px;color:#ffcf3a;font-weight:900">${n >= 2 ? price + ' BP' : '2 attributes: ' + P.trapPrice(2) + ' BP, +1,000 each more'}</div></div>
+      <div style="margin-top:6px;color:#9fd4ff">${slots === 6 ? 'Has all 6 attributes' : slots ? `Has exactly ${slots} attributes` : 'Pick 2 or more attributes'}</div>
+      <div style="margin-top:2px;color:#ffd0c8">${n ? trapPick.attrs.map(cap).join(', ') : ''}</div>
+      <div style="margin-top:4px;color:#ffcf3a;font-weight:900">${price} BP</div></div>
     <div class="txt" style="left:8px;top:168px;font-size:9px">You own ${mine.length} Trap${mine.length === 1 ? '' : 's'}</div>`;
   if ((T.thumbs || {})[color]) pack.url(T.thumbs[color]).then(u => { const im = document.createElement('img'); im.src = u; im.style.cssText = 'left:8px;top:30px;width:112px;height:112px'; $('topUI').append(im); });
   const pill = (txt, x, y, w, id, on) => `<div class="pill tap ${on ? 'sel' : ''}" ${id} style="left:${x}px;top:${y}px;width:${w}px;height:16px;line-height:14px;font-size:9px">${txt}</div>`;
@@ -582,15 +587,15 @@ function trapShop() {
     `<div class="txt" style="left:8px;top:76px;font-size:9px">Attrib.</div>` +
     ATTRS.map((a, i) => `<div class="tap" data-ta="${a}" style="position:absolute;left:${50 + i * 32}px;top:70px;width:28px;height:36px;border-radius:4px;text-align:center;background:${trapPick.attrs.includes(a) ? '#1478c8' : '#0d2140'};border:1px solid #8fb4d8">
       <img src="${art('attr_' + a)}" style="position:static;width:15px;height:20px;margin-top:2px" alt=""><div style="font:800 5.5px/8px system-ui">${cap(a)}</div></div>`).join('') +
-    `<div class="pill gold tap ${n >= 2 && p.bp >= price ? '' : 'off'}" id="tBuy" style="left:60px;top:118px;width:136px">Buy for ${n >= 2 ? price : '—'} BP</div>` +
+    `<div class="pill gold tap ${ready && p.bp >= price ? '' : 'off'}" id="tBuy" style="left:60px;top:118px;width:136px">Buy for ${price} BP</div>` +
     bpBar(p.bp, 60, 166);
-  bar('Pick a Trap, its color, and 2 or more attributes.');
+  bar(slots === 6 ? 'This Trap has every attribute. Pick its color.' : slots ? `Pick its color and ${slots} attributes.` : 'Pick its color and 2 or more attributes.');
   $('tPrev').onclick = () => { trapPick = { i: (trapPick.i + traps.length - 1) % traps.length, color: null, attrs: trapPick.attrs }; trapShop(); };
   $('tNext').onclick = () => { trapPick = { i: (trapPick.i + 1) % traps.length, color: null, attrs: trapPick.attrs }; trapShop(); };
   $('bot').querySelectorAll('[data-col]').forEach(b => b.onclick = () => { trapPick.color = b.dataset.col; trapShop(); });
-  $('bot').querySelectorAll('[data-ta]').forEach(b => b.onclick = () => { const a = b.dataset.ta, k = trapPick.attrs.indexOf(a); if (k >= 0) trapPick.attrs.splice(k, 1); else trapPick.attrs.push(a); trapShop(); });
+  $('bot').querySelectorAll('[data-ta]').forEach(b => b.onclick = () => { if (slots === 6) return; const a = b.dataset.ta, k = trapPick.attrs.indexOf(a); if (k >= 0) trapPick.attrs.splice(k, 1); else trapPick.attrs.push(a); trapShop(); });
   $('tBuy').onclick = () => {
-    if (n < 2) { bar('A Trap needs 2 or more attributes.'); return; }
+    if (!ready) { bar(slots ? `${T.name} has exactly ${slots} attributes.` : 'A Trap needs 2 or more attributes.'); return; }
     if (p.bp < price) { bar(`You need ${price - p.bp} more BP.`); return; }
     const uid = 't' + Date.now().toString(36), attrs = ATTRS.filter(a => trapPick.attrs.includes(a));
     P.update(act(), q => { P.ensureShop(q); q.owned.traps = q.owned.traps || []; q.bp -= price; q.owned.traps.push({ uid, id: T.id, color, attrs });

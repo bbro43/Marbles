@@ -2516,8 +2516,7 @@ export const AI_TEAMS = {
     "color": "pyrus",
     "attrs": [
      "pyrus",
-     "ventus",
-     "darkus"
+     "ventus"
     ]
    }
   },
@@ -2575,9 +2574,7 @@ export const AI_TEAMS = {
     "color": "pyrus",
     "attrs": [
      "pyrus",
-     "subterra",
-     "aquos",
-     "haos"
+     "subterra"
     ]
    }
   }
@@ -2696,8 +2693,7 @@ export const AI_TEAMS = {
     "color": "ventus",
     "attrs": [
      "ventus",
-     "aquos",
-     "subterra"
+     "aquos"
     ]
    }
   },
@@ -2755,9 +2751,7 @@ export const AI_TEAMS = {
     "color": "ventus",
     "attrs": [
      "ventus",
-     "aquos",
-     "pyrus",
-     "haos"
+     "aquos"
     ]
    }
   }
@@ -2818,7 +2812,8 @@ export const AI_TEAMS = {
     "color": "aquos",
     "attrs": [
      "aquos",
-     "pyrus"
+     "pyrus",
+     "subterra"
     ]
    }
   },
@@ -2936,8 +2931,7 @@ export const AI_TEAMS = {
     "attrs": [
      "aquos",
      "subterra",
-     "darkus",
-     "haos"
+     "darkus"
     ]
    }
   }
@@ -3056,8 +3050,7 @@ export const AI_TEAMS = {
     "color": "darkus",
     "attrs": [
      "darkus",
-     "haos",
-     "ventus"
+     "haos"
     ]
    }
   },
@@ -3115,9 +3108,7 @@ export const AI_TEAMS = {
     "color": "darkus",
     "attrs": [
      "darkus",
-     "subterra",
-     "ventus",
-     "pyrus"
+     "subterra"
     ]
    }
   }
@@ -3236,8 +3227,7 @@ export const AI_TEAMS = {
     "color": "subterra",
     "attrs": [
      "subterra",
-     "aquos",
-     "pyrus"
+     "aquos"
     ]
    }
   },
@@ -3295,9 +3285,7 @@ export const AI_TEAMS = {
     "color": "subterra",
     "attrs": [
      "subterra",
-     "haos",
-     "darkus",
-     "aquos"
+     "haos"
     ]
    }
   }
@@ -3358,7 +3346,8 @@ export const AI_TEAMS = {
     "color": "haos",
     "attrs": [
      "haos",
-     "ventus"
+     "ventus",
+     "darkus"
     ]
    }
   },
@@ -3476,8 +3465,7 @@ export const AI_TEAMS = {
     "attrs": [
      "haos",
      "darkus",
-     "subterra",
-     "ventus"
+     "subterra"
     ]
    }
   }
@@ -3596,8 +3584,7 @@ export const AI_TEAMS = {
     "color": "pyrus",
     "attrs": [
      "pyrus",
-     "ventus",
-     "darkus"
+     "ventus"
     ]
    }
   },
@@ -3655,9 +3642,7 @@ export const AI_TEAMS = {
     "color": "pyrus",
     "attrs": [
      "pyrus",
-     "subterra",
-     "aquos",
-     "haos"
+     "subterra"
     ]
    }
   }
@@ -3718,7 +3703,8 @@ export const AI_TEAMS = {
     "color": "aquos",
     "attrs": [
      "aquos",
-     "subterra"
+     "subterra",
+     "darkus"
     ]
    }
   },
@@ -3836,8 +3822,7 @@ export const AI_TEAMS = {
     "attrs": [
      "aquos",
      "subterra",
-     "haos",
-     "darkus"
+     "haos"
     ]
    }
   }
@@ -4078,7 +4063,11 @@ export const AI_TEAMS = {
     "color": "subterra",
     "attrs": [
      "subterra",
-     "aquos"
+     "aquos",
+     "haos",
+     "darkus",
+     "ventus",
+     "pyrus"
     ]
    }
   },
@@ -4137,7 +4126,10 @@ export const AI_TEAMS = {
     "attrs": [
      "subterra",
      "aquos",
-     "pyrus"
+     "pyrus",
+     "haos",
+     "ventus",
+     "darkus"
     ]
    }
   },
@@ -4197,7 +4189,9 @@ export const AI_TEAMS = {
      "subterra",
      "haos",
      "darkus",
-     "aquos"
+     "aquos",
+     "pyrus",
+     "ventus"
     ]
    }
   }
@@ -4258,7 +4252,11 @@ export const AI_TEAMS = {
     "color": "darkus",
     "attrs": [
      "darkus",
-     "haos"
+     "haos",
+     "pyrus",
+     "subterra",
+     "aquos",
+     "ventus"
     ]
    }
   },
@@ -4317,7 +4315,10 @@ export const AI_TEAMS = {
     "attrs": [
      "darkus",
      "haos",
-     "ventus"
+     "ventus",
+     "subterra",
+     "aquos",
+     "pyrus"
     ]
    }
   },
@@ -4377,7 +4378,9 @@ export const AI_TEAMS = {
      "darkus",
      "subterra",
      "pyrus",
-     "ventus"
+     "ventus",
+     "haos",
+     "aquos"
     ]
    }
   }

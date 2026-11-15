@@ -3,6 +3,7 @@
 import fs from 'fs';
 import { fitsAttrs, abilityScore, lineBlocked, GATE_COLORS, AB_COLORS } from '../js/setup.js';
 import { isCoded } from '../js/abilities.js';
+import { TRAP_SLOTS } from '../js/profiles.js';
 const cat = JSON.parse(fs.readFileSync(process.argv[2]));
 const byName = new Map(cat.toys.filter(t => t.baseG).map(t => [t.name, t]));
 // character: attribute (one, or one per difficulty) and the Bakugan used at each difficulty (stronger Bakugan as it goes up)
@@ -104,7 +105,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
         const gcards = Object.values(team.gates).map(g => gates.find(x => x.id === g.id));
         const others = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'].filter(a => a !== attr)
           .sort((a, b) => gcards.reduce((n, g) => n + (g.bonus[b] || 0), 0) - gcards.reduce((n, g) => n + (g.bonus[a] || 0), 0));
-        team.trap = { id: t.id, name: t.name, color: attr, attrs: [attr, ...others.slice(0, TRAP_ATTRS[lvl] - 1)] };
+        team.trap = { id: t.id, name: t.name, color: attr, attrs: [attr, ...others.slice(0, (TRAP_SLOTS[t.name] || TRAP_ATTRS[lvl]) - 1)] };
       }
     }
     out[id][lvl] = team;

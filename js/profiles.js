@@ -40,6 +40,9 @@ export const toyPrice = t => Math.max(800, Math.round((t.baseG || 250) * 6 / 100
 export const CARD_PRICE = { gold: 250, silver: 200, copper: 150, red: 300, blue: 300, green: 300 };
 export const cardPrice = c => CARD_PRICE[c.color] || 250;
 // Traps: the more attributes, the more it costs (2 attributes 1,500; each more +1,000)
+// Some Traps have a set number of attributes (Billy's B.xlsx). Traps not listed (Fencer, Wired): pick 2 or more.
+export const TRAP_SLOTS = { 'Scorpion': 2, 'Hylash': 2, 'Tripod Epsilon': 3, 'Baliton': 2, 'Falcon Fly': 2, 'Piercian': 3,
+  'Metalfencer': 2, 'Tripod Theta': 3, 'Hexados': 6, 'Pythantus': 6 };
 export const trapPrice = n => 1500 + 1000 * Math.max(0, n - 2);
 // G-Power: +10G each, the price goes up with each one bought for that Bakugan
 export const gPrice = n => 100 + 20 * n;
