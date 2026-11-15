@@ -36,6 +36,13 @@ const CSS = `
 #setup .fchip { background:#151d27; color:#e8edf2; border:2px solid #2a3644; border-left:6px solid var(--c); border-radius:999px; padding:5px 10px; font:inherit; font-size:13px; cursor:pointer; }
 #setup .fchip.on { background:var(--c); color:#111; border-color:#fff; font-weight:700; }
 #setup .none { color:#5d6b7a; padding:8px; }
+#setup .tpic { width:64px; height:64px; object-fit:contain; float:left; margin:-2px 8px 0 -2px; }
+#setup .slot .tpic { width:72px; height:72px; }
+#setup .item.toy { min-height:72px; }
+#setup .cpic { float:left; width:54px; height:72px; margin:0 8px 2px 0; background-size:cover; background-position:center; border-radius:4px; position:relative; }
+#setup .cpic.blank i { position:absolute; left:4px; right:4px; top:22px; font-style:normal; font-weight:700; font-size:9px; line-height:1.1; color:#fff; text-align:center; text-shadow:0 1px 2px #000; }
+#setup .item.card { min-height:80px; }
+#setup .tab .cpic { width:36px; height:48px; margin-right:6px; } #setup .tab .cpic.blank i { font-size:6px; top:14px; }
 #setup .big { display:block; width:100%; margin:8px 0; font-size:18px; }
 `;
 
@@ -81,10 +88,20 @@ const rand = n => Math.floor(Math.random() * n);
 const pick = arr => arr[rand(arr.length)];
 
 // Resolves with { players: [{ name, toys, gates, abilities }], first }
-export function setupTeams(cat) {
+export async function setupTeams(cat, pack) {
   const style = document.createElement('style'); style.textContent = CSS; document.head.append(style);
   const root = document.createElement('div'); root.id = 'setup'; document.body.append(root);
-  const toys = cat.toys.filter(t => t.game === 'bb' && Object.keys(t.attributes || {}).length);
+  // pictures: toy thumbnails, card art, blank card frames (all from the asset pack)
+  root.innerHTML = '<h2>Loading pictures…</h2>';
+  const pic = new Map();
+  const paths = [...cat.toys.flatMap(t => Object.values(t.thumbs || {})), ...cat.cards.map(c => c.art).filter(Boolean), ...Object.values(cat.cardFrames || {})];
+  await Promise.all([...new Set(paths)].map(async p => { try { pic.set(p, await pack.url(p)); } catch {} }));
+  const thumb = (d, attr) => pic.get((d.thumbs || {})[attr]) || '';
+  // a card picture: its art from the DS game, or the blank frame for its color with the name on it
+  const cardPic = c => c.art && pic.get(c.art)
+    ? `<span class="cpic" style="background-image:url(${pic.get(c.art)})"></span>`
+    : `<span class="cpic blank" style="background-image:url(${pic.get((cat.cardFrames || {})[c.color]) || ''})"><i>${esc(c.name)}</i></span>`;
+  const toys = cat.toys.filter(t => t.baseG && Object.keys(t.attributes || {}).length);
   const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus);
   const abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));
   const toyById = new Map(toys.map(t => [t.id, t])), cardById = new Map([...gates, ...abilities].map(c => [c.id, c]));
@@ -129,7 +146,7 @@ export function setupTeams(cat) {
     }
   }
 
-  return new Promise(resolve => {
+  return await new Promise(resolve => {
     const teams = [restore(lastTeam(0), 0), restore(lastTeam(1), 1)];
     let who = 0, gateTab = 'gold', abTab = 'red', search = '';
     const filt = new Set();   // attribute filter (empty = all)
@@ -145,24 +162,25 @@ export function setupTeams(cat) {
         const x = t.toys[k];
         if (!x) return `<div class="slot empty">Pick a toy below</div>`;
         const d = toyById.get(x.id);
-        return `<div class="slot" style="--c:${ATTR_COLOR[x.attr]}"><button class="x" data-rm="${k}">✕</button><b>${esc(d.name)}</b>
+        return `<div class="slot" style="--c:${ATTR_COLOR[x.attr]}"><button class="x" data-rm="${k}">✕</button><img class="tpic" src="${thumb(d, x.attr)}" alt=""><b>${esc(d.name)}</b>
           <small>${d.baseG ?? 250}G · Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</small>
           <div class="dots">${Object.keys(d.attributes).map(a => `<span class="dot ${a === x.attr ? 'on' : ''}" title="${cap(a)}" data-k="${k}" data-attr="${a}" style="background:${ATTR_COLOR[a]}"></span>`).join('')}</div></div>`;
       }).join('');
       const q = search.trim().toLowerCase();
       const hit = (...texts) => !q || texts.some(x => String(x || '').toLowerCase().includes(q));
       const fa = [...filt];
+      const listAttr = d => fa.find(a => d.attributes[a]) || Object.keys(d.attributes)[0];   // show toys in the filtered color
       const toyList = toys.filter(d => hit(d.name) && (!fa.length || fa.some(a => d.attributes[a]))).map(d =>
-        `<button class="item ${lineBlocked(t.toys, d.id) ? 'off' : ''}" data-add="${d.id}" style="--c:${ATTR_COLOR[Object.keys(d.attributes)[0]]}"><b>${esc(d.name)}</b><span>${d.baseG ?? 250}G · ${Object.keys(d.attributes).map(cap).join(', ')}</span><span>Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</span></button>`).join('');
+        `<button class="item toy ${lineBlocked(t.toys, d.id) ? 'off' : ''}" data-add="${d.id}" style="--c:${ATTR_COLOR[listAttr(d)]}"><img class="tpic" src="${thumb(d, listAttr(d))}" alt="" loading="lazy"><b>${esc(d.name)}</b><span>${d.baseG ?? 250}G</span><span>Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</span></button>`).join('');
       // Gate cards: sorted by the best bonus for your toys' attributes
       const focus = fa.length ? fa : mine.length ? mine : ALL;
       const score = g => Math.max(0, ...focus.map(a => g.bonus[a] || 0));
       const gateList = gates.filter(g => g.color === gateTab && hit(g.name, g.text) && (!fa.length || score(g) > 0)).sort((a, b) => score(b) - score(a)).map(g =>
-        `<button class="item ${t.gates[gateTab] === g.id ? 'sel' : ''}" data-gate="${esc(g.id)}" style="--c:${COLOR_HEX[g.color]}"><b>${esc(g.name)}</b>
+        `<button class="item card ${t.gates[gateTab] === g.id ? 'sel' : ''}" data-gate="${esc(g.id)}" style="--c:${COLOR_HEX[g.color]}">${cardPic(g)}<b>${esc(g.name)}</b>
           <span>${focus.map(a => `${cap(a)} +${g.bonus[a] || 0}`).join(' · ')}</span>${g.text ? `<span>${esc(g.text)}</span>` : ''}</button>`).join('');
       const abList = abilities.filter(a => a.color === abTab && hit(a.name, a.text) && (!fa.length || fitsAttrs(a, fa))).map(a =>
-        `<button class="item ${t.abilities[abTab] === a.id ? 'sel' : ''}" data-ab="${esc(a.id)}" style="--c:${COLOR_HEX[a.color]}"><b>${esc(a.name)}</b><span>${esc(a.text)}</span></button>`).join('');
-      const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}</small></button>`;
+        `<button class="item card ${t.abilities[abTab] === a.id ? 'sel' : ''}" data-ab="${esc(a.id)}" style="--c:${COLOR_HEX[a.color]}">${cardPic(a)}<b>${esc(a.name)}</b><span>${esc(a.text)}</span></button>`).join('');
+      const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${chosen ? cardPic(cardById.get(chosen)) : ''}${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}</small></button>`;
       root.innerHTML = `
         <h2>${esc(t.name)}: set up your team</h2>
         <div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>

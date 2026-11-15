@@ -642,7 +642,7 @@ async function start() {
   }
   const cat = pack.catalog;
   $('loading').hidden = true;
-  const { players, first } = await setupTeams(cat);
+  const { players, first } = await setupTeams(cat, pack);
   $('loading').hidden = false;
   state = R.newMatch(players, { first });
   $('loading').textContent = 'Loading toys…';
