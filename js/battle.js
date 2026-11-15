@@ -885,7 +885,10 @@ async function start() {
   }
   const cat = pack.catalog;
   $('loading').hidden = true;
-  const { players, first } = await setupTeams(cat, pack);
+  let match = null; try { match = JSON.parse(sessionStorage.getItem('marbles-match') || 'null'); } catch {}
+  const picked = match && match.players && match.players.length === 2 ? match.players : null;
+  const { players, first } = await setupTeams(cat, pack, picked);
+  if (picked) for (let p = 0; p < 2; p++) { try { const u = await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
   $('loading').hidden = false;
   state = R.newMatch(players, { first });
   $('loading').textContent = 'Loading Bakugan…';

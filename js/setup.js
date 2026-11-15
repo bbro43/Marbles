@@ -88,7 +88,8 @@ const rand = n => Math.floor(Math.random() * n);
 const pick = arr => arr[rand(arr.length)];
 
 // Resolves with { players: [{ name, toys, gates, abilities }], first }
-export async function setupTeams(cat, pack) {
+// picked: optional [{ id, name }] characters picked in the menu; each character keeps its own last team
+export async function setupTeams(cat, pack, picked = null) {
   const style = document.createElement('style'); style.textContent = CSS; document.head.append(style);
   const root = document.createElement('div'); root.id = 'setup'; document.body.append(root);
   // pictures: toy thumbnails, card art, blank card frames (all from the asset pack)
@@ -147,7 +148,8 @@ export async function setupTeams(cat, pack) {
   }
 
   return await new Promise(resolve => {
-    const teams = [restore(lastTeam(0), 0), restore(lastTeam(1), 1)];
+    const key = i => picked && picked[i] ? 'c-' + picked[i].id : i;
+    const teams = [0, 1].map(i => { const t = restore(lastTeam(key(i)), i); if (picked && picked[i]) t.name = picked[i].name; return t; });
     let who = 0, gateTab = 'gold', abTab = 'red', search = '';
     const filt = new Set();   // attribute filter (empty = all)
 
@@ -183,7 +185,7 @@ export async function setupTeams(cat, pack) {
       const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${chosen ? cardPic(cardById.get(chosen)) : ''}${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}</small></button>`;
       root.innerHTML = `
         <h2>${esc(t.name)}: set up your team</h2>
-        <div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>
+        ${picked ? '' : `<div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>`}
         <div class="filters">
           <input type="search" id="ssearch" placeholder="Search Bakugan and cards" value="${esc(search)}">
           <div class="row">${ALL.map(a => `<button class="fchip ${filt.has(a) ? 'on' : ''}" data-f="${a}" style="--c:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>
@@ -199,7 +201,7 @@ export async function setupTeams(cat, pack) {
         <div class="list">${abList || '<span class="none">No matches</span>'}</div>
         <div class="bar"><button id="srand">Random</button><button id="sauto">Auto finish</button><button class="go" id="sdone" ${complete(t) ? '' : 'disabled'}>${who === 0 ? 'Next player' : 'Done'}</button></div>`;
       const $ = s => root.querySelector(s);
-      $('#sname').oninput = e => { t.name = e.target.value || `Player ${who + 1}`; root.querySelector('h2').textContent = `${t.name}: set up your team`; };
+      if ($('#sname')) $('#sname').oninput = e => { t.name = e.target.value || `Player ${who + 1}`; root.querySelector('h2').textContent = `${t.name}: set up your team`; };
       $('#ssearch').oninput = e => { search = e.target.value; const pos = e.target.selectionStart; render(); const s = root.querySelector('#ssearch'); s.focus(); s.setSelectionRange(pos, pos); };
       root.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { t.toys.splice(+b.dataset.rm, 1); render(); });
       root.querySelectorAll('[data-attr]').forEach(b => b.onclick = () => { t.toys[+b.dataset.k].attr = b.dataset.attr; render(); });
@@ -222,7 +224,7 @@ export async function setupTeams(cat, pack) {
       root.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt.has(b.dataset.f) ? filt.delete(b.dataset.f) : filt.add(b.dataset.f); render(); });
       $('#sdone').onclick = () => {
         if (!complete(t)) return;
-        saveTeam(who, t); who++; search = ''; filt.clear(); gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
+        saveTeam(key(who), t); who++; search = ''; filt.clear(); gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
       };
     }
 

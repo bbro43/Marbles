@@ -3,59 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f1417">
-<title>Marbles</title>
+<meta name="theme-color" content="#000000">
+<title>Bakugan</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192-v2.png">
 <link rel="apple-touch-icon" href="icons/icon-192-v2.png">
 <style>
-  :root { color-scheme: dark; --bg:#0f1417; --panel:#182028; --line:#2a3644; --text:#e8edf2; --dim:#93a2b2; --accent:#d8322b; }
+  /* Two DS-sized screens (256x192 each) stacked like the DS, scaled up to fit the phone. All coordinates are DS pixels. */
   * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
-  html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
-  body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-  main { max-width: 520px; margin: 0 auto; padding: 28px 18px; }
-  h1 { font-size: 34px; letter-spacing: .5px; margin: 8px 0 4px; }
-  .sub { color: var(--dim); margin: 0 0 24px; }
-  .menu { display: grid; gap: 12px; }
-  .btn { display:flex; align-items:center; justify-content:space-between; width:100%; padding:18px; font:inherit; font-size:18px; color:var(--text);
-         background:var(--panel); border:1px solid var(--line); border-radius:14px; cursor:pointer; text-align:left; }
-  .btn:disabled { opacity:.45; cursor:default; }
-  .btn small { color: var(--dim); font-size: 13px; }
-  .btn.primary { border-color: var(--accent); }
-  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; margin-top:22px; }
-  .card h2 { font-size:15px; margin:0 0 8px; color:var(--dim); font-weight:600; text-transform:uppercase; letter-spacing:.6px; }
-  .row { display:flex; justify-content:space-between; padding:4px 0; }
-  .row span:last-child { color: var(--dim); }
-  .msg { color: var(--dim); font-size: 14px; margin-top: 10px; min-height: 1.4em; }
+  [hidden] { display:none !important; }
+  html, body { margin:0; height:100%; background:#000; color:#fff; overflow:hidden; font-family: system-ui,-apple-system,"Segoe UI",sans-serif; }
+  #ds { position:fixed; left:0; top:0; width:256px; height:384px; transform-origin:0 0; }
+  .scr { position:absolute; left:0; width:256px; height:192px; overflow:hidden; background:#200; }
+  #top { top:0; } #bot { top:192px; }
+  .scr img, .px { position:absolute; image-rendering:pixelated; image-rendering:crisp-edges; user-select:none; -webkit-user-drag:none; }
+  .tap { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .tap:active, .tap.on { filter: brightness(1.25) drop-shadow(0 0 2px #4cc3ff) drop-shadow(0 0 1px #4cc3ff); }
+  .off { filter: grayscale(.85) brightness(.6); }
+  /* scrolling message bar at the top of the bottom screen */
+  #bar { position:absolute; left:0; right:0; top:4px; height:12px; overflow:hidden; z-index:20; pointer-events:none; }
+  #barText { position:absolute; top:0; white-space:nowrap; font: 600 9px/12px ui-monospace,"Courier New",monospace; color:#fff; letter-spacing:.2px; }
+  #barText.run { animation: tick linear infinite; }
+  @keyframes tick { from { transform: translateX(256px); } to { transform: translateX(var(--to)); } }
+  .txt { position:absolute; font: 700 10px/12px system-ui,sans-serif; color:#fff; text-shadow:0 1px 0 #000; }
+  .obtn { position:absolute; left:40px; width:176px; height:17px; background:#4a110c; border:1px solid #e3241b; color:#fff;
+          font: italic 800 9px/15px system-ui,sans-serif; text-align:center; letter-spacing:.3px; text-shadow:0 1px 0 #000; }
+  .obtn.sel, .obtn:active { background:#a87a78; border-color:#f05a50; }
+  .rows { position:absolute; left:26px; right:20px; top:44px; font: 600 8.5px/12px system-ui,sans-serif; }
+  .rows div { display:flex; justify-content:space-between; border-bottom:1px solid #ffffff22; }
+  .rows span:last-child { color:#ffd0c8; }
+  .fade { transition: opacity .5s; }
   input[type=file] { display:none; }
 </style>
 </head>
 <body>
-<main>
-  <h1 id="appName">Marbles</h1>
-  <p class="sub" id="tagline">Getting the asset pack…</p>
-
-  <div class="menu">
-    <button class="btn" id="btnBattle" disabled>Battle <small>2 players, this device — pick your teams</small></button>
-      <button class="btn" id="btnPrompt">Prompt Ability Cards: <span id="promptState">On</span> <small>ask before and after each throw</small></button>
-    <button class="btn" id="btnIndex" disabled>Bakugan Index <small>models, stats and colors</small></button>
-    <button class="btn" id="btnChars" disabled>Characters <small>later</small></button>
-    <button class="btn" id="btnShop" disabled>Shop <small>later</small></button>
-  </div>
-
-  <div class="card">
-    <h2>Asset pack</h2>
-    <div id="packInfo"><div class="row"><span>Status</span><span>Not loaded</span></div></div>
-    <div class="menu" style="margin-top:12px">
-      <button class="btn primary" id="btnUpdate">Check for update <small>downloads only when there's a new pack</small></button>
-      <label class="btn" for="packFile">Load pack from file <small>backup option</small></label>
-      <input type="file" id="packFile" accept=".zip,application/zip">
-    </div>
-    <div class="msg" id="msg"></div>
-  </div>
-</main>
-
+<div id="ds">
+  <div class="scr" id="top"></div>
+  <div class="scr" id="bot"></div>
+</div>
+<input type="file" id="packFile" accept=".zip,application/zip">
 <script src="vendor/jszip.min.js"></script>
 <script>
 // ---- Asset pack storage (IndexedDB). Nothing here ever leaves the device.
@@ -71,59 +57,170 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 33;   // bump with CACHE in sw.js on every release
-const Pack = { zip: null, info: null };
+const APP_BUILD = 34;   // bump with CACHE in sw.js on every release
+const Pack = { zip: null, info: null, cat: null, urls: new Map() };
+let packMsg = 'Getting the asset pack…';
 
 async function openPack(blob) {
   const zip = await JSZip.loadAsync(blob);
   const infoFile = zip.file('pack.json');
   if (!infoFile) throw new Error('This zip is not an asset pack (no pack.json).');
   Pack.zip = zip; Pack.info = JSON.parse(await infoFile.async('string'));
-  showPack();
+  Pack.cat = JSON.parse(await zip.file('catalog.json').async('string'));
+  Pack.urls.forEach(u => URL.revokeObjectURL(u)); Pack.urls.clear();
+  const files = Object.values((Pack.cat.menu || {}).files || {}).concat((Pack.cat.menu?.chars || []).map(c => c.face));
+  await Promise.all([...new Set(files)].map(async f => { const z = zip.file(f); if (z) Pack.urls.set(f, URL.createObjectURL(await z.async('blob'))); }));
 }
-function showPack() {
+const art = k => Pack.urls.get((Pack.cat?.menu?.files || {})[k]) || '';
+const hasArt = () => !!art('title_top');
+
+// ---- layout: scale the two DS screens to the phone
+function fit() {
+  const w = document.documentElement.clientWidth, h = document.documentElement.clientHeight, s = Math.min(w / 256, h / 384);
+  $('ds').style.transform = `translate(${(w - 256 * s) / 2}px, ${(h - 384 * s) / 2}px) scale(${s})`;
+}
+addEventListener('resize', fit); fit();
+
+// ---- tiny screen builder
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function img(k, x, y, cls = '', extra = '') { const u = art(k); return u ? `<img src="${u}" style="left:${x}px;top:${y}px" class="${cls}" ${extra} alt="">` : ''; }
+function bar(text) {
+  const b = document.createElement('div'); b.id = 'bar'; b.innerHTML = '<span id="barText"></span>'; $('bot').append(b);
+  const t = $('barText'); t.textContent = text;
+  requestAnimationFrame(() => {
+    const w = t.offsetWidth;
+    if (w > 240) { t.style.setProperty('--to', `-${w}px`); t.style.animationDuration = `${(w + 256) / 40}s`; t.classList.add('run'); }
+    else { t.style.left = (250 - w) + 'px'; }
+  });
+}
+let screen = 'title', timer = null;
+function go(s) { screen = s; clearInterval(timer); timer = null; render(); }
+function render() {
+  if (!hasArt() && screen !== 'options') screen = 'options';
+  ({ title, arena, chars, options })[screen]();
+}
+
+// ---- title menu (Story / Battle Arena / Tutorial / My Room / Options) with the rotating character ring
+const BTN = [['story', 'Play through the Bakugan story! (coming later)', null],
+  ['arena', 'Practice your Bakugan skills in the Battle Arena.', () => go('arena')],
+  ['tutorial', 'Learn how to play Bakugan. (coming later)', null],
+  ['myroom', 'Go to My Room: the Bakugan Index — models, stats and colors.', () => { location.href = 'viewer.html'; }],
+  ['options', 'Change the game options.', () => go('options')]];
+const BTN_X = [3, 15, 7, 15, 23];
+let pic = 0;
+function title() {
+  $('top').innerHTML = img('title_top', 0, 0);
+  $('bot').innerHTML = img('title_bot', 0, 0) +
+    `<div id="pics">${[0, 1, 2, 3, 4].map(i => img('title_pic' + i, 0, 0, 'fade', `data-pic="${i}" style="opacity:${i === pic ? 1 : 0}"`)).join('')}</div>` +
+    img('title_ring', 0, 0) +
+    BTN.map(([k, , fn], i) => `<img src="${art('btn_' + k)}" class="tap ${fn ? '' : 'off'}" data-b="${i}" style="left:0;top:${35 + 29 * i}px" alt="">`).join('');
+  bar('Practice your Bakugan skills in the Battle Arena.');
+  $('bot').querySelectorAll('[data-b]').forEach(b => b.onclick = () => {
+    const [, msg, fn] = BTN[+b.dataset.b]; $('barText').remove(); $('bar').remove(); bar(msg);
+    if (fn) setTimeout(fn, 150);
+  });
+  // the portraits in the ring take turns, like the DS title menu
+  timer = setInterval(() => {
+    pic = (pic + 1) % 5;
+    document.querySelectorAll('[data-pic]').forEach(e => e.style.opacity = +e.dataset.pic === pic ? 1 : 0);
+  }, 4000);
+}
+
+// ---- Battle Arena selection: Single Player (needs the computer opponent) / Multiplayer
+function arena() {
+  $('top').innerHTML = img('arena_top', 0, 0) + img('banner_arena', 56, 7);
+  $('bot').innerHTML = img('arena_bot', 0, 0) +
+    `<img src="${art('btn_single')}" class="tap off" id="bSingle" style="left:32px;top:48px" alt="">` +
+    `<img src="${art('btn_multi')}" class="tap" id="bMulti" style="left:32px;top:96px" alt="">` +
+    `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
+  bar('Select the type of game.');
+  $('bSingle').onclick = () => { $('bar').remove(); bar('Single Player needs the computer opponent — that is next on the build list.'); };
+  $('bMulti').onclick = () => { pickFor = 0; picks = [null, null]; go('chars'); };
+  $('bBack').onclick = () => go('title');
+}
+
+// ---- Select Character (Multiplayer: Player 1 picks, then Player 2)
+let pickFor = 0, picks = [null, null];
+function chars() {
+  const M = Pack.cat.menu, G = M.grid, face = c => Pack.urls.get(c.face);
+  const rowTop = (p, y) => img('hex_empty', 22, y) + img('namebar_' + (picks[p] ? (p ? 'red' : 'blue') : 'grey'), 48, y) +
+    (picks[p] ? `<img src="${face(picks[p])}" style="left:26px;top:${y}px" alt="">` : '') +
+    img('tag_p' + (p + 1), 16, y - 4) +
+    (picks[p] ? `<div class="txt" style="left:78px;top:${y + 9}px;font-size:12px">${esc(picks[p].name)}</div>` : '');
+  $('top').innerHTML = img('arena_top', 0, 0) + img('banner_character', 56, 7) + rowTop(0, 40) + rowTop(1, 78);
+  const frames = picks.map((c, p) => c ? img('hex_p' + (p + 1), G.x + c.col * G.step - 4, G.y + c.row * G.step) : '').join('');
+  $('bot').innerHTML = img('arena_bot', 0, 0) + img('ch_grid', 0, 0) + frames +
+    M.chars.map(c => `<div class="px tap" data-c="${c.id}" style="left:${G.x + c.col * G.step - 4}px;top:${G.y + c.row * G.step}px;width:40px;height:32px"></div>`).join('') +
+    `<div class="px tap" id="cYou" style="left:${G.x - 4}px;top:${G.y}px;width:40px;height:32px"></div>` +
+    `<div class="px tap" id="cRand" style="left:${G.x + 5 * G.step - 4}px;top:${G.y + 2 * G.step}px;width:40px;height:32px"></div>` +
+    `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
+  bar(`Player ${pickFor + 1}: select a character.`);
+  const choose = c => {
+    picks[pickFor] = c;
+    if (pickFor === 0) { pickFor = 1; render(); return; }
+    render(); $('bar').remove(); bar(`${picks[0].name} vs ${picks[1].name} — set up your teams!`);
+    try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode: 'multi', players: picks.map(c => ({ id: c.id, name: c.name, face: c.face })) })); } catch {}
+    setTimeout(() => { location.href = 'battle.html'; }, 900);
+  };
+  $('bot').querySelectorAll('[data-c]').forEach(b => b.onclick = () => choose(M.chars.find(c => c.id === b.dataset.c)));
+  $('cRand').onclick = () => choose(M.chars[Math.floor(Math.random() * M.chars.length)]);
+  $('cYou').onclick = () => { $('bar').remove(); bar('Making your own character comes with Characters & saves.'); };
+  $('bBack').onclick = () => { if (pickFor === 1 && !picks[1]) { pickFor = 0; picks[0] = null; render(); } else go('arena'); };
+}
+
+// ---- Options: every setting lives here
+const promptGet = () => { try { return localStorage.getItem('marbles-prompt-abilities') !== '0'; } catch { return true; } };
+function options() {
   const i = Pack.info;
-  if (i.appName) { $('appName').textContent = i.appName; document.title = i.appName; }
-  $('tagline').textContent = 'Ready.';
-  const rows = [['App build', APP_BUILD], ['Pack version', i.version], ...Object.entries(i.counts || {})];
-  $('packInfo').innerHTML = rows.map(([k, v]) => `<div class="row"><span>${k}</span><span>${v}</span></div>`).join('');
-  $('btnBattle').disabled = false; $('btnIndex').disabled = false;
+  const rows = i ? [['App build', APP_BUILD], ['Pack version', i.version], ...Object.entries(i.counts || {})] : [['App build', APP_BUILD], ['Pack', 'not loaded']];
+  $('top').innerHTML = (img('options_top', 0, 0) || '<div class="txt" style="left:12px;top:8px;font-size:16px">OPTIONS</div>') +
+    `<div class="txt" style="left:22px;top:28px;font-size:9px">${esc(packMsg)}</div>` +
+    `<div class="rows">${rows.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('')}</div>`;
+  const items = [['prompt', `Prompt Ability Cards: ${promptGet() ? 'On' : 'Off'}`], ['update', 'Check for Asset Pack Update'], ['file', 'Load Asset Pack from File']];
+  $('bot').innerHTML = (img('options_bot', 0, 0) || '') +
+    items.map(([k, t], n) => `<button class="obtn tap" data-o="${k}" style="top:${44 + n * 24}px">${esc(t)}</button>`).join('') +
+    (hasArt() ? `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">` : '');
+  bar(hasArt() ? 'Select the option you want to change.' : 'Load the asset pack to start.');
+  $('bot').querySelectorAll('[data-o]').forEach(b => b.onclick = () => {
+    const k = b.dataset.o;
+    if (k === 'prompt') { try { localStorage.setItem('marbles-prompt-abilities', promptGet() ? '0' : '1'); } catch {} render(); }
+    if (k === 'update') checkUpdate(true);
+    if (k === 'file') $('packFile').click();
+  });
+  if ($('bBack')) $('bBack').onclick = () => go('title');
 }
 
 $('packFile').addEventListener('change', async e => {
   const f = e.target.files[0]; if (!f) return;
-  $('msg').textContent = 'Loading…';
-  try { await openPack(f); await idbPut('pack', f); $('msg').textContent = 'Saved on this device.'; }
-  catch (err) { $('msg').textContent = err.message; }
-  e.target.value = '';
+  packMsg = 'Loading…'; render();
+  try { await openPack(f); await idbPut('pack', f); packMsg = 'Saved on this device.'; }
+  catch (err) { packMsg = err.message; }
+  e.target.value = ''; render();
 });
 // ---- Auto-update: download the pack from this site only when its version changed.
 async function checkUpdate(manual) {
   let remote;
   try { remote = await (await fetch('pack/version.json', { cache: 'no-store' })).json(); }
-  catch { if (manual) $('msg').textContent = 'Offline. Using the pack on this device.'; return; }
-  if (Pack.info && Pack.info.version === remote.version) { if (manual) $('msg').textContent = 'Up to date (v' + remote.version + ').'; return; }
-  $('msg').textContent = 'Downloading pack v' + remote.version + '…';
+  catch { if (manual) { packMsg = 'Offline. Using the pack on this device.'; render(); } return; }
+  if (Pack.info && Pack.info.version === remote.version) { packMsg = manual ? 'Up to date (v' + remote.version + ').' : 'Ready.'; if (manual) render(); return; }
+  packMsg = 'Downloading pack v' + remote.version + '…'; render();
   try {
     const r = await fetch('pack/marbles-pack.zip?v=' + encodeURIComponent(remote.version), { cache: 'no-store' });
     if (!r.ok) throw new Error('Download failed (' + r.status + ').');
     const blob = await r.blob();
     await openPack(blob); await idbPut('pack', blob);
-    $('msg').textContent = 'Updated to v' + remote.version + '.';
-  } catch (err) { $('msg').textContent = err.message; }
+    packMsg = 'Updated to v' + remote.version + '.';
+    if (screen === 'options' && hasArt() && !manual) screen = 'title';
+  } catch (err) { packMsg = err.message; }
+  render();
 }
-$('btnUpdate').addEventListener('click', () => checkUpdate(true));
-const promptGet = () => { try { return localStorage.getItem('marbles-prompt-abilities') !== '0'; } catch { return true; } };
-const promptShow = () => { $('promptState').textContent = promptGet() ? 'On' : 'Off'; };
-$('btnPrompt').addEventListener('click', () => { try { localStorage.setItem('marbles-prompt-abilities', promptGet() ? '0' : '1'); } catch {} promptShow(); });
-promptShow();
-$('btnBattle').addEventListener('click', () => { location.href = 'battle.html'; });
-$('btnIndex').addEventListener('click', () => { location.href = 'viewer.html'; });
 
 (async () => {
-  try { const saved = await idbGet('pack'); if (saved) await openPack(saved); } catch {}
+  try { const saved = await idbGet('pack'); if (saved) { await openPack(saved); packMsg = 'Ready.'; } } catch {}
+  render();
   checkUpdate(false);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  window.MENU = { go, get screen() { return screen; } };
 })();
 </script>
 </body>
