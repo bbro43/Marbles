@@ -3878,12 +3878,16 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt08",
-    "name": "Fencer",
+    "id": "dc_spt09",
+    "name": "Hexados",
     "color": "haos",
     "attrs": [
      "haos",
-     "pyrus"
+     "pyrus",
+     "darkus",
+     "ventus",
+     "subterra",
+     "aquos"
     ]
    }
   },
@@ -3936,13 +3940,16 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt08",
-    "name": "Fencer",
+    "id": "dc_spt09",
+    "name": "Hexados",
     "color": "haos",
     "attrs": [
      "haos",
      "subterra",
-     "darkus"
+     "darkus",
+     "aquos",
+     "ventus",
+     "pyrus"
     ]
    }
   },
@@ -3995,14 +4002,16 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt08",
-    "name": "Fencer",
+    "id": "dc_spt09",
+    "name": "Hexados",
     "color": "haos",
     "attrs": [
      "haos",
      "darkus",
      "subterra",
-     "ventus"
+     "ventus",
+     "pyrus",
+     "aquos"
     ]
    }
   }
@@ -4058,16 +4067,12 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt09",
-    "name": "Hexados",
+    "id": "dc_spt08",
+    "name": "Fencer",
     "color": "subterra",
     "attrs": [
      "subterra",
-     "aquos",
-     "haos",
-     "darkus",
-     "ventus",
-     "pyrus"
+     "aquos"
     ]
    }
   },
@@ -4120,16 +4125,13 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt09",
-    "name": "Hexados",
+    "id": "dc_spt08",
+    "name": "Fencer",
     "color": "subterra",
     "attrs": [
      "subterra",
      "aquos",
-     "pyrus",
-     "haos",
-     "ventus",
-     "darkus"
+     "pyrus"
     ]
    }
   },
@@ -4182,16 +4184,14 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt09",
-    "name": "Hexados",
+    "id": "dc_spt08",
+    "name": "Fencer",
     "color": "subterra",
     "attrs": [
      "subterra",
      "haos",
      "darkus",
-     "aquos",
-     "pyrus",
-     "ventus"
+     "aquos"
     ]
    }
   }
@@ -4247,16 +4247,12 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt10",
-    "name": "Pythantus",
+    "id": "dc_spt11",
+    "name": "Wired",
     "color": "darkus",
     "attrs": [
      "darkus",
-     "haos",
-     "pyrus",
-     "subterra",
-     "aquos",
-     "ventus"
+     "haos"
     ]
    }
   },
@@ -4309,16 +4305,13 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt10",
-    "name": "Pythantus",
+    "id": "dc_spt11",
+    "name": "Wired",
     "color": "darkus",
     "attrs": [
      "darkus",
      "haos",
-     "ventus",
-     "subterra",
-     "aquos",
-     "pyrus"
+     "ventus"
     ]
    }
   },
@@ -4371,16 +4364,14 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt10",
-    "name": "Pythantus",
+    "id": "dc_spt11",
+    "name": "Wired",
     "color": "darkus",
     "attrs": [
      "darkus",
      "subterra",
      "pyrus",
-     "ventus",
-     "haos",
-     "aquos"
+     "ventus"
     ]
    }
   }
@@ -4436,12 +4427,16 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt10",
+    "name": "Pythantus",
     "color": "ventus",
     "attrs": [
      "ventus",
-     "haos"
+     "haos",
+     "pyrus",
+     "subterra",
+     "aquos",
+     "darkus"
     ]
    }
   },
@@ -4494,13 +4489,16 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt10",
+    "name": "Pythantus",
     "color": "ventus",
     "attrs": [
      "ventus",
      "aquos",
-     "subterra"
+     "subterra",
+     "pyrus",
+     "haos",
+     "darkus"
     ]
    }
   },
@@ -4553,14 +4551,16 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt10",
+    "name": "Pythantus",
     "color": "ventus",
     "attrs": [
      "ventus",
      "aquos",
      "pyrus",
-     "haos"
+     "haos",
+     "subterra",
+     "darkus"
     ]
    }
   }
