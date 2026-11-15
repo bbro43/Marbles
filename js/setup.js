@@ -23,6 +23,7 @@ const CSS = `
 #setup .dot.on { border-color:#fff; }
 #setup .list { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; max-height:300px; overflow:auto; margin-top:8px; padding:2px; }
 #setup .item { text-align:left; background:#151d27; color:#e8edf2; border:2px solid #2a3644; border-left:6px solid var(--c,#2a3644); border-radius:10px; padding:7px 9px; font:inherit; cursor:pointer; }
+#setup .item.off { opacity:.35; cursor:default; }
 #setup .item.sel { border-color:#fff; border-left-color:var(--c); }
 #setup .item b { display:block; font-size:14px; } #setup .item span { display:block; color:#93a2b2; font-size:12px; }
 #setup .tabs { display:flex; gap:6px; } #setup .tab { flex:1; background:#151d27; color:#e8edf2; border:2px solid #2a3644; border-top:5px solid var(--c); border-radius:10px; padding:7px; font:inherit; cursor:pointer; text-align:left; }
@@ -37,6 +38,19 @@ const CSS = `
 #setup .none { color:#5d6b7a; padding:8px; }
 #setup .big { display:block; width:100%; margin:8px 0; font-size:18px; }
 `;
+
+// Evolution lines: a team can hold only one toy from each line (Billy's call).
+// Preyas II Angelo / Diablo share a line (one or the other); Preyas and Warius have no line.
+const LINES = {
+  dragonoid: ['bb_00', 'bb_01', 'dc_sp00', 'dc_sp00_00', 'dc_sp00_01'], tigrerra: ['bb_04', 'bb_05'], preyas2: ['bb_07', 'bb_08'],
+  gorem: ['bb_09', 'bb_10'], skyress: ['bb_11', 'bb_12'], hydranoid: ['bb_13', 'bb_14'], leonidas: ['bb_62', 'bb_63'],
+  vladitor: ['bb_64', 'bb_65'], ingram: ['dc_sp01', 'dc_sp01_00'], elfin: ['dc_sp02', 'dc_sp02_00'],
+  percival: ['dc_sp03', 'dc_sp03_00', 'dc_sp12'], wilda: ['dc_sp04', 'dc_sp04_00'], nemus: ['dc_sp05', 'dc_sp05_00'],
+  helios: ['dc_sp06', 'dc_sp06_01'],
+};
+const LINE_OF = Object.fromEntries(Object.entries(LINES).flatMap(([l, ids]) => ids.map(id => [id, l])));
+// would adding toy id break the one-per-line rule for this team?
+const lineBlocked = (team, id) => !!LINE_OF[id] && team.some(x => x.id !== id && LINE_OF[x.id] === LINE_OF[id]);
 
 const ALL = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
 const NAMES = { pyrus: /pyrus/i, aquos: /aquos|auqos/i, subterra: /sub ?t?terra/i, haos: /haos/i, darkus: /darkus/i, ventus: /ventus/i };
@@ -76,7 +90,7 @@ export function setupTeams(cat) {
   const toyById = new Map(toys.map(t => [t.id, t])), cardById = new Map([...gates, ...abilities].map(c => [c.id, c]));
 
   const randomTeam = () => ({
-    toys: Array.from({ length: 3 }, () => { const t = pick(toys); return { id: t.id, attr: pick(Object.keys(t.attributes)) }; }),
+    toys: (() => { const out = []; while (out.length < 3) { const d = pick(toys); if (!lineBlocked(out, d.id)) out.push({ id: d.id, attr: pick(Object.keys(d.attributes)) }); } return out; })(),
     gates: Object.fromEntries(GATE_COLORS.map(c => [c, pick(gates.filter(g => g.color === c)).id])),
     abilities: Object.fromEntries(AB_COLORS.map(c => [c, pick(abilities.filter(a => a.color === c)).id])),
   });
@@ -99,8 +113,9 @@ export function setupTeams(cat) {
     const main = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || fa[0];
     while (t.toys.length < 3) {
       const taken = new Set(t.toys.map(x => x.id));
-      let pool = toys.filter(d => !taken.has(d.id) && (main ? d.attributes[main] : true));
-      if (!pool.length) pool = toys.filter(d => !taken.has(d.id));
+      const ok = d => !taken.has(d.id) && !lineBlocked(t.toys, d.id);
+      let pool = toys.filter(d => ok(d) && (main ? d.attributes[main] : true));
+      if (!pool.length) pool = toys.filter(ok);
       const d = topPick(pool, d => d.baseG ?? 250);
       t.toys.push({ id: d.id, attr: main && d.attributes[main] ? main : Object.keys(d.attributes)[0] });
     }
@@ -138,7 +153,7 @@ export function setupTeams(cat) {
       const hit = (...texts) => !q || texts.some(x => String(x || '').toLowerCase().includes(q));
       const fa = [...filt];
       const toyList = toys.filter(d => hit(d.name) && (!fa.length || fa.some(a => d.attributes[a]))).map(d =>
-        `<button class="item" data-add="${d.id}" style="--c:${ATTR_COLOR[Object.keys(d.attributes)[0]]}"><b>${esc(d.name)}</b><span>${d.baseG ?? 250}G · ${Object.keys(d.attributes).map(cap).join(', ')}</span><span>Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</span></button>`).join('');
+        `<button class="item ${lineBlocked(t.toys, d.id) ? 'off' : ''}" data-add="${d.id}" style="--c:${ATTR_COLOR[Object.keys(d.attributes)[0]]}"><b>${esc(d.name)}</b><span>${d.baseG ?? 250}G · ${Object.keys(d.attributes).map(cap).join(', ')}</span><span>Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</span></button>`).join('');
       // Gate cards: sorted by the best bonus for your toys' attributes
       const focus = fa.length ? fa : mine.length ? mine : ALL;
       const score = g => Math.max(0, ...focus.map(a => g.bonus[a] || 0));
@@ -171,7 +186,7 @@ export function setupTeams(cat) {
       root.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { t.toys.splice(+b.dataset.rm, 1); render(); });
       root.querySelectorAll('[data-attr]').forEach(b => b.onclick = () => { t.toys[+b.dataset.k].attr = b.dataset.attr; render(); });
       root.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
-        if (t.toys.length >= 3) return;
+        if (t.toys.length >= 3 || lineBlocked(t.toys, b.dataset.add)) return;
         const d = toyById.get(b.dataset.add); t.toys.push({ id: d.id, attr: Object.keys(d.attributes)[0] }); render();
       });
       root.querySelectorAll('[data-gate]').forEach(b => b.onclick = () => {
