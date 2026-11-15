@@ -567,9 +567,9 @@ export const AI_TEAMS = {
      "name": "Terrorclaw"
     },
     {
-     "id": "bb_62",
+     "id": "bb_61",
      "attr": "subterra",
-     "name": "Leonidas"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -867,9 +867,9 @@ export const AI_TEAMS = {
      "name": "Terrorclaw"
     },
     {
-     "id": "bb_62",
+     "id": "bb_60",
      "attr": "subterra",
-     "name": "Leonidas"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -1462,9 +1462,9 @@ export const AI_TEAMS = {
      "name": "Cycloid"
     },
     {
-     "id": "bb_62",
+     "id": "bb_46",
      "attr": "subterra",
-     "name": "Leonidas"
+     "name": "Laserman"
     },
     {
      "id": "bb_50",
@@ -1767,9 +1767,9 @@ export const AI_TEAMS = {
      "name": "Laserman"
     },
     {
-     "id": "bb_62",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Leonidas"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -2067,9 +2067,9 @@ export const AI_TEAMS = {
      "name": "Warius"
     },
     {
-     "id": "bb_63",
+     "id": "bb_46",
      "attr": "aquos",
-     "name": "Omega Leonidas"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2517,9 +2517,9 @@ export const AI_TEAMS = {
      "name": "Warius"
     },
     {
-     "id": "bb_63",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Omega Leonidas"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2662,9 +2662,9 @@ export const AI_TEAMS = {
      "name": "Cosmic Ingram"
     },
     {
-     "id": "bb_63",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Omega Leonidas"
+     "name": "Monarus"
     },
     {
      "id": "bb_46",
@@ -3112,9 +3112,9 @@ export const AI_TEAMS = {
      "name": "Thunder Wilda"
     },
     {
-     "id": "bb_63",
+     "id": "bb_46",
      "attr": "subterra",
-     "name": "Omega Leonidas"
+     "name": "Laserman"
     },
     {
      "id": "bb_50",
@@ -3267,9 +3267,9 @@ export const AI_TEAMS = {
      "name": "Laserman"
     },
     {
-     "id": "bb_63",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Omega Leonidas"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -3417,9 +3417,9 @@ export const AI_TEAMS = {
      "name": "Warius"
     },
     {
-     "id": "bb_63",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Omega Leonidas"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -3712,9 +3712,9 @@ export const AI_TEAMS = {
      "name": "Brontes"
     },
     {
-     "id": "bb_63",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Omega Leonidas"
+     "name": "Monarus"
     },
     {
      "id": "bb_46",
@@ -3818,9 +3818,9 @@ export const AI_TEAMS = {
      "name": "Terrorclaw"
     },
     {
-     "id": "bb_62",
+     "id": "bb_61",
      "attr": "subterra",
-     "name": "Leonidas"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -3862,9 +3862,9 @@ export const AI_TEAMS = {
      "name": "Premo Vulcan"
     },
     {
-     "id": "bb_63",
+     "id": "bb_46",
      "attr": "subterra",
-     "name": "Omega Leonidas"
+     "name": "Laserman"
     },
     {
      "id": "bb_50",
@@ -4167,9 +4167,9 @@ export const AI_TEAMS = {
      "name": "Laserman"
     },
     {
-     "id": "bb_63",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Omega Leonidas"
+     "name": "Monarus"
     }
    ],
    "gates": {
