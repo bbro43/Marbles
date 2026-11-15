@@ -89,8 +89,9 @@ export async function buildAvatar(L, url) {
   group.traverse(o => {
     if (!o.isBone) return;
     const side = o.name.includes('_L_') ? 1 : -1;
-    if (/UpperArm$/.test(o.name)) o.rotateOnAxis(Z, -side * 1.18);
-    if (/Forearm$/.test(o.name)) o.rotateOnAxis(Z, side * 0.28);
+    if (/UpperArm$/.test(o.name)) o.rotateOnAxis(Z, -side * 1.24);
+    // elbows bend forward and slightly in, so the hands rest in front of the thighs
+    if (/Forearm$/.test(o.name)) { o.rotateOnAxis(Z, -side * 0.12); o.rotateOnAxis(new THREE.Vector3(0, 1, 0), side * 0.3); }
   });
   const bones = []; group.traverse(o => { if (o.isBone) bones.push({ o, base: o.quaternion.clone() }); });
   group.updateMatrixWorld(true);
