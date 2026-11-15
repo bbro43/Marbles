@@ -28,8 +28,12 @@ const FRICTION = 260;     // units/s^2
 const STAT_MIN = 1, STAT_MAX = 5, STAT_AVG = 3;
 const lv = (st, k) => Math.min(STAT_MAX, Math.max(STAT_MIN, st[k] ?? STAT_AVG));
 const maxSpeed = st => 340 + 30 * (lv(st, 'speed') - 1);              // 340 / 370 / 400 / 430 / 460
-const standMass = st => 1.6 * (1 + 0.25 * (lv(st, 'defense') - 3));   // 0.8 .. 2.4
-const standGrip = st => 520 * (1 + 0.15 * (lv(st, 'defense') - 3));   // 364 .. 676
+// Hits on a standing Bakugan (Billy's rule):
+//   Speed (of whoever hits) < Defense (of the one hit)  -> it doesn't move; the hitter bounces off at half speed.
+//   Speed >= Defense -> it's pushed: push = hit speed x 0.4 x (half / three quarters / full for a gap of 0 / 1 / 2+).
+//   Magnet = its grip on the card: how fast the slide stops. Slide distance = push^2 / (2 x grip).
+const PUSH_SHARE = 0.4, GAP_PUSH = [0.5, 0.75, 1], WALL_BOUNCE = 0.5;
+const standGrip = st => 600 + 300 * (lv(st, 'magnet') - 1);            // 600 / 900 / 1200 / 1500 / 1800
 const MAGNET_SPEED = 160;                                              // magnet works below this speed, over a card
 const magnetBrake = st => 110 * (lv(st, 'magnet') - 1);                // 0 .. 440 extra slowdown
 const magnetPull = st => 15 * (lv(st, 'magnet') - 1);                  // 0 .. 60 pull toward card center
@@ -333,12 +337,11 @@ function tapToCell(e) {
 let roll = null;   // { ball: body, stands: [body] } while a throw is in motion
 // A body: { tm, pos, vel, p, t, kind: 'ball' | 'stand', card (stands only), moved, done }
 const STAND_R = RADIUS * 1.15; // open toys are a bit wider than the closed ball
-const BALL_MASS = 1;
-const massOf = b => b.kind === 'ball' ? BALL_MASS : standMass(statsOf(b.p, b.t));
+const levelOf = (b, k) => lv(statsOf(b.p, b.t), k);
 // A settled ball, and the thrower's own standing toys, act like walls: you can't knock your own toys around.
 const isInvulnerable = b => !!state.invulnerable && state.invulnerable.p === b.p && state.invulnerable.t === b.t;
-const invMass = b => (b.kind === 'ball' && b.done) || (b.kind === 'stand' && (b.p === state.turn || isInvulnerable(b))) ? 0 : 1 / massOf(b);
-const BOUNCE = 0.65;          // how bouncy toy-on-toy hits are
+// never moves when hit: a settled ball, the thrower's own Bakugan, an Invulnerable one
+const fixed = b => (b.kind === 'ball' && b.done) || (b.kind === 'stand' && (b.p === state.turn || isInvulnerable(b)));
 let pointer = null;
 renderer.domElement.addEventListener('pointerdown', e => {
   if (spotTap) {
@@ -796,15 +799,30 @@ function stepPhysics(dt) {
     const n = new THREE.Vector3(c.pos.x - a.pos.x, 0, c.pos.z - a.pos.z); const d = n.length();
     if (d === 0 || d >= ra + rc) continue;
     n.divideScalar(d);
-    // a settled ball acts like a wall; otherwise use the toys' masses
-    const ia = invMass(a), ic = invMass(c);
-    if (ia + ic === 0) continue;
-    const overlap = ra + rc - d;                           // push apart so they never pass through
-    a.pos.addScaledVector(n, -overlap * ia / (ia + ic)); c.pos.addScaledVector(n, overlap * ic / (ia + ic));
-    const rel = a.vel.clone().sub(c.vel).dot(n);
-    if (rel > 0) {
-      const jmp = (1 + BOUNCE) * rel / (ia + ic);
-      a.vel.addScaledVector(n, -jmp * ia); c.vel.addScaledVector(n, jmp * ic);
+    // who is doing the hitting: the one moving harder toward the other
+    const va = a.vel.dot(n), vc = -c.vel.dot(n);
+    const m = va >= vc ? a : c, t = m === a ? c : a, nn = m === a ? n : n.clone().negate();
+    const vm = Math.max(0, m.vel.dot(nn) - t.vel.dot(nn));
+    const overlap = ra + rc - d;
+    const wall = fixed(t) || (t.kind === 'stand' && levelOf(m, 'speed') < levelOf(t, 'defense'));
+    // one push per pair per throw: a follow-up touch just stops the hitter (no pushing a Bakugan along)
+    const key = (m.kind + m.p + m.t) + '>' + (t.kind + t.p + t.t);
+    const again = !wall && t.kind === 'stand' && roll.pushed && roll.pushed.has(key);
+    if (wall || again || fixed(m) && fixed(t)) {
+      m.pos.addScaledVector(nn, -overlap);                 // push the hitter out
+      if (vm > 0) m.vel.addScaledVector(nn, -(1 + (again ? 0 : WALL_BOUNCE)) * vm);
+    } else {
+      m.pos.addScaledVector(nn, -overlap / 2); t.pos.addScaledVector(nn, overlap / 2);
+      if (vm > 0) {
+        if (t.kind === 'ball') {                           // a slid Bakugan bumping the rolling ball
+          t.vel.addScaledVector(nn, vm * 0.6); m.vel.addScaledVector(nn, -vm * 0.6);
+        } else {
+          const T = GAP_PUSH[Math.min(2, levelOf(m, 'speed') - levelOf(t, 'defense'))];
+          t.vel.addScaledVector(nn, vm * PUSH_SHARE * T);
+          m.vel.addScaledVector(nn, -vm * 0.8 * T);        // the hitter loses what it handed over
+          (roll.pushed ||= new Set()).add(key);
+        }
+      }
     }
     for (const b of [a, c]) { if (b.kind === 'stand') b.moved = true; b.tm.holder.position.copy(b.pos); }
   }
