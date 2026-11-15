@@ -382,39 +382,48 @@ function throwToy(vel) {
   }));
   roll = { ball, stands };
   // for Second Chance: where everything was before the throw
-  snapshot = { t: selected, toys: [0, 1].flatMap(p => toysMesh[p].map((m, t) => ({ m, pos: m.holder.position.clone(), q: m.obj.quaternion.clone(), vis: m.holder.visible }))) };
+  snapshot = { t: selected, toys: [0, 1].flatMap(p => toysMesh[p].map((m, t) => ({ m, pos: m.holder.position.clone(), q: m.obj.quaternion.clone(), vis: m.holder.visible, open: m.open }))) };
   fieldPhase = null; refreshAbilityButton();
   say('');
 }
 let snapshot = null;
+// Settle the thrown Bakugan onto the card it stopped over, open it, and say what happened.
+async function standAndShow(ball, knocked) {
+  const { tm, t } = ball, p = state.turn, name = state.players[p].toys[t].name;
+  let k = landingIndexAt(ball.pos);
+  if (k !== null && knocked.some(b => b.card === state.field[k].card)) k = null;   // that card goes to the knockout
+  if (k === null) { say(`${name} missed the Gate cards — back to your hand.`); return; }
+  const f = state.field[k], spot = onCardSpot(f, ball.pos);
+  if (spot.distanceTo(new THREE.Vector3(ball.pos.x, RADIUS, ball.pos.z)) > 0.5) await glide(tm, spot, 250);
+  tm.obj.quaternion.copy(UPRIGHT); ball.pos.copy(tm.holder.position);
+  await animateOpen(tm, 1);
+  const theirs = f.toys.find(x => x.p !== p), mine = f.toys.some(x => x.p === p);
+  say(theirs ? `${name} opens on ${f.card.name} — battle with ${state.players[1 - p].toys[theirs.t].name}!`
+    : mine ? `${name} opens next to your other Bakugan on ${f.card.name}!`
+    : `${name} opens on the Gate card!`);
+}
 async function rollStopped() {
   const { ball, stands } = roll; roll = null;
   let { tm, pos, t } = ball;
   const p = state.turn;
   inFlight = tm;
-  // After the Bakugan stops: Ability cards that work now (Second Chance, Trickster, Sleight of Hand, Road Trip)
+  // 1. Knockouts are shown right away (they count after the Ability card window, so Second Chance can undo them).
+  const knockedNow = () => stands.filter(b => b.p !== p && b.moved && cardAt(b.pos) !== b.card && !isInvulnerable(b));
+  for (const b of knockedNow()) { flash('KNOCKOUT!'); await animateOpen(b.tm, 0, 300); b.tm.holder.visible = false; }
+  // 2. The thrown Bakugan settles onto the card it stopped over and opens, with the result on screen.
+  await standAndShow(ball, knockedNow());
+  // 3. Now the Ability card window and its timer (Second Chance, Trickster, Sleight of Hand, Road Trip)
   const post = await postThrowCards(ball, stands);
   if (post === 'redo') return;
   ({ tm, pos, t } = ball); inFlight = tm;
-  // Knockouts first: any standing toy that got pushed off the card it was on.
-  const knocked = stands.filter(b => b.p !== p && b.moved && cardAt(b.pos) !== b.card).map(b => ({ p: b.p, t: b.t, card: b.card }));
+  // 4. Knockouts count now
+  const knocked = knockedNow().map(b => ({ p: b.p, t: b.t, card: b.card }));
   if (knocked.length) {
-    for (const e of R.knockOff(state, knocked)) {
-      if (e.type === 'knockedOff') {
-        const ktm = toysMesh[e.p][e.t];
-        if (e.p !== p) { say(''); flash('KNOCKOUT!'); } else say(`${state.players[e.p].toys[e.t].name} got knocked off its card.`);
-        await animateOpen(ktm, 0, 300); ktm.holder.visible = false; await sleep(700);
-      }
-      if (e.type === 'capture') await captured(e);
-    }
+    for (const e of R.knockOff(state, knocked)) if (e.type === 'capture') await captured(e);
     if (state.winner !== null) { inFlight = null; return afterTurn(); }
   }
   const fieldIdx = landingIndexAt(pos);
-  if (fieldIdx !== null) {                                   // partly over a card still counts: settle it onto the card
-    const spot = onCardSpot(state.field[fieldIdx], pos);
-    if (spot.distanceTo(new THREE.Vector3(pos.x, RADIUS, pos.z)) > 0.5) await glide(tm, spot, 250);
-    tm.obj.quaternion.copy(UPRIGHT);
-  }
+  if (fieldIdx === null && tm.open > 0) await animateOpen(tm, 0, 250);   // its card was just won by knockout
   // Landed on a card with your own toy: take the card, or move to a touching card.
   let moveTo = null;
   const f = fieldIdx === null ? null : state.field[fieldIdx];
@@ -434,8 +443,8 @@ async function rollStopped() {
   const res = R.land(state, t, fieldIdx, () => moveTo);
   inFlight = null;
   for (const e of res.events) {
-    if (e.type === 'miss') { say('Missed the Gate cards — back to your hand.'); await sleep(900); tm.holder.visible = false; }
-    if (e.type === 'stand') { await animateOpen(tm, 1); say(`${state.players[p].toys[t].name} opens on the Gate card!`); await sleep(600); }
+    if (e.type === 'miss') { tm.holder.visible = false; }
+    if (e.type === 'stand' && tm.open < 1) { await animateOpen(tm, 1); }
     if (e.type === 'moved') { say('Moving to the touching Gate card.'); await sleep(500); await glide(tm, standSpot(e.cell, e.slot)); await animateOpen(tm, 1); await sleep(400); }
     if (e.type === 'capture') await captured(e);
   }
@@ -579,7 +588,7 @@ async function useFieldCard(i) {
       $('picker').classList.add('off');
       play();
       const b = postCtx.ball, old = b.tm, tm2 = toysMesh[p][t2];
-      tm2.holder.position.copy(old.holder.position); tm2.obj.quaternion.copy(UPRIGHT); tm2.holder.visible = true; setOpen(tm2, 0);
+      tm2.holder.position.copy(old.holder.position); tm2.obj.quaternion.copy(UPRIGHT); tm2.holder.visible = true; setOpen(tm2, old.open);
       old.holder.visible = false; setOpen(old, 0);
       b.tm = tm2; b.t = t2; inFlight = tm2;
       say(`Switched to ${pl.toys[t2].name}!`);
@@ -604,8 +613,10 @@ async function useFieldCard(i) {
       const others = state.field.map((f, k) => k).filter(k => k !== landing.fieldIdx), k = others[Math.floor(Math.random() * others.length)];
       say('Road Trip!');
       const to = cellCenter(state.field[k].cell).setY(RADIUS);
+      await animateOpen(postCtx.ball.tm, 0, 200);
       await glide(postCtx.ball.tm, to, 600);
       postCtx.ball.pos.copy(to); landing.fieldIdx = k;
+      await standAndShow(postCtx.ball, []);
       break;
     }
   }
@@ -633,17 +644,17 @@ async function postThrowCards(ball, stands) {
   }
   const done = new Promise(res => { postResolve = res; });
   if (promptOn()) {
-    askUse('Your Bakugan stopped — use an Ability card?', ASK_SECONDS).then(yes => {
+    askUse('Use an Ability card before the turn goes on?', ASK_SECONDS).then(yes => {
       if (yes) openAbilityPanel(); else if (postResolve) { const r = postResolve; postResolve = null; r('continue'); }
     });
-  } else { say('Your Bakugan stopped — use an Ability card?'); showContinue(); }
+  } else showContinue();
   const how = await done;
   stopTimer(); $('ask').hidden = true; if ($('contBtn')) $('picker').innerHTML = '';
   $('apanel').hidden = true; $('picker').classList.add('off');
   fieldPhase = null; refreshAbilityButton();
   if (how === 'redo') {
     // Second Chance: everything goes back to where it was; throw again
-    for (const x of snapshot.toys) { x.m.holder.position.copy(x.pos); x.m.obj.quaternion.copy(x.q); x.m.holder.visible = x.vis; }
+    for (const x of snapshot.toys) { x.m.holder.position.copy(x.pos); x.m.obj.quaternion.copy(x.q); x.m.holder.visible = x.vis; x.m.anim = null; setOpen(x.m, x.open ?? 0); }
     inFlight = null; busy = false; say('Second Chance — throw again!');
     $('picker').classList.remove('off'); showPicker(); select(snapshot.t);
     return 'redo';
@@ -873,6 +884,8 @@ window.MARBLES = {
   answer: yes => $(yes ? 'askYes' : 'askNo').click(),
   get fieldOptions() { return fieldOpts(); },
   useFieldCard: i => useFieldCard(i),
+  project: (p, t) => { const v = toysMesh[p][t].holder.position.clone().project(camera); const r = renderer.domElement.getBoundingClientRect(); return [Math.round((v.x + 1) / 2 * r.width + r.left), Math.round((1 - v.y) / 2 * r.height + r.top)]; },
+  debugToy: p => toysMesh[p].map(m => ({ vis: m.holder.visible, pos: m.holder.position.toArray().map(Math.round), open: m.open, scale: m.holder.scale.x })),
   giveCard: (p, name) => { const c = pack.catalog.cards.find(x => x.name === name); if (c) state.players[p].abilityHand.push(c); return !!c; },
   closePanel: () => closeAbilityPanel(),
   pickGate: i => { const b = $('picker').querySelector(`[data-g="${i}"]`); if (b) b.click(); },
