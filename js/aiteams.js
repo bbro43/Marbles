@@ -5,6 +5,7 @@ export const AI_TEAMS = {
  "dan": {
   "attr": "pyrus",
   "easy": {
+   "attr": "pyrus",
    "upgrades": 0,
    "toys": [
     {
@@ -53,6 +54,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "pyrus",
    "upgrades": 5,
    "toys": [
     {
@@ -101,6 +103,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "pyrus",
    "upgrades": 10,
    "toys": [
     {
@@ -152,6 +155,7 @@ export const AI_TEAMS = {
  "runo": {
   "attr": "haos",
   "easy": {
+   "attr": "haos",
    "upgrades": 0,
    "toys": [
     {
@@ -200,6 +204,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "haos",
    "upgrades": 5,
    "toys": [
     {
@@ -248,6 +253,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "haos",
    "upgrades": 10,
    "toys": [
     {
@@ -299,6 +305,7 @@ export const AI_TEAMS = {
  "marucho": {
   "attr": "aquos",
   "easy": {
+   "attr": "aquos",
    "upgrades": 0,
    "toys": [
     {
@@ -347,6 +354,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "aquos",
    "upgrades": 5,
    "toys": [
     {
@@ -395,6 +403,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "aquos",
    "upgrades": 10,
    "toys": [
     {
@@ -446,6 +455,7 @@ export const AI_TEAMS = {
  "julie": {
   "attr": "subterra",
   "easy": {
+   "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
@@ -494,6 +504,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "subterra",
    "upgrades": 5,
    "toys": [
     {
@@ -542,6 +553,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "subterra",
    "upgrades": 10,
    "toys": [
     {
@@ -593,6 +605,7 @@ export const AI_TEAMS = {
  "shun": {
   "attr": "ventus",
   "easy": {
+   "attr": "ventus",
    "upgrades": 0,
    "toys": [
     {
@@ -641,6 +654,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "ventus",
    "upgrades": 5,
    "toys": [
     {
@@ -689,6 +703,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "ventus",
    "upgrades": 10,
    "toys": [
     {
@@ -738,48 +753,49 @@ export const AI_TEAMS = {
   }
  },
  "akira": {
-  "attr": "pyrus",
+  "attr": "subterra",
   "easy": {
+   "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
      "id": "bb_41",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Saurus"
     },
     {
      "id": "bb_39",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Juggernoid"
     },
     {
      "id": "bb_40",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Robotallion"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
-     "id": "ds_226",
-     "name": "Earthen Wave"
+     "id": "ds_202",
+     "name": "Muddy Ground"
     },
     "copper": {
-     "id": "ds_310",
-     "name": "Bait and Switch"
+     "id": "ds_303",
+     "name": "Clipped Wings"
     }
    },
    "abilities": {
     "red": {
-     "id": "ds_425",
-     "name": "Pyrus Double Input"
+     "id": "ds_407",
+     "name": "Twin Swap"
     },
     "blue": {
-     "id": "ds_615",
-     "name": "Updraft"
+     "id": "ds_602",
+     "name": "G-Power Boost"
     },
     "green": {
      "id": "ds_505",
@@ -788,21 +804,22 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "subterra",
    "upgrades": 5,
    "toys": [
     {
      "id": "bb_43",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Falconeer"
     },
     {
      "id": "bb_49",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Siege"
     },
     {
      "id": "bb_45",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Griffon"
     }
    ],
@@ -812,22 +829,22 @@ export const AI_TEAMS = {
      "name": "Omega Leonidas"
     },
     "silver": {
-     "id": "ds_207",
-     "name": "Tornado Alley"
+     "id": "ds_208",
+     "name": "Whirlpool"
     },
     "copper": {
-     "id": "ds_317",
-     "name": "Waist Deep"
+     "id": "ds_305",
+     "name": "Down For The Count"
     }
    },
    "abilities": {
     "red": {
-     "id": "ds_409",
-     "name": "Pyrus Time Breaker"
+     "id": "ds_411",
+     "name": "Subterra Time Breaker"
     },
     "blue": {
-     "id": "ds_614",
-     "name": "Circle Of Fire"
+     "id": "ds_608",
+     "name": "Mega Impact"
     },
     "green": {
      "id": "ds_502",
@@ -836,32 +853,33 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "subterra",
    "upgrades": 10,
    "toys": [
     {
      "id": "bb_46",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Laserman"
     },
     {
      "id": "bb_60",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Warius"
     },
     {
      "id": "bb_28",
-     "attr": "pyrus",
+     "attr": "subterra",
      "name": "Fortress"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
-     "id": "ds_216",
-     "name": "Volcanic Lake"
+     "id": "ds_209",
+     "name": "Earthen Mound"
     },
     "copper": {
      "id": "ds_309",
@@ -870,12 +888,12 @@ export const AI_TEAMS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_401",
-     "name": "Pyrus Swap"
+     "id": "ds_403",
+     "name": "Subterra Swap"
     },
     "blue": {
-     "id": "ds_616",
-     "name": "Brushfire"
+     "id": "ds_605",
+     "name": "Home Advantage"
     },
     "green": {
      "id": "ds_501",
@@ -885,38 +903,39 @@ export const AI_TEAMS = {
   }
  },
  "shuji": {
-  "attr": "darkus",
+  "attr": "subterra/darkus/darkus",
   "easy": {
+   "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
      "id": "bb_48",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Fear Ripper"
     },
     {
      "id": "bb_52",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Gargonoid"
     },
     {
      "id": "bb_40",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Robotallion"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
-     "id": "ds_222",
-     "name": "Pit Dweller"
+     "id": "ds_202",
+     "name": "Muddy Ground"
     },
     "copper": {
-     "id": "ds_331",
-     "name": "Mega Warrior"
+     "id": "ds_303",
+     "name": "Clipped Wings"
     }
    },
    "abilities": {
@@ -925,8 +944,8 @@ export const AI_TEAMS = {
      "name": "Twin Swap"
     },
     "blue": {
-     "id": "ds_611",
-     "name": "G-Power Bonus"
+     "id": "ds_602",
+     "name": "G-Power Boost"
     },
     "green": {
      "id": "ds_505",
@@ -935,6 +954,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "darkus",
    "upgrades": 5,
    "toys": [
     {
@@ -983,6 +1003,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "darkus",
    "upgrades": 10,
    "toys": [
     {
@@ -1034,12 +1055,13 @@ export const AI_TEAMS = {
  "jenny": {
   "attr": "aquos",
   "easy": {
+   "attr": "aquos",
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_44",
+     "id": "bb_49",
      "attr": "aquos",
-     "name": "Stinglash"
+     "name": "Siege"
     },
     {
      "id": "bb_47",
@@ -1082,12 +1104,13 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "aquos",
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_44",
+     "id": "bb_49",
      "attr": "aquos",
-     "name": "Stinglash"
+     "name": "Siege"
     },
     {
      "id": "dc_sp07",
@@ -1095,9 +1118,9 @@ export const AI_TEAMS = {
      "name": "Elico"
     },
     {
-     "id": "bb_61",
+     "id": "bb_44",
      "attr": "aquos",
-     "name": "Monarus"
+     "name": "Stinglash"
     }
    ],
    "gates": {
@@ -1130,12 +1153,13 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "aquos",
    "upgrades": 10,
    "toys": [
     {
-     "id": "dc_sp07",
+     "id": "bb_49",
      "attr": "aquos",
-     "name": "Elico"
+     "name": "Siege"
     },
     {
      "id": "dc_sp02",
@@ -1143,9 +1167,9 @@ export const AI_TEAMS = {
      "name": "Elfin"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp07",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Elico"
     }
    ],
    "gates": {
@@ -1179,38 +1203,39 @@ export const AI_TEAMS = {
   }
  },
  "jewls": {
-  "attr": "ventus",
+  "attr": "subterra",
   "easy": {
+   "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_61",
-     "attr": "ventus",
-     "name": "Monarus"
-    },
-    {
-     "id": "bb_58",
-     "attr": "ventus",
-     "name": "Ravenoid"
+     "id": "bb_47",
+     "attr": "subterra",
+     "name": "Centipoid"
     },
     {
      "id": "bb_56",
-     "attr": "ventus",
+     "attr": "subterra",
      "name": "Manion"
+    },
+    {
+     "id": "bb_58",
+     "attr": "subterra",
+     "name": "Ravenoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
-     "id": "ds_232",
-     "name": "Blue Sky"
+     "id": "ds_202",
+     "name": "Muddy Ground"
     },
     "copper": {
-     "id": "ds_317",
-     "name": "Waist Deep"
+     "id": "ds_303",
+     "name": "Clipped Wings"
     }
    },
    "abilities": {
@@ -1219,8 +1244,8 @@ export const AI_TEAMS = {
      "name": "Twin Swap"
     },
     "blue": {
-     "id": "ds_611",
-     "name": "G-Power Bonus"
+     "id": "ds_602",
+     "name": "G-Power Boost"
     },
     "green": {
      "id": "ds_505",
@@ -1229,21 +1254,22 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "subterra",
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_58",
-     "attr": "ventus",
-     "name": "Ravenoid"
+     "id": "bb_47",
+     "attr": "subterra",
+     "name": "Centipoid"
     },
     {
-     "id": "dc_sp11",
-     "attr": "ventus",
-     "name": "Altair"
+     "id": "bb_50",
+     "attr": "subterra",
+     "name": "Terrorclaw"
     },
     {
      "id": "bb_45",
-     "attr": "ventus",
+     "attr": "subterra",
      "name": "Griffon"
     }
    ],
@@ -1253,22 +1279,22 @@ export const AI_TEAMS = {
      "name": "Omega Leonidas"
     },
     "silver": {
-     "id": "ds_213",
-     "name": "Sand Storm"
+     "id": "ds_208",
+     "name": "Whirlpool"
     },
     "copper": {
-     "id": "ds_308",
-     "name": "Load Up"
+     "id": "ds_305",
+     "name": "Down For The Count"
     }
    },
    "abilities": {
     "red": {
-     "id": "ds_414",
-     "name": "Ventus Time Breaker"
+     "id": "ds_411",
+     "name": "Subterra Time Breaker"
     },
     "blue": {
-     "id": "ds_622",
-     "name": "The Gust"
+     "id": "ds_608",
+     "name": "Mega Impact"
     },
     "green": {
      "id": "ds_502",
@@ -1277,46 +1303,47 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "subterra",
    "upgrades": 10,
    "toys": [
     {
-     "id": "dc_sp11",
-     "attr": "ventus",
-     "name": "Altair"
+     "id": "bb_47",
+     "attr": "subterra",
+     "name": "Centipoid"
     },
     {
-     "id": "bb_61",
-     "attr": "ventus",
-     "name": "Monarus"
+     "id": "dc_sp04",
+     "attr": "subterra",
+     "name": "Wilda"
     },
     {
      "id": "bb_46",
-     "attr": "ventus",
+     "attr": "subterra",
      "name": "Laserman"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
-     "id": "ds_207",
-     "name": "Tornado Alley"
+     "id": "ds_209",
+     "name": "Earthen Mound"
     },
     "copper": {
-     "id": "ds_312",
-     "name": "Heat Haze"
+     "id": "ds_309",
+     "name": "Electrified"
     }
    },
    "abilities": {
     "red": {
-     "id": "ds_406",
-     "name": "Ventus Swap"
+     "id": "ds_403",
+     "name": "Subterra Swap"
     },
     "blue": {
-     "id": "ds_615",
-     "name": "Updraft"
+     "id": "ds_605",
+     "name": "Home Advantage"
     },
     "green": {
      "id": "ds_501",
@@ -1328,6 +1355,7 @@ export const AI_TEAMS = {
  "billy": {
   "attr": "subterra",
   "easy": {
+   "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
@@ -1376,6 +1404,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "subterra",
    "upgrades": 5,
    "toys": [
     {
@@ -1424,6 +1453,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "subterra",
    "upgrades": 10,
    "toys": [
     {
@@ -1475,6 +1505,7 @@ export const AI_TEAMS = {
  "komba": {
   "attr": "ventus",
   "easy": {
+   "attr": "ventus",
    "upgrades": 0,
    "toys": [
     {
@@ -1523,6 +1554,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "ventus",
    "upgrades": 5,
    "toys": [
     {
@@ -1571,6 +1603,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "ventus",
    "upgrades": 10,
    "toys": [
     {
@@ -1622,6 +1655,7 @@ export const AI_TEAMS = {
  "julio": {
   "attr": "haos",
   "easy": {
+   "attr": "haos",
    "upgrades": 0,
    "toys": [
     {
@@ -1670,6 +1704,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "haos",
    "upgrades": 5,
    "toys": [
     {
@@ -1718,6 +1753,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "haos",
    "upgrades": 10,
    "toys": [
     {
@@ -1769,6 +1805,7 @@ export const AI_TEAMS = {
  "chanlee": {
   "attr": "pyrus",
   "easy": {
+   "attr": "pyrus",
    "upgrades": 0,
    "toys": [
     {
@@ -1817,6 +1854,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "pyrus",
    "upgrades": 5,
    "toys": [
     {
@@ -1865,6 +1903,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "pyrus",
    "upgrades": 10,
    "toys": [
     {
@@ -1916,6 +1955,7 @@ export const AI_TEAMS = {
  "klaus": {
   "attr": "aquos",
   "easy": {
+   "attr": "aquos",
    "upgrades": 0,
    "toys": [
     {
@@ -1964,6 +2004,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "aquos",
    "upgrades": 5,
    "toys": [
     {
@@ -2012,6 +2053,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "aquos",
    "upgrades": 10,
    "toys": [
     {
@@ -2063,6 +2105,7 @@ export const AI_TEAMS = {
  "masquerade": {
   "attr": "darkus",
   "easy": {
+   "attr": "darkus",
    "upgrades": 0,
    "toys": [
     {
@@ -2111,6 +2154,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "darkus",
    "upgrades": 5,
    "toys": [
     {
@@ -2159,6 +2203,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "darkus",
    "upgrades": 10,
    "toys": [
     {
@@ -2210,6 +2255,7 @@ export const AI_TEAMS = {
  "marduk": {
   "attr": "darkus",
   "easy": {
+   "attr": "darkus",
    "upgrades": 0,
    "toys": [
     {
@@ -2258,6 +2304,7 @@ export const AI_TEAMS = {
    }
   },
   "normal": {
+   "attr": "darkus",
    "upgrades": 5,
    "toys": [
     {
@@ -2306,6 +2353,7 @@ export const AI_TEAMS = {
    }
   },
   "hard": {
+   "attr": "darkus",
    "upgrades": 10,
    "toys": [
     {

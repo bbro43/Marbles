@@ -5,17 +5,17 @@ import { fitsAttrs, abilityScore, lineBlocked, GATE_COLORS, AB_COLORS } from '..
 import { isCoded } from '../js/abilities.js';
 const cat = JSON.parse(fs.readFileSync(process.argv[2]));
 const byName = new Map(cat.toys.filter(t => t.baseG).map(t => [t.name, t]));
-// character: attribute and the Bakugan used at each difficulty (stronger Bakugan as it goes up)
+// character: attribute (one, or one per difficulty) and the Bakugan used at each difficulty (stronger Bakugan as it goes up)
 const CH = {
   dan:        ['pyrus',    ['Dragonoid', 'Falconeer', 'Serpenoid'],     ['Dragonoid', 'Laserman', 'Griffon'],       ['Delta Dragonoid II', 'Fortress', 'Warius']],
   runo:       ['haos',     ['Tigrerra', 'Centipoid', 'Saurus'],         ['Tigrerra', 'Tentaclear', 'Laserman'],     ['Blade Tigrerra', 'Mega Nemus', 'Tentaclear']],
   marucho:    ['aquos',    ['Preyas', 'Juggernoid', 'Stinglash'],       ['Preyas', 'Sirenoid', 'Siege'],            ['Preyas II (Angelo)', 'Preyas', 'Dual Elfin']],
   julie:      ['subterra', ['Gorem', 'Saurus', 'Terrorclaw'],           ['Gorem', 'Cycloid', 'Siege'],              ['Hammer Gorem', 'Thunder Wilda', 'Cycloid']],
   shun:       ['ventus',   ['Skyress', 'Falconeer', 'Monarus'],         ['Skyress', 'Harpus', 'Laserman'],          ['Storm Skyress', 'Cosmic Ingram', 'Harpus']],
-  akira:      ['pyrus',    ['Saurus', 'Juggernoid', 'Robotallion'],     ['Falconeer', 'Siege', 'Griffon'],          ['Laserman', 'Warius', 'Fortress']],
-  shuji:      ['darkus',   ['Fear Ripper', 'Gargonoid', 'Robotallion'], ['Fear Ripper', 'Siege', 'Laserman'],       ['Hades', 'Laserman', 'Siege']],
-  jenny:      ['aquos',    ['Stinglash', 'Centipoid', 'Serpenoid'],     ['Stinglash', 'Elico', 'Monarus'],          ['Elico', 'Elfin', 'Laserman']],
-  jewls:      ['ventus',   ['Monarus', 'Ravenoid', 'Manion'],           ['Ravenoid', 'Altair', 'Griffon'],          ['Altair', 'Monarus', 'Laserman']],
+  akira:      ['subterra',    ['Saurus', 'Juggernoid', 'Robotallion'],     ['Falconeer', 'Siege', 'Griffon'],          ['Laserman', 'Warius', 'Fortress']],
+  shuji:      [['subterra', 'darkus', 'darkus'],   ['Fear Ripper', 'Gargonoid', 'Robotallion'], ['Fear Ripper', 'Siege', 'Laserman'],       ['Hades', 'Laserman', 'Siege']],
+  jenny:      ['aquos',    ['Siege', 'Centipoid', 'Serpenoid'],         ['Siege', 'Elico', 'Stinglash'],            ['Siege', 'Elfin', 'Elico']],
+  jewls:      ['subterra', ['Centipoid', 'Manion', 'Ravenoid'],         ['Centipoid', 'Terrorclaw', 'Griffon'],     ['Centipoid', 'Wilda', 'Laserman']],
   billy:      ['subterra', ['Cycloid', 'Terrorclaw', 'Manion'],         ['Cycloid', 'Premo Vulcan', 'Siege'],       ['Cycloid', 'Premo Vulcan', 'Wilda']],
   komba:      ['ventus',   ['Harpus', 'Manion', 'Ravenoid'],            ['Harpus', 'Falconeer', 'Laserman'],        ['Harpus', 'Ingram', 'Altair']],
   julio:      ['haos',     ['Tentaclear', 'Manion', 'Centipoid'],       ['Tentaclear', 'Brontes', 'Laserman'],      ['Tentaclear', 'Helios', 'Brontes']],
@@ -27,10 +27,10 @@ const CH = {
 const LEVELS = { easy: { upgrades: 0, rank: 4 }, normal: { upgrades: 5, rank: 1 }, hard: { upgrades: 10, rank: 0 } };   // rank 0 = best card for the team
 const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));
 const out = {}, problems = [];
-for (const [id, [attr, ...tiers]] of Object.entries(CH)) {
-  out[id] = { attr };
+for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
+  out[id] = { attr: Array.isArray(attrs0) ? attrs0.join('/') : attrs0 };
   Object.keys(LEVELS).forEach((lvl, k) => {
-    const { upgrades, rank } = LEVELS[lvl], toys = [];
+    const { upgrades, rank } = LEVELS[lvl], toys = [], attr = Array.isArray(attrs0) ? attrs0[k] : attrs0;
     for (const n of tiers[k]) {
       const t = byName.get(n);
       if (!t) { problems.push(`${id} ${lvl}: no Bakugan "${n}"`); continue; }
@@ -38,7 +38,7 @@ for (const [id, [attr, ...tiers]] of Object.entries(CH)) {
       toys.push({ id: t.id, attr: t.attributes[attr] ? attr : Object.keys(t.attributes)[0], name: n });
     }
     const attrs = [attr], ranked = (arr, score) => [...arr].sort((a, b) => score(b) - score(a));
-    const team = { upgrades, toys, gates: {}, abilities: {} };
+    const team = { attr, upgrades, toys, gates: {}, abilities: {} };
     for (const c of GATE_COLORS) { const r = ranked(gates.filter(g => g.color === c), g => g.bonus[attr] || 0); const g = r[Math.min(rank, r.length - 1)]; team.gates[c] = { id: g.id, name: g.name }; }
     for (const c of AB_COLORS) {
       let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
