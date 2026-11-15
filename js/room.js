@@ -5,7 +5,7 @@ import { buildAvatar, idle, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from '
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
-import { AI_TEAMS } from './aiteams.js';
+import { STARTERS } from './aiteams.js';
 import { isCoded } from './abilities.js';
 
 const $ = id => document.getElementById(id);
@@ -370,7 +370,7 @@ const STARTER_OF = { pyrus: 'dan', aquos: 'marucho', subterra: 'julie', haos: 'r
 const ATTR_HEX = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d' };
 const cap = s => s[0].toUpperCase() + s.slice(1);
 function starterDeck(attr) {
-  const t = AI_TEAMS[STARTER_OF[attr]].easy;
+  const t = STARTERS[attr];
   return { toys: t.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_COLORS.map(k => [k, t.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, t.abilities[k].id])) };
 }
 function starter(sel = null) {

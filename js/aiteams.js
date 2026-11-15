@@ -14,14 +14,14 @@ export const AI_TEAMS = {
      "name": "Dragonoid"
     },
     {
-     "id": "bb_43",
-     "attr": "pyrus",
-     "name": "Falconeer"
-    },
-    {
      "id": "bb_42",
      "attr": "pyrus",
      "name": "Serpenoid"
+    },
+    {
+     "id": "bb_41",
+     "attr": "pyrus",
+     "name": "Saurus"
     }
    ],
    "gates": {
@@ -63,9 +63,9 @@ export const AI_TEAMS = {
      "name": "Dragonoid"
     },
     {
-     "id": "bb_46",
+     "id": "bb_43",
      "attr": "pyrus",
-     "name": "Laserman"
+     "name": "Falconeer"
     },
     {
      "id": "bb_45",
@@ -112,9 +112,9 @@ export const AI_TEAMS = {
      "name": "Delta Dragonoid II"
     },
     {
-     "id": "bb_28",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Fortress"
+     "name": "Laserman"
     },
     {
      "id": "bb_60",
@@ -164,14 +164,14 @@ export const AI_TEAMS = {
      "name": "Tigrerra"
     },
     {
-     "id": "bb_47",
-     "attr": "haos",
-     "name": "Centipoid"
-    },
-    {
      "id": "bb_41",
      "attr": "haos",
      "name": "Saurus"
+    },
+    {
+     "id": "bb_56",
+     "attr": "haos",
+     "name": "Manion"
     }
    ],
    "gates": {
@@ -213,14 +213,14 @@ export const AI_TEAMS = {
      "name": "Tigrerra"
     },
     {
-     "id": "bb_29",
+     "id": "bb_58",
      "attr": "haos",
-     "name": "Tentaclear"
+     "name": "Ravenoid"
     },
     {
-     "id": "bb_46",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Laserman"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -262,14 +262,14 @@ export const AI_TEAMS = {
      "name": "Blade Tigrerra"
     },
     {
-     "id": "bb_29",
-     "attr": "haos",
-     "name": "Tentaclear"
-    },
-    {
      "id": "bb_46",
      "attr": "haos",
      "name": "Laserman"
+    },
+    {
+     "id": "bb_61",
+     "attr": "haos",
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -314,14 +314,14 @@ export const AI_TEAMS = {
      "name": "Preyas"
     },
     {
-     "id": "bb_39",
-     "attr": "aquos",
-     "name": "Juggernoid"
-    },
-    {
      "id": "bb_44",
      "attr": "aquos",
      "name": "Stinglash"
+    },
+    {
+     "id": "bb_42",
+     "attr": "aquos",
+     "name": "Serpenoid"
     }
    ],
    "gates": {
@@ -363,14 +363,14 @@ export const AI_TEAMS = {
      "name": "Preyas"
     },
     {
-     "id": "bb_27",
+     "id": "bb_44",
      "attr": "aquos",
-     "name": "Sirenoid"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_49",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Siege"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -412,9 +412,9 @@ export const AI_TEAMS = {
      "name": "Preyas II (Angelo)"
     },
     {
-     "id": "bb_06",
+     "id": "bb_60",
      "attr": "aquos",
-     "name": "Preyas"
+     "name": "Warius"
     },
     {
      "id": "bb_46",
@@ -469,9 +469,9 @@ export const AI_TEAMS = {
      "name": "Saurus"
     },
     {
-     "id": "bb_50",
+     "id": "bb_40",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Robotallion"
     }
    ],
    "gates": {
@@ -513,14 +513,14 @@ export const AI_TEAMS = {
      "name": "Gorem"
     },
     {
-     "id": "bb_26",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Cycloid"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_49",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Siege"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -562,14 +562,14 @@ export const AI_TEAMS = {
      "name": "Hammer Gorem"
     },
     {
-     "id": "bb_26",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Cycloid"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_49",
+     "id": "bb_62",
      "attr": "subterra",
-     "name": "Siege"
+     "name": "Leonidas"
     }
    ],
    "gates": {
@@ -614,14 +614,14 @@ export const AI_TEAMS = {
      "name": "Skyress"
     },
     {
-     "id": "bb_43",
+     "id": "bb_58",
      "attr": "ventus",
-     "name": "Falconeer"
+     "name": "Ravenoid"
     },
     {
-     "id": "bb_61",
+     "id": "bb_56",
      "attr": "ventus",
-     "name": "Monarus"
+     "name": "Manion"
     }
    ],
    "gates": {
@@ -663,14 +663,14 @@ export const AI_TEAMS = {
      "name": "Skyress"
     },
     {
-     "id": "bb_30",
+     "id": "bb_43",
      "attr": "ventus",
-     "name": "Harpus"
+     "name": "Falconeer"
     },
     {
-     "id": "bb_46",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Laserman"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -712,9 +712,9 @@ export const AI_TEAMS = {
      "name": "Storm Skyress"
     },
     {
-     "id": "bb_30",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Harpus"
+     "name": "Monarus"
     },
     {
      "id": "bb_46",
@@ -764,14 +764,14 @@ export const AI_TEAMS = {
      "name": "Saurus"
     },
     {
-     "id": "bb_39",
-     "attr": "subterra",
-     "name": "Juggernoid"
-    },
-    {
      "id": "bb_40",
      "attr": "subterra",
      "name": "Robotallion"
+    },
+    {
+     "id": "bb_44",
+     "attr": "subterra",
+     "name": "Stinglash"
     }
    ],
    "gates": {
@@ -813,9 +813,9 @@ export const AI_TEAMS = {
      "name": "Falconeer"
     },
     {
-     "id": "bb_49",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Siege"
+     "name": "Terrorclaw"
     },
     {
      "id": "bb_45",
@@ -862,14 +862,14 @@ export const AI_TEAMS = {
      "name": "Laserman"
     },
     {
-     "id": "bb_60",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Warius"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_28",
+     "id": "bb_62",
      "attr": "subterra",
-     "name": "Fortress"
+     "name": "Leonidas"
     }
    ],
    "gates": {
@@ -963,14 +963,14 @@ export const AI_TEAMS = {
      "name": "Fear Ripper"
     },
     {
-     "id": "bb_49",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Siege"
+     "name": "Reaper"
     },
     {
-     "id": "bb_46",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Laserman"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -1012,14 +1012,14 @@ export const AI_TEAMS = {
      "name": "Warius"
     },
     {
+     "id": "bb_25",
+     "attr": "darkus",
+     "name": "Reaper"
+    },
+    {
      "id": "bb_46",
      "attr": "darkus",
      "name": "Laserman"
-    },
-    {
-     "id": "bb_49",
-     "attr": "darkus",
-     "name": "Siege"
     }
    ],
    "gates": {
@@ -1064,14 +1064,14 @@ export const AI_TEAMS = {
      "name": "Siege"
     },
     {
-     "id": "bb_47",
-     "attr": "aquos",
-     "name": "Centipoid"
-    },
-    {
      "id": "bb_42",
      "attr": "aquos",
      "name": "Serpenoid"
+    },
+    {
+     "id": "bb_44",
+     "attr": "aquos",
+     "name": "Stinglash"
     }
    ],
    "gates": {
@@ -1118,9 +1118,9 @@ export const AI_TEAMS = {
      "name": "Stinglash"
     },
     {
-     "id": "bb_61",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Monarus"
+     "name": "Griffon"
     }
    ],
    "gates": {
@@ -1162,14 +1162,14 @@ export const AI_TEAMS = {
      "name": "Siege"
     },
     {
-     "id": "bb_46",
-     "attr": "aquos",
-     "name": "Laserman"
-    },
-    {
      "id": "bb_60",
      "attr": "aquos",
      "name": "Warius"
+    },
+    {
+     "id": "bb_46",
+     "attr": "aquos",
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -1219,9 +1219,9 @@ export const AI_TEAMS = {
      "name": "Manion"
     },
     {
-     "id": "bb_58",
+     "id": "bb_41",
      "attr": "subterra",
-     "name": "Ravenoid"
+     "name": "Saurus"
     }
    ],
    "gates": {
@@ -1413,14 +1413,14 @@ export const AI_TEAMS = {
      "name": "Cycloid"
     },
     {
-     "id": "bb_49",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Siege"
+     "name": "Gargonoid"
     },
     {
-     "id": "bb_50",
+     "id": "bb_43",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Falconeer"
     }
    ],
    "gates": {
@@ -1462,14 +1462,14 @@ export const AI_TEAMS = {
      "name": "Cycloid"
     },
     {
-     "id": "bb_46",
+     "id": "bb_62",
      "attr": "subterra",
-     "name": "Laserman"
+     "name": "Leonidas"
     },
     {
-     "id": "bb_60",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Warius"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
@@ -1568,9 +1568,9 @@ export const AI_TEAMS = {
      "name": "Falconeer"
     },
     {
-     "id": "bb_46",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Laserman"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -1617,9 +1617,9 @@ export const AI_TEAMS = {
      "name": "Laserman"
     },
     {
-     "id": "bb_43",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Falconeer"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -1669,9 +1669,9 @@ export const AI_TEAMS = {
      "name": "Manion"
     },
     {
-     "id": "bb_47",
+     "id": "bb_41",
      "attr": "haos",
-     "name": "Centipoid"
+     "name": "Saurus"
     }
    ],
    "gates": {
@@ -1713,14 +1713,14 @@ export const AI_TEAMS = {
      "name": "Tentaclear"
     },
     {
-     "id": "bb_49",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Siege"
+     "name": "Griffon"
     },
     {
-     "id": "bb_46",
+     "id": "bb_58",
      "attr": "haos",
-     "name": "Laserman"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
@@ -1767,9 +1767,9 @@ export const AI_TEAMS = {
      "name": "Laserman"
     },
     {
-     "id": "bb_60",
+     "id": "bb_62",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Leonidas"
     }
    ],
    "gates": {
@@ -1964,14 +1964,14 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "bb_47",
+     "id": "bb_44",
      "attr": "aquos",
-     "name": "Centipoid"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_39",
+     "id": "bb_42",
      "attr": "aquos",
-     "name": "Juggernoid"
+     "name": "Serpenoid"
     }
    ],
    "gates": {
@@ -2013,9 +2013,9 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "bb_49",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Siege"
+     "name": "Reaper"
     },
     {
      "id": "bb_44",
@@ -2062,14 +2062,14 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "bb_08",
+     "id": "bb_60",
      "attr": "aquos",
-     "name": "Preyas II (Diablo)"
+     "name": "Warius"
     },
     {
-     "id": "bb_46",
+     "id": "bb_63",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Omega Leonidas"
     }
    ],
    "gates": {
@@ -2109,14 +2109,14 @@ export const AI_TEAMS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
-    },
-    {
      "id": "bb_13",
      "attr": "darkus",
      "name": "Hydranoid"
+    },
+    {
+     "id": "bb_25",
+     "attr": "darkus",
+     "name": "Reaper"
     },
     {
      "id": "bb_48",
@@ -2217,9 +2217,9 @@ export const AI_TEAMS = {
      "name": "Reaper"
     },
     {
-     "id": "bb_46",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Laserman"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -2259,6 +2259,11 @@ export const AI_TEAMS = {
    "upgrades": 0,
    "toys": [
     {
+     "id": "bb_64",
+     "attr": "darkus",
+     "name": "Vladitor"
+    },
+    {
      "id": "bb_52",
      "attr": "darkus",
      "name": "Gargonoid"
@@ -2267,11 +2272,6 @@ export const AI_TEAMS = {
      "id": "bb_48",
      "attr": "darkus",
      "name": "Fear Ripper"
-    },
-    {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
     }
    ],
    "gates": {
@@ -2318,9 +2318,9 @@ export const AI_TEAMS = {
      "name": "Reaper"
     },
     {
-     "id": "bb_49",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Siege"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -2367,9 +2367,9 @@ export const AI_TEAMS = {
      "name": "Reaper"
     },
     {
-     "id": "bb_49",
+     "id": "bb_46",
      "attr": "darkus",
-     "name": "Siege"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2414,14 +2414,14 @@ export const AI_TEAMS = {
      "name": "Neo Dragonoid"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_45",
      "attr": "pyrus",
-     "name": "Elico"
+     "name": "Griffon"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_43",
      "attr": "pyrus",
-     "name": "Brontes"
+     "name": "Falconeer"
     }
    ],
    "gates": {
@@ -2463,14 +2463,14 @@ export const AI_TEAMS = {
      "name": "Neo Dragonoid"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Helios"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_61",
      "attr": "pyrus",
-     "name": "Altair"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -2512,14 +2512,14 @@ export const AI_TEAMS = {
      "name": "Hyper Dragonoid"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_60",
      "attr": "pyrus",
-     "name": "Helios"
+     "name": "Warius"
     },
     {
-     "id": "dc_sp03_00",
+     "id": "bb_63",
      "attr": "pyrus",
-     "name": "Midnight Percival"
+     "name": "Omega Leonidas"
     }
    ],
    "gates": {
@@ -2564,14 +2564,14 @@ export const AI_TEAMS = {
      "name": "Ingram"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_58",
      "attr": "ventus",
-     "name": "Altair"
+     "name": "Ravenoid"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_43",
      "attr": "ventus",
-     "name": "Elico"
+     "name": "Falconeer"
     }
    ],
    "gates": {
@@ -2613,14 +2613,14 @@ export const AI_TEAMS = {
      "name": "Ingram"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Altair"
+     "name": "Monarus"
     },
     {
-     "id": "dc_sp05",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Nemus"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2662,14 +2662,14 @@ export const AI_TEAMS = {
      "name": "Cosmic Ingram"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_63",
      "attr": "ventus",
-     "name": "Altair"
+     "name": "Omega Leonidas"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Hades"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2714,14 +2714,14 @@ export const AI_TEAMS = {
      "name": "Elfin"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_44",
      "attr": "aquos",
-     "name": "Elico"
+     "name": "Stinglash"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Brontes"
+     "name": "Griffon"
     }
    ],
    "gates": {
@@ -2763,14 +2763,14 @@ export const AI_TEAMS = {
      "name": "Elfin"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_06",
      "attr": "aquos",
-     "name": "Elico"
+     "name": "Preyas"
     },
     {
-     "id": "dc_sp03",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Percival"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -2812,14 +2812,14 @@ export const AI_TEAMS = {
      "name": "Dual Elfin"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_06",
      "attr": "aquos",
-     "name": "Elico"
+     "name": "Preyas"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_60",
      "attr": "aquos",
-     "name": "Helios"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -2864,14 +2864,14 @@ export const AI_TEAMS = {
      "name": "Percival"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_48",
      "attr": "darkus",
-     "name": "Hades"
+     "name": "Fear Ripper"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Brontes"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -2913,14 +2913,14 @@ export const AI_TEAMS = {
      "name": "Percival"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Hades"
+     "name": "Reaper"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_46",
      "attr": "darkus",
-     "name": "Altair"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2962,14 +2962,14 @@ export const AI_TEAMS = {
      "name": "Midnight Percival"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Hades"
+     "name": "Warius"
     },
     {
-     "id": "dc_sp04_00",
+     "id": "bb_46",
      "attr": "darkus",
-     "name": "Thunder Wilda"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -3014,14 +3014,14 @@ export const AI_TEAMS = {
      "name": "Wilda"
     },
     {
-     "id": "dc_sp09",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Premo Vulcan"
+     "name": "Terrorclaw"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Brontes"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -3063,14 +3063,14 @@ export const AI_TEAMS = {
      "name": "Wilda"
     },
     {
-     "id": "dc_sp09",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Premo Vulcan"
+     "name": "Terrorclaw"
     },
     {
-     "id": "dc_sp02",
+     "id": "bb_61",
      "attr": "subterra",
-     "name": "Elfin"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -3112,14 +3112,14 @@ export const AI_TEAMS = {
      "name": "Thunder Wilda"
     },
     {
-     "id": "dc_sp09",
+     "id": "bb_63",
      "attr": "subterra",
-     "name": "Premo Vulcan"
+     "name": "Omega Leonidas"
     },
     {
-     "id": "dc_sp05_00",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Mega Nemus"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
@@ -3164,14 +3164,14 @@ export const AI_TEAMS = {
      "name": "Nemus"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_58",
      "attr": "haos",
-     "name": "Brontes"
+     "name": "Ravenoid"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_56",
      "attr": "haos",
-     "name": "Elico"
+     "name": "Manion"
     }
    ],
    "gates": {
@@ -3213,14 +3213,14 @@ export const AI_TEAMS = {
      "name": "Nemus"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Brontes"
+     "name": "Monarus"
     },
     {
-     "id": "dc_sp01",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Ingram"
+     "name": "Griffon"
     }
    ],
    "gates": {
@@ -3262,14 +3262,14 @@ export const AI_TEAMS = {
      "name": "Mega Nemus"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_46",
      "attr": "haos",
-     "name": "Brontes"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp01_00",
+     "id": "bb_63",
      "attr": "haos",
-     "name": "Cosmic Ingram"
+     "name": "Omega Leonidas"
     }
    ],
    "gates": {
@@ -3314,14 +3314,14 @@ export const AI_TEAMS = {
      "name": "Helios"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_43",
      "attr": "pyrus",
-     "name": "Altair"
+     "name": "Falconeer"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_52",
      "attr": "pyrus",
-     "name": "Elico"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -3363,14 +3363,14 @@ export const AI_TEAMS = {
      "name": "Helios"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Hades"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Altair"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -3412,14 +3412,14 @@ export const AI_TEAMS = {
      "name": "Helios"
     },
     {
-     "id": "dc_sp03_00",
+     "id": "bb_60",
      "attr": "pyrus",
-     "name": "Midnight Percival"
+     "name": "Warius"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_63",
      "attr": "pyrus",
-     "name": "Hades"
+     "name": "Omega Leonidas"
     }
    ],
    "gates": {
@@ -3464,14 +3464,14 @@ export const AI_TEAMS = {
      "name": "Elico"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_44",
      "attr": "aquos",
-     "name": "Brontes"
+     "name": "Stinglash"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Altair"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -3513,14 +3513,14 @@ export const AI_TEAMS = {
      "name": "Elico"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Hades"
+     "name": "Reaper"
     },
     {
-     "id": "dc_sp09",
+     "id": "bb_46",
      "attr": "aquos",
-     "name": "Premo Vulcan"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -3562,14 +3562,14 @@ export const AI_TEAMS = {
      "name": "Elico"
     },
     {
-     "id": "dc_sp02_00",
+     "id": "bb_60",
      "attr": "aquos",
-     "name": "Dual Elfin"
+     "name": "Warius"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_46",
      "attr": "aquos",
-     "name": "Hades"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -3614,14 +3614,14 @@ export const AI_TEAMS = {
      "name": "Brontes"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_56",
      "attr": "haos",
-     "name": "Altair"
+     "name": "Manion"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Elico"
+     "name": "Griffon"
     }
    ],
    "gates": {
@@ -3663,14 +3663,14 @@ export const AI_TEAMS = {
      "name": "Brontes"
     },
     {
-     "id": "dc_sp05",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Nemus"
+     "name": "Monarus"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_58",
      "attr": "haos",
-     "name": "Hades"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
@@ -3712,14 +3712,14 @@ export const AI_TEAMS = {
      "name": "Brontes"
     },
     {
-     "id": "dc_sp05_00",
+     "id": "bb_63",
      "attr": "haos",
-     "name": "Mega Nemus"
+     "name": "Omega Leonidas"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_46",
      "attr": "haos",
-     "name": "Helios"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -3764,14 +3764,14 @@ export const AI_TEAMS = {
      "name": "Premo Vulcan"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Brontes"
+     "name": "Gargonoid"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Elico"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
@@ -3813,14 +3813,14 @@ export const AI_TEAMS = {
      "name": "Premo Vulcan"
     },
     {
-     "id": "dc_sp04",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Wilda"
+     "name": "Terrorclaw"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_62",
      "attr": "subterra",
-     "name": "Hades"
+     "name": "Leonidas"
     }
    ],
    "gates": {
@@ -3862,14 +3862,14 @@ export const AI_TEAMS = {
      "name": "Premo Vulcan"
     },
     {
-     "id": "dc_sp04_00",
+     "id": "bb_63",
      "attr": "subterra",
-     "name": "Thunder Wilda"
+     "name": "Omega Leonidas"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Helios"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
@@ -3914,14 +3914,14 @@ export const AI_TEAMS = {
      "name": "Hades"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_48",
      "attr": "darkus",
-     "name": "Altair"
+     "name": "Fear Ripper"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Elico"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -3963,14 +3963,14 @@ export const AI_TEAMS = {
      "name": "Hades"
     },
     {
-     "id": "dc_sp03",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Percival"
+     "name": "Reaper"
     },
     {
-     "id": "dc_sp09",
+     "id": "bb_48",
      "attr": "darkus",
-     "name": "Premo Vulcan"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
@@ -4012,14 +4012,14 @@ export const AI_TEAMS = {
      "name": "Hades"
     },
     {
-     "id": "dc_sp03_00",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Midnight Percival"
+     "name": "Warius"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Helios"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -4064,14 +4064,14 @@ export const AI_TEAMS = {
      "name": "Altair"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_58",
      "attr": "ventus",
-     "name": "Elico"
+     "name": "Ravenoid"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_43",
      "attr": "ventus",
-     "name": "Brontes"
+     "name": "Falconeer"
     }
    ],
    "gates": {
@@ -4113,14 +4113,14 @@ export const AI_TEAMS = {
      "name": "Altair"
     },
     {
-     "id": "dc_sp01",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Ingram"
+     "name": "Monarus"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_45",
      "attr": "ventus",
-     "name": "Hades"
+     "name": "Griffon"
     }
    ],
    "gates": {
@@ -4162,14 +4162,14 @@ export const AI_TEAMS = {
      "name": "Altair"
     },
     {
-     "id": "dc_sp01_00",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Cosmic Ingram"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_63",
      "attr": "ventus",
-     "name": "Helios"
+     "name": "Omega Leonidas"
     }
    ],
    "gates": {
@@ -4199,6 +4199,291 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   }
+  }
+ }
+};
+// new players' starter decks, by attribute
+export const STARTERS = {
+ "pyrus": {
+  "toys": [
+   {
+    "id": "bb_42",
+    "attr": "pyrus",
+    "name": "Serpenoid"
+   },
+   {
+    "id": "bb_41",
+    "attr": "pyrus",
+    "name": "Saurus"
+   },
+   {
+    "id": "bb_43",
+    "attr": "pyrus",
+    "name": "Falconeer"
+   }
+  ],
+  "gates": {
+   "gold": {
+    "id": "ds_120",
+    "name": "Robotallion"
+   },
+   "silver": {
+    "id": "ds_226",
+    "name": "Earthen Wave"
+   },
+   "copper": {
+    "id": "ds_310",
+    "name": "Bait and Switch"
+   }
+  },
+  "abilities": {
+   "red": {
+    "id": "ds_425",
+    "name": "Pyrus Double Input"
+   },
+   "blue": {
+    "id": "ds_615",
+    "name": "Updraft"
+   },
+   "green": {
+    "id": "ds_505",
+    "name": "Negative Wave"
+   }
+  }
+ },
+ "aquos": {
+  "toys": [
+   {
+    "id": "bb_44",
+    "attr": "aquos",
+    "name": "Stinglash"
+   },
+   {
+    "id": "bb_42",
+    "attr": "aquos",
+    "name": "Serpenoid"
+   },
+   {
+    "id": "bb_40",
+    "attr": "aquos",
+    "name": "Robotallion"
+   }
+  ],
+  "gates": {
+   "gold": {
+    "id": "ds_129",
+    "name": "Siege"
+   },
+   "silver": {
+    "id": "ds_225",
+    "name": "Spitting Fire"
+   },
+   "copper": {
+    "id": "ds_308",
+    "name": "Load Up"
+   }
+  },
+  "abilities": {
+   "red": {
+    "id": "ds_407",
+    "name": "Twin Swap"
+   },
+   "blue": {
+    "id": "ds_604",
+    "name": "Blaze"
+   },
+   "green": {
+    "id": "ds_505",
+    "name": "Negative Wave"
+   }
+  }
+ },
+ "subterra": {
+  "toys": [
+   {
+    "id": "bb_40",
+    "attr": "subterra",
+    "name": "Robotallion"
+   },
+   {
+    "id": "bb_41",
+    "attr": "subterra",
+    "name": "Saurus"
+   },
+   {
+    "id": "bb_56",
+    "attr": "subterra",
+    "name": "Manion"
+   }
+  ],
+  "gates": {
+   "gold": {
+    "id": "ds_121",
+    "name": "Saurus"
+   },
+   "silver": {
+    "id": "ds_202",
+    "name": "Muddy Ground"
+   },
+   "copper": {
+    "id": "ds_303",
+    "name": "Clipped Wings"
+   }
+  },
+  "abilities": {
+   "red": {
+    "id": "ds_407",
+    "name": "Twin Swap"
+   },
+   "blue": {
+    "id": "ds_602",
+    "name": "G-Power Boost"
+   },
+   "green": {
+    "id": "ds_505",
+    "name": "Negative Wave"
+   }
+  }
+ },
+ "haos": {
+  "toys": [
+   {
+    "id": "bb_41",
+    "attr": "haos",
+    "name": "Saurus"
+   },
+   {
+    "id": "bb_56",
+    "attr": "haos",
+    "name": "Manion"
+   },
+   {
+    "id": "bb_58",
+    "attr": "haos",
+    "name": "Ravenoid"
+   }
+  ],
+  "gates": {
+   "gold": {
+    "id": "ds_103",
+    "name": "Tigrerra"
+   },
+   "silver": {
+    "id": "ds_223",
+    "name": "Nightmare"
+   },
+   "copper": {
+    "id": "ds_305",
+    "name": "Down For The Count"
+   }
+  },
+  "abilities": {
+   "red": {
+    "id": "ds_407",
+    "name": "Twin Swap"
+   },
+   "blue": {
+    "id": "ds_606",
+    "name": "Power From Darkness"
+   },
+   "green": {
+    "id": "ds_505",
+    "name": "Negative Wave"
+   }
+  }
+ },
+ "darkus": {
+  "toys": [
+   {
+    "id": "bb_48",
+    "attr": "darkus",
+    "name": "Fear Ripper"
+   },
+   {
+    "id": "bb_52",
+    "attr": "darkus",
+    "name": "Gargonoid"
+   },
+   {
+    "id": "bb_42",
+    "attr": "darkus",
+    "name": "Serpenoid"
+   }
+  ],
+  "gates": {
+   "gold": {
+    "id": "ds_106",
+    "name": "Preyas's"
+   },
+   "silver": {
+    "id": "ds_222",
+    "name": "Pit Dweller"
+   },
+   "copper": {
+    "id": "ds_331",
+    "name": "Mega Warrior"
+   }
+  },
+  "abilities": {
+   "red": {
+    "id": "ds_407",
+    "name": "Twin Swap"
+   },
+   "blue": {
+    "id": "ds_611",
+    "name": "G-Power Bonus"
+   },
+   "green": {
+    "id": "ds_505",
+    "name": "Negative Wave"
+   }
+  }
+ },
+ "ventus": {
+  "toys": [
+   {
+    "id": "bb_58",
+    "attr": "ventus",
+    "name": "Ravenoid"
+   },
+   {
+    "id": "bb_56",
+    "attr": "ventus",
+    "name": "Manion"
+   },
+   {
+    "id": "bb_44",
+    "attr": "ventus",
+    "name": "Stinglash"
+   }
+  ],
+  "gates": {
+   "gold": {
+    "id": "ds_135",
+    "name": "Monarus"
+   },
+   "silver": {
+    "id": "ds_232",
+    "name": "Blue Sky"
+   },
+   "copper": {
+    "id": "ds_317",
+    "name": "Waist Deep"
+   }
+  },
+  "abilities": {
+   "red": {
+    "id": "ds_407",
+    "name": "Twin Swap"
+   },
+   "blue": {
+    "id": "ds_611",
+    "name": "G-Power Bonus"
+   },
+   "green": {
+    "id": "ds_505",
+    "name": "Negative Wave"
    }
   }
  }
