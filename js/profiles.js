@@ -11,7 +11,7 @@ export function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } 
 export function active(d = load()) { return d.active !== null && d.slots[d.active] ? d.slots[d.active] : null; }
 export const newStats = () => ({ matches: 0, wins: 0, losses: 0, gates: 0, knockouts: 0, streak: 0, best: 0, vs: {} });
 export function create(d, slot, name, look) {
-  d.slots[slot] = { name: name || 'Brawler', look, face: null, deck: null, stats: newStats(), made: Date.now(), bp: START_BP, owned: { toys: {}, cards: [] } };
+  d.slots[slot] = { name: name || 'Brawler', look, face: null, deck: null, stats: newStats(), made: Date.now(), bp: START_BP, owned: { toys: {}, cards: [], traps: [] } };
   d.active = slot; save(d); return d.slots[slot];
 }
 export function update(slot, fn) { const d = load(); if (!d.slots[slot]) return; fn(d.slots[slot]); save(d); }
@@ -39,6 +39,8 @@ export const G_STEP = 10, G_CAP = 600, STAT_CAP = 5;
 export const toyPrice = t => Math.max(800, Math.round((t.baseG || 250) * 6 / 100) * 100);
 export const CARD_PRICE = { gold: 250, silver: 200, copper: 150, red: 300, blue: 300, green: 300 };
 export const cardPrice = c => CARD_PRICE[c.color] || 250;
+// Traps: the more attributes, the more it costs (2 attributes 1,500; each more +1,000)
+export const trapPrice = n => 1500 + 1000 * Math.max(0, n - 2);
 // G-Power: +10G each, the price goes up with each one bought for that Bakugan
 export const gPrice = n => 100 + 20 * n;
 // Level: each level adds 1 to Speed, Defense or Magnet (your pick). Level 1 = no stat points added.
@@ -47,8 +49,9 @@ export const key = (id, attr) => `${id}:${attr}`;
 // owned: { toys: { 'bb_00:pyrus': { g: upgrades bought, st: { speed, defense, magnet } } }, cards: [ids] }
 export function ensureShop(p) {
   if (p.bp === undefined) p.bp = START_BP;
+  if (p.owned && !p.owned.traps) p.owned.traps = [];
   if (!p.owned) {
-    p.owned = { toys: {}, cards: [] };
+    p.owned = { toys: {}, cards: [], traps: [] };
     if (p.deck) {   // a player made before the Shop keeps the deck they had
       for (const x of p.deck.toys || []) p.owned.toys[key(x.id, x.attr)] = { g: 0, st: {} };
       p.owned.cards = [...Object.values(p.deck.gates || {}), ...Object.values(p.deck.abilities || {})];

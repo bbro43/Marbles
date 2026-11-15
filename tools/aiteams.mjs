@@ -60,6 +60,20 @@ const STARTERS = {
 const LEVELS = { easy: { upgrades: 0, rank: 4 }, normal: { upgrades: 5, rank: 1 }, hard: { upgrades: 10, rank: 0 } };   // rank 0 = best card for the team
 const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));
 const out = {}, problems = [];
+// Gold Gate cards are character cards (a picture of one Bakugan, which gets the bonus twice).
+// A prebuilt deck only takes a gold card for a Bakugan it has.
+const goldFor = (g, names) => names.includes(g.name) || (g.name === "Preyas's" && names.some(n => n.startsWith('Preyas II')));
+function pickGates(names, attr, rank) {
+  const gt = {};
+  for (const c of GATE_COLORS) {
+    let pool = gates.filter(g => g.color === c);
+    if (c === 'gold') { const mine = pool.filter(g => goldFor(g, names)); if (mine.length) pool = mine; else problems.push(`no gold card for ${names.join(', ')}`); }
+    const score = g => (g.bonus[attr] || 0) + (c === 'gold' && goldFor(g, names.slice(0, 1)) ? 1000 : 0);   // the partner's own card first
+    const r = [...pool].sort((a, b) => score(b) - score(a)), g = r[Math.min(c === 'gold' ? 0 : rank, r.length - 1)];
+    gt[c] = { id: g.id, name: g.name };
+  }
+  return gt;
+}
 for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
   out[id] = { attr: Array.isArray(attrs0) ? attrs0.join('/') : attrs0 };
   Object.keys(LEVELS).forEach((lvl, k) => {
@@ -74,7 +88,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     }
     const attrs = [attr], ranked = (arr, score) => [...arr].sort((a, b) => score(b) - score(a));
     const team = { attr, upgrades, toys, gates: {}, abilities: {} };
-    for (const c of GATE_COLORS) { const r = ranked(gates.filter(g => g.color === c), g => g.bonus[attr] || 0); const g = r[Math.min(rank, r.length - 1)]; team.gates[c] = { id: g.id, name: g.name }; }
+    team.gates = pickGates(toys.map(x => x.name), attr, rank);
     for (const c of AB_COLORS) {
       let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
       const r = ranked(pool, a => abilityScore(a, attrs)); const a = r[Math.min(rank, r.length - 1)]; team.abilities[c] = { id: a.id, name: a.name };
@@ -86,7 +100,7 @@ const starters = {};
 for (const [attr, [who, names]] of Object.entries(STARTERS)) {
   for (const n of names) { if (ownerOf.has(n)) problems.push(`starter ${attr}: ${n} is a partner`); if (!byName.get(n)) problems.push(`starter ${attr}: no Bakugan ${n}`); }
   const e = out[who].easy;
-  starters[attr] = { toys: names.map(n => ({ id: byName.get(n).id, attr, name: n })), gates: e.gates, abilities: e.abilities };
+  starters[attr] = { toys: names.map(n => ({ id: byName.get(n).id, attr, name: n })), gates: pickGates(names, attr, 4), abilities: e.abilities };
 }
 fs.writeFileSync(new URL('../js/aiteams.js', import.meta.url), `// Computer opponents: each character's team at Easy / Normal / Hard. Built by tools/aiteams.mjs — edit the table there.
 // upgrades: each upgrade adds ${UPG()}G to every Bakugan on the team (capped at 600G).

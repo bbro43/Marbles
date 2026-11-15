@@ -105,7 +105,7 @@ async function faceShot() {
 let screen = 'room', roomSel = 3, slot = null;
 const prof = () => { const d = P.load(); const p = d.active !== null ? d.slots[d.active] : null; if (p && (p.bp === undefined || !p.owned)) { P.ensureShop(p); P.save(d); } return p; };
 const act = () => P.load().active;
-function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade })[s](...a); }
+function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade, trapShop })[s](...a); }
 
 // My Room: the DS carousel
 const ROOM = [['info', 'INFO', 'You can check your statistics on the computer.'], ['save', 'SAVE', 'Switch players or start a new one (up to 6).'],
@@ -235,25 +235,38 @@ function deck() {
   $('topUI').innerHTML = img('banner_team', 56, 7) +
     `<div class="txt" style="left:16px;top:38px;font:italic 900 10px system-ui">CURRENT DECK</div><div class="box" style="left:6px;top:50px;width:244px;height:40px"></div>${pics}` +
     `<div class="txt" style="left:0;right:0;top:104px;text-align:center;color:#ffd54a">Total G-Power</div><div class="txt" style="left:0;right:0;top:118px;text-align:center;font-size:20px;line-height:22px;color:#ffd54a">${d ? total : '—'}</div>`;
+  { const t = (p.owned.traps || []).find(x => x.uid === (d || {}).trap), td = t && (pack.catalog.traps || []).find(x => x.id === t.id);
+    if (td && (td.thumbs || {})[t.color]) $('topUI').insertAdjacentHTML('beforeend', `<img data-src="${td.thumbs[t.color]}" style="left:220px;top:92px;width:30px;height:30px" alt=""><div class="txt" style="left:206px;top:122px;font-size:7px">TRAP</div>`); }
   $('topUI').querySelectorAll('[data-src]').forEach(async im => { im.src = await pack.url(im.dataset.src); });
   $('bot').innerHTML = img('arena_bot', 0, 0) +
     `<div class="pill tap sel" id="dEdit" style="left:40px;top:40px;width:176px">Edit deck</div>` +
     `<div class="pill tap" id="dAuto" style="left:40px;top:70px;width:176px">Auto-Create</div>` +
-    `<div class="pill tap" id="dReset" style="left:40px;top:100px;width:176px">Reset</div>`;
+    `<div class="pill tap" id="dReset" style="left:40px;top:100px;width:176px">Reset</div>` +
+    `<div class="pill tap" id="dTrap" style="left:40px;top:130px;width:176px">Trap: ${esc(trapLabel(p))}</div>`;
   bar(d ? 'Use these to change your deck.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
   const edit = async (start) => {
     $('ds').style.visibility = 'hidden';
     const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned);
     $('ds').style.visibility = '';
-    if (r.deck) P.update(P.load().active, q => { q.deck = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities }; });
+    if (r.deck) P.update(P.load().active, q => { q.deck = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, trap: (q.deck || {}).trap || null }; });
     go('deck');
   };
   $('dEdit').onclick = () => edit();
   $('dAuto').onclick = () => edit({ name: p.name, toys: [], gates: {}, abilities: {}, auto: true });
+  $('dTrap').onclick = () => {
+    const list = p.owned.traps || [];
+    if (!list.length) { bar('You have no Traps yet. Buy one in the Shop.'); return; }
+    const ids = [null, ...list.map(t => t.uid)], cur = ids.indexOf((p.deck || {}).trap || null);
+    P.update(act(), q => { if (q.deck) q.deck.trap = ids[(cur + 1) % ids.length]; }); go('deck');
+  };
   $('dReset').onclick = () => { P.update(P.load().active, q => { q.deck = null; }); go('deck'); };
   backBtn(() => go('room'));
 }
 
+function trapLabel(p) {
+  const t = (p.owned.traps || []).find(x => x.uid === (p.deck || {}).trap); if (!t) return 'none';
+  const d = (pack.catalog.traps || []).find(x => x.id === t.id); return `${d ? d.name : 'Trap'} · ${t.attrs.map(a => cap(a).slice(0, 3)).join('/')}`;
+}
 // Save: 6 players
 let deleting = false;
 function save() {
@@ -428,20 +441,21 @@ function shopTop(on) {
   else holder.visible = true;
 }
 function shopCam() { camera.position.set(-2.75, 0.8, 1.55); camera.lookAt(-0.35, 0.5, -0.05); }
-const SHOP = [['bakugan', 'BAKUGAN', 'Hi there! Pick a Bakugan to buy.'], ['card', 'CARD', 'You can use your BP to buy a new card.'], ['upgrade', 'UPGRADE', 'You can use your BP to upgrade your Bakugan.']];
+const SHOP = [['bakugan', 'BAKUGAN', 'Hi there! Pick a Bakugan to buy.'], ['card', 'CARD', 'You can use your BP to buy a new card.'], ['upgrade', 'UPGRADE', 'You can use your BP to upgrade your Bakugan.'],
+  ['trap', 'TRAP', 'Traps! Pick its color and its attributes. More attributes cost more.']];
 async function shop() {
   const p = prof(); await loadShop(); shopTop(true);
   $('topUI').innerHTML = `<div class="bubble"><b>Alice</b>${SHOP[shopSel][2]}</div>`;
   const n = SHOP.length, L = (shopSel + n - 1) % n, R = (shopSel + 1) % n;
   $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 22) +
-    `<img src="${art('shop_' + SHOP[L][0])}" class="tap" id="sL" style="left:2px;top:66px" alt="">` +
-    `<img src="${art('shop_' + SHOP[shopSel][0] + '_on')}" class="tap" id="sC" style="left:88px;top:54px" alt="">` +
-    `<img src="${art('shop_' + SHOP[R][0])}" class="tap" id="sR" style="left:198px;top:66px" alt="">` +
+    `<img src="${art('shop_' + (SHOP[L][0] === 'trap' ? 'bakugan' : SHOP[L][0]))}" class="tap" id="sL" style="left:2px;top:66px" alt="">` +
+    `<img src="${art('shop_' + (SHOP[shopSel][0] === 'trap' ? 'bakugan' : SHOP[shopSel][0]) + '_on')}" class="tap" id="sC" style="left:88px;top:54px;${SHOP[shopSel][0] === 'trap' ? 'filter:hue-rotate(180deg) saturate(.4)' : ''}" alt="">` +
+    `<img src="${art('shop_' + (SHOP[R][0] === 'trap' ? 'bakugan' : SHOP[R][0]))}" class="tap" id="sR" style="left:198px;top:66px" alt="">` +
     `<div style="position:absolute;left:0;right:0;top:140px;height:14px;background:linear-gradient(#2f7fe8,#1146a8);border-top:1px solid #9fd0ff;border-bottom:1px solid #0a2a66;text-align:center;font:900 10px/14px system-ui;letter-spacing:1px;text-shadow:0 1px 0 #000">${SHOP[shopSel][1]}</div>`;
   bar('Select the type of item you want to buy.');
   $('sL').onclick = () => { shopSel = L; shop(); };
   $('sR').onclick = () => { shopSel = R; shop(); };
-  $('sC').onclick = () => { listTab = 0; listTop = 0; go(SHOP[shopSel][0] === 'upgrade' ? 'upgrade' : 'shopList', SHOP[shopSel][0]); };
+  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; go(k === 'upgrade' ? 'upgrade' : k === 'trap' ? 'trapShop' : 'shopList', k); };
   backBtn(() => { shopTop(false); go('room'); });
 }
 const bpBar = (bp, x, y) => `<div style="position:absolute;left:${x}px;top:${y}px;width:96px;height:14px;border-radius:7px;background:linear-gradient(90deg,#0a3b7a,#06204a);border:2px solid #39b8ff;
@@ -542,5 +556,46 @@ function upgrade(sel = 0) {
   const spend = (cost, fn) => { if (p.bp < cost) { bar(`You need ${cost - p.bp} more BP.`); return; } P.update(act(), q => { q.bp -= cost; fn(q.owned.toys[x.k]); }); upgrade(sel); };
   $('uG').onclick = () => { if (!gMax) spend(gCost, t => { t.g = (t.g || 0) + 1; }); };
   $('bot').querySelectorAll('[data-st]').forEach(b => b.onclick = () => { const k = b.dataset.st; if (up.stats[k] >= P.STAT_CAP) return; spend(lvCost, t => { t.st = t.st || {}; t.st[k] = (t.st[k] || 0) + 1; }); });
+  backBtn(() => go('shop'));
+}
+
+// ---------- Traps: pick the Trap, its color, and 2 or more attributes. One Trap goes in your deck.
+let trapPick = { i: 0, color: null, attrs: [] };
+function trapShop() {
+  const p = prof(), traps = (pack.catalog.traps || []).filter(t => t.attributes);
+  const T = traps[trapPick.i] || traps[0], color = trapPick.color || Object.keys(T.attributes).find(a => !(T.attributesMade || []).includes(a)) || 'pyrus';
+  const n = trapPick.attrs.length, price = P.trapPrice(Math.max(2, n)), mine = (p.owned.traps || []);
+  shopTop(false); top3d(false, 'linear-gradient(115deg,#5a0b1e 0%,#b0122a 45%,#5a0b2e 100%)');
+  $('topUI').innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:22px;background:linear-gradient(#b0122a,#6b0d22);border-bottom:1px solid #fff5;font:900 11px/22px system-ui;text-align:center">
+      <span style="position:absolute;left:4px;font:italic 900 7px/22px system-ui;color:#fffa">TRAP ››</span>${esc(T.name)}</div>
+    <div style="position:absolute;left:126px;top:30px;width:120px;background:#2a0b1fcc;padding:6px;border-radius:3px;font:600 8.5px/12px system-ui">
+      0G of its own. Once per game, add it to a battle like an Ability card: it gets the Gate card's bonus for <b>each</b> of its attributes.
+      <div style="margin-top:6px;color:#ffd0c8">Attributes: ${n ? trapPick.attrs.map(cap).join(', ') : 'pick 2 or more'}</div>
+      <div style="margin-top:4px;color:#ffcf3a;font-weight:900">${n >= 2 ? price + ' BP' : '2 attributes: ' + P.trapPrice(2) + ' BP, +1,000 each more'}</div></div>
+    <div class="txt" style="left:8px;top:168px;font-size:9px">You own ${mine.length} Trap${mine.length === 1 ? '' : 's'}</div>`;
+  if ((T.thumbs || {})[color]) pack.url(T.thumbs[color]).then(u => { const im = document.createElement('img'); im.src = u; im.style.cssText = 'left:8px;top:30px;width:112px;height:112px'; $('topUI').append(im); });
+  const pill = (txt, x, y, w, id, on) => `<div class="pill tap ${on ? 'sel' : ''}" ${id} style="left:${x}px;top:${y}px;width:${w}px;height:16px;line-height:14px;font-size:9px">${txt}</div>`;
+  $('bot').innerHTML = img('list_bot', 0, 0) +
+    pill('◀', 6, 20, 22, 'id="tPrev"') + `<div class="txt" style="left:32px;top:22px;width:150px;text-align:center">${esc(T.name)} (${trapPick.i + 1}/${traps.length})</div>` + pill('▶', 186, 20, 22, 'id="tNext"') +
+    `<div class="txt" style="left:8px;top:44px;font-size:9px">Color</div>` +
+    ATTRS.map((a, i) => `<img src="${art('attr_' + a)}" class="tap" data-col="${a}" style="left:${50 + i * 32}px;top:40px;width:18px;height:24px;${a === color ? 'outline:2px solid #ff8a1c' : 'opacity:.6'}" alt="">`).join('') +
+    `<div class="txt" style="left:8px;top:76px;font-size:9px">Attrib.</div>` +
+    ATTRS.map((a, i) => `<div class="tap" data-ta="${a}" style="position:absolute;left:${50 + i * 32}px;top:70px;width:28px;height:36px;border-radius:4px;text-align:center;background:${trapPick.attrs.includes(a) ? '#1478c8' : '#0d2140'};border:1px solid #8fb4d8">
+      <img src="${art('attr_' + a)}" style="position:static;width:15px;height:20px;margin-top:2px" alt=""><div style="font:800 5.5px/8px system-ui">${cap(a)}</div></div>`).join('') +
+    `<div class="pill gold tap ${n >= 2 && p.bp >= price ? '' : 'off'}" id="tBuy" style="left:60px;top:118px;width:136px">Buy for ${n >= 2 ? price : '—'} BP</div>` +
+    bpBar(p.bp, 60, 166);
+  bar('Pick a Trap, its color, and 2 or more attributes.');
+  $('tPrev').onclick = () => { trapPick = { i: (trapPick.i + traps.length - 1) % traps.length, color: null, attrs: trapPick.attrs }; trapShop(); };
+  $('tNext').onclick = () => { trapPick = { i: (trapPick.i + 1) % traps.length, color: null, attrs: trapPick.attrs }; trapShop(); };
+  $('bot').querySelectorAll('[data-col]').forEach(b => b.onclick = () => { trapPick.color = b.dataset.col; trapShop(); });
+  $('bot').querySelectorAll('[data-ta]').forEach(b => b.onclick = () => { const a = b.dataset.ta, k = trapPick.attrs.indexOf(a); if (k >= 0) trapPick.attrs.splice(k, 1); else trapPick.attrs.push(a); trapShop(); });
+  $('tBuy').onclick = () => {
+    if (n < 2) { bar('A Trap needs 2 or more attributes.'); return; }
+    if (p.bp < price) { bar(`You need ${price - p.bp} more BP.`); return; }
+    const uid = 't' + Date.now().toString(36), attrs = ATTRS.filter(a => trapPick.attrs.includes(a));
+    P.update(act(), q => { P.ensureShop(q); q.owned.traps = q.owned.traps || []; q.bp -= price; q.owned.traps.push({ uid, id: T.id, color, attrs });
+      if (q.deck && !q.deck.trap) q.deck.trap = uid; });
+    trapPick.attrs = []; trapShop(); bar(`Thanks! ${T.name} (${attrs.map(cap).join(', ')}) is yours. Choose your Trap in My Room > Deck.`);
+  };
   backBtn(() => go('shop'));
 }

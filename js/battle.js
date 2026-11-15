@@ -780,7 +780,7 @@ async function postThrowCards(ball, stands) {
 
 // ---------- battle overlay with the count-up
 // ---------- Ability cards during a battle: active player first, then back and forth until both pass.
-const ABILITY_COLOR = { red: '#d9534f', blue: '#4a8fe0', green: '#4caf6a' };
+const ABILITY_COLOR = { red: '#d9534f', blue: '#4a8fe0', green: '#4caf6a', trap: '#b0b8c4' };
 let abilityResolve = null;
 async function abilityPhase(bt) {
   const o = $('battle'); o.hidden = false; $('bnext').hidden = true;
@@ -1065,6 +1065,14 @@ async function start() {
     abilities: Object.fromEntries(AB_COLORS.map((k, i) => [k, players[p].abilities[i].id])) }; }); });
   if (picked) for (let p = 0; p < 2; p++) { try { const u = picked[p].face && picked[p].face.startsWith('data:') ? picked[p].face : await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
   $('loading').hidden = false;
+  // your Trap from My Room > Deck (one per game, played like an Ability card in a battle)
+  players.forEach((pl, p) => {
+    const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;
+    const pr = Profiles.load().slots[c.profile]; const tr = pr && pr.deck && pr.deck.trap && (pr.owned.traps || []).find(x => x.uid === pr.deck.trap);
+    const d = tr && (cat.traps || []).find(x => x.id === tr.id);
+    if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, name: `Trap: ${d.name}`, attrs: tr.attrs,
+      text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
+  });
   state = R.newMatch(players, { first });
   $('loading').textContent = 'Loading Bakugan…';
   for (let p = 0; p < 2; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));

@@ -26,8 +26,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_101",
+     "name": "Dragonoid"
     },
     "silver": {
      "id": "ds_226",
@@ -75,8 +75,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_101",
+     "name": "Dragonoid"
     },
     "silver": {
      "id": "ds_207",
@@ -225,8 +225,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_103",
+     "name": "Tigrerra"
     },
     "silver": {
      "id": "ds_209",
@@ -326,8 +326,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_129",
-     "name": "Siege"
+     "id": "ds_105",
+     "name": "Preyas"
     },
     "silver": {
      "id": "ds_225",
@@ -375,8 +375,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_105",
+     "name": "Preyas"
     },
     "silver": {
      "id": "ds_204",
@@ -476,8 +476,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_107",
+     "name": "Gorem"
     },
     "silver": {
      "id": "ds_202",
@@ -525,8 +525,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_107",
+     "name": "Gorem"
     },
     "silver": {
      "id": "ds_208",
@@ -626,8 +626,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_109",
+     "name": "Skyress"
     },
     "silver": {
      "id": "ds_232",
@@ -675,8 +675,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_109",
+     "name": "Skyress"
     },
     "silver": {
      "id": "ds_213",
@@ -825,8 +825,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_208",
@@ -874,8 +874,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_108",
-     "name": "Hammer Gorem"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_209",
@@ -926,8 +926,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_202",
@@ -975,8 +975,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_203",
@@ -1024,8 +1024,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_214",
@@ -1125,8 +1125,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_129",
+     "name": "Siege"
     },
     "silver": {
      "id": "ds_204",
@@ -1174,8 +1174,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_129",
+     "name": "Siege"
     },
     "silver": {
      "id": "ds_208",
@@ -1226,8 +1226,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_127",
+     "name": "Centipoid"
     },
     "silver": {
      "id": "ds_202",
@@ -1275,8 +1275,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_127",
+     "name": "Centipoid"
     },
     "silver": {
      "id": "ds_208",
@@ -1324,8 +1324,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_108",
-     "name": "Hammer Gorem"
+     "id": "ds_127",
+     "name": "Centipoid"
     },
     "silver": {
      "id": "ds_209",
@@ -1376,8 +1376,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_114",
+     "name": "Cycloid"
     },
     "silver": {
      "id": "ds_202",
@@ -1425,8 +1425,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_114",
+     "name": "Cycloid"
     },
     "silver": {
      "id": "ds_208",
@@ -1474,8 +1474,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_108",
-     "name": "Hammer Gorem"
+     "id": "ds_114",
+     "name": "Cycloid"
     },
     "silver": {
      "id": "ds_209",
@@ -1526,8 +1526,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_118",
+     "name": "Harpus"
     },
     "silver": {
      "id": "ds_232",
@@ -1575,8 +1575,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_118",
+     "name": "Harpus"
     },
     "silver": {
      "id": "ds_213",
@@ -1624,8 +1624,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_118",
+     "name": "Harpus"
     },
     "silver": {
      "id": "ds_207",
@@ -1676,8 +1676,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_103",
-     "name": "Tigrerra"
+     "id": "ds_117",
+     "name": "Tentaclear"
     },
     "silver": {
      "id": "ds_223",
@@ -1725,8 +1725,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_117",
+     "name": "Tentaclear"
     },
     "silver": {
      "id": "ds_209",
@@ -1774,8 +1774,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_104",
-     "name": "Blade Tigrerra"
+     "id": "ds_117",
+     "name": "Tentaclear"
     },
     "silver": {
      "id": "ds_203",
@@ -1826,8 +1826,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_116",
+     "name": "Fortress"
     },
     "silver": {
      "id": "ds_226",
@@ -1875,8 +1875,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_116",
+     "name": "Fortress"
     },
     "silver": {
      "id": "ds_207",
@@ -1924,8 +1924,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "ds_116",
+     "name": "Fortress"
     },
     "silver": {
      "id": "ds_216",
@@ -1976,8 +1976,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_129",
-     "name": "Siege"
+     "id": "ds_115",
+     "name": "Sirenoid"
     },
     "silver": {
      "id": "ds_225",
@@ -2025,8 +2025,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_115",
+     "name": "Sirenoid"
     },
     "silver": {
      "id": "ds_204",
@@ -2074,8 +2074,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_115",
+     "name": "Sirenoid"
     },
     "silver": {
      "id": "ds_208",
@@ -2126,8 +2126,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_111",
+     "name": "Hydranoid"
     },
     "silver": {
      "id": "ds_222",
@@ -2175,8 +2175,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_111",
+     "name": "Hydranoid"
     },
     "silver": {
      "id": "ds_203",
@@ -2276,8 +2276,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_138",
+     "name": "Vladitor"
     },
     "silver": {
      "id": "ds_222",
@@ -2325,8 +2325,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_138",
+     "name": "Vladitor"
     },
     "silver": {
      "id": "ds_203",
@@ -2374,8 +2374,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_139",
+     "name": "Battle Ax Vladitor"
     },
     "silver": {
      "id": "ds_214",
@@ -2426,8 +2426,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_226",
@@ -2475,8 +2475,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_207",
@@ -2524,8 +2524,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_216",
@@ -2576,8 +2576,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_232",
@@ -2625,8 +2625,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_213",
@@ -2674,8 +2674,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_207",
@@ -2726,8 +2726,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_129",
-     "name": "Siege"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_225",
@@ -2775,8 +2775,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_105",
+     "name": "Preyas"
     },
     "silver": {
      "id": "ds_204",
@@ -2824,8 +2824,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_105",
+     "name": "Preyas"
     },
     "silver": {
      "id": "ds_208",
@@ -2876,8 +2876,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_222",
@@ -2974,8 +2974,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_214",
@@ -3026,8 +3026,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_202",
@@ -3075,8 +3075,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_208",
@@ -3124,8 +3124,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_108",
-     "name": "Hammer Gorem"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_209",
@@ -3176,8 +3176,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_103",
-     "name": "Tigrerra"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_223",
@@ -3225,8 +3225,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_209",
@@ -3274,8 +3274,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_104",
-     "name": "Blade Tigrerra"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_203",
@@ -3326,8 +3326,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_226",
@@ -3375,8 +3375,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_207",
@@ -3424,8 +3424,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_216",
@@ -3476,8 +3476,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_129",
-     "name": "Siege"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_225",
@@ -3525,8 +3525,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_204",
@@ -3574,8 +3574,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_208",
@@ -3626,8 +3626,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_103",
-     "name": "Tigrerra"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_223",
@@ -3675,8 +3675,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_209",
@@ -3724,8 +3724,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_104",
-     "name": "Blade Tigrerra"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_203",
@@ -3776,8 +3776,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_202",
@@ -3825,8 +3825,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_208",
@@ -3874,8 +3874,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_108",
-     "name": "Hammer Gorem"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_209",
@@ -3926,8 +3926,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_222",
@@ -4024,8 +4024,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_214",
@@ -4076,8 +4076,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_232",
@@ -4125,8 +4125,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_137",
-     "name": "Omega Leonidas"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_213",
@@ -4174,8 +4174,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_207",
@@ -4225,8 +4225,8 @@ export const STARTERS = {
   ],
   "gates": {
    "gold": {
-    "id": "ds_120",
-    "name": "Robotallion"
+    "id": "ds_122",
+    "name": "Serpenoid"
    },
    "silver": {
     "id": "ds_226",
@@ -4272,8 +4272,8 @@ export const STARTERS = {
   ],
   "gates": {
    "gold": {
-    "id": "ds_129",
-    "name": "Siege"
+    "id": "ds_124",
+    "name": "Stinglash"
    },
    "silver": {
     "id": "ds_225",
@@ -4319,8 +4319,8 @@ export const STARTERS = {
   ],
   "gates": {
    "gold": {
-    "id": "ds_121",
-    "name": "Saurus"
+    "id": "ds_120",
+    "name": "Robotallion"
    },
    "silver": {
     "id": "ds_202",
@@ -4366,8 +4366,8 @@ export const STARTERS = {
   ],
   "gates": {
    "gold": {
-    "id": "ds_103",
-    "name": "Tigrerra"
+    "id": "ds_121",
+    "name": "Saurus"
    },
    "silver": {
     "id": "ds_223",
@@ -4413,8 +4413,8 @@ export const STARTERS = {
   ],
   "gates": {
    "gold": {
-    "id": "ds_106",
-    "name": "Preyas's"
+    "id": "ds_128",
+    "name": "Fear Ripper"
    },
    "silver": {
     "id": "ds_222",
@@ -4460,8 +4460,8 @@ export const STARTERS = {
   ],
   "gates": {
    "gold": {
-    "id": "ds_135",
-    "name": "Monarus"
+    "id": "ds_133",
+    "name": "Ravenoid"
    },
    "silver": {
     "id": "ds_232",

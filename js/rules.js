@@ -31,7 +31,7 @@ export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DE
       unused: p.toys.map((_, i) => i),
       used: [],
       gateHand: [...p.gates],
-      abilityHand: [...(p.abilities || [])],
+      abilityHand: [...(p.abilities || []), ...(p.trap ? [p.trap] : [])],   // a Trap plays like an Ability card, once
       abilityUsed: [],
       captured: [],
     })),
