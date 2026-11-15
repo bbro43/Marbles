@@ -203,7 +203,10 @@ function showPicker() {
   armed = null;
   if (pl.unused.length === 1) select(pl.unused[0]);
   fieldPhase = 'pre'; refreshAbilityButton();
-  if (promptOn() && !promptedPre && R.fieldCardOptions(state, 'pre').length) { promptedPre = true; openAbilityPanel(); }
+  if (promptOn() && !promptedPre && R.fieldCardOptions(state, 'pre').length) {
+    promptedPre = true;
+    askUse('Use an Ability card before you throw?', ASK_SECONDS).then(yes => { if (yes && fieldPhase === 'pre') openAbilityPanel(); });
+  }
 }
 let promptedPre = false;
 // Red "before you throw" cards that work with the selected toy, shown after the toys. Tap to arm, tap again to cancel.
@@ -485,6 +488,31 @@ let fieldPhase = null, postCtx = null, postResolve = null, pickWait = false;
 const promptOn = () => { try { return localStorage.getItem('marbles-prompt-abilities') !== '0'; } catch { return true; } };
 const setPrompt = on => { try { localStorage.setItem('marbles-prompt-abilities', on ? '1' : '0'); } catch {} };
 const fieldOpts = () => fieldPhase ? R.fieldCardOptions(state, fieldPhase, postCtx && postCtx.landing) : [];
+// One countdown at a time, shown in #timer. onDone runs when it hits zero.
+let timer = null;
+function startTimer(sec, label, onDone) {
+  stopTimer();
+  const el = $('timer'), end = performance.now() + sec * 1000;
+  const tick = () => {
+    const left = Math.ceil((end - performance.now()) / 1000);
+    if (left <= 0) { stopTimer(); onDone(); return; }
+    el.hidden = false; el.textContent = `${label} ${left}s`;
+    timer = setTimeout(tick, 200);
+  };
+  tick();
+}
+function stopTimer() { clearTimeout(timer); timer = null; $('timer').hidden = true; }
+// Yes / No question with a countdown (No when time runs out)
+function askUse(text, sec) {
+  return new Promise(res => {
+    $('ask').hidden = false; $('askText').textContent = text;
+    const done = v => { stopTimer(); $('ask').hidden = true; res(v); };
+    $('askYes').onclick = () => done(true); $('askNo').onclick = () => done(false);
+    startTimer(sec, 'Continuing in', () => done(false));
+  });
+}
+const PANEL_SECONDS = 45, ASK_SECONDS = 10, WAIT_SECONDS = 5, NOCARD_SECONDS = 3;
+
 function refreshAbilityButton() {
   const b = $('abtn'); if (!b || !state) return;
   b.disabled = !fieldPhase;
@@ -500,14 +528,16 @@ function openAbilityPanel() {
   $('aprompt').checked = promptOn();
   $('aclose').textContent = fieldPhase === 'post' ? 'Continue' : 'Close';
   $('alist').querySelectorAll('button[data-a]').forEach(b => b.onclick = () => useFieldCard(+b.dataset.a));
+  startTimer(PANEL_SECONDS, 'Time left', closeAbilityPanel);
 }
 function closeAbilityPanel() {
+  stopTimer();
   $('apanel').hidden = true;
   if (fieldPhase === 'post' && postResolve) { const r = postResolve; postResolve = null; r('continue'); }
 }
 async function useFieldCard(i) {
   const p = state.turn, card = state.players[p].abilityHand[i];
-  $('apanel').hidden = true;
+  stopTimer(); $('apanel').hidden = true;
   const phase = fieldPhase, landing = phase === 'post' ? postCtx.landing : null;
   // find the card again at play time (the hand can change while the player is picking)
   const play = target => { const r = R.playFieldCard(state, state.players[p].abilityHand.indexOf(card), phase, landing, target); flash(card.name); return r; };
@@ -581,22 +611,34 @@ async function useFieldCard(i) {
   }
   refreshAbilityButton();
   if (fieldPhase === 'post') {            // keep the window open: more cards, or Continue
-    if (promptOn()) openAbilityPanel(); else showContinue();
+    if (!fieldOpts().length) { if (postResolve) { const r = postResolve; postResolve = null; r('continue'); } }
+    else if (promptOn()) openAbilityPanel(); else showContinue();
   }
 }
 // Shown in the bottom bar after a throw when prompts are off and a card could be used.
 function showContinue() {
   $('picker').classList.remove('off');
   $('picker').innerHTML = `<button class="chip skip" id="contBtn"><b>Continue ▶</b><span>or tap Ability cards first</span></button>`;
-  $('contBtn').onclick = () => { $('picker').classList.add('off'); if (postResolve) { const r = postResolve; postResolve = null; r('continue'); } };
+  const go = () => { stopTimer(); $('picker').classList.add('off'); $('picker').innerHTML = ''; if (postResolve) { const r = postResolve; postResolve = null; r('continue'); } };
+  $('contBtn').onclick = go;
+  startTimer(WAIT_SECONDS, 'Continuing in', go);
 }
 async function postThrowCards(ball, stands) {
   postCtx = { ball, stands, landing: { t: ball.t, fieldIdx: landingIndexAt(ball.pos) } };
   fieldPhase = 'post'; refreshAbilityButton();
-  if (!fieldOpts().length) { fieldPhase = null; refreshAbilityButton(); return 'continue'; }
+  if (!fieldOpts().length) {               // nothing playable: short pause, then go on
+    fieldPhase = null; refreshAbilityButton();
+    await new Promise(res => startTimer(NOCARD_SECONDS, 'Next in', res));
+    return 'continue';
+  }
   const done = new Promise(res => { postResolve = res; });
-  if (promptOn()) openAbilityPanel(); else { say('Your Bakugan stopped — use an Ability card?'); showContinue(); }
+  if (promptOn()) {
+    askUse('Your Bakugan stopped — use an Ability card?', ASK_SECONDS).then(yes => {
+      if (yes) openAbilityPanel(); else if (postResolve) { const r = postResolve; postResolve = null; r('continue'); }
+    });
+  } else { say('Your Bakugan stopped — use an Ability card?'); showContinue(); }
   const how = await done;
+  stopTimer(); $('ask').hidden = true; if ($('contBtn')) $('picker').innerHTML = '';
   $('apanel').hidden = true; $('picker').classList.add('off');
   fieldPhase = null; refreshAbilityButton();
   if (how === 'redo') {
@@ -782,7 +824,7 @@ renderer.setAnimationLoop(() => {
 
 // ---------- setup: teams are picked on the setup screen (setup.js)
 function wireAbilityButton() {
-  $('abtn').onclick = () => { if (fieldPhase) openAbilityPanel(); };
+  $('abtn').onclick = () => { if (fieldPhase) { $('ask').hidden = true; openAbilityPanel(); } };
   $('aclose').onclick = closeAbilityPanel;
   $('aprompt').onchange = e => setPrompt(e.target.checked);
 }
@@ -827,6 +869,8 @@ window.MARBLES = {
   // tap a choice in the bottom bar (Gate card index, or -1 = Skip) / tap a spot on the mat
   get choosing() { return pickWait ? 'pick' : spotTap ? 'spot' : gateResolve ? 'gate' : null; },
   get fieldPhase() { return fieldPhase; },
+  get asking() { return !$('ask').hidden; },
+  answer: yes => $(yes ? 'askYes' : 'askNo').click(),
   get fieldOptions() { return fieldOpts(); },
   useFieldCard: i => useFieldCard(i),
   giveCard: (p, name) => { const c = pack.catalog.cards.find(x => x.name === name); if (c) state.players[p].abilityHand.push(c); return !!c; },

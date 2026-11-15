@@ -20,6 +20,8 @@
   .pl.active { border-color:var(--pc); box-shadow:0 0 0 2px var(--pc); }
   .pl .n { font-weight:700; } .dot { display:inline-block; width:12px; height:12px; border-radius:50%; border:2px solid #d4af37; margin-right:4px; }
   .dot.on { background:#d4af37; }
+  #timer { position:absolute; top:64px; right:10px; z-index:60; background:#000a; color:#ffd54a; border-radius:999px; padding:4px 10px; font-weight:700; }
+  #ask .row2 { display:flex; gap:10px; margin-top:12px; } #ask .row2 .btn { flex:1; } #askText { font-weight:700; font-size:18px; }
   #abtn { position:absolute; bottom:10px; right:10px; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:8px 12px; font:inherit; }
   #abtn:disabled { opacity:.4; } #abtn.ready { border-color:#ffd54a; box-shadow:0 0 0 2px #ffd54a55; }
   #alist { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; } #alist .ahead { font-weight:700; }
@@ -72,6 +74,11 @@
     <div id="flash"></div>
     <a id="back" href="./">Home</a>
     <button id="abtn" disabled>Ability cards</button>
+    <div id="timer" hidden></div>
+    <div class="overlay" id="ask" hidden><div class="box">
+      <div id="askText"></div>
+      <div class="row2"><button class="btn" id="askYes">Yes</button><button class="btn" id="askNo" style="background:#2a3644">No</button></div>
+    </div></div>
     <div class="overlay" id="apanel" hidden><div class="box">
       <div id="alist"></div>
       <label class="aprompt"><input type="checkbox" id="aprompt"> Prompt Ability Cards</label>
