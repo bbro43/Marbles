@@ -4,7 +4,7 @@
 import { isCoded } from './abilities.js';
 
 const ATTR_COLOR = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d', clear: '#cfd8dc' };
-const GATE_COLORS = ['gold', 'silver', 'copper'], AB_COLORS = ['red', 'blue', 'green'];
+export const GATE_COLORS = ['gold', 'silver', 'copper'], AB_COLORS = ['red', 'blue', 'green'];
 const COLOR_HEX = { gold: '#e2b84a', silver: '#c9d1da', copper: '#c67a43', red: '#d9534f', blue: '#4a8fe0', green: '#4caf6a' };
 const cap = s => s[0].toUpperCase() + s.slice(1);
 const lv = (st, k) => Math.min(5, Math.max(1, (st || {})[k] ?? 3));
@@ -57,21 +57,21 @@ const LINES = {
 };
 const LINE_OF = Object.fromEntries(Object.entries(LINES).flatMap(([l, ids]) => ids.map(id => [id, l])));
 // would adding toy id break the one-per-line rule for this team?
-const lineBlocked = (team, id) => !!LINE_OF[id] && team.some(x => x.id !== id && LINE_OF[x.id] === LINE_OF[id]);
+export const lineBlocked = (team, id) => !!LINE_OF[id] && team.some(x => x.id !== id && LINE_OF[x.id] === LINE_OF[id]);
 
 const ALL = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
 const NAMES = { pyrus: /pyrus/i, aquos: /aquos|auqos/i, subterra: /sub ?t?terra/i, haos: /haos/i, darkus: /darkus/i, ventus: /ventus/i };
 // attributes a card's text asks for ("…with one of your Haos or Ventus…")
 const mentioned = card => ALL.filter(a => NAMES[a].test(card.text || ''));
 // a card fits if it doesn't ask for an attribute, or asks for one of these; bonus cards need a bonus for one of them
-function fitsAttrs(card, attrs) {
+export function fitsAttrs(card, attrs) {
   const m = mentioned(card);
   if (m.length && !m.some(a => attrs.includes(a))) return false;
   const b = card.bonus || {};
   if (Object.values(b).some(v => v > 0) && !attrs.some(a => (b[a] || 0) > 0)) return false;
   return true;
 }
-function abilityScore(card, attrs) {
+export function abilityScore(card, attrs) {
   const b = card.bonus || {};
   const avg = attrs.reduce((n, a) => n + (b[a] || 0), 0) / attrs.length;
   return avg + (card.extraBonus || 0) + (mentioned(card).some(a => attrs.includes(a)) ? 40 : 0);
@@ -149,8 +149,15 @@ export async function setupTeams(cat, pack, picked = null) {
 
   return await new Promise(resolve => {
     const key = i => picked && picked[i] ? 'c-' + picked[i].id : i;
-    const teams = [0, 1].map(i => { const t = restore(lastTeam(key(i)), i); if (picked && picked[i]) t.name = picked[i].name; return t; });
-    let who = 0, gateTab = 'gold', abTab = 'red', search = '';
+    const teams = [0, 1].map(i => {
+      const c = picked && picked[i];
+      // a computer player brings its own team (js/aiteams.js)
+      if (c && c.team) return { name: c.name, fixed: true, toys: c.team.toys.map(x => ({ id: x.id, attr: x.attr })),
+        gates: Object.fromEntries(GATE_COLORS.map(k => [k, c.team.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, c.team.abilities[k].id])) };
+      const t = restore(lastTeam(key(i)), i); if (c) t.name = c.name; return t;
+    });
+    const skipFixed = (w, dir) => { while (w >= 0 && w < 2 && teams[w].fixed) w += dir; return w; };
+    let who = skipFixed(0, 1), gateTab = 'gold', abTab = 'red', search = '';
     const filt = new Set();   // attribute filter (empty = all)
 
     const complete = t => t.toys.length === 3 && GATE_COLORS.every(c => t.gates[c]) && AB_COLORS.every(c => t.abilities[c]);
@@ -199,7 +206,7 @@ export async function setupTeams(cat, pack, picked = null) {
         <h3>Ability cards</h3>
         <div class="tabs">${AB_COLORS.map(c => tab('a', c, t.abilities[c], c === abTab)).join('')}</div>
         <div class="list">${abList || '<span class="none">No matches</span>'}</div>
-        <div class="bar"><button id="srand">Random</button><button id="sauto">Auto finish</button><button class="go" id="sdone" ${complete(t) ? '' : 'disabled'}>${who === 0 ? 'Next player' : 'Done'}</button></div>`;
+        <div class="bar"><button id="srand">Random</button><button id="sauto">Auto finish</button><button class="go" id="sdone" ${complete(t) ? '' : 'disabled'}>${skipFixed(who + 1, 1) < 2 ? 'Next player' : 'Done'}</button></div>`;
       const $ = s => root.querySelector(s);
       if ($('#sname')) $('#sname').oninput = e => { t.name = e.target.value || `Player ${who + 1}`; root.querySelector('h2').textContent = `${t.name}: set up your team`; };
       $('#ssearch').oninput = e => { search = e.target.value; const pos = e.target.selectionStart; render(); const s = root.querySelector('#ssearch'); s.focus(); s.setSelectionRange(pos, pos); };
@@ -224,7 +231,7 @@ export async function setupTeams(cat, pack, picked = null) {
       root.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt.has(b.dataset.f) ? filt.delete(b.dataset.f) : filt.add(b.dataset.f); render(); });
       $('#sdone').onclick = () => {
         if (!complete(t)) return;
-        saveTeam(key(who), t); who++; search = ''; filt.clear(); gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
+        saveTeam(key(who), t); who = skipFixed(who + 1, 1); search = ''; filt.clear(); gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
       };
     }
 
@@ -247,7 +254,7 @@ export async function setupTeams(cat, pack, picked = null) {
           })),
         });
       });
-      root.querySelector('#sback').onclick = () => { who = 1; render(); };
+      root.querySelector('#sback').onclick = () => { who = skipFixed(1, -1); render(); };
     }
 
     render();

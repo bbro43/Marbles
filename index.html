@@ -57,7 +57,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 34;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 35;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -97,7 +97,7 @@ let screen = 'title', timer = null;
 function go(s) { screen = s; clearInterval(timer); timer = null; render(); }
 function render() {
   if (!hasArt() && screen !== 'options') screen = 'options';
-  ({ title, arena, chars, options })[screen]();
+  ({ title, arena, computer, chars, options })[screen]();
 }
 
 // ---- title menu (Story / Battle Arena / Tutorial / My Room / Options) with the rotating character ring
@@ -130,42 +130,77 @@ function title() {
 function arena() {
   $('top').innerHTML = img('arena_top', 0, 0) + img('banner_arena', 56, 7);
   $('bot').innerHTML = img('arena_bot', 0, 0) +
-    `<img src="${art('btn_single')}" class="tap off" id="bSingle" style="left:32px;top:48px" alt="">` +
+    `<img src="${art('btn_single')}" class="tap" id="bSingle" style="left:32px;top:48px" alt="">` +
     `<img src="${art('btn_multi')}" class="tap" id="bMulti" style="left:32px;top:96px" alt="">` +
     `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
   bar('Select the type of game.');
-  $('bSingle').onclick = () => { $('bar').remove(); bar('Single Player needs the computer opponent — that is next on the build list.'); };
-  $('bMulti').onclick = () => { pickFor = 0; picks = [null, null]; go('chars'); };
+  $('bSingle').onclick = () => go('computer');
+  $('bMulti').onclick = () => { mode = 'multi'; pickFor = 0; picks = [null, null]; go('chars'); };
   $('bBack').onclick = () => go('title');
 }
 
-// ---- Select Character (Multiplayer: Player 1 picks, then Player 2)
-let pickFor = 0, picks = [null, null];
+// ---- Single Player: how many computer players (1 for now; 3 and 4 player matches come later)
+function computer() {
+  $('top').innerHTML = img('arena_top', 0, 0) + img('banner_computer', 56, 7);
+  $('bot').innerHTML = img('arena_bot', 0, 0) +
+    [1, 2, 3].map(n => `<img src="${art('cpu_rows' + n)}" class="tap ${n > 1 ? 'off' : ''}" data-n="${n}" style="left:30px;top:${10 + n * 36}px" alt="">`).join('') +
+    `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
+  bar('How many computer-controlled players in the game?');
+  $('bot').querySelectorAll('[data-n]').forEach(b => b.onclick = () => {
+    if (b.dataset.n !== '1') { $('bar').remove(); bar('Matches with 3 and 4 players come later.'); return; }
+    mode = 'single'; pickFor = 0; picks = [null, null]; go('chars');
+  });
+  $('bBack').onclick = () => go('arena');
+}
+
+// ---- Select Character. Multiplayer: Player 1 picks, then Player 2.
+// Single Player: you pick yours, then the computer's character and how hard it plays.
+let mode = 'multi', pickFor = 0, picks = [null, null], level = null;
 function chars() {
   const M = Pack.cat.menu, G = M.grid, face = c => Pack.urls.get(c.face);
   const rowTop = (p, y) => img('hex_empty', 22, y) + img('namebar_' + (picks[p] ? (p ? 'red' : 'blue') : 'grey'), 48, y) +
-    (picks[p] ? `<img src="${face(picks[p])}" style="left:26px;top:${y}px" alt="">` : '') +
+    (picks[p] ? `<img src="${face(picks[p])}" style="left:27px;top:${y + 3}px" alt="">` : '') +
     img('tag_p' + (p + 1), 16, y - 4) +
+    (mode === 'single' ? (p ? img('tag_ai', 40, y - 3) : img('tag_you', 22, y + 22)) : '') +
+    (mode === 'single' && p && picks[p] && level ? `<div class="txt" style="left:180px;top:${y + 10}px;font-size:9px">${level.toUpperCase()}</div>` : '') +
     (picks[p] ? `<div class="txt" style="left:78px;top:${y + 9}px;font-size:12px">${esc(picks[p].name)}</div>` : '');
   $('top').innerHTML = img('arena_top', 0, 0) + img('banner_character', 56, 7) + rowTop(0, 40) + rowTop(1, 78);
-  const frames = picks.map((c, p) => c ? img('hex_p' + (p + 1), G.x + c.col * G.step - 4, G.y + c.row * G.step) : '').join('');
+  const frames = picks.map((c, p) => c ? img('hex_p' + (p + 1), G.x + c.col * G.step - 5, G.y + c.row * G.step - 3) : '').join('');
   $('bot').innerHTML = img('arena_bot', 0, 0) + img('ch_grid', 0, 0) + frames +
-    M.chars.map(c => `<div class="px tap" data-c="${c.id}" style="left:${G.x + c.col * G.step - 4}px;top:${G.y + c.row * G.step}px;width:40px;height:32px"></div>`).join('') +
-    `<div class="px tap" id="cYou" style="left:${G.x - 4}px;top:${G.y}px;width:40px;height:32px"></div>` +
-    `<div class="px tap" id="cRand" style="left:${G.x + 5 * G.step - 4}px;top:${G.y + 2 * G.step}px;width:40px;height:32px"></div>` +
+    M.chars.map(c => `<div class="px tap" data-c="${c.id}" style="left:${G.x + c.col * G.step - 5}px;top:${G.y + c.row * G.step - 3}px;width:40px;height:34px"></div>`).join('') +
+    `<div class="px tap" id="cYou" style="left:${G.x - 5}px;top:${G.y - 3}px;width:40px;height:34px"></div>` +
+    `<div class="px tap" id="cRand" style="left:${G.x + 5 * G.step - 5}px;top:${G.y + 2 * G.step - 3}px;width:40px;height:34px"></div>` +
     `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
-  bar(`Player ${pickFor + 1}: select a character.`);
+  bar(mode === 'single' ? (pickFor ? "Select the computer's character." : 'Select your character.') : `Player ${pickFor + 1}: select a character.`);
+  const start = () => {
+    try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode, players: picks.map((c, p) => ({ id: c.id, name: c.name, face: c.face, ...(mode === 'single' && p === 1 ? { ai: level } : {}) })) })); } catch {}
+    setTimeout(() => { location.href = 'battle.html'; }, 900);
+  };
   const choose = c => {
     picks[pickFor] = c;
     if (pickFor === 0) { pickFor = 1; render(); return; }
+    if (mode === 'single') { render(); return difficulty(c, lv => { level = lv; render(); $('bar').remove(); bar(`${picks[0].name} vs ${picks[1].name} (${lv}) — set up your team!`); start(); }); }
     render(); $('bar').remove(); bar(`${picks[0].name} vs ${picks[1].name} — set up your teams!`);
-    try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode: 'multi', players: picks.map(c => ({ id: c.id, name: c.name, face: c.face })) })); } catch {}
-    setTimeout(() => { location.href = 'battle.html'; }, 900);
+    start();
   };
   $('bot').querySelectorAll('[data-c]').forEach(b => b.onclick = () => choose(M.chars.find(c => c.id === b.dataset.c)));
   $('cRand').onclick = () => choose(M.chars[Math.floor(Math.random() * M.chars.length)]);
   $('cYou').onclick = () => { $('bar').remove(); bar('Making your own character comes with Characters & saves.'); };
-  $('bBack').onclick = () => { if (pickFor === 1 && !picks[1]) { pickFor = 0; picks[0] = null; render(); } else go('arena'); };
+  $('bBack').onclick = () => { if (pickFor === 1) { pickFor = 0; picks = [null, null]; level = null; render(); } else go(mode === 'single' ? 'computer' : 'arena'); };
+}
+// the DS's difficulty box over the character grid
+function difficulty(c, done) {
+  const box = document.createElement('div');
+  box.style.cssText = 'position:absolute;left:41px;top:30px;width:174px;height:146px;background:#2b8a9e;border:2px solid #0e2a33;box-shadow:inset 0 0 0 1px #6fc3d3;z-index:30';
+  box.innerHTML = `<img src="${art('hex_empty')}" style="left:67px;top:8px" alt=""><img src="${Pack.urls.get(c.face)}" style="left:72px;top:11px" alt="">` +
+    ['easy', 'normal', 'hard'].map((k, i) => `<div class="tap" data-l="${k}" style="position:absolute;left:12px;top:${50 + i * 30}px;width:148px;height:22px;border-radius:11px;
+      background:${i ? '#2c2f33' : '#7aa7e0'};border:2px solid ${i ? '#151719' : '#cfe0f7'};display:flex;align-items:center;justify-content:center">
+      <img src="${art('diff_' + k)}" style="position:static" alt=""></div>`).join('');
+  $('bot').append(box); $('bar').remove(); bar('Select the difficulty of the opponent.');
+  box.querySelectorAll('[data-l]').forEach(b => b.onclick = () => {
+    box.querySelectorAll('[data-l]').forEach(x => { const on = x === b; x.style.background = on ? '#7aa7e0' : '#2c2f33'; x.style.borderColor = on ? '#cfe0f7' : '#151719'; });
+    setTimeout(() => { box.remove(); done(b.dataset.l); }, 250);
+  });
 }
 
 // ---- Options: every setting lives here

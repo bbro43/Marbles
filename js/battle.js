@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
 import * as R from './rules.js';
 import { setupTeams } from './setup.js';
+import { AI_TEAMS, UPGRADE_G } from './aiteams.js';
 
 // ---------- real-world scale
 // The Arena mat is 56 cm square = 285 model units, so 1 cm = 285/56 ≈ 5.09 units.
@@ -77,6 +78,80 @@ function cameraFor(p) {
 let gateBack = null;   // card back image from the asset pack (face-down Gate cards)
 let pack, state, toysMesh = [[], []], gateMesh = new Map(), busy = false, selected = null;
 const loader = new GLTFLoader();
+
+// ---------- computer opponent
+// aiLevel[p] = 'easy' | 'normal' | 'hard' for a computer player, null for a person on this device.
+let aiLevel = [null, null];
+const isAI = p => !!aiLevel[p];
+const viewOf = p => isAI(p) && !isAI(1 - p) ? 1 - p : p;     // single player: the camera stays behind the person
+// how far off a throw can be: angle (radians) and distance (fraction), as a spread
+const AI_AIM = { easy: { ang: 0.17, dist: 0.28 }, normal: { ang: 0.08, dist: 0.13 }, hard: { ang: 0.035, dist: 0.06 } };
+const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+const bonusFor = (card, attr) => ((card && card.bonus) || {})[attr] || 0;
+// which Gate card to set: Easy any, otherwise the one that helps its Bakugan the most
+function aiGateIndex(p) {
+  const pl = state.players[p], hand = pl.gateHand;
+  if (!hand.length) return null;
+  if (aiLevel[p] === 'easy') return Math.floor(Math.random() * hand.length);
+  const attrs = pl.unused.map(t => pl.toys[t].attr);
+  let best = 0, bv = -1;
+  hand.forEach((c, i) => { const v = attrs.reduce((n, a) => n + bonusFor(c, a), 0) + Math.random(); if (v > bv) { bv = v; best = i; } });
+  return best;
+}
+// where to set it: Easy anywhere, otherwise the spot closest to its own throwing corner
+function aiPlaceCell(p, cells) {
+  if (aiLevel[p] === 'easy') return cells[Math.floor(Math.random() * cells.length)];
+  const home = DIR[p].clone().multiplyScalar(START);
+  return [...cells].sort((a, b) => cellCenter(a).distanceTo(home) - cellCenter(b).distanceTo(home))[0];
+}
+// pick a Bakugan and a Gate card to throw at
+function aiPlan(p) {
+  const lvl = aiLevel[p], pl = state.players[p], home = DIR[p].clone().multiplyScalar(START);
+  const options = [];
+  for (const t of pl.unused) for (let k = 0; k < state.field.length; k++) {
+    const f = state.field[k], toy = pl.toys[t];
+    const theirs = f.toys.filter(x => x.p !== p), mine = f.toys.filter(x => x.p === p);
+    const myG = toy.g + (lvl === 'hard' ? bonusFor(f.card, toy.attr) : 0);
+    let v;
+    if (theirs.length) {
+      const o = state.players[theirs[0].p].toys[theirs[0].t], oG = o.g + (lvl === 'hard' ? bonusFor(f.card, o.attr) : 0);
+      v = myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
+    } else if (mine.length) v = lvl === 'hard' ? 120 : 70;          // two of mine there: take the card
+    else v = 30 + bonusFor(f.card, toy.attr) / 10;
+    v -= cellCenter(f.cell).distanceTo(home) / (lvl === 'hard' ? 60 : 30);   // far cards are harder to hit
+    v += Math.random() * (lvl === 'normal' ? 40 : 10);
+    options.push({ t, k, v });
+  }
+  if (!options.length) return null;
+  if (lvl === 'easy') return options[Math.floor(Math.random() * options.length)];
+  return options.sort((a, b) => b.v - a.v)[0];
+}
+async function aiThrow(p) {
+  await sleep(600);
+  const plan = aiPlan(p);
+  if (!plan || state.turn !== p) return;
+  select(plan.t);
+  say(`${state.players[p].name} aims ${state.players[p].toys[plan.t].name} at ${state.field[plan.k].card.name}…`);
+  await sleep(900);
+  const aim = AI_AIM[aiLevel[p]], tm = toysMesh[p][selected], from = tm.holder.position, to = cellCenter(state.field[plan.k].cell);
+  const d = new THREE.Vector3(to.x - from.x, 0, to.z - from.z);
+  const dist = Math.max(10, d.length() * (1 + gauss() * aim.dist));
+  d.applyAxisAngle(new THREE.Vector3(0, 1, 0), gauss() * aim.ang);
+  throwToy(d.setLength(Math.sqrt(2 * FRICTION * dist) * 0.97));
+}
+// during a battle: play the card that turns it around (Easy rarely, Hard whenever it helps)
+function aiAbility(p, bt, opts) {
+  const lvl = aiLevel[p], hand = state.players[p].abilityHand;
+  const gap = c => { const me = c.sides.find(x => x.p === p), op = c.sides.find(x => x.p !== p); return me.total - op.total; };
+  const now = gap(R.computeBattle(state, bt));
+  if (now > 0 && lvl !== 'hard') return -1;
+  const scored = opts.map(i => ({ i, g: gap(R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] })) })).sort((a, b) => b.g - a.g);
+  if (lvl === 'easy') return now <= 0 && Math.random() < 0.35 ? opts[Math.floor(Math.random() * opts.length)] : -1;
+  const best = scored[0];
+  if (!best || best.g <= now) return -1;
+  if (lvl === 'normal') return Math.random() < 0.75 ? best.i : -1;
+  return now > 0 && now > 120 ? -1 : best.i;      // hard: saves cards when already well ahead
+}
 const mixers = new Set();
 
 async function loadToy(spec) {
@@ -219,6 +294,8 @@ function showPicker() {
   armed = null;
   if (pl.unused.length === 1) select(pl.unused[0]);
   fieldPhase = 'pre'; refreshAbilityButton();
+  if (isAI(p)) { $('picker').classList.add('off'); aiThrow(p); return; }
+  $('picker').classList.remove('off');
   if (promptOn() && !promptedPre && R.fieldCardOptions(state, 'pre').length) {
     promptedPre = true;
     askUse('Use an Ability card before you throw?', ASK_SECONDS).then(yes => { if (yes && fieldPhase === 'pre') openAbilityPanel(); });
@@ -251,14 +328,14 @@ function select(t) {
   tm.holder.rotation.set(0, Math.atan2(-DIR[p].x, -DIR[p].z), 0);    // facing the center
   tm.obj.quaternion.identity();
   tm.holder.visible = true;
-  say(`${state.players[p].name}: swipe up to throw ${state.players[p].toys[t].name}`);
+  if (!isAI(p)) say(`${state.players[p].name}: swipe up to throw ${state.players[p].toys[t].name}`);
 }
 const isStanding = (p, t) => state.field.some(f => f.toys.some(x => x.p === p && x.t === t));
 
 // ---------- turn flow
 async function nextTurn() {
   promptedPre = false;
-  cameraFor(state.turn); hud(); selected = null;
+  cameraFor(viewOf(state.turn)); hud(); selected = null;
   // Opening (first turn, or the field is empty again): everyone picks a Gate card for their opening spot.
   const picks = {};
   for (const p of R.openingPlayers(state)) {
@@ -279,7 +356,8 @@ async function nextTurn() {
     while (i !== null) {
       const cells = R.placeCells(state), glow = showSpots(cells, state.turn);
       say('Tap a glowing spot to set it there (or pick another card)');
-      const r = await tapSpot(cells, () => chooseGate(state.turn, null, true).then(j => ({ again: j })));
+      const r = isAI(state.turn) ? (await sleep(500), aiPlaceCell(state.turn, cells))
+        : await tapSpot(cells, () => chooseGate(state.turn, null, true).then(j => ({ again: j })));
       clearSpots(glow);
       if (r.again !== undefined) { i = r.again; continue; }
       const e = R.placeGate(state, i, r)[0];
@@ -301,6 +379,13 @@ function gateChip(card, i) {
 // msg = null keeps the current message and the current bar (used while a spot is being picked).
 let gateResolve = null;
 function chooseGate(p, msg, canSkip) {
+  if (isAI(p)) {
+    if (msg !== null) say(msg.replace(/^.*?: /, `${state.players[p].name} is choosing: `));
+    $('picker').innerHTML = ''; $('picker').classList.add('off');
+    const i = aiGateIndex(p);
+    const skip = canSkip && (i === null || (aiLevel[p] === 'easy' && Math.random() < 0.5));
+    return sleep(800).then(() => skip ? null : i);
+  }
   return new Promise(res => {
     gateResolve = res;
     if (msg !== null) {
@@ -361,7 +446,7 @@ renderer.domElement.addEventListener('pointerdown', e => {
     if (hit) spotTap.finish(hit);
     return;
   }
-  if (busy || selected === null || state.winner !== null) return;
+  if (busy || selected === null || state.winner !== null || isAI(state.turn)) return;
   pointer = { pts: [{ x: e.clientX, y: e.clientY, t: performance.now() }] };
   renderer.domElement.setPointerCapture(e.pointerId);
 });
@@ -442,7 +527,7 @@ async function rollStopped() {
   // Landed on a card with your own toy: take the card, or move to a touching card.
   let moveTo = null;
   const f = fieldIdx === null ? null : state.field[fieldIdx];
-  if (f && f.toys.some(x => x.p === p) && !f.toys.some(x => x.p !== p)) {
+  if (f && !isAI(p) && f.toys.some(x => x.p === p) && !f.toys.some(x => x.p !== p)) {
     const opts = R.moveOptions(state, fieldIdx);
     if (opts.length) {
       await animateOpen(tm, 1);
@@ -539,7 +624,7 @@ const PANEL_SECONDS = 45, ASK_SECONDS = 10, WAIT_SECONDS = 5, NOCARD_SECONDS = 3
 
 function refreshAbilityButton() {
   const b = $('abtn'); if (!b || !state) return;
-  b.disabled = !fieldPhase;
+  b.disabled = !fieldPhase || isAI(state.turn);
   b.classList.toggle('ready', fieldOpts().length > 0);
 }
 function openAbilityPanel() {
@@ -652,7 +737,7 @@ function showContinue() {
 async function postThrowCards(ball, stands) {
   postCtx = { ball, stands, landing: { t: ball.t, fieldIdx: landingIndexAt(ball.pos) } };
   fieldPhase = 'post'; refreshAbilityButton();
-  if (!fieldOpts().length) {               // nothing playable: short pause, then go on
+  if (!fieldOpts().length || isAI(state.turn)) {   // nothing playable (or the computer's turn): short pause, then go on
     fieldPhase = null; refreshAbilityButton();
     await new Promise(res => startTimer(NOCARD_SECONDS, 'Next in', res));
     return 'continue';
@@ -699,6 +784,13 @@ async function abilityPhase(bt) {
     const p = bt.next, opts = R.abilityOptions(state, bt);
     if (!opts.length) { R.passAbility(state, bt); continue; }
     const hand = state.players[p].abilityHand;
+    if (isAI(p)) {
+      $('bplay').innerHTML = `<div class="who2">${state.players[p].name} is thinking…</div>`;
+      await sleep(900);
+      const i = aiAbility(p, bt, opts);
+      if (i < 0) R.passAbility(state, bt); else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(700); }
+      continue;
+    }
     $('bplay').innerHTML = `<div class="who2">${state.players[p].name}: play an Ability card?</div>` +
       opts.map(i => {
         // what it would do: change in the G-Power gap, worked out with the card added
@@ -887,13 +979,16 @@ async function start() {
   $('loading').hidden = true;
   let match = null; try { match = JSON.parse(sessionStorage.getItem('marbles-match') || 'null'); } catch {}
   const picked = match && match.players && match.players.length === 2 ? match.players : null;
+  if (picked) picked.forEach((c, p) => { if (c.ai && AI_TEAMS[c.id]) { aiLevel[p] = c.ai; c.team = AI_TEAMS[c.id][c.ai]; } });
   const { players, first } = await setupTeams(cat, pack, picked);
+  // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap
+  players.forEach((pl, p) => { const up = picked && picked[p].team ? picked[p].team.upgrades : 0; if (up) pl.toys.forEach(t => { t.g = Math.min(600, t.g + up * UPGRADE_G); }); });
   if (picked) for (let p = 0; p < 2; p++) { try { const u = await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
   $('loading').hidden = false;
   state = R.newMatch(players, { first });
   $('loading').textContent = 'Loading Bakugan…';
   for (let p = 0; p < 2; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
-  cameraFor(first); camera.position.copy(camGoal);
+  cameraFor(viewOf(first)); camera.position.copy(camGoal);
   $('loading').hidden = true;
   hud(); nextTurn();
 }
