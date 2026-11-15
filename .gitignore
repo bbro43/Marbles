@@ -6,3 +6,4 @@ assets/
 node_modules/
 .DS_Store
 !pack/marbles-pack.zip
+/marbles
