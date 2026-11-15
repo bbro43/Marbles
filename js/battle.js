@@ -103,6 +103,8 @@ async function loadToy(spec) {
     const box = new THREE.Box3().setFromObject(obj, true), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
     const k = TOY_D / Math.max(size.x, size.z);
     obj.scale.setScalar(k); obj.position.set(-c.x * k, -c.y * k, -c.z * k);
+    // spin around the ball's own center (like the Classic Bakugan): put the offset model inside a wrapper that rolls
+    const spin = new THREE.Group(); holder.add(spin); spin.add(obj); t.obj = spin;
   }
   setOpen(t, 0);
   return t;
@@ -913,6 +915,7 @@ window.MARBLES = {
   get fieldOptions() { return fieldOpts(); },
   useFieldCard: i => useFieldCard(i),
   project: (p, t) => { const v = toysMesh[p][t].holder.position.clone().project(camera); const r = renderer.domElement.getBoundingClientRect(); return [Math.round((v.x + 1) / 2 * r.width + r.left), Math.round((1 - v.y) / 2 * r.height + r.top)]; },
+  toyMesh: (p, t) => toysMesh[p][t],
   debugToy: p => toysMesh[p].map(m => ({ vis: m.holder.visible, pos: m.holder.position.toArray().map(Math.round), open: m.open, scale: m.holder.scale.x })),
   giveCard: (p, name) => { const c = pack.catalog.cards.find(x => x.name === name); if (c) state.players[p].abilityHand.push(c); return !!c; },
   closePanel: () => closeAbilityPanel(),
