@@ -133,7 +133,11 @@ function renderTabs() {
   const tabs = [['all', 'All', '#93a2b2'], ...ALL.map(a => [a, cap(a), ATTR_COLOR[a]]), ['traps', 'Traps', '#cfd8dc']];
   $('tabs').innerHTML = tabs.map(([k, n, c]) => `<button class="tab ${k === tab ? 'on' : ''}" data-t="${k}" style="--c:${c}">${n}</button>`).join('');
 }
-$('tabs').addEventListener('click', e => { const t = e.target.dataset.t; if (!t) return; tab = t; renderTabs(); renderList(); });
+$('tabs').addEventListener('click', e => {
+  const t = e.target.dataset.t; if (!t) return; tab = t; renderTabs();
+  if (sel && sel.attributes?.[t] && t !== selAttr) { selAttr = t; setStats(sel, t); show(sel, t); }   // the shown Bakugan follows the color tab
+  renderList();
+});
 $('search').addEventListener('input', renderList);
 
 function renderList() {
