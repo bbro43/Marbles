@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1417">
+<title>Bakugan — Index</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192-v2.png">
+<style>
+  :root { color-scheme: dark; --line:#2a3644; --text:#e8edf2; --dim:#93a2b2; --c:#e53935; }
+  * { box-sizing: border-box; }
+  [hidden] { display:none !important; }
+  html, body { margin:0; height:100%; background:#0d1014; color:var(--text); font:15px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; }
+  #wrap { position:fixed; inset:0; display:flex; flex-direction:column; padding-top:env(safe-area-inset-top); }
+
+  /* top window, styled after the DS shop */
+  #top { position:relative; flex:0 0 auto; height:min(52vh, 440px);
+         background: radial-gradient(120% 90% at 30% 55%, #c8233f 0%, #8e1236 45%, #3a0d2a 100%); border-bottom:3px solid #d9d9d9; overflow:hidden; }
+  #top::before { content:""; position:absolute; inset:0; background:repeating-linear-gradient(115deg, #fff0 0 38px, #ffffff0d 38px 40px); pointer-events:none; }
+  #bar { position:relative; display:flex; align-items:center; height:42px; background:linear-gradient(#b0122a, #6b0d22); border-bottom:2px solid #ffffff55; }
+  #bar .tag { position:absolute; left:10px; font-weight:900; font-style:italic; font-size:13px; color:#ffffffb0; letter-spacing:1px; }
+  #name { flex:1; text-align:center; font-weight:800; font-size:22px; text-shadow:0 2px 0 #000; }
+  #stage { position:absolute; left:0; top:42px; bottom:56px; width:52%; }
+  #stage canvas { display:block; width:100%; height:100%; touch-action:none; cursor:grab; }
+  #stats { position:absolute; right:10px; top:56px; width:44%; background:#2a0b1fcc; border-radius:6px; padding:8px 10px; }
+  .stat { margin:4px 0 10px; } .stat .h { display:flex; justify-content:space-between; font-weight:800; font-size:17px; color:#9fd4ff; text-shadow:0 1px 0 #000; }
+  .stat .h b { color:#fff; font-size:20px; }
+  .meter { height:12px; margin-top:4px; background:#5c1426; border:2px solid #120610; border-radius:3px; overflow:hidden; }
+  .meter i { display:block; height:100%; background:linear-gradient(#ffe0b0, #f59a3c 60%, #d8692a); }
+  #attrs { display:flex; gap:8px; justify-content:center; margin-top:4px; }
+  .ad { width:24px; height:24px; border-radius:50%; border:2px solid #0008; cursor:pointer; padding:0; }
+  .ad.on { outline:3px solid #fff; outline-offset:1px; }
+  #foot { position:absolute; left:0; right:0; bottom:8px; display:flex; align-items:center; justify-content:center; gap:14px; }
+  #gp { display:flex; align-items:center; gap:8px; font-weight:900; font-size:30px; color:#ffcf3a; text-shadow:0 2px 0 #6b3a00; }
+  #gp .em { width:34px; height:34px; border-radius:50%; background:var(--c); border:3px solid #fff; box-shadow:0 0 0 2px #0006; }
+  #openBtn { background:#1b2430e6; color:var(--text); border:1px solid #ffffff55; border-radius:10px; padding:8px 14px; font:inherit; font-weight:700; }
+  #hint { position:absolute; left:8px; bottom:62px; font-size:11px; color:#ffffff88; pointer-events:none; }
+
+  /* list */
+  #tabs { display:flex; gap:6px; padding:8px; background:#121820; border-bottom:1px solid var(--line); overflow-x:auto; flex:0 0 auto; }
+  .tab { flex:0 0 auto; background:#1b2430; color:var(--text); border:2px solid var(--line); border-radius:999px; padding:5px 12px; font:inherit; font-size:13px; }
+  .tab.on { border-color:var(--c); background:color-mix(in srgb, var(--c) 30%, #1b2430); }
+  #search { flex:0 0 auto; margin:8px 8px 0; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#1b2430; color:var(--text); font:inherit; }
+  #list { flex:1; overflow-y:auto; padding:8px; padding-bottom:calc(64px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:8px; }
+  .it { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:#1b2430; color:var(--text); border:2px solid var(--line); border-left:8px solid var(--c); border-radius:12px; padding:6px 10px; font:inherit; }
+  .it.on { border-color:#fff; border-left-color:var(--c); }
+  .it img, .it .ph { width:48px; height:48px; flex:0 0 48px; border-radius:50%; object-fit:cover; background:var(--c); }
+  .it b { display:block; } .it span { color:var(--dim); font-size:13px; }
+  .it .g { margin-left:auto; font-weight:800; color:#ffcf3a; }
+  #back { position:fixed; left:10px; bottom:calc(10px + env(safe-area-inset-bottom)); background:#182028; border:1px solid var(--line); color:var(--text); border-radius:10px; padding:8px 12px; font:inherit; text-decoration:none; }
+  #msg { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="top">
+    <div id="bar"><span class="tag">BAKUGAN ››</span><div id="name">…</div></div>
+    <div id="stage"></div>
+    <div id="stats">
+      <div class="stat"><div class="h"><span>SPEED</span><b id="sSpd">–</b></div><div class="meter"><i id="mSpd"></i></div></div>
+      <div class="stat"><div class="h"><span>DEFENSE</span><b id="sDef">–</b></div><div class="meter"><i id="mDef"></i></div></div>
+      <div class="stat"><div class="h"><span>MAGNET</span><b id="sMag">–</b></div><div class="meter"><i id="mMag"></i></div></div>
+      <div id="attrs"></div>
+    </div>
+    <div id="hint">drag to spin</div>
+    <div id="foot"><div id="gp"><span class="em"></span><span id="gVal">–</span></div><button id="openBtn">Open</button></div>
+    <div id="msg">Loading…</div>
+  </div>
+  <div id="tabs"></div>
+  <input id="search" type="search" placeholder="Search Bakugan">
+  <div id="list"></div>
+</div>
+<a id="back" href="index.html">Home</a>
+<script src="vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/build/three.module.js",
+  "three/addons/": "./vendor/three/examples/jsm/"
+} }
+</script>
+<script type="module" src="js/viewer.js"></script>
+</body>
+</html>

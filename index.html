@@ -39,6 +39,7 @@
   <div class="menu">
     <button class="btn" id="btnBattle" disabled>Battle <small>2 players, this device — pick your teams</small></button>
       <button class="btn" id="btnPrompt">Prompt Ability Cards: <span id="promptState">On</span> <small>ask before and after each throw</small></button>
+    <button class="btn" id="btnIndex" disabled>Bakugan Index <small>models, stats and colors</small></button>
     <button class="btn" id="btnChars" disabled>Characters <small>later</small></button>
     <button class="btn" id="btnShop" disabled>Shop <small>later</small></button>
   </div>
@@ -70,7 +71,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 30;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 31;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null };
 
 async function openPack(blob) {
@@ -86,7 +87,7 @@ function showPack() {
   $('tagline').textContent = 'Ready.';
   const rows = [['App build', APP_BUILD], ['Pack version', i.version], ...Object.entries(i.counts || {})];
   $('packInfo').innerHTML = rows.map(([k, v]) => `<div class="row"><span>${k}</span><span>${v}</span></div>`).join('');
-  $('btnBattle').disabled = false;
+  $('btnBattle').disabled = false; $('btnIndex').disabled = false;
 }
 
 $('packFile').addEventListener('change', async e => {
@@ -117,6 +118,7 @@ const promptShow = () => { $('promptState').textContent = promptGet() ? 'On' : '
 $('btnPrompt').addEventListener('click', () => { try { localStorage.setItem('marbles-prompt-abilities', promptGet() ? '0' : '1'); } catch {} promptShow(); });
 promptShow();
 $('btnBattle').addEventListener('click', () => { location.href = 'battle.html'; });
+$('btnIndex').addEventListener('click', () => { location.href = 'viewer.html'; });
 
 (async () => {
   try { const saved = await idbGet('pack'); if (saved) await openPack(saved); } catch {}
