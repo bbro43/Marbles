@@ -84,8 +84,15 @@ export async function buildAvatar(L, url) {
     group.add(sc);
   }
   await Promise.all(jobs);
-  // the parts are in a T-pose: bring the arms down to the sides
-  group.traverse(o => { if (o.isBone && /UpperArm$/.test(o.name)) o.rotateOnAxis(new THREE.Vector3(0, 0, -1), (o.name.includes('_L_') ? 1 : -1) * 1.25); });
+  // the parts are in a T-pose: a relaxed stance instead (arms down, elbows a little bent)
+  const Z = new THREE.Vector3(0, 0, 1);
+  group.traverse(o => {
+    if (!o.isBone) return;
+    const side = o.name.includes('_L_') ? 1 : -1;
+    if (/UpperArm$/.test(o.name)) o.rotateOnAxis(Z, -side * 1.18);
+    if (/Forearm$/.test(o.name)) o.rotateOnAxis(Z, side * 0.28);
+  });
+  const bones = []; group.traverse(o => { if (o.isBone) bones.push({ o, base: o.quaternion.clone() }); });
   group.updateMatrixWorld(true);
   group.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
   const box = new THREE.Box3().setFromObject(group, true);
@@ -94,5 +101,26 @@ export async function buildAvatar(L, url) {
   const c = box.getCenter(new THREE.Vector3());
   group.position.set(-c.x * k, -box.min.y * k, -c.z * k);
   wrap.add(group);
+  wrap.userData.bones = bones; wrap.userData.phase = Math.random() * 10;
   return wrap;
+}
+// idle: breathing, a little sway, looking around (call every frame with seconds)
+const _q = new THREE.Quaternion(), _e = new THREE.Euler();
+const IDLE = [
+  [/Spine$/, t => [0, 0, 0.025 * Math.sin(t * 1.7)]],
+  [/Head$/, t => [0.16 * Math.sin(t * 0.45) + 0.05 * Math.sin(t * 1.3), 0, 0.03 * Math.sin(t * 0.8)]],
+  [/Neck$/, t => [0.05 * Math.sin(t * 0.45), 0, 0]],
+  [/L_UpperArm$/, t => [0, 0.03 * Math.sin(t * 0.9), 0.05 * Math.sin(t * 1.7 + 0.4)]],
+  [/R_UpperArm$/, t => [0, -0.03 * Math.sin(t * 0.9), -0.05 * Math.sin(t * 1.7 + 0.4)]],
+  [/Forearm$/, t => [0, 0, 0.04 * Math.sin(t * 1.1)]],
+  [/Pelvis$/, t => [0, 0.03 * Math.sin(t * 0.6), 0.012 * Math.sin(t * 0.8)]],
+];
+export function idle(wrap, t) {
+  const bones = wrap && wrap.userData.bones; if (!bones) return;
+  t += wrap.userData.phase;
+  for (const b of bones) {
+    const r = IDLE.find(([re]) => re.test(b.o.name));
+    b.o.quaternion.copy(b.base);
+    if (r) { const [x, y, z] = r[1](t); b.o.quaternion.multiply(_q.setFromEuler(_e.set(x, y, z))); }
+  }
 }

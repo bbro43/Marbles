@@ -1,7 +1,8 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
 import * as THREE from 'three';
 import { Pack } from './pack.js';
-import { buildAvatar, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from './avatar.js';
+import { buildAvatar, idle, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from './avatar.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 
@@ -39,7 +40,17 @@ scene.add(new THREE.AmbientLight(0xffffff, 2.3));
 const camera = new THREE.PerspectiveCamera(30, 256 / 192, 0.01, 50);
 const holder = new THREE.Group(); scene.add(holder);
 const floor = new THREE.Mesh(new THREE.CircleGeometry(0.35, 40), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25 }));
-floor.rotation.x = -Math.PI / 2; scene.add(floor);
+floor.rotation.x = -Math.PI / 2; floor.position.y = 0.002; scene.add(floor);
+// the bedroom from the first DS game, around your character
+let room3d = null;
+async function loadRoom() {
+  try {
+    const g = await new GLTFLoader().loadAsync(await pack.url(M.files.room3d));
+    room3d = g.scene; room3d.scale.setScalar(0.0085); room3d.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+    scene.add(room3d); room3d.visible = showRoom;
+  } catch {}
+}
+let showRoom = true;
 let avatar = null, avatarKey = '', building = null, view = 'full', spin = 0, show3d = false;
 const VIEWS = { full: [0.5, 2.9], head: [0.86, 1.0], upper: [0.62, 1.5], lower: [0.25, 1.6], side: [0.5, 2.6] };
 let camY = 0.5, camD = 2.9;
@@ -60,11 +71,19 @@ renderer.domElement.addEventListener('pointermove', e => { if (drag !== null) { 
 renderer.setAnimationLoop(() => {
   if (!show3d) return;
   const [ty, td] = VIEWS[view] || VIEWS.full; camY += (ty - camY) * 0.15; camD += (td - camD) * 0.15;
-  camera.position.set(0, camY + 0.05, camD); camera.lookAt(0, camY, 0);
+  const ox = view === 'full' ? 0.25 : 0;      // the full view shows the desk and shelves beside you, like the DS
+  camera.position.set(ox, camY + 0.12, camD); camera.lookAt(ox * 0.6, camY, 0);
   holder.rotation.y += (spin - holder.rotation.y) * 0.2;
+  idle(avatar, performance.now() / 1000);
   renderer.render(scene, camera);
 });
-function top3d(on, bg = '') { show3d = on; $('view3d').hidden = !on; $('top').style.background = bg || 'linear-gradient(#cfe7ee 0%, #b9d8e0 55%, #e4c79a 56%, #c9a06a 100%)'; }
+// on: show your character; bg: a picture behind it instead of the bedroom
+function top3d(on, bg = '') {
+  show3d = on; $('view3d').hidden = !on;
+  showRoom = !bg; if (room3d) room3d.visible = showRoom; floor.visible = showRoom;
+  $('top').style.background = bg ? bg : '#cfe7ee';
+}
+const INFO_BG = () => `url(${art('info_top')}) 0 0 / 256px 256px`;
 // a face picture for menus and the battle: render the head, cut to the DS face-icon shape
 async function faceShot() {
   const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(128, 128); r.outputColorSpace = THREE.SRGBColorSpace;
@@ -222,7 +241,7 @@ function deck() {
 // Save: 6 players
 let deleting = false;
 function save() {
-  top3d(false, 'linear-gradient(#0b6f86, #49d3e6 60%, #0b6f86)');
+  top3d(false, INFO_BG());
   const d = P.load();
   $('topUI').innerHTML = `<div class="bubble" style="bottom:20px"><b>Save</b>${d.active === null ? 'Pick a slot to make your character.' : 'Your progress saves by itself. Pick a player, or an empty slot for a new one.'}</div>`;
   let h = img('arena_bot', 0, 0);
@@ -271,7 +290,7 @@ const TIPS = {
 };
 const TIP_FACE = { dan: 'title_pic1', runo: 'title_pic2', marucho: 'title_pic3', shun: 'title_pic0', julie: 'title_pic4' };
 function tips(who, n = 0) {
-  top3d(false, 'linear-gradient(#0b6f86, #49d3e6 60%, #0b6f86)');
+  top3d(false, INFO_BG());
   const names = Object.keys(TIPS), ch = c => M.chars.find(x => x.id === c);
   if (who) {
     const list = TIPS[who];
@@ -291,7 +310,7 @@ let rankTop = 0;
 function ranking() {
   const p = prof(), rp = (p.stats && p.stats.rp) || 0, all = [...RANK.map(([id, v]) => ({ name: M.chars.find(c => c.id === id).name, rp: v })), { name: p.name, rp, me: true }].sort((a, b) => b.rp - a.rp);
   const myRank = all.findIndex(x => x.me) + 1;
-  top3d(true, 'linear-gradient(#0a4d6a, #2aa6c8)'); setView('upper'); showAvatar(p.look);
+  top3d(true, INFO_BG()); setView('upper'); showAvatar(p.look);
   $('topUI').innerHTML = `<div style="position:absolute;left:120px;top:24px;width:128px;font:800 10px/14px system-ui">
     <div style="color:#bfe9ff">NAME</div><div style="border-bottom:1px solid #6fd3ff">${esc(p.name)}</div><div style="color:#bfe9ff;margin-top:6px">RANK</div><div style="text-align:right;border-bottom:1px solid #6fd3ff">${myRank}</div>
     <div style="color:#bfe9ff;margin-top:6px">RP</div><div style="text-align:right;border-bottom:1px solid #6fd3ff">${rp}</div></div>
@@ -309,7 +328,7 @@ function ranking() {
 // Statistics: battle data, title, wins by opponent
 function stats() {
   const p = prof(), s = { ...P.newStats(), ...(p.stats || {}) }, pct = s.matches ? Math.round(s.wins / s.matches * 100) : 0;
-  top3d(false, 'linear-gradient(#0a4d6a, #2aa6c8)');
+  top3d(false, INFO_BG());
   const line = (k, v) => `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #6fd3ff;padding:1px 0"><span>${k}</span><span>${v}</span></div>`;
   $('topUI').innerHTML = `<div class="txt" style="right:6px;top:4px;font:italic 900 12px system-ui;color:#bfe9ff">STATISTICS</div>
     <div style="position:absolute;left:14px;right:14px;top:26px;font:700 9px/12px system-ui">
@@ -329,6 +348,7 @@ function stats() {
   pack = await Pack.fromDevice();
   if (!pack || !pack.catalog.menu || !pack.catalog.menu.files.room_bot) { document.body.insertAdjacentHTML('beforeend', '<p style="position:fixed;top:40%;left:0;right:0;text-align:center">Update the asset pack from Options first.</p>'); return; }
   M = pack.catalog.menu;
+  loadRoom();
   await Promise.all([...new Set([...Object.values(M.files), ...M.chars.map(c => c.face)])].map(async f => { try { urls.set(f, await pack.url(f)); } catch {} }));
   const q = new URLSearchParams(location.search).get('go');
   go(q && ['save', 'closet', 'deck', 'info'].includes(q) && prof() ? q : prof() ? 'room' : 'save');
