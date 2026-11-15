@@ -49,6 +49,10 @@ const PARTNERS = {
   christopher: ['Juggernoid'], player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
   spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico'], volt: ['Brontes'], shadow: ['Hades'], lync: ['Altair'],
 };
+// New Vestroia characters' Traps (only they get one). Volt, Shadow and Lync have no Trap we can use.
+const TRAPS = { nv_dan: 'Scorpion', nv_shun: 'Hylash', nv_marucho: 'Tripod Epsilon', mira: 'Baliton', ace: 'Falcon Fly', baron: 'Piercian',
+  spectra: 'Metalfencer', gus: 'Hexados', mylene: 'Tripod Theta' };
+const TRAP_ATTRS = { easy: 2, normal: 3, hard: 4 };
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));
 // starter decks for new players: generic Bakugan only; cards = that attribute's main character's Easy cards
@@ -92,6 +96,16 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     for (const c of AB_COLORS) {
       let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
       const r = ranked(pool, a => abilityScore(a, attrs)); const a = r[Math.min(rank, r.length - 1)]; team.abilities[c] = { id: a.id, name: a.name };
+    }
+    if (TRAPS[id]) {   // the character's attribute, then the attributes its Gate cards favor most
+      const t = (cat.traps || []).find(x => x.name === TRAPS[id]);
+      if (!t) problems.push(`${id}: no Trap ${TRAPS[id]}`);
+      else {
+        const gcards = Object.values(team.gates).map(g => gates.find(x => x.id === g.id));
+        const others = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'].filter(a => a !== attr)
+          .sort((a, b) => gcards.reduce((n, g) => n + (g.bonus[b] || 0), 0) - gcards.reduce((n, g) => n + (g.bonus[a] || 0), 0));
+        team.trap = { id: t.id, name: t.name, color: attr, attrs: [attr, ...others.slice(0, TRAP_ATTRS[lvl] - 1)] };
+      }
     }
     out[id][lvl] = team;
   });

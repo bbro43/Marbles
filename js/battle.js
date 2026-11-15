@@ -1065,6 +1065,12 @@ async function start() {
     abilities: Object.fromEntries(AB_COLORS.map((k, i) => [k, players[p].abilities[i].id])) }; }); });
   if (picked) for (let p = 0; p < 2; p++) { try { const u = picked[p].face && picked[p].face.startsWith('data:') ? picked[p].face : await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
   $('loading').hidden = false;
+  // a New Vestroia character's own Trap (js/aiteams.js)
+  players.forEach((pl, p) => {
+    const tr = picked && picked[p] && picked[p].team && picked[p].team.trap; if (!tr) return;
+    pl.trap = { type: 'trap', color: 'trap', id: 'ai-' + tr.id, name: `Trap: ${tr.name}`, attrs: tr.attrs,
+      text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
+  });
   // your Trap from My Room > Deck (one per game, played like an Ability card in a battle)
   players.forEach((pl, p) => {
     const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;

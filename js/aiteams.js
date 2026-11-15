@@ -2451,6 +2451,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt00",
+    "name": "Scorpion",
+    "color": "pyrus",
+    "attrs": [
+     "pyrus",
+     "aquos"
+    ]
    }
   },
   "normal": {
@@ -2500,6 +2509,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt00",
+    "name": "Scorpion",
+    "color": "pyrus",
+    "attrs": [
+     "pyrus",
+     "ventus",
+     "darkus"
+    ]
    }
   },
   "hard": {
@@ -2549,6 +2568,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt00",
+    "name": "Scorpion",
+    "color": "pyrus",
+    "attrs": [
+     "pyrus",
+     "subterra",
+     "aquos",
+     "haos"
+    ]
    }
   }
  },
@@ -2601,6 +2631,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt01",
+    "name": "Hylash",
+    "color": "ventus",
+    "attrs": [
+     "ventus",
+     "haos"
+    ]
    }
   },
   "normal": {
@@ -2650,6 +2689,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt01",
+    "name": "Hylash",
+    "color": "ventus",
+    "attrs": [
+     "ventus",
+     "aquos",
+     "subterra"
+    ]
    }
   },
   "hard": {
@@ -2699,6 +2748,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt01",
+    "name": "Hylash",
+    "color": "ventus",
+    "attrs": [
+     "ventus",
+     "aquos",
+     "pyrus",
+     "haos"
+    ]
    }
   }
  },
@@ -2751,6 +2811,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt02",
+    "name": "Tripod Epsilon",
+    "color": "aquos",
+    "attrs": [
+     "aquos",
+     "pyrus"
+    ]
    }
   },
   "normal": {
@@ -2800,6 +2869,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt02",
+    "name": "Tripod Epsilon",
+    "color": "aquos",
+    "attrs": [
+     "aquos",
+     "subterra",
+     "darkus"
+    ]
    }
   },
   "hard": {
@@ -2849,6 +2928,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt02",
+    "name": "Tripod Epsilon",
+    "color": "aquos",
+    "attrs": [
+     "aquos",
+     "subterra",
+     "darkus",
+     "haos"
+    ]
    }
   }
  },
@@ -2901,6 +2991,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt03",
+    "name": "Falcon Fly",
+    "color": "darkus",
+    "attrs": [
+     "darkus",
+     "subterra"
+    ]
    }
   },
   "normal": {
@@ -2950,6 +3049,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt03",
+    "name": "Falcon Fly",
+    "color": "darkus",
+    "attrs": [
+     "darkus",
+     "haos",
+     "ventus"
+    ]
    }
   },
   "hard": {
@@ -2999,6 +3108,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt03",
+    "name": "Falcon Fly",
+    "color": "darkus",
+    "attrs": [
+     "darkus",
+     "subterra",
+     "ventus",
+     "pyrus"
+    ]
    }
   }
  },
@@ -3051,6 +3171,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt04",
+    "name": "Baliton",
+    "color": "subterra",
+    "attrs": [
+     "subterra",
+     "aquos"
+    ]
    }
   },
   "normal": {
@@ -3100,6 +3229,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt04",
+    "name": "Baliton",
+    "color": "subterra",
+    "attrs": [
+     "subterra",
+     "aquos",
+     "pyrus"
+    ]
    }
   },
   "hard": {
@@ -3149,6 +3288,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt04",
+    "name": "Baliton",
+    "color": "subterra",
+    "attrs": [
+     "subterra",
+     "haos",
+     "darkus",
+     "aquos"
+    ]
    }
   }
  },
@@ -3201,6 +3351,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt05",
+    "name": "Piercian",
+    "color": "haos",
+    "attrs": [
+     "haos",
+     "ventus"
+    ]
    }
   },
   "normal": {
@@ -3250,6 +3409,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt05",
+    "name": "Piercian",
+    "color": "haos",
+    "attrs": [
+     "haos",
+     "subterra",
+     "aquos"
+    ]
    }
   },
   "hard": {
@@ -3299,6 +3468,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt05",
+    "name": "Piercian",
+    "color": "haos",
+    "attrs": [
+     "haos",
+     "darkus",
+     "subterra",
+     "ventus"
+    ]
    }
   }
  },
@@ -3351,6 +3531,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt06",
+    "name": "Metalfencer",
+    "color": "pyrus",
+    "attrs": [
+     "pyrus",
+     "ventus"
+    ]
    }
   },
   "normal": {
@@ -3400,6 +3589,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt06",
+    "name": "Metalfencer",
+    "color": "pyrus",
+    "attrs": [
+     "pyrus",
+     "ventus",
+     "darkus"
+    ]
    }
   },
   "hard": {
@@ -3449,6 +3648,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt06",
+    "name": "Metalfencer",
+    "color": "pyrus",
+    "attrs": [
+     "pyrus",
+     "subterra",
+     "aquos",
+     "haos"
+    ]
    }
   }
  },
@@ -3501,6 +3711,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt07",
+    "name": "Tripod Theta",
+    "color": "aquos",
+    "attrs": [
+     "aquos",
+     "subterra"
+    ]
    }
   },
   "normal": {
@@ -3550,6 +3769,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt07",
+    "name": "Tripod Theta",
+    "color": "aquos",
+    "attrs": [
+     "aquos",
+     "darkus",
+     "subterra"
+    ]
    }
   },
   "hard": {
@@ -3599,6 +3828,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt07",
+    "name": "Tripod Theta",
+    "color": "aquos",
+    "attrs": [
+     "aquos",
+     "subterra",
+     "haos",
+     "darkus"
+    ]
    }
   }
  },
@@ -3801,6 +4041,15 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "trap": {
+    "id": "dc_spt09",
+    "name": "Hexados",
+    "color": "subterra",
+    "attrs": [
+     "subterra",
+     "aquos"
+    ]
    }
   },
   "normal": {
@@ -3850,6 +4099,16 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "trap": {
+    "id": "dc_spt09",
+    "name": "Hexados",
+    "color": "subterra",
+    "attrs": [
+     "subterra",
+     "aquos",
+     "pyrus"
+    ]
    }
   },
   "hard": {
@@ -3899,6 +4158,17 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "trap": {
+    "id": "dc_spt09",
+    "name": "Hexados",
+    "color": "subterra",
+    "attrs": [
+     "subterra",
+     "haos",
+     "darkus",
+     "aquos"
+    ]
    }
   }
  },
