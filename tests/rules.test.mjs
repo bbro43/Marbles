@@ -242,9 +242,32 @@ test('Copper regain: Stand Your Ground gives used Ability cards back', () => {
   assert.equal(b.events[0].type, 'regain'); assert.equal(s.players[0].abilityHand.length, 1);
 });
 
+test('mini-game cards: Time Breaker, Double Input, Rewind, Level Field, No Backsies', () => {
+  let { s, b } = battleSetup([ab('Pyrus Time Breaker', {}, 'red')], [ab('Flash', { haos: 110 })]);
+  playAbility(s, b, 0); playAbility(s, b, 0);
+  let c = computeBattle(s, b);
+  assert.equal(c.sides[1].total, 350 + 50);                      // Flash cancelled
+  ({ s, b } = battleSetup([ab('Pyrus Double Input', {}, 'red'), ab('Blaze', { pyrus: 80 })], []));
+  playAbility(s, b, 0); passAbility(s, b); playAbility(s, b, 0);
+  c = computeBattle(s, b);
+  assert.equal(c.sides[0].total, 300 + 160 + 200);
+  ({ s, b } = battleSetup([ab('Blaze', { pyrus: 80 })], [ab('Rewind', {}, 'red')]));
+  playAbility(s, b, 0); playAbility(s, b, 0);
+  c = computeBattle(s, b);
+  assert.equal(c.sides[0].total, 300 + 100); assert.equal(c.sides[1].total, 350 + 50 + 50);
+  ({ s, b } = battleSetup([ab('Level Field', {}, 'red')], []));
+  playAbility(s, b, 0);
+  c = computeBattle(s, b);
+  assert.equal(c.sides[0].total, 100); assert.equal(c.sides[1].total, 50);
+  ({ s, b } = battleSetup([ab('No Backsies', {}, 'green'), ab('Blaze', { pyrus: 80 })], [ab('Flash', { haos: 110 })]));
+  playAbility(s, b, 0);
+  assert.deepEqual(abilityOptions(s, b), []); passAbility(s, b);
+  assert.deepEqual(abilityOptions(s, b), []);
+});
+
 test('every coded card has a known kind', () => {
   for (const [name, e] of Object.entries(EFFECTS)) assert.ok(['battle', 'throw'].includes(e.when), name);
-  assert.ok(isCoded({ name: 'Blaze', color: 'blue', type: 'ability' })); assert.ok(!isCoded({ name: 'Rewind', color: 'red', type: 'ability' }));
+  assert.ok(isCoded({ name: 'Blaze', color: 'blue', type: 'ability' })); assert.ok(!isCoded({ name: 'Another Throw', color: 'red', type: 'ability' }));
 });
 
 console.log(`\n${n} tests passed`);

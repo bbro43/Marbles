@@ -231,7 +231,8 @@ export function abilityOptions(s, b, p = b.next) {
   const w = build(s, b.fieldIdx, b.plays);
   const ge = gateEffectOf(w.g.card);
   if (ge && ge.noAbility && ge.noAbility(w.gctx(), p)) return [];          // the Gate card says no
-  const blocked = card => b.plays.some(pl => pl.p !== p && (effectOf(pl.card) || {}).blocks && effectOf(pl.card).blocks(card));
+  const blocked = card => b.plays.some(pl => { const e = effectOf(pl.card) || {};
+    return (pl.p !== p && e.blocks && e.blocks(card)) || (e.blocksAll && e.blocksAll(card)); });
   return hand.map((c, i) => i).filter(i => {
     const e = effectOf(hand[i]);
     if (!e || e.when !== 'battle' || blocked(hand[i])) return false;
@@ -264,15 +265,16 @@ function build(s, fieldIdx, plays) {
   const table = { ...(g.card.bonus || {}) };
   const ctx = play => {
     const me = sides.find(x => x.p === play.p), opp = sides.find(x => x !== me);
-    return { s, field: g, gateCard: g.card, table, me, opp, sides, card: play.card };
+    return { s, field: g, gateCard: g.card, table, me, opp, sides, card: play.card, plays };
   };
   const gctx = () => ({ s, field: g, gateCard: g.card, table, sides, card: g.card });
   // Gate card effect: printed G-Power changes and per-side flags
   const ge = gateEffectOf(g.card);
   const printedNotes = ge && ge.printed ? ge.printed(gctx()) : [];
   if (ge && ge.gate) ge.gate(gctx());
+  const lastReset = plays.map(pl => !!(effectOf(pl.card) || {}).resets).lastIndexOf(true);   // Rewind cancels earlier cards
   for (const phase of ['attr', 'table', 'gate'])
-    for (const play of plays) { const e = effectOf(play.card); if (e && e[phase]) e[phase](ctx(play)); }
+    for (const [i, play] of plays.entries()) { if (i < lastReset) continue; const e = effectOf(play.card); if (e && e[phase]) e[phase](ctx(play)); }
   return { g, sides, table, ctx, gctx, ge, printedNotes };
 }
 
@@ -285,6 +287,9 @@ export function computeBattle(s, b) {
     sd.steps.push({ label, amount, note, from: sd.total, to: sd.total + amount });
     sd.total += amount;
   };
+  // Level Field: both toys' printed G-Power counts as zero
+  if (b.plays.some(pl => (effectOf(pl.card) || {}).printedZero)) for (const sd of sides) sd.printed = 0;
+  if (b.plays.some(pl => (effectOf(pl.card) || {}).printedZero)) printedNotes.push(...sides.map(sd => ({ side: sd, note: 'Level Field: printed G-Power 0' })));
   // Gate card changed printed G-Power (swap / doubling)
   for (const { side, note } of printedNotes) {
     const diff = side.printed - side.total;
@@ -300,8 +305,12 @@ export function computeBattle(s, b) {
     }
   }
   // Ability cards played in this battle, in order
-  for (const play of b.plays) {
+  // Rewind: cards played before it are cancelled
+  const lastReset = b.plays.map(pl => !!(effectOf(pl.card) || {}).resets).lastIndexOf(true);
+  for (const [i, play] of b.plays.entries()) {
     const e = effectOf(play.card), c = ctx(play);
+    if (i < lastReset) { step(c.me, play.card.name, 0, 'cancelled by Rewind'); continue; }
+    if (e.addSides) { for (const { side, amount } of e.addSides(c)) step(side, play.card.name, side.noAbility ? 0 : amount * side.abilityMult); continue; }
     if (e.add) step(c.me, play.card.name, c.me.noAbility ? 0 : e.add(c) * c.me.abilityMult, c.me.noAbility ? 'cancelled' : undefined);
     else step(c.me, play.card.name, 0, e.swap ? 'swap at the end' : 'played');
   }

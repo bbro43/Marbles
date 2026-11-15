@@ -50,7 +50,51 @@ const trio = (...attrs) => ({
 });
 const triangle = (...attrs) => ({ when: 'battle', can: c => attrs.includes(c.me.attr), add: c => 50 * captured(c.s, c.me.p) });
 
+// ---------- Mini-game cards: effects picked from Billy's card list to match each name (Billy's call)
+const attrIs = a => c => c.me.attr === a;
+const sameAttr = c => c.me.attr === c.opp.attr, diffAttr = c => c.me.attr !== c.opp.attr;
+// Time Breaker ← "Stuck": your opponent's Ability card bonuses count as zero this battle
+const timeBreaker = cond => ({ when: 'battle', can: cond, gate: c => { c.opp.noAbility = true; } });
+// Double Input ← "Rock On": your Gate and Ability card bonuses count twice
+const doubleInput = cond => ({ when: 'battle', can: cond, gate: c => { c.me.gateMult *= 2; c.me.abilityMult *= 2; } });
+const wish = color => ({ when: 'battle', can: c => c.gateCard.color === color, add: () => 200 });
+const usedHas = (s, p, color, b) => s.players[p].abilityUsed.some(x => x.color === color && !(b || []).some(pl => pl.card === x));
+const highestOf = c => Math.max(0, ...ATTRS.map(a => c.table[a] || 0));
+
+const MINI = {
+  'Pyrus Time Breaker': timeBreaker(attrIs('pyrus')), 'Aquos Time Breaker': timeBreaker(attrIs('aquos')),
+  'Subterra Time Breaker': timeBreaker(attrIs('subterra')), 'Haos Time Breaker': timeBreaker(attrIs('haos')),
+  'Darkus Time Breaker': timeBreaker(attrIs('darkus')), 'Ventus Time Breaker': timeBreaker(attrIs('ventus')),
+  'Twin Time Breaker': timeBreaker(sameAttr), 'Counter Time Breaker': timeBreaker(diffAttr),
+  'Pyrus Double Input': doubleInput(attrIs('pyrus')), 'Aquos Double Input': doubleInput(attrIs('aquos')),
+  'Subterra Double Input': doubleInput(attrIs('subterra')), 'Haos Double Input': doubleInput(attrIs('haos')),
+  'Darkus Double Input': doubleInput(attrIs('darkus')), 'Ventus Double Input': doubleInput(attrIs('ventus')),
+  'Twin Double Input': doubleInput(sameAttr), 'Counter Double Input': doubleInput(diffAttr),
+  // Battle Redos: start over with a twist
+  'Scratch Battle Redo': { when: 'battle', can: always, table: c => { for (const a of ATTRS) c.table[a] = Math.min(50, c.table[a] || 0); } }, // ← Ground
+  'Spin Battle Redo': { when: 'battle', can: always, attr: c => { for (const sd of c.sides) sd.attr = OPPOSITE[sd.attr] || sd.attr; } },   // ← Special Mirror
+  'Timing Battle Redo': { when: 'battle', can: always, gate: c => { c.me.useHighest = true; } },                                         // ← Gate Shift
+  'Pop Battle Redo': { when: 'battle', can: always, table: c => { for (const a of ATTRS) c.table[a] = (c.table[a] || 0) * 2; } },       // ← Strong Winds Blow
+  'Trace Battle Redo': { when: 'battle', can: always,                                                                                      // ← Mirror Element
+    attr: c => { const opts = [...new Set(c.s.players[c.opp.p].toys.map(t => t.attr))]; c.me.attr = opts.reduce((b, a) => ((c.table[a] || 0) > (c.table[b] || 0) ? a : b), opts[0]); } },
+  'Bound Battle Redo': { when: 'battle', can: always, gate: c => { c.opp.noGate = true; } },                                              // ← Shadowfire
+  'Rewind': { when: 'battle', can: always, resets: true, add: () => 50 },                                                                 // ← Abisomega
+  'Level Field': { when: 'battle', can: always, printedZero: true },                                                                       // ← "Pyrus" (green)
+  // Green
+  'No Backsies': { when: 'battle', can: always, blocksAll: () => true },                                                                   // ← Silver Doors
+  'Out Of Time': { when: 'battle', can: always, blocks: () => true },                                                                       // ← Contestir's Gambit
+  'Double Input Cancel': { when: 'battle', can: always, blocksAll: card => card.color === 'blue' || card.color === 'green' },             // ← Dark Tunnel
+  'Prevention': { when: 'battle', can: always, gate: c => { for (const sd of c.sides) sd.noAbility = true; } },                          // ← Stuck
+  'Stolen Gold': wish('gold'), 'Swiped Silver': wish('silver'), 'Copped Copper': wish('copper'),                                          // ← Golden/Silver/Copper Wish
+  // Blue
+  'All For One': { when: 'battle', can: c => standing(c.s, c.me.p).some(x => c.s.field[x.k] !== c.field), add: () => 100 },              // ← Stand Tall
+  "Fill'er Up": { when: 'battle', can: c => c.s.players[c.me.p].abilityHand.length > c.s.players[c.opp.p].abilityHand.length, add: () => 200 }, // ← Holding Power
+  'Subtraction': { when: 'battle', can: always, addSides: c => c.sides.map(sd => ({ side: sd, amount: usedHas(c.s, sd.p, 'blue', c.plays) ? -150 : 0 })) }, // ← Blue Drain
+  'Addition': { when: 'battle', can: always, addSides: c => c.sides.map(sd => ({ side: sd, amount: usedHas(c.s, sd.p, 'blue', c.plays) ? 100 : 0 })) },      // ← Hate Gate
+};
+
 export const EFFECTS = {
+  ...MINI,
   // ---- Red: swaps (totals are swapped at the end of the battle)
   'Pyrus Swap': swapIf(c => c.me.attr === 'pyrus'), 'Aquos Swap': swapIf(c => c.me.attr === 'aquos'),
   'Subterra Swap': swapIf(c => c.me.attr === 'subterra'), 'Haos Swap': swapIf(c => c.me.attr === 'haos'),
