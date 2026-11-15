@@ -7,23 +7,38 @@ const cat = JSON.parse(fs.readFileSync(process.argv[2]));
 const byName = new Map(cat.toys.filter(t => t.baseG).map(t => [t.name, t]));
 // character: attribute (one, or one per difficulty) and the Bakugan used at each difficulty (stronger Bakugan as it goes up)
 const CH = {
+  // first game: Battle Brawlers Bakugan only
   dan:        ['pyrus',    ['Dragonoid', 'Falconeer', 'Serpenoid'],     ['Dragonoid', 'Laserman', 'Griffon'],       ['Delta Dragonoid II', 'Fortress', 'Warius']],
-  runo:       ['haos',     ['Tigrerra', 'Centipoid', 'Saurus'],         ['Tigrerra', 'Tentaclear', 'Laserman'],     ['Blade Tigrerra', 'Mega Nemus', 'Tentaclear']],
-  marucho:    ['aquos',    ['Preyas', 'Juggernoid', 'Stinglash'],       ['Preyas', 'Sirenoid', 'Siege'],            ['Preyas II (Angelo)', 'Preyas', 'Dual Elfin']],
-  julie:      ['subterra', ['Gorem', 'Saurus', 'Terrorclaw'],           ['Gorem', 'Cycloid', 'Siege'],              ['Hammer Gorem', 'Thunder Wilda', 'Cycloid']],
-  shun:       ['ventus',   ['Skyress', 'Falconeer', 'Monarus'],         ['Skyress', 'Harpus', 'Laserman'],          ['Storm Skyress', 'Cosmic Ingram', 'Harpus']],
-  akira:      ['subterra',    ['Saurus', 'Juggernoid', 'Robotallion'],     ['Falconeer', 'Siege', 'Griffon'],          ['Laserman', 'Warius', 'Fortress']],
-  shuji:      [['subterra', 'darkus', 'darkus'],   ['Fear Ripper', 'Gargonoid', 'Robotallion'], ['Fear Ripper', 'Siege', 'Laserman'],       ['Hades', 'Laserman', 'Siege']],
-  jenny:      ['aquos',    ['Siege', 'Centipoid', 'Serpenoid'],         ['Siege', 'Elico', 'Stinglash'],            ['Siege', 'Elfin', 'Elico']],
-  jewls:      ['subterra', ['Centipoid', 'Manion', 'Ravenoid'],         ['Centipoid', 'Terrorclaw', 'Griffon'],     ['Centipoid', 'Wilda', 'Laserman']],
-  billy:      ['subterra', ['Cycloid', 'Terrorclaw', 'Manion'],         ['Cycloid', 'Premo Vulcan', 'Siege'],       ['Cycloid', 'Premo Vulcan', 'Wilda']],
-  komba:      ['ventus',   ['Harpus', 'Manion', 'Ravenoid'],            ['Harpus', 'Falconeer', 'Laserman'],        ['Harpus', 'Ingram', 'Altair']],
-  julio:      ['haos',     ['Tentaclear', 'Manion', 'Centipoid'],       ['Tentaclear', 'Brontes', 'Laserman'],      ['Tentaclear', 'Helios', 'Brontes']],
+  runo:       ['haos',     ['Tigrerra', 'Centipoid', 'Saurus'],         ['Tigrerra', 'Tentaclear', 'Laserman'],     ['Blade Tigrerra', 'Tentaclear', 'Laserman']],
+  marucho:    ['aquos',    ['Preyas', 'Juggernoid', 'Stinglash'],       ['Preyas', 'Sirenoid', 'Siege'],            ['Preyas II (Angelo)', 'Preyas', 'Laserman']],
+  julie:      ['subterra', ['Gorem', 'Saurus', 'Terrorclaw'],           ['Gorem', 'Cycloid', 'Siege'],              ['Hammer Gorem', 'Cycloid', 'Siege']],
+  shun:       ['ventus',   ['Skyress', 'Falconeer', 'Monarus'],         ['Skyress', 'Harpus', 'Laserman'],          ['Storm Skyress', 'Harpus', 'Laserman']],
+  akira:      ['subterra', ['Saurus', 'Juggernoid', 'Robotallion'],     ['Falconeer', 'Siege', 'Griffon'],          ['Laserman', 'Warius', 'Fortress']],
+  shuji:      [['subterra', 'darkus', 'darkus'], ['Fear Ripper', 'Gargonoid', 'Robotallion'], ['Fear Ripper', 'Siege', 'Laserman'], ['Warius', 'Laserman', 'Siege']],
+  jenny:      ['aquos',    ['Siege', 'Centipoid', 'Serpenoid'],         ['Siege', 'Stinglash', 'Monarus'],          ['Siege', 'Laserman', 'Warius']],
+  jewls:      ['subterra', ['Centipoid', 'Manion', 'Ravenoid'],         ['Centipoid', 'Terrorclaw', 'Griffon'],     ['Centipoid', 'Terrorclaw', 'Laserman']],
+  billy:      ['subterra', ['Cycloid', 'Terrorclaw', 'Manion'],         ['Cycloid', 'Siege', 'Terrorclaw'],         ['Cycloid', 'Laserman', 'Warius']],
+  komba:      ['ventus',   ['Harpus', 'Manion', 'Ravenoid'],            ['Harpus', 'Falconeer', 'Laserman'],        ['Harpus', 'Laserman', 'Falconeer']],
+  julio:      ['haos',     ['Tentaclear', 'Manion', 'Centipoid'],       ['Tentaclear', 'Siege', 'Laserman'],        ['Tentaclear', 'Laserman', 'Warius']],
   chanlee:    ['pyrus',    ['Fortress', 'Gargonoid', 'Ravenoid'],       ['Fortress', 'Falconeer', 'Griffon'],       ['Fortress', 'Warius', 'Laserman']],
-  klaus:      ['aquos',    ['Sirenoid', 'Centipoid', 'Juggernoid'],     ['Sirenoid', 'Elico', 'Siege'],             ['Sirenoid', 'Dual Elfin', 'Preyas II (Diablo)']],
-  masquerade: ['darkus',   ['Reaper', 'Hydranoid', 'Fear Ripper'],      ['Hydranoid', 'Reaper', 'Laserman'],        ['Dual Hydranoid', 'Midnight Percival', 'Hades']],
-  marduk:     ['darkus',   ['Gargonoid', 'Fear Ripper', 'Reaper'],      ['Vladitor', 'Reaper', 'Siege'],            ['Battle Ax Vladitor', 'Percival', 'Hades']],
+  klaus:      ['aquos',    ['Sirenoid', 'Centipoid', 'Juggernoid'],     ['Sirenoid', 'Siege', 'Stinglash'],         ['Sirenoid', 'Preyas II (Diablo)', 'Laserman']],
+  masquerade: ['darkus',   ['Reaper', 'Hydranoid', 'Fear Ripper'],      ['Hydranoid', 'Reaper', 'Laserman'],        ['Dual Hydranoid', 'Reaper', 'Laserman']],
+  marduk:     ['darkus',   ['Gargonoid', 'Fear Ripper', 'Reaper'],      ['Vladitor', 'Reaper', 'Siege'],            ['Battle Ax Vladitor', 'Reaper', 'Siege']],
+  // New Vestroia: New Vestroia Bakugan only, led by their partner
+  nv_dan:     ['pyrus',    ['Neo Dragonoid', 'Elico', 'Brontes'],       ['Neo Dragonoid', 'Helios', 'Altair'],      ['Hyper Dragonoid', 'Helios', 'Midnight Percival']],
+  nv_shun:    ['ventus',   ['Ingram', 'Altair', 'Elico'],               ['Ingram', 'Altair', 'Nemus'],              ['Cosmic Ingram', 'Altair', 'Hades']],
+  nv_marucho: ['aquos',    ['Elfin', 'Elico', 'Brontes'],               ['Elfin', 'Elico', 'Percival'],             ['Dual Elfin', 'Elico', 'Helios']],
+  ace:        ['darkus',   ['Percival', 'Hades', 'Brontes'],            ['Percival', 'Hades', 'Altair'],            ['Midnight Percival', 'Hades', 'Thunder Wilda']],
+  mira:       ['subterra', ['Wilda', 'Premo Vulcan', 'Brontes'],        ['Wilda', 'Premo Vulcan', 'Elfin'],         ['Thunder Wilda', 'Premo Vulcan', 'Mega Nemus']],
+  baron:      ['haos',     ['Nemus', 'Brontes', 'Elico'],               ['Nemus', 'Brontes', 'Ingram'],             ['Mega Nemus', 'Brontes', 'Cosmic Ingram']],
+  spectra:    ['pyrus',    ['Helios', 'Altair', 'Elico'],               ['Helios', 'Hades', 'Altair'],              ['Helios', 'Midnight Percival', 'Hades']],
+  mylene:     ['aquos',    ['Elico', 'Brontes', 'Altair'],              ['Elico', 'Hades', 'Premo Vulcan'],         ['Elico', 'Dual Elfin', 'Hades']],
+  volt:       ['haos',     ['Brontes', 'Altair', 'Elico'],              ['Brontes', 'Nemus', 'Hades'],              ['Brontes', 'Mega Nemus', 'Helios']],
+  gus:        ['subterra', ['Premo Vulcan', 'Brontes', 'Elico'],        ['Premo Vulcan', 'Wilda', 'Hades'],         ['Premo Vulcan', 'Thunder Wilda', 'Helios']],
+  shadow:     ['darkus',   ['Hades', 'Altair', 'Elico'],                ['Hades', 'Percival', 'Premo Vulcan'],      ['Hades', 'Midnight Percival', 'Helios']],
+  lync:       ['ventus',   ['Altair', 'Elico', 'Brontes'],              ['Altair', 'Ingram', 'Hades'],              ['Altair', 'Cosmic Ingram', 'Helios']],
 };
+const NEW_VESTROIA = new Set(['nv_dan', 'nv_shun', 'nv_marucho', 'ace', 'mira', 'baron', 'spectra', 'mylene', 'volt', 'gus', 'shadow', 'lync']);
 const LEVELS = { easy: { upgrades: 0, rank: 4 }, normal: { upgrades: 5, rank: 1 }, hard: { upgrades: 10, rank: 0 } };   // rank 0 = best card for the team
 const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));
 const out = {}, problems = [];
@@ -34,6 +49,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     for (const n of tiers[k]) {
       const t = byName.get(n);
       if (!t) { problems.push(`${id} ${lvl}: no Bakugan "${n}"`); continue; }
+      if (t.id.startsWith('dc_') !== NEW_VESTROIA.has(id)) problems.push(`${id} ${lvl}: ${n} is from the wrong series`);
       if (lineBlocked(toys, t.id)) problems.push(`${id} ${lvl}: ${n} is in the same evolution line as another`);
       toys.push({ id: t.id, attr: t.attributes[attr] ? attr : Object.keys(t.attributes)[0], name: n });
     }

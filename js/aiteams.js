@@ -262,14 +262,14 @@ export const AI_TEAMS = {
      "name": "Blade Tigrerra"
     },
     {
-     "id": "dc_sp05_00",
-     "attr": "haos",
-     "name": "Mega Nemus"
-    },
-    {
      "id": "bb_29",
      "attr": "haos",
      "name": "Tentaclear"
+    },
+    {
+     "id": "bb_46",
+     "attr": "haos",
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -417,9 +417,9 @@ export const AI_TEAMS = {
      "name": "Preyas"
     },
     {
-     "id": "dc_sp02_00",
+     "id": "bb_46",
      "attr": "aquos",
-     "name": "Dual Elfin"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -562,14 +562,14 @@ export const AI_TEAMS = {
      "name": "Hammer Gorem"
     },
     {
-     "id": "dc_sp04_00",
-     "attr": "subterra",
-     "name": "Thunder Wilda"
-    },
-    {
      "id": "bb_26",
      "attr": "subterra",
      "name": "Cycloid"
+    },
+    {
+     "id": "bb_49",
+     "attr": "subterra",
+     "name": "Siege"
     }
    ],
    "gates": {
@@ -712,14 +712,14 @@ export const AI_TEAMS = {
      "name": "Storm Skyress"
     },
     {
-     "id": "dc_sp01_00",
-     "attr": "ventus",
-     "name": "Cosmic Ingram"
-    },
-    {
      "id": "bb_30",
      "attr": "ventus",
      "name": "Harpus"
+    },
+    {
+     "id": "bb_46",
+     "attr": "ventus",
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -1007,9 +1007,9 @@ export const AI_TEAMS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "dc_sp10",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Hades"
+     "name": "Warius"
     },
     {
      "id": "bb_46",
@@ -1113,14 +1113,14 @@ export const AI_TEAMS = {
      "name": "Siege"
     },
     {
-     "id": "dc_sp07",
-     "attr": "aquos",
-     "name": "Elico"
-    },
-    {
      "id": "bb_44",
      "attr": "aquos",
      "name": "Stinglash"
+    },
+    {
+     "id": "bb_61",
+     "attr": "aquos",
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -1162,14 +1162,14 @@ export const AI_TEAMS = {
      "name": "Siege"
     },
     {
-     "id": "dc_sp02",
+     "id": "bb_46",
      "attr": "aquos",
-     "name": "Elfin"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp07",
+     "id": "bb_60",
      "attr": "aquos",
-     "name": "Elico"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -1312,9 +1312,9 @@ export const AI_TEAMS = {
      "name": "Centipoid"
     },
     {
-     "id": "dc_sp04",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Wilda"
+     "name": "Terrorclaw"
     },
     {
      "id": "bb_46",
@@ -1413,14 +1413,14 @@ export const AI_TEAMS = {
      "name": "Cycloid"
     },
     {
-     "id": "dc_sp09",
-     "attr": "subterra",
-     "name": "Premo Vulcan"
-    },
-    {
      "id": "bb_49",
      "attr": "subterra",
      "name": "Siege"
+    },
+    {
+     "id": "bb_50",
+     "attr": "subterra",
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
@@ -1462,14 +1462,14 @@ export const AI_TEAMS = {
      "name": "Cycloid"
     },
     {
-     "id": "dc_sp09",
+     "id": "bb_46",
      "attr": "subterra",
-     "name": "Premo Vulcan"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp04",
+     "id": "bb_60",
      "attr": "subterra",
-     "name": "Wilda"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -1612,14 +1612,14 @@ export const AI_TEAMS = {
      "name": "Harpus"
     },
     {
-     "id": "dc_sp01",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Ingram"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp11",
+     "id": "bb_43",
      "attr": "ventus",
-     "name": "Altair"
+     "name": "Falconeer"
     }
    ],
    "gates": {
@@ -1713,9 +1713,9 @@ export const AI_TEAMS = {
      "name": "Tentaclear"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_49",
      "attr": "haos",
-     "name": "Brontes"
+     "name": "Siege"
     },
     {
      "id": "bb_46",
@@ -1762,14 +1762,14 @@ export const AI_TEAMS = {
      "name": "Tentaclear"
     },
     {
-     "id": "dc_sp06",
+     "id": "bb_46",
      "attr": "haos",
-     "name": "Helios"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp08",
+     "id": "bb_60",
      "attr": "haos",
-     "name": "Brontes"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -2013,14 +2013,14 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "dc_sp07",
-     "attr": "aquos",
-     "name": "Elico"
-    },
-    {
      "id": "bb_49",
      "attr": "aquos",
      "name": "Siege"
+    },
+    {
+     "id": "bb_44",
+     "attr": "aquos",
+     "name": "Stinglash"
     }
    ],
    "gates": {
@@ -2062,14 +2062,14 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "dc_sp02_00",
-     "attr": "aquos",
-     "name": "Dual Elfin"
-    },
-    {
      "id": "bb_08",
      "attr": "aquos",
      "name": "Preyas II (Diablo)"
+    },
+    {
+     "id": "bb_46",
+     "attr": "aquos",
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2212,14 +2212,14 @@ export const AI_TEAMS = {
      "name": "Dual Hydranoid"
     },
     {
-     "id": "dc_sp03_00",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Midnight Percival"
+     "name": "Reaper"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_46",
      "attr": "darkus",
-     "name": "Hades"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2362,14 +2362,14 @@ export const AI_TEAMS = {
      "name": "Battle Ax Vladitor"
     },
     {
-     "id": "dc_sp03",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Percival"
+     "name": "Reaper"
     },
     {
-     "id": "dc_sp10",
+     "id": "bb_49",
      "attr": "darkus",
-     "name": "Hades"
+     "name": "Siege"
     }
    ],
    "gates": {
@@ -2394,6 +2394,1806 @@ export const AI_TEAMS = {
     "blue": {
      "id": "ds_606",
      "name": "Power From Darkness"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "nv_dan": {
+  "attr": "pyrus",
+  "easy": {
+   "attr": "pyrus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp00",
+     "attr": "pyrus",
+     "name": "Neo Dragonoid"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "pyrus",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "pyrus",
+     "name": "Brontes"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_120",
+     "name": "Robotallion"
+    },
+    "silver": {
+     "id": "ds_226",
+     "name": "Earthen Wave"
+    },
+    "copper": {
+     "id": "ds_310",
+     "name": "Bait and Switch"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_425",
+     "name": "Pyrus Double Input"
+    },
+    "blue": {
+     "id": "ds_615",
+     "name": "Updraft"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "pyrus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp00",
+     "attr": "pyrus",
+     "name": "Neo Dragonoid"
+    },
+    {
+     "id": "dc_sp06",
+     "attr": "pyrus",
+     "name": "Helios"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "pyrus",
+     "name": "Altair"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_207",
+     "name": "Tornado Alley"
+    },
+    "copper": {
+     "id": "ds_317",
+     "name": "Waist Deep"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_409",
+     "name": "Pyrus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_614",
+     "name": "Circle Of Fire"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "pyrus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp00_00",
+     "attr": "pyrus",
+     "name": "Hyper Dragonoid"
+    },
+    {
+     "id": "dc_sp06",
+     "attr": "pyrus",
+     "name": "Helios"
+    },
+    {
+     "id": "dc_sp03_00",
+     "attr": "pyrus",
+     "name": "Midnight Percival"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
+    },
+    "silver": {
+     "id": "ds_216",
+     "name": "Volcanic Lake"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_401",
+     "name": "Pyrus Swap"
+    },
+    "blue": {
+     "id": "ds_616",
+     "name": "Brushfire"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "nv_shun": {
+  "attr": "ventus",
+  "easy": {
+   "attr": "ventus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp01",
+     "attr": "ventus",
+     "name": "Ingram"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "ventus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "ventus",
+     "name": "Elico"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_135",
+     "name": "Monarus"
+    },
+    "silver": {
+     "id": "ds_232",
+     "name": "Blue Sky"
+    },
+    "copper": {
+     "id": "ds_317",
+     "name": "Waist Deep"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_611",
+     "name": "G-Power Bonus"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "ventus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp01",
+     "attr": "ventus",
+     "name": "Ingram"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "ventus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp05",
+     "attr": "ventus",
+     "name": "Nemus"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_213",
+     "name": "Sand Storm"
+    },
+    "copper": {
+     "id": "ds_308",
+     "name": "Load Up"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_414",
+     "name": "Ventus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_622",
+     "name": "The Gust"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "ventus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp01_00",
+     "attr": "ventus",
+     "name": "Cosmic Ingram"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "ventus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "ventus",
+     "name": "Hades"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_110",
+     "name": "Storm Skyress"
+    },
+    "silver": {
+     "id": "ds_207",
+     "name": "Tornado Alley"
+    },
+    "copper": {
+     "id": "ds_312",
+     "name": "Heat Haze"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_406",
+     "name": "Ventus Swap"
+    },
+    "blue": {
+     "id": "ds_615",
+     "name": "Updraft"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "nv_marucho": {
+  "attr": "aquos",
+  "easy": {
+   "attr": "aquos",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp02",
+     "attr": "aquos",
+     "name": "Elfin"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "aquos",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "aquos",
+     "name": "Brontes"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_129",
+     "name": "Siege"
+    },
+    "silver": {
+     "id": "ds_225",
+     "name": "Spitting Fire"
+    },
+    "copper": {
+     "id": "ds_308",
+     "name": "Load Up"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_604",
+     "name": "Blaze"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "aquos",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp02",
+     "attr": "aquos",
+     "name": "Elfin"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "aquos",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp03",
+     "attr": "aquos",
+     "name": "Percival"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_204",
+     "name": "Tsunami"
+    },
+    "copper": {
+     "id": "ds_303",
+     "name": "Clipped Wings"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_410",
+     "name": "Aquos Time Breaker"
+    },
+    "blue": {
+     "id": "ds_621",
+     "name": "The Shadow"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "aquos",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp02_00",
+     "attr": "aquos",
+     "name": "Dual Elfin"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "aquos",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp06",
+     "attr": "aquos",
+     "name": "Helios"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_106",
+     "name": "Preyas's"
+    },
+    "silver": {
+     "id": "ds_208",
+     "name": "Whirlpool"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_402",
+     "name": "Aquos Swap"
+    },
+    "blue": {
+     "id": "ds_607",
+     "name": "Summon Wave"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "ace": {
+  "attr": "darkus",
+  "easy": {
+   "attr": "darkus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp03",
+     "attr": "darkus",
+     "name": "Percival"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "darkus",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "darkus",
+     "name": "Brontes"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_106",
+     "name": "Preyas's"
+    },
+    "silver": {
+     "id": "ds_222",
+     "name": "Pit Dweller"
+    },
+    "copper": {
+     "id": "ds_331",
+     "name": "Mega Warrior"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_611",
+     "name": "G-Power Bonus"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "darkus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp03",
+     "attr": "darkus",
+     "name": "Percival"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "darkus",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "darkus",
+     "name": "Altair"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_113",
+     "name": "Reaper"
+    },
+    "silver": {
+     "id": "ds_203",
+     "name": "Light-Burst"
+    },
+    "copper": {
+     "id": "ds_321",
+     "name": "Reflexes"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_413",
+     "name": "Darkus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_621",
+     "name": "The Shadow"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "darkus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp03_00",
+     "attr": "darkus",
+     "name": "Midnight Percival"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "darkus",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp04_00",
+     "attr": "darkus",
+     "name": "Thunder Wilda"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
+    },
+    "silver": {
+     "id": "ds_214",
+     "name": "Haunted Night"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_405",
+     "name": "Darkus Swap"
+    },
+    "blue": {
+     "id": "ds_606",
+     "name": "Power From Darkness"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "mira": {
+  "attr": "subterra",
+  "easy": {
+   "attr": "subterra",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp04",
+     "attr": "subterra",
+     "name": "Wilda"
+    },
+    {
+     "id": "dc_sp09",
+     "attr": "subterra",
+     "name": "Premo Vulcan"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "subterra",
+     "name": "Brontes"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_121",
+     "name": "Saurus"
+    },
+    "silver": {
+     "id": "ds_202",
+     "name": "Muddy Ground"
+    },
+    "copper": {
+     "id": "ds_303",
+     "name": "Clipped Wings"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_602",
+     "name": "G-Power Boost"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "subterra",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp04",
+     "attr": "subterra",
+     "name": "Wilda"
+    },
+    {
+     "id": "dc_sp09",
+     "attr": "subterra",
+     "name": "Premo Vulcan"
+    },
+    {
+     "id": "dc_sp02",
+     "attr": "subterra",
+     "name": "Elfin"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_208",
+     "name": "Whirlpool"
+    },
+    "copper": {
+     "id": "ds_305",
+     "name": "Down For The Count"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_411",
+     "name": "Subterra Time Breaker"
+    },
+    "blue": {
+     "id": "ds_608",
+     "name": "Mega Impact"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "subterra",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp04_00",
+     "attr": "subterra",
+     "name": "Thunder Wilda"
+    },
+    {
+     "id": "dc_sp09",
+     "attr": "subterra",
+     "name": "Premo Vulcan"
+    },
+    {
+     "id": "dc_sp05_00",
+     "attr": "subterra",
+     "name": "Mega Nemus"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_108",
+     "name": "Hammer Gorem"
+    },
+    "silver": {
+     "id": "ds_209",
+     "name": "Earthen Mound"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_403",
+     "name": "Subterra Swap"
+    },
+    "blue": {
+     "id": "ds_605",
+     "name": "Home Advantage"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "baron": {
+  "attr": "haos",
+  "easy": {
+   "attr": "haos",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp05",
+     "attr": "haos",
+     "name": "Nemus"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "haos",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "haos",
+     "name": "Elico"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_103",
+     "name": "Tigrerra"
+    },
+    "silver": {
+     "id": "ds_223",
+     "name": "Nightmare"
+    },
+    "copper": {
+     "id": "ds_305",
+     "name": "Down For The Count"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_606",
+     "name": "Power From Darkness"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "haos",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp05",
+     "attr": "haos",
+     "name": "Nemus"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "haos",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp01",
+     "attr": "haos",
+     "name": "Ingram"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_209",
+     "name": "Earthen Mound"
+    },
+    "copper": {
+     "id": "ds_316",
+     "name": "Elements"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_412",
+     "name": "Haos Time Breaker"
+    },
+    "blue": {
+     "id": "ds_610",
+     "name": "Flash"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "haos",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp05_00",
+     "attr": "haos",
+     "name": "Mega Nemus"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "haos",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp01_00",
+     "attr": "haos",
+     "name": "Cosmic Ingram"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
+    },
+    "silver": {
+     "id": "ds_203",
+     "name": "Light-Burst"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_404",
+     "name": "Haos Swap"
+    },
+    "blue": {
+     "id": "ds_620",
+     "name": "The Glow"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "spectra": {
+  "attr": "pyrus",
+  "easy": {
+   "attr": "pyrus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp06",
+     "attr": "pyrus",
+     "name": "Helios"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "pyrus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "pyrus",
+     "name": "Elico"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_120",
+     "name": "Robotallion"
+    },
+    "silver": {
+     "id": "ds_226",
+     "name": "Earthen Wave"
+    },
+    "copper": {
+     "id": "ds_310",
+     "name": "Bait and Switch"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_425",
+     "name": "Pyrus Double Input"
+    },
+    "blue": {
+     "id": "ds_615",
+     "name": "Updraft"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "pyrus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp06",
+     "attr": "pyrus",
+     "name": "Helios"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "pyrus",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "pyrus",
+     "name": "Altair"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_207",
+     "name": "Tornado Alley"
+    },
+    "copper": {
+     "id": "ds_317",
+     "name": "Waist Deep"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_409",
+     "name": "Pyrus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_614",
+     "name": "Circle Of Fire"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "pyrus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp06",
+     "attr": "pyrus",
+     "name": "Helios"
+    },
+    {
+     "id": "dc_sp03_00",
+     "attr": "pyrus",
+     "name": "Midnight Percival"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "pyrus",
+     "name": "Hades"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
+    },
+    "silver": {
+     "id": "ds_216",
+     "name": "Volcanic Lake"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_401",
+     "name": "Pyrus Swap"
+    },
+    "blue": {
+     "id": "ds_616",
+     "name": "Brushfire"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "mylene": {
+  "attr": "aquos",
+  "easy": {
+   "attr": "aquos",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp07",
+     "attr": "aquos",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "aquos",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "aquos",
+     "name": "Altair"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_129",
+     "name": "Siege"
+    },
+    "silver": {
+     "id": "ds_225",
+     "name": "Spitting Fire"
+    },
+    "copper": {
+     "id": "ds_308",
+     "name": "Load Up"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_604",
+     "name": "Blaze"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "aquos",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp07",
+     "attr": "aquos",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "aquos",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp09",
+     "attr": "aquos",
+     "name": "Premo Vulcan"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_204",
+     "name": "Tsunami"
+    },
+    "copper": {
+     "id": "ds_303",
+     "name": "Clipped Wings"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_410",
+     "name": "Aquos Time Breaker"
+    },
+    "blue": {
+     "id": "ds_621",
+     "name": "The Shadow"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "aquos",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp07",
+     "attr": "aquos",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp02_00",
+     "attr": "aquos",
+     "name": "Dual Elfin"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "aquos",
+     "name": "Hades"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_106",
+     "name": "Preyas's"
+    },
+    "silver": {
+     "id": "ds_208",
+     "name": "Whirlpool"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_402",
+     "name": "Aquos Swap"
+    },
+    "blue": {
+     "id": "ds_607",
+     "name": "Summon Wave"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "volt": {
+  "attr": "haos",
+  "easy": {
+   "attr": "haos",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp08",
+     "attr": "haos",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "haos",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "haos",
+     "name": "Elico"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_103",
+     "name": "Tigrerra"
+    },
+    "silver": {
+     "id": "ds_223",
+     "name": "Nightmare"
+    },
+    "copper": {
+     "id": "ds_305",
+     "name": "Down For The Count"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_606",
+     "name": "Power From Darkness"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "haos",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp08",
+     "attr": "haos",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp05",
+     "attr": "haos",
+     "name": "Nemus"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "haos",
+     "name": "Hades"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_209",
+     "name": "Earthen Mound"
+    },
+    "copper": {
+     "id": "ds_316",
+     "name": "Elements"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_412",
+     "name": "Haos Time Breaker"
+    },
+    "blue": {
+     "id": "ds_610",
+     "name": "Flash"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "haos",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp08",
+     "attr": "haos",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp05_00",
+     "attr": "haos",
+     "name": "Mega Nemus"
+    },
+    {
+     "id": "dc_sp06",
+     "attr": "haos",
+     "name": "Helios"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
+    },
+    "silver": {
+     "id": "ds_203",
+     "name": "Light-Burst"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_404",
+     "name": "Haos Swap"
+    },
+    "blue": {
+     "id": "ds_620",
+     "name": "The Glow"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "gus": {
+  "attr": "subterra",
+  "easy": {
+   "attr": "subterra",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp09",
+     "attr": "subterra",
+     "name": "Premo Vulcan"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "subterra",
+     "name": "Brontes"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "subterra",
+     "name": "Elico"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_121",
+     "name": "Saurus"
+    },
+    "silver": {
+     "id": "ds_202",
+     "name": "Muddy Ground"
+    },
+    "copper": {
+     "id": "ds_303",
+     "name": "Clipped Wings"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_602",
+     "name": "G-Power Boost"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "subterra",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp09",
+     "attr": "subterra",
+     "name": "Premo Vulcan"
+    },
+    {
+     "id": "dc_sp04",
+     "attr": "subterra",
+     "name": "Wilda"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "subterra",
+     "name": "Hades"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_208",
+     "name": "Whirlpool"
+    },
+    "copper": {
+     "id": "ds_305",
+     "name": "Down For The Count"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_411",
+     "name": "Subterra Time Breaker"
+    },
+    "blue": {
+     "id": "ds_608",
+     "name": "Mega Impact"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "subterra",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp09",
+     "attr": "subterra",
+     "name": "Premo Vulcan"
+    },
+    {
+     "id": "dc_sp04_00",
+     "attr": "subterra",
+     "name": "Thunder Wilda"
+    },
+    {
+     "id": "dc_sp06",
+     "attr": "subterra",
+     "name": "Helios"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_108",
+     "name": "Hammer Gorem"
+    },
+    "silver": {
+     "id": "ds_209",
+     "name": "Earthen Mound"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_403",
+     "name": "Subterra Swap"
+    },
+    "blue": {
+     "id": "ds_605",
+     "name": "Home Advantage"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "shadow": {
+  "attr": "darkus",
+  "easy": {
+   "attr": "darkus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp10",
+     "attr": "darkus",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp11",
+     "attr": "darkus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "darkus",
+     "name": "Elico"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_106",
+     "name": "Preyas's"
+    },
+    "silver": {
+     "id": "ds_222",
+     "name": "Pit Dweller"
+    },
+    "copper": {
+     "id": "ds_331",
+     "name": "Mega Warrior"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_611",
+     "name": "G-Power Bonus"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "darkus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp10",
+     "attr": "darkus",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp03",
+     "attr": "darkus",
+     "name": "Percival"
+    },
+    {
+     "id": "dc_sp09",
+     "attr": "darkus",
+     "name": "Premo Vulcan"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_113",
+     "name": "Reaper"
+    },
+    "silver": {
+     "id": "ds_203",
+     "name": "Light-Burst"
+    },
+    "copper": {
+     "id": "ds_321",
+     "name": "Reflexes"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_413",
+     "name": "Darkus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_621",
+     "name": "The Shadow"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "darkus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp10",
+     "attr": "darkus",
+     "name": "Hades"
+    },
+    {
+     "id": "dc_sp03_00",
+     "attr": "darkus",
+     "name": "Midnight Percival"
+    },
+    {
+     "id": "dc_sp06",
+     "attr": "darkus",
+     "name": "Helios"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
+    },
+    "silver": {
+     "id": "ds_214",
+     "name": "Haunted Night"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_405",
+     "name": "Darkus Swap"
+    },
+    "blue": {
+     "id": "ds_606",
+     "name": "Power From Darkness"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   }
+  }
+ },
+ "lync": {
+  "attr": "ventus",
+  "easy": {
+   "attr": "ventus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "dc_sp11",
+     "attr": "ventus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp07",
+     "attr": "ventus",
+     "name": "Elico"
+    },
+    {
+     "id": "dc_sp08",
+     "attr": "ventus",
+     "name": "Brontes"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_135",
+     "name": "Monarus"
+    },
+    "silver": {
+     "id": "ds_232",
+     "name": "Blue Sky"
+    },
+    "copper": {
+     "id": "ds_317",
+     "name": "Waist Deep"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_611",
+     "name": "G-Power Bonus"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   }
+  },
+  "normal": {
+   "attr": "ventus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "dc_sp11",
+     "attr": "ventus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp01",
+     "attr": "ventus",
+     "name": "Ingram"
+    },
+    {
+     "id": "dc_sp10",
+     "attr": "ventus",
+     "name": "Hades"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_137",
+     "name": "Omega Leonidas"
+    },
+    "silver": {
+     "id": "ds_213",
+     "name": "Sand Storm"
+    },
+    "copper": {
+     "id": "ds_308",
+     "name": "Load Up"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_414",
+     "name": "Ventus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_622",
+     "name": "The Gust"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   }
+  },
+  "hard": {
+   "attr": "ventus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "dc_sp11",
+     "attr": "ventus",
+     "name": "Altair"
+    },
+    {
+     "id": "dc_sp01_00",
+     "attr": "ventus",
+     "name": "Cosmic Ingram"
+    },
+    {
+     "id": "dc_sp06",
+     "attr": "ventus",
+     "name": "Helios"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_110",
+     "name": "Storm Skyress"
+    },
+    "silver": {
+     "id": "ds_207",
+     "name": "Tornado Alley"
+    },
+    "copper": {
+     "id": "ds_312",
+     "name": "Heat Haze"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_406",
+     "name": "Ventus Swap"
+    },
+    "blue": {
+     "id": "ds_615",
+     "name": "Updraft"
     },
     "green": {
      "id": "ds_501",
