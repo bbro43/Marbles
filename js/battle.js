@@ -901,8 +901,11 @@ function gameOver() {
   say('');
   // your profile's statistics (My Room > Info > Statistics)
   if (matchPicked) matchPicked.forEach((c, p) => {
-    if (c && c.profile !== undefined && c.profile !== null) Profiles.record(c.profile, { opponent: matchPicked[1 - p] && matchPicked[1 - p].id, won: w === p,
-      gates: state.players[p].captured.length, knockouts: knockouts[p] });
+    if (c && c.profile !== undefined && c.profile !== null) {
+      const opp = matchPicked[1 - p] || {};
+      const bp = Profiles.record(c.profile, { opponent: opp.id, won: w === p, gates: state.players[p].captured.length, knockouts: knockouts[p], level: opp.level || 'normal' });
+      $('overText').textContent += `  ${c.name} +${bp} BP`;
+    }
   });
 }
 
@@ -1050,6 +1053,12 @@ async function start() {
   const { players, first } = await setupTeams(cat, pack, picked);
   // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap
   players.forEach((pl, p) => { const up = picked && picked[p].team ? picked[p].team.upgrades : 0; if (up) pl.toys.forEach(t => { t.g = Math.min(600, t.g + up * UPGRADE_G); }); });
+  // your Bakugan's upgrades from the Shop (G-Power and levels)
+  players.forEach((pl, p) => {
+    const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;
+    const pr = Profiles.load().slots[c.profile]; if (!pr || !pr.owned) return;
+    pl.toys.forEach(t => { const d = cat.toys.find(x => x.id === t.id); if (!d) return; const u = Profiles.upgraded(d, t.attr, pr.owned); t.g = u.g; t.stats = { ...t.stats, ...u.stats }; });
+  });
   // a profile without a deck yet keeps the one just built
   if (picked) picked.forEach((c, p) => { if (c.profile !== undefined && c.profile !== null && !c.team) Profiles.update(c.profile, q => { q.deck = {
     toys: players[p].toys.map(t => ({ id: t.id, attr: t.attr })), gates: Object.fromEntries(GATE_COLORS.map((k, i) => [k, players[p].gates[i].id])),

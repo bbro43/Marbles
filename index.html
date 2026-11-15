@@ -57,7 +57,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 42;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 43;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -199,6 +199,7 @@ function chars() {
     let pr = null; try { const d = JSON.parse(localStorage.getItem('marbles-profiles') || 'null'); if (d && d.active !== null) pr = d.slots[d.active]; if (pr) pr.idx = d.active; } catch {}
     const taken = picks.some(c => c && c.profile !== undefined);
     if (!pr && !taken && pickFor === 0) { $('bar').remove(); bar('Make your character in My Room first (Title > My Room).'); return; }
+    if (pr && !taken && !pr.deck) { $('bar').remove(); bar(`${pr.name} needs a deck — pick a starter deck in My Room.`); return; }
     if (pr && !taken) return choose({ id: 'you', custom: true, profile: pr.idx, name: pr.name, face: pr.face || M.files.face_you, col: 0, row: 0, page: 'bb' });
     choose({ id: 'you', custom: true, name: `Player ${pickFor + 1}`, face: M.files.face_you, col: 0, row: 0, page: 'bb' });
   };

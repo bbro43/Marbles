@@ -90,7 +90,8 @@ const pick = arr => arr[rand(arr.length)];
 // Resolves with { players: [{ name, toys, gates, abilities }], first }
 // picked: optional [{ id, name }] characters picked in the menu; each character keeps its own last team
 // deck = { name, toys, gates, abilities } edits just that one deck (My Room) and resolves with { deck } (null = cancelled)
-export async function setupTeams(cat, pack, picked = null, deck = null) {
+// owned (from a profile, js/profiles.js): only the Bakugan (in the attributes owned) and cards that player has
+export async function setupTeams(cat, pack, picked = null, deck = null, owned = null) {
   const style = document.createElement('style'); style.textContent = CSS; document.head.append(style);
   const root = document.createElement('div'); root.id = 'setup'; document.body.append(root);
   // pictures: toy thumbnails, card art, blank card frames (all from the asset pack)
@@ -103,15 +104,20 @@ export async function setupTeams(cat, pack, picked = null, deck = null) {
   const cardPic = c => c.art && pic.get(c.art)
     ? `<span class="cpic" style="background-image:url(${pic.get(c.art)})"></span>`
     : `<span class="cpic blank" style="background-image:url(${pic.get((cat.cardFrames || {})[c.color]) || ''})"><i>${esc(c.name)}</i></span>`;
-  const toys = cat.toys.filter(t => t.baseG && Object.keys(t.attributes || {}).length);
-  const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus);
-  const abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));
+  let toys = cat.toys.filter(t => t.baseG && Object.keys(t.attributes || {}).length);
+  let gates = cat.cards.filter(c => c.type === 'gate' && c.bonus);
+  let abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));
+  if (owned) {
+    const has = Object.keys(owned.toys || {}), cards = new Set(owned.cards || []);
+    toys = toys.map(t => { const a = Object.fromEntries(Object.entries(t.attributes).filter(([k]) => has.includes(`${t.id}:${k}`))); return Object.keys(a).length ? { ...t, attributes: a } : null; }).filter(Boolean);
+    gates = gates.filter(c => cards.has(c.id)); abilities = abilities.filter(c => cards.has(c.id));
+  }
   const toyById = new Map(toys.map(t => [t.id, t])), cardById = new Map([...gates, ...abilities].map(c => [c.id, c]));
 
   const randomTeam = () => ({
-    toys: (() => { const out = []; while (out.length < 3) { const d = pick(toys); if (!lineBlocked(out, d.id)) out.push({ id: d.id, attr: pick(Object.keys(d.attributes)) }); } return out; })(),
-    gates: Object.fromEntries(GATE_COLORS.map(c => [c, pick(gates.filter(g => g.color === c)).id])),
-    abilities: Object.fromEntries(AB_COLORS.map(c => [c, pick(abilities.filter(a => a.color === c)).id])),
+    toys: (() => { const out = []; let n = 0; while (out.length < 3 && n++ < 300 && toys.length) { const d = pick(toys); if (!lineBlocked(out, d.id)) out.push({ id: d.id, attr: pick(Object.keys(d.attributes)) }); } return out; })(),
+    gates: Object.fromEntries(GATE_COLORS.map(c => [c, pick(gates.filter(g => g.color === c))?.id])),
+    abilities: Object.fromEntries(AB_COLORS.map(c => [c, pick(abilities.filter(a => a.color === c))?.id])),
   });
   // a saved team, keeping only what still exists in this asset pack
   const restore = (saved, i) => {
@@ -136,15 +142,16 @@ export async function setupTeams(cat, pack, picked = null, deck = null) {
       let pool = toys.filter(d => ok(d) && (main ? d.attributes[main] : true));
       if (!pool.length) pool = toys.filter(ok);
       const d = topPick(pool, d => d.baseG ?? 250);
+      if (!d) break;
       t.toys.push({ id: d.id, attr: main && d.attributes[main] ? main : Object.keys(d.attributes)[0] });
     }
     const attrs = t.toys.map(x => x.attr);
     for (const c of GATE_COLORS) if (!t.gates[c])
-      t.gates[c] = topPick(gates.filter(g => g.color === c), g => attrs.reduce((n, a) => n + (g.bonus[a] || 0), 0)).id;
+      t.gates[c] = topPick(gates.filter(g => g.color === c), g => attrs.reduce((n, a) => n + (g.bonus[a] || 0), 0))?.id;
     const team = [...new Set(attrs)];
     for (const c of AB_COLORS) if (!t.abilities[c]) {
       const pool = abilities.filter(a => a.color === c && fitsAttrs(a, team));
-      t.abilities[c] = topPick(pool.length ? pool : abilities.filter(a => a.color === c), a => abilityScore(a, attrs)).id;
+      t.abilities[c] = topPick(pool.length ? pool : abilities.filter(a => a.color === c), a => abilityScore(a, attrs))?.id;
     }
   }
 

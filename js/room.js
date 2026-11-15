@@ -5,6 +5,8 @@ import { buildAvatar, idle, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from '
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
+import { AI_TEAMS } from './aiteams.js';
+import { isCoded } from './abilities.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -72,7 +74,8 @@ renderer.setAnimationLoop(() => {
   if (!show3d) return;
   const [ty, td] = VIEWS[view] || VIEWS.full; camY += (ty - camY) * 0.15; camD += (td - camD) * 0.15;
   const ox = view === 'full' ? 0.25 : 0;      // the full view shows the desk and shelves beside you, like the DS
-  camera.position.set(ox, camY + 0.12, camD); camera.lookAt(ox * 0.6, camY, 0);
+  if (inShop) { shopCam(); idle(alice, performance.now() / 1000); }
+  else { camera.position.set(ox, camY + 0.12, camD); camera.lookAt(ox * 0.6, camY, 0); }
   holder.rotation.y += (spin - holder.rotation.y) * 0.2;
   idle(avatar, performance.now() / 1000);
   renderer.render(scene, camera);
@@ -100,22 +103,26 @@ async function faceShot() {
 
 // ---- screens
 let screen = 'room', roomSel = 3, slot = null;
-const prof = () => { const d = P.load(); return d.active !== null ? d.slots[d.active] : null; };
-function go(s, ...a) { screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats })[s](...a); }
+const prof = () => { const d = P.load(); const p = d.active !== null ? d.slots[d.active] : null; if (p && (p.bp === undefined || !p.owned)) { P.ensureShop(p); P.save(d); } return p; };
+const act = () => P.load().active;
+function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade })[s](...a); }
 
 // My Room: the DS carousel
 const ROOM = [['info', 'INFO', 'You can check your statistics on the computer.'], ['save', 'SAVE', 'Switch players or start a new one (up to 6).'],
-  ['deck', 'DECK', 'View and edit your deck.'], ['closet', 'CLOSET', 'Change your look and your name.'], ['collection', 'BAKUGAN', 'Look through every Bakugan — models, stats and colors.']];
+  ['deck', 'DECK', 'View and edit your deck.'], ['closet', 'CLOSET', 'Change your look and your name.'], ['shop', 'SHOP', 'Spend your BP on Bakugan, cards and upgrades.'],
+  ['collection', 'BAKUGAN', 'Look through every Bakugan — models, stats and colors.']];
 function room() {
   const p = prof();
   if (!p) return go('save');
+  if (!p.deck && !Object.keys(p.owned.toys).length) return go('starter');
   top3d(true); setView('full'); showAvatar(p.look);
   $('topUI').innerHTML = `<div class="bubble"><b>${esc(p.name)}</b>${roomSel === 3 ? 'I should change my look.' : roomSel === 2 ? 'I should reorganize my deck.' : roomSel === 1 ? 'I should save my progress.' : 'What should I do?'}</div>`;
   const n = ROOM.length, L = (roomSel + n - 1) % n, R = (roomSel + 1) % n;
   $('bot').innerHTML = img('room_bot', 0, 0) +
-    `<img src="${art('room_' + ROOM[L][0])}" class="tap" id="rL" style="left:2px;top:56px" alt="">` +
-    `<img src="${art('room_' + ROOM[roomSel][0] + '_on')}" class="tap" id="rC" style="left:88px;top:44px" alt="">` +
-    `<img src="${art('room_' + ROOM[R][0])}" class="tap" id="rR" style="left:186px;top:56px" alt="">` +
+    `<img src="${art(ROOM[L][0] === 'shop' ? 'shop_bakugan' : 'room_' + ROOM[L][0])}" class="tap" id="rL" style="left:2px;top:56px" alt="">` +
+    `<img src="${art(ROOM[roomSel][0] === 'shop' ? 'shop_bakugan_on' : 'room_' + ROOM[roomSel][0] + '_on')}" class="tap" id="rC" style="left:88px;top:44px" alt="">` +
+    `<img src="${art(ROOM[R][0] === 'shop' ? 'shop_bakugan' : 'room_' + ROOM[R][0])}" class="tap" id="rR" style="left:186px;top:56px" alt="">` +
+    `<div class="txt" style="left:4px;top:20px;padding:0 6px;border-radius:7px;background:#0a2a66;border:1px solid #39b8ff;font:900 9px/12px system-ui">BP ${p.bp}</div>` +
     `<div style="position:absolute;left:0;right:0;top:132px;height:14px;background:linear-gradient(#2f7fe8,#1146a8);border-top:1px solid #9fd0ff;border-bottom:1px solid #0a2a66;text-align:center;font:900 10px/14px system-ui;letter-spacing:1px;text-shadow:0 1px 0 #000">${ROOM[roomSel][1]}</div>`;
   bar(ROOM[roomSel][2]);
   $('rL').onclick = () => { roomSel = L; go('room'); };
@@ -185,9 +192,10 @@ function closet(start) {
     await building;
     const face = await faceShot();
     const d = P.load();
+    const fresh = isNew;
     if (isNew) { P.create(d, slot, closetName, look); }
     P.update(P.load().active, q => { q.look = look; q.face = face; });
-    look = null; isNew = false; editCat = editPart = null; go('room');
+    look = null; isNew = false; editCat = editPart = null; go(fresh ? 'starter' : 'room');
   };
   backBtn(() => {
     if (editPart) { editPart = null; return go('closet'); }
@@ -227,7 +235,7 @@ function deck() {
   bar(d ? 'Use these to change your deck.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
   const edit = async (start) => {
     $('ds').style.visibility = 'hidden';
-    const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name });
+    const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned);
     $('ds').style.visibility = '';
     if (r.deck) P.update(P.load().active, q => { q.deck = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities }; });
     go('deck');
@@ -354,3 +362,177 @@ function stats() {
   go(q && ['save', 'closet', 'deck', 'info'].includes(q) && prof() ? q : prof() ? 'room' : 'save');
   window.ROOM = { go, get screen() { return screen; }, prof };
 })();
+
+
+// ---------- Starter deck: a new player picks an attribute and gets that starter deck (3 Bakugan + 6 cards)
+const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
+const STARTER_OF = { pyrus: 'dan', aquos: 'marucho', subterra: 'julie', haos: 'runo', darkus: 'masquerade', ventus: 'shun' };
+const ATTR_HEX = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d' };
+const cap = s => s[0].toUpperCase() + s.slice(1);
+function starterDeck(attr) {
+  const t = AI_TEAMS[STARTER_OF[attr]].easy;
+  return { toys: t.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_COLORS.map(k => [k, t.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, t.abilities[k].id])) };
+}
+function starter(sel = null) {
+  const p = prof(); top3d(true); setView('full'); showAvatar(p.look);
+  const toyBy = new Map(pack.catalog.toys.map(t => [t.id, t]));
+  const d = sel && starterDeck(sel);
+  $('topUI').innerHTML = `<div class="bubble"><b>${esc(p.name)}</b>${d ? `${cap(sel)} starter: ${d.toys.map(x => toyBy.get(x.id).name).join(', ')} and 6 cards. Tap OK to take it.` : 'Which attribute will I brawl with? Pick my starter deck.'}</div>`;
+  $('bot').innerHTML = img('arena_bot', 0, 0) + `<div class="txt" style="left:0;right:0;top:24px;text-align:center">Choose your starter deck</div>` +
+    ATTRS.map((a, i) => `<div class="tap" data-a="${a}" style="position:absolute;left:${22 + (i % 3) * 74}px;top:${44 + Math.floor(i / 3) * 52}px;width:62px;height:46px;border-radius:6px;
+      background:${sel === a ? 'linear-gradient(#35a8f0,#1478c8)' : 'linear-gradient(#123d70,#071f44)'};border:1px solid #8fb4d8;text-align:center">
+      <img src="${art('attr_' + a)}" style="position:static;margin-top:3px;width:24px;height:32px" alt=""><div style="font:800 8px/9px system-ui">${cap(a)}</div></div>`).join('') +
+    (sel ? `<div class="pill gold tap" id="sOk" style="left:88px;top:152px;width:80px">OK</div>` : '');
+  bar('Your starter deck is 3 Bakugan and 6 cards of one attribute. Buy more in the Shop.');
+  $('bot').querySelectorAll('[data-a]').forEach(b => b.onclick = () => starter(b.dataset.a));
+  if ($('sOk')) $('sOk').onclick = () => {
+    P.update(act(), q => { P.ensureShop(q); q.deck = d; for (const x of d.toys) q.owned.toys[P.key(x.id, x.attr)] ||= { g: 0, st: {} };
+      q.owned.cards = [...new Set([...q.owned.cards, ...Object.values(d.gates), ...Object.values(d.abilities)])]; });
+    go('room');
+  };
+}
+
+// ---------- Shop: Alice behind the counter, Bakugan / Card / Upgrade
+let shop3d = null, alice = null, shopSel = 0;
+async function loadShop() {
+  if (shop3d) return;
+  const L = new GLTFLoader();
+  const [s, a] = await Promise.all([L.loadAsync(await pack.url(M.files.shop3d)), L.loadAsync(await pack.url(M.files.alice3d))]);
+  shop3d = s.scene; shop3d.scale.setScalar(0.0028); shop3d.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  alice = a.scene; alice.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  alice.updateMatrixWorld(true);
+  const hp = new THREE.Vector3(), fp = new THREE.Vector3();
+  alice.getObjectByName('Bip01_Head').getWorldPosition(hp); (alice.getObjectByName('Bip01_L_Foot') || alice.getObjectByName('Bip01_L_Toe0')).getWorldPosition(fp);
+  const k = 0.88 / (hp.y - fp.y); alice.scale.setScalar(k);
+  alice.traverse(o => { if (o.isBone && /UpperArm$/.test(o.name)) o.rotateOnAxis(new THREE.Vector3(0, 0, -1), (o.name.includes('_L_') ? 1 : -1) * 1.24); });
+  const al = new THREE.Group(); alice.position.set(-hp.x * k, -fp.y * k + 0.03, -hp.z * k); al.add(alice);
+  al.position.set(-0.95, 0, 0.15); al.rotation.y = 4.71; alice = al;
+  alice.userData.bones = []; alice.traverse(o => { if (o.isBone) alice.userData.bones.push({ o, base: o.quaternion.clone() }); }); alice.userData.phase = 2;
+  shop3d.add(alice); alice.scale.setScalar(1 / 0.0028); alice.position.multiplyScalar(1 / 0.0028);
+  shop3d.visible = false; scene.add(shop3d);
+}
+// the top screen in the shop: the store (3D) with Alice talking, or a picture/stat panel
+let inShop = false;
+function shopTop(on) {
+  inShop = on;
+  if (shop3d) shop3d.visible = on;
+  if (on) { show3d = true; $('view3d').hidden = false; showRoom = false; if (room3d) room3d.visible = false; floor.visible = false; holder.visible = false; $('top').style.background = '#9fd3d0'; }
+  else holder.visible = true;
+}
+function shopCam() { camera.position.set(-2.75, 0.8, 1.55); camera.lookAt(-0.35, 0.5, -0.05); }
+const SHOP = [['bakugan', 'BAKUGAN', 'Hi there! Pick a Bakugan to buy.'], ['card', 'CARD', 'You can use your BP to buy a new card.'], ['upgrade', 'UPGRADE', 'You can use your BP to upgrade your Bakugan.']];
+async function shop() {
+  const p = prof(); await loadShop(); shopTop(true);
+  $('topUI').innerHTML = `<div class="bubble"><b>Alice</b>${SHOP[shopSel][2]}</div>`;
+  const n = SHOP.length, L = (shopSel + n - 1) % n, R = (shopSel + 1) % n;
+  $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 22) +
+    `<img src="${art('shop_' + SHOP[L][0])}" class="tap" id="sL" style="left:2px;top:66px" alt="">` +
+    `<img src="${art('shop_' + SHOP[shopSel][0] + '_on')}" class="tap" id="sC" style="left:88px;top:54px" alt="">` +
+    `<img src="${art('shop_' + SHOP[R][0])}" class="tap" id="sR" style="left:198px;top:66px" alt="">` +
+    `<div style="position:absolute;left:0;right:0;top:140px;height:14px;background:linear-gradient(#2f7fe8,#1146a8);border-top:1px solid #9fd0ff;border-bottom:1px solid #0a2a66;text-align:center;font:900 10px/14px system-ui;letter-spacing:1px;text-shadow:0 1px 0 #000">${SHOP[shopSel][1]}</div>`;
+  bar('Select the type of item you want to buy.');
+  $('sL').onclick = () => { shopSel = L; shop(); };
+  $('sR').onclick = () => { shopSel = R; shop(); };
+  $('sC').onclick = () => { listTab = 0; listTop = 0; go(SHOP[shopSel][0] === 'upgrade' ? 'upgrade' : 'shopList', SHOP[shopSel][0]); };
+  backBtn(() => { shopTop(false); go('room'); });
+}
+const bpBar = (bp, x, y) => `<div style="position:absolute;left:${x}px;top:${y}px;width:96px;height:14px;border-radius:7px;background:linear-gradient(90deg,#0a3b7a,#06204a);border:2px solid #39b8ff;
+  font:900 9px/10px system-ui;padding:0 6px;display:flex;justify-content:space-between"><span style="color:#8fe3ff">BP</span><span>${bp}</span></div>`;
+// stat panel for the top screen (like the DS shop): name, picture, Speed / Defense / Magnet, G-Power
+function statTop(title, kind, picUrl, st, g, level, extra = '') {
+  shopTop(false); top3d(false, 'linear-gradient(115deg,#5a0b1e 0%,#b0122a 45%,#5a0b2e 100%)');
+  const bar5 = (k, v) => `<div style="margin:0 0 5px"><div style="display:flex;justify-content:space-between;font:900 9px/11px system-ui;color:#9fd4ff"><span>${k}</span><b style="color:#fff">${v}</b></div>
+    <div style="height:6px;background:#5c1426;border:1px solid #120610"><i style="display:block;height:100%;width:${v * 20}%;background:linear-gradient(#ffe0b0,#f59a3c)"></i></div></div>`;
+  $('topUI').innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:22px;background:linear-gradient(#b0122a,#6b0d22);border-bottom:1px solid #fff5;font:900 11px/22px system-ui;text-align:center">
+      <span style="position:absolute;left:4px;font:italic 900 7px/22px system-ui;color:#fffa">${kind} ››</span>${esc(title)}</div>
+    ${picUrl ? `<img src="${picUrl}" style="left:14px;top:34px;width:96px;height:96px;image-rendering:auto" alt="">` : ''}
+    ${level ? `<div class="txt" style="left:30px;top:136px;font-size:12px">LV ${level}</div>` : ''}
+    ${st ? `<div style="position:absolute;left:126px;top:32px;width:118px;background:#2a0b1fcc;padding:6px;border-radius:3px">${bar5('SPEED', st.speed)}${bar5('DEFENSE', st.defense)}${bar5('MAGNET', st.magnet)}</div>` : ''}
+    ${g ? `<div class="txt" style="left:0;right:0;top:160px;text-align:center;font:900 15px system-ui;color:#ffcf3a">${g} GP</div>` : ''}${extra}`;
+}
+let listTab = 0, listTop = 0, listSel = 0;
+const CARD_TABS = ['gold', 'silver', 'copper', 'red', 'blue', 'green'];
+function shopList(kind, confirmItem = null) {
+  const p = prof(), cat = pack.catalog;
+  let items;
+  if (kind === 'bakugan') {
+    const a = ATTRS[listTab];
+    items = cat.toys.filter(t => t.baseG && t.attributes && t.attributes[a]).sort((x, y) => x.baseG - y.baseG)
+      .map(t => ({ id: t.id, name: t.name, attr: a, price: P.toyPrice(t), g: t.baseG, owned: !!p.owned.toys[P.key(t.id, a)], t, pic: (t.thumbs || {})[a] }));
+  } else {
+    const c = CARD_TABS[listTab];
+    items = cat.cards.filter(x => x.color === c && (x.type === 'gate' ? x.bonus : isCoded(x))).map(x => ({ id: x.id, name: x.name, price: P.cardPrice(x), owned: p.owned.cards.includes(x.id), c: x, pic: x.art }));
+  }
+  listSel = Math.min(listSel, Math.max(0, items.length - 1));
+  const it = items[listSel];
+  if (it) {
+    if (kind === 'bakugan') { const u = P.upgraded(it.t, it.attr, null); statTop(it.name, 'BAKUGAN', null, u.stats, it.g, 1); }
+    else statTop(it.name, it.c.type === 'gate' ? 'GATE CARD' : 'ABILITY CARD', null, null, null, null,
+      `<div style="position:absolute;left:126px;top:32px;width:118px;bottom:14px;background:#2a0b1fcc;padding:6px;border-radius:3px;font:600 8.5px/11px system-ui;overflow:hidden">${esc(it.c.text || '')}
+        ${it.c.bonus ? `<div style="margin-top:4px;color:#ffd0c8">${ATTRS.map(a => `${cap(a)} +${it.c.bonus[a] || 0}`).join('<br>')}</div>` : ''}</div>`);
+    if (it.pic) pack.url(it.pic).then(u => { const im = document.createElement('img'); im.src = u; im.style.cssText = kind === 'bakugan' ? 'left:14px;top:34px;width:96px;height:96px' : 'left:20px;top:28px;width:90px;height:124px'; $('topUI').append(im); });
+  }
+  const tabs = kind === 'bakugan' ? ATTRS.map((a, i) => `<img src="${art('attr_' + a)}" class="tap ${i === listTab ? 'on' : ''}" data-tab="${i}" style="left:${30 + i * 34}px;top:22px;${i === listTab ? '' : 'opacity:.55'}" alt="">`).join('')
+    : CARD_TABS.map((c, i) => `<img src="${art('cardicon_' + c)}" class="tap ${i === listTab ? 'on' : ''}" data-tab="${i}" style="left:${30 + i * 34}px;top:22px;${i === listTab ? '' : 'opacity:.55'}" alt="">`).join('');
+  const rows = items.slice(listTop, listTop + 3).map((x, i) => {
+    const k = listTop + i, sel = k === listSel;
+    return `<div class="tap" data-row="${k}" style="position:absolute;left:26px;top:${60 + i * 34}px;width:200px;height:30px;background:${sel ? '#7a1020' : '#3a0c12'};border:2px solid ${sel ? '#4cc3ff' : '#c0262e'};border-radius:2px">
+      <span class="pic" data-src="${x.pic || ''}" style="position:absolute;left:2px;top:1px;width:24px;height:24px"></span>
+      <div style="position:absolute;left:32px;top:2px;font:800 10px/12px system-ui">${esc(x.name)}</div>
+      ${x.g ? `<div style="position:absolute;right:4px;top:2px;font:800 9px/12px system-ui">GP ${x.g}</div>` : ''}
+      <div style="position:absolute;right:4px;bottom:1px;font:800 9px/11px system-ui;color:${x.owned ? '#8fe3ff' : p.bp >= x.price ? '#ff6b6b' : '#888'}">${x.owned ? 'OWNED' : 'BP ' + x.price}</div></div>`;
+  }).join('');
+  $('bot').innerHTML = img('list_bot', 0, 0) + tabs + rows +
+    `<div class="pill tap" id="lUp" style="left:2px;top:60px;width:20px">▲</div><div class="pill tap" id="lDn" style="left:2px;top:128px;width:20px">▼</div>` +
+    bpBar(p.bp, 60, 166) + `<div class="txt" style="left:166px;top:168px;font-size:9px">${items.length ? listSel + 1 : 0} / ${items.length}</div>` +
+    (confirmItem ? `<div class="box" style="left:28px;top:56px;width:200px;height:96px;z-index:30;background:#0d2140f2;text-align:center;padding-top:10px;font:700 10px/14px system-ui">
+      Buy ${esc(confirmItem.name)}${confirmItem.attr ? ` (${cap(confirmItem.attr)})` : ''}<br>for ${confirmItem.price} BP?
+      <div class="pill gold tap" id="cYes" style="left:24px;top:62px;width:66px">Yes</div><div class="pill tap" id="cNo" style="left:110px;top:62px;width:66px">No</div></div>` : '');
+  bar(kind === 'bakugan' ? 'Select a Bakugan you want to buy.' : 'Select a card you want to buy.');
+  $('bot').querySelectorAll('.pic[data-src]').forEach(async e => { if (e.dataset.src) e.innerHTML = `<img src="${await pack.url(e.dataset.src)}" style="position:static;width:24px;height:24px;object-fit:contain" alt="">`; });
+  $('bot').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { listTab = +b.dataset.tab; listTop = 0; listSel = 0; shopList(kind); });
+  $('bot').querySelectorAll('[data-row]').forEach(b => b.onclick = () => {
+    const k = +b.dataset.row;
+    if (k !== listSel) { listSel = k; return shopList(kind); }
+    const x = items[k];
+    if (x.owned) { bar(kind === 'bakugan' ? 'You already have this Bakugan in this attribute.' : 'You already have this card.'); return; }
+    if (p.bp < x.price) { bar(`You need ${x.price - p.bp} more BP. Win battles as You to earn BP.`); return; }
+    shopList(kind, x);
+  });
+  $('lUp').onclick = () => { listSel = Math.max(0, listSel - 1); listTop = Math.min(listTop, listSel); shopList(kind); };
+  $('lDn').onclick = () => { listSel = Math.min(items.length - 1, listSel + 1); if (listSel > listTop + 2) listTop = listSel - 2; shopList(kind); };
+  if (confirmItem) {
+    $('cNo').onclick = () => shopList(kind);
+    $('cYes').onclick = () => {
+      P.update(act(), q => { P.ensureShop(q); if (q.bp < confirmItem.price) return; q.bp -= confirmItem.price;
+        if (kind === 'bakugan') q.owned.toys[P.key(confirmItem.id, confirmItem.attr)] = { g: 0, st: {} }; else q.owned.cards.push(confirmItem.id); });
+      shopList(kind); bar(`Thanks! ${confirmItem.name} is yours. Put it in your deck from My Room > Deck.`);
+    };
+  }
+  backBtn(() => go('shop'));
+}
+// Upgrade: G-Power (+10G) and Level (+1 Speed, Defense or Magnet)
+function upgrade(sel = 0) {
+  const p = prof(), toyBy = new Map(pack.catalog.toys.map(t => [t.id, t]));
+  const mine = Object.keys(p.owned.toys).map(k => { const [id, attr] = k.split(':'); return { k, id, attr, t: toyBy.get(id) }; }).filter(x => x.t);
+  if (!mine.length) { bar('You have no Bakugan yet.'); return go('shop'); }
+  sel = Math.min(sel, mine.length - 1);
+  const x = mine[sel], u = p.owned.toys[x.k], up = P.upgraded(x.t, x.attr, p.owned), gN = u.g || 0;
+  const gCost = P.gPrice(gN), lvCost = P.levelPrice(up.level), gMax = up.g >= P.G_CAP;
+  statTop(x.t.name, 'UPGRADE', null, up.stats, up.g, up.level);
+  if ((x.t.thumbs || {})[x.attr]) pack.url(x.t.thumbs[x.attr]).then(url => { const im = document.createElement('img'); im.src = url; im.style.cssText = 'left:14px;top:34px;width:96px;height:96px'; $('topUI').append(im); });
+  const statBtn = (k, i) => { const max = up.stats[k] >= P.STAT_CAP;
+    return `<div class="pill tap ${max ? 'off' : ''}" data-st="${k}" style="left:${8 + i * 82}px;top:118px;width:76px;height:30px;line-height:13px">${cap(k)} ${up.stats[k]}${max ? '<br>MAX' : '<br>+1'}</div>`; };
+  $('bot').innerHTML = img('list_bot', 0, 0) +
+    mine.map((m, i) => `<img src="" data-src="${(m.t.thumbs || {})[m.attr] || ''}" class="tap" data-pick="${i}" style="left:${6 + (i % 9) * 27}px;top:${20 + Math.floor(i / 9) * 27}px;width:24px;height:24px;${i === sel ? 'outline:2px solid #4cc3ff' : 'opacity:.75'}" alt="">`).join('') +
+    `<div class="pill tap ${gMax ? 'off' : ''}" id="uG" style="left:8px;top:86px;width:240px">${gMax ? 'G-Power is at 600G (max)' : `G-Power +10G  (${up.g}G → ${up.g + 10}G) — ${gCost} BP`}</div>` +
+    `<div class="txt" style="left:8px;top:104px;font-size:9px">Level up — ${lvCost} BP, pick a stat:</div>` + ['speed', 'defense', 'magnet'].map(statBtn).join('') +
+    bpBar(p.bp, 60, 166);
+  bar('Raise G-Power, or level up to raise Speed, Defense or Magnet.');
+  $('bot').querySelectorAll('img[data-src]').forEach(async im => { if (im.dataset.src) im.src = await pack.url(im.dataset.src); });
+  $('bot').querySelectorAll('[data-pick]').forEach(b => b.onclick = () => upgrade(+b.dataset.pick));
+  const spend = (cost, fn) => { if (p.bp < cost) { bar(`You need ${cost - p.bp} more BP.`); return; } P.update(act(), q => { q.bp -= cost; fn(q.owned.toys[x.k]); }); upgrade(sel); };
+  $('uG').onclick = () => { if (!gMax) spend(gCost, t => { t.g = (t.g || 0) + 1; }); };
+  $('bot').querySelectorAll('[data-st]').forEach(b => b.onclick = () => { const k = b.dataset.st; if (up.stats[k] >= P.STAT_CAP) return; spend(lvCost, t => { t.st = t.st || {}; t.st[k] = (t.st[k] || 0) + 1; }); });
+  backBtn(() => go('shop'));
+}
