@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
 import * as R from './rules.js';
-import { setupTeams } from './setup.js';
+import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
+import * as Profiles from './profiles.js';
 import { AI_TEAMS, UPGRADE_G } from './aiteams.js';
 
 // ---------- real-world scale
@@ -580,8 +581,11 @@ async function runBattle(fieldIdx) {
     }
   }
 }
+const knockouts = [0, 0];
+let matchPicked = null;   // the characters from the menu (to record a profile's statistics)
 async function captured(e, b) {
   const card = e.card;
+  if (e.how === 'knockout') knockouts[e.p]++;
   const how = e.how === 'uncontested' ? ' (uncontested)' : e.how === 'knockout' ? ' by knockout' : e.how === 'early victory' ? ' — Early Victory!' : '';
   say(`${state.players[e.p].name} wins ${card.name}${how}!`);
   clearGate(card, b && b.sides);
@@ -895,6 +899,11 @@ function gameOver() {
   $('over').hidden = false;
   $('overText').textContent = w === 'draw' ? 'Draw!' : `${state.players[w].name} wins!`;
   say('');
+  // your profile's statistics (My Room > Info > Statistics)
+  if (matchPicked) matchPicked.forEach((c, p) => {
+    if (c && c.profile !== undefined && c.profile !== null) Profiles.record(c.profile, { opponent: matchPicked[1 - p] && matchPicked[1 - p].id, won: w === p,
+      gates: state.players[p].captured.length, knockouts: knockouts[p] });
+  });
 }
 
 // ---------- render loop
@@ -1023,6 +1032,16 @@ async function start() {
   let match = null; try { match = JSON.parse(sessionStorage.getItem('marbles-match') || 'null'); } catch {}
   const picked = match && match.players && match.players.length === 2 ? match.players : null;
   // a character comes with its deck at the level picked (Easy / Normal / Hard); "You" builds your own
+  matchPicked = picked;
+  // You: your profile's name, face and deck (built in My Room)
+  if (picked) picked.forEach(c => {
+    if (c.profile === undefined || c.profile === null) return;
+    const pr = Profiles.load().slots[c.profile]; if (!pr) return;
+    c.name = pr.name; c.face = pr.face || c.face;
+    const d = pr.deck;
+    if (d && d.toys && d.toys.length === 3 && GATE_COLORS.every(k => d.gates[k]) && AB_COLORS.every(k => d.abilities[k]))
+      c.team = { upgrades: 0, toys: d.toys, gates: Object.fromEntries(GATE_COLORS.map(k => [k, { id: d.gates[k] }])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, { id: d.abilities[k] }])) };
+  });
   if (picked) picked.forEach((c, p) => {
     const lvl = c.level || (typeof c.ai === 'string' ? c.ai : null);
     if (lvl && AI_TEAMS[c.id]) c.team = AI_TEAMS[c.id][lvl];
@@ -1031,7 +1050,11 @@ async function start() {
   const { players, first } = await setupTeams(cat, pack, picked);
   // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap
   players.forEach((pl, p) => { const up = picked && picked[p].team ? picked[p].team.upgrades : 0; if (up) pl.toys.forEach(t => { t.g = Math.min(600, t.g + up * UPGRADE_G); }); });
-  if (picked) for (let p = 0; p < 2; p++) { try { const u = await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
+  // a profile without a deck yet keeps the one just built
+  if (picked) picked.forEach((c, p) => { if (c.profile !== undefined && c.profile !== null && !c.team) Profiles.update(c.profile, q => { q.deck = {
+    toys: players[p].toys.map(t => ({ id: t.id, attr: t.attr })), gates: Object.fromEntries(GATE_COLORS.map((k, i) => [k, players[p].gates[i].id])),
+    abilities: Object.fromEntries(AB_COLORS.map((k, i) => [k, players[p].abilities[i].id])) }; }); });
+  if (picked) for (let p = 0; p < 2; p++) { try { const u = picked[p].face && picked[p].face.startsWith('data:') ? picked[p].face : await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
   $('loading').hidden = false;
   state = R.newMatch(players, { first });
   $('loading').textContent = 'Loading Bakugan…';

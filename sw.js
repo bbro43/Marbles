@@ -1,8 +1,8 @@
 // Offline cache for the app shell. The asset pack lives in IndexedDB, not here.
-const CACHE = 'marbles-v39';
+const CACHE = 'marbles-v40';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'vendor/jszip.min.js',
   'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/maskable-512-v2.png',
-  'battle.html', 'js/battle.js', 'viewer.html', 'js/viewer.js', 'js/rules.js', 'js/pack.js', 'js/abilities.js', 'js/setup.js', 'js/aiteams.js',
+  'battle.html', 'js/battle.js', 'viewer.html', 'js/viewer.js', 'room.html', 'js/room.js', 'js/avatar.js', 'js/profiles.js', 'js/rules.js', 'js/pack.js', 'js/abilities.js', 'js/setup.js', 'js/aiteams.js',
   'vendor/three/build/three.module.js', 'vendor/three/examples/jsm/loaders/GLTFLoader.js',
   'vendor/three/examples/jsm/utils/BufferGeometryUtils.js'];
 

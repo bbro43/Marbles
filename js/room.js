@@ -1,0 +1,336 @@
+// My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
+import * as THREE from 'three';
+import { Pack } from './pack.js';
+import { buildAvatar, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from './avatar.js';
+import * as P from './profiles.js';
+import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let pack, M, urls = new Map();
+const art = k => urls.get(M.files[k]) || '';
+const img = (k, x, y, cls = '', extra = '') => art(k) ? `<img src="${art(k)}" style="left:${x}px;top:${y}px" class="${cls}" ${extra} alt="">` : '';
+
+// ---- the two screens, scaled to the phone
+function fit() {
+  const w = document.documentElement.clientWidth, h = document.documentElement.clientHeight, s = Math.min(w / 256, h / 384);
+  $('ds').style.transform = `translate(${(w - 256 * s) / 2}px, ${(h - 384 * s) / 2}px) scale(${s})`;
+  renderer.setPixelRatio(Math.min(4, s * (devicePixelRatio || 1))); renderer.setSize(256, 192, false);
+}
+function bar(text) {
+  $('bar')?.remove();
+  const b = document.createElement('div'); b.id = 'bar'; b.innerHTML = '<span id="barText"></span>'; $('bot').append(b);
+  const t = $('barText'); t.textContent = text;
+  requestAnimationFrame(() => {
+    const w = t.offsetWidth;
+    if (w > 240) { t.style.setProperty('--to', `-${w}px`); t.style.animationDuration = `${(w + 256) / 40}s`; t.classList.add('run'); }
+    else t.style.left = (250 - w) + 'px';
+  });
+}
+const backBtn = (fn) => { $('bot').insertAdjacentHTML('beforeend', `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`); $('bBack').onclick = fn; };
+
+// ---- 3D: your character on the top screen
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+$('view3d').append(renderer.domElement);
+const scene = new THREE.Scene();
+scene.add(new THREE.AmbientLight(0xffffff, 2.3));
+const camera = new THREE.PerspectiveCamera(30, 256 / 192, 0.01, 50);
+const holder = new THREE.Group(); scene.add(holder);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(0.35, 40), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25 }));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+let avatar = null, avatarKey = '', building = null, view = 'full', spin = 0, show3d = false;
+const VIEWS = { full: [0.5, 2.9], head: [0.86, 1.0], upper: [0.62, 1.5], lower: [0.25, 1.6], side: [0.5, 2.6] };
+let camY = 0.5, camD = 2.9;
+function setView(v) { view = v; }
+async function showAvatar(look) {
+  const key = JSON.stringify(look);
+  if (key === avatarKey && avatar) return;
+  avatarKey = key;
+  const job = building = buildAvatar(look, p => pack.url(p));
+  const a = await job; if (job !== building) return;
+  if (avatar) holder.remove(avatar);
+  avatar = a; holder.add(a);
+}
+let drag = null;
+renderer.domElement.addEventListener('pointerdown', e => { drag = e.clientX; });
+addEventListener('pointerup', () => { drag = null; });
+renderer.domElement.addEventListener('pointermove', e => { if (drag !== null) { spin += (e.clientX - drag) * 0.02; drag = e.clientX; } });
+renderer.setAnimationLoop(() => {
+  if (!show3d) return;
+  const [ty, td] = VIEWS[view] || VIEWS.full; camY += (ty - camY) * 0.15; camD += (td - camD) * 0.15;
+  camera.position.set(0, camY + 0.05, camD); camera.lookAt(0, camY, 0);
+  holder.rotation.y += (spin - holder.rotation.y) * 0.2;
+  renderer.render(scene, camera);
+});
+function top3d(on, bg = '') { show3d = on; $('view3d').hidden = !on; $('top').style.background = bg || 'linear-gradient(#cfe7ee 0%, #b9d8e0 55%, #e4c79a 56%, #c9a06a 100%)'; }
+// a face picture for menus and the battle: render the head, cut to the DS face-icon shape
+async function faceShot() {
+  const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(128, 128); r.outputColorSpace = THREE.SRGBColorSpace;
+  const cam = new THREE.PerspectiveCamera(20, 1, 0.01, 50); cam.position.set(0, 0.86, 0.62); cam.lookAt(0, 0.855, 0);
+  const sc = new THREE.Scene(); sc.add(new THREE.AmbientLight(0xffffff, 2.3));
+  const keep = [holder.rotation.y, holder.position.x]; holder.rotation.y = 0; holder.position.x = 0; scene.remove(holder); sc.add(holder);
+  r.render(sc, cam); sc.remove(holder); scene.add(holder); [holder.rotation.y, holder.position.x] = keep;
+  const out = document.createElement('canvas'); out.width = 32; out.height = 32; const x = out.getContext('2d');
+  x.imageSmoothingEnabled = true; x.drawImage(r.domElement, 10, 14, 108, 92, 0, 0, 28, 24);
+  const mask = new Image(); mask.src = art('face_dan'); await mask.decode();
+  x.globalCompositeOperation = 'destination-in'; x.drawImage(mask, 0, 0);
+  r.dispose(); return out.toDataURL('image/png');
+}
+
+// ---- screens
+let screen = 'room', roomSel = 3, slot = null;
+const prof = () => { const d = P.load(); return d.active !== null ? d.slots[d.active] : null; };
+function go(s, ...a) { screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats })[s](...a); }
+
+// My Room: the DS carousel
+const ROOM = [['info', 'INFO', 'You can check your statistics on the computer.'], ['save', 'SAVE', 'Switch players or start a new one (up to 6).'],
+  ['deck', 'DECK', 'View and edit your deck.'], ['closet', 'CLOSET', 'Change your look and your name.'], ['collection', 'BAKUGAN', 'Look through every Bakugan — models, stats and colors.']];
+function room() {
+  const p = prof();
+  if (!p) return go('save');
+  top3d(true); setView('full'); showAvatar(p.look);
+  $('topUI').innerHTML = `<div class="bubble"><b>${esc(p.name)}</b>${roomSel === 3 ? 'I should change my look.' : roomSel === 2 ? 'I should reorganize my deck.' : roomSel === 1 ? 'I should save my progress.' : 'What should I do?'}</div>`;
+  const n = ROOM.length, L = (roomSel + n - 1) % n, R = (roomSel + 1) % n;
+  $('bot').innerHTML = img('room_bot', 0, 0) +
+    `<img src="${art('room_' + ROOM[L][0])}" class="tap" id="rL" style="left:2px;top:56px" alt="">` +
+    `<img src="${art('room_' + ROOM[roomSel][0] + '_on')}" class="tap" id="rC" style="left:88px;top:44px" alt="">` +
+    `<img src="${art('room_' + ROOM[R][0])}" class="tap" id="rR" style="left:186px;top:56px" alt="">` +
+    `<div style="position:absolute;left:0;right:0;top:132px;height:14px;background:linear-gradient(#2f7fe8,#1146a8);border-top:1px solid #9fd0ff;border-bottom:1px solid #0a2a66;text-align:center;font:900 10px/14px system-ui;letter-spacing:1px;text-shadow:0 1px 0 #000">${ROOM[roomSel][1]}</div>`;
+  bar(ROOM[roomSel][2]);
+  $('rL').onclick = () => { roomSel = L; go('room'); };
+  $('rR').onclick = () => { roomSel = R; go('room'); };
+  $('rC').onclick = () => { const k = ROOM[roomSel][0]; if (k === 'collection') location.href = 'viewer.html'; else go(k); };
+  backBtn(() => { location.href = './'; });
+}
+
+// Closet: the character creator
+const CAT = { Head: ['hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top'], 'Lower body': ['down', 'shoes'] };
+const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: 'top', down: 'bottom', shoes: 'shoes', skin: 'skin' };
+const LABEL = { hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
+const VIEW_OF = { hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
+let look = null, editCat = null, editPart = null, isNew = false;
+function closet(start) {
+  const p = prof();
+  if (start) { look = start.look; isNew = !!start.isNew; } else if (!look) look = JSON.parse(JSON.stringify(p ? p.look : DEFAULT_LOOK));
+  top3d(true); setView(editPart ? VIEW_OF[editPart] : editCat === 'Head' ? 'head' : editCat === 'Upper body' ? 'upper' : editCat === 'Lower body' ? 'lower' : 'full');
+  showAvatar(look);
+  const name = (p && !isNew) ? p.name : (start && start.name) || closetName;
+  $('topUI').innerHTML = `<div style="position:absolute;left:4px;bottom:6px;width:140px;height:14px;border-radius:7px;background:#000c;border:2px solid #1aa3c8;font:800 9px/11px system-ui;padding-left:8px">${esc(name)}</div>`;
+  // body figure with the part being edited lit up
+  let h = img('edit_bot', 0, 0) + img('edit_panel', 6, 18) + img('edit_figure', 36, 22);
+  const right = (html) => h += html;
+  if (!editCat) {
+    bar('Create your character.');
+    ['Random', 'Head', 'Upper body', 'Lower body'].forEach((t, i) => right(`<div class="pill tap ${t === 'Random' ? 'sel' : ''}" data-cat="${t}" style="left:138px;top:${22 + i * 26}px;width:112px">${t}</div>`));
+    right(`<div class="pill tap" id="cName" style="left:138px;top:126px;width:112px">Name</div>`);
+    right(`<div class="pill gold tap" id="cDone" style="left:138px;top:170px;width:80px">Done</div>`);
+  } else if (!editPart) {
+    bar(editCat);
+    right(`<div class="pill" style="left:138px;top:22px;width:112px">${editCat}</div>`);
+    CAT[editCat].forEach((k, i) => right(`<div class="pill tap" data-part="${k}" style="left:144px;top:${48 + i * 22}px;width:106px">${LABEL[k]}</div>`));
+  } else {
+    const k = editPart, def = PARTS[k];
+    bar(LABEL[k]);
+    right(`<div class="pill" style="left:138px;top:20px;width:112px">${LABEL[k]}</div><div class="box" style="left:136px;top:40px;width:116px;height:128px"></div>`);
+    const styles = k === 'skin' ? SKIN_TONES : def.styles + (def.optional ? 1 : 0);
+    for (let i = 0; i < styles; i++) {
+      const v = k === 'skin' ? i : def.optional ? i - 1 : i, cur = k === 'skin' ? look.skin : look[k][0];
+      const pic = art(`part_${ICON[k]}${k === 'skin' ? i : def.optional ? i : i}`);
+      const cols = styles > 9 ? 4 : 3, sz = cols === 4 ? 27 : 36;
+      right(`<img src="${pic}" class="icon tap ${cur === v ? 'sel' : ''}" data-style="${v}" style="left:${140 + (i % cols) * (sz + 1)}px;top:${44 + Math.floor(i / cols) * (sz + 1)}px;width:${sz}px;height:${sz}px" alt="">`);
+    }
+    if (k !== 'skin') {
+      const sw = (M.swatch || {})[k === 'eye' ? 'eye' : k] || [];
+      for (let c = 0; c < def.colors; c++) right(`<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="left:${142 + c * 18}px;top:152px;background:${sw[c] || '#888'}"></div>`);
+    }
+  }
+  $('bot').innerHTML = h;
+  $('bot').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => {
+    if (b.dataset.cat === 'Random') { look = randomLook(); return go('closet'); }
+    editCat = b.dataset.cat; go('closet');
+  });
+  $('bot').querySelectorAll('[data-part]').forEach(b => b.onclick = () => { editPart = b.dataset.part; go('closet'); });
+  $('bot').querySelectorAll('[data-style]').forEach(b => b.onclick = () => {
+    const v = +b.dataset.style; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
+    if (editPart === 'eye') look.eyeblow[0] = v;
+    go('closet');
+  });
+  $('bot').querySelectorAll('[data-color]').forEach(b => b.onclick = () => {
+    const c = +b.dataset.color; look[editPart][1] = c; if (editPart === 'hair') look.eyeblow[1] = c;
+    go('closet');
+  });
+  if ($('cName')) $('cName').onclick = () => askName(name).then(n => { if (n) { closetName = n; if (p && !isNew) P.update(P.load().active, q => { q.name = n; }); } go('closet'); });
+  if ($('cDone')) $('cDone').onclick = async () => {
+    await building;
+    const face = await faceShot();
+    const d = P.load();
+    if (isNew) { P.create(d, slot, closetName, look); }
+    P.update(P.load().active, q => { q.look = look; q.face = face; });
+    look = null; isNew = false; editCat = editPart = null; go('room');
+  };
+  backBtn(() => {
+    if (editPart) { editPart = null; return go('closet'); }
+    if (editCat) { editCat = null; return go('closet'); }
+    look = null; if (isNew) { isNew = false; return go('save'); } go('room');
+  });
+}
+let closetName = 'Brawler';
+function askName(cur) {
+  return new Promise(res => {
+    const i = document.createElement('input'); i.className = 'name'; i.maxLength = 12; i.value = cur || ''; i.placeholder = 'Your name';
+    $('bot').append(i); bar('Type your name, then press Enter.'); i.focus();
+    let fin = false; const done = () => { if (fin) return; fin = true; const v = i.value.trim(); i.remove(); res(v || null); };
+    i.onkeydown = e => { if (e.key === 'Enter') done(); }; i.onblur = done;
+  });
+}
+
+// Deck: what you take into battle
+function deck() {
+  const p = prof(); if (!p) return go('save');
+  top3d(false, `url(${art('arena_top')}) 0 0 / 256px 192px`);
+  const cat = pack.catalog, d = p.deck, toyBy = new Map(cat.toys.map(t => [t.id, t])), cardBy = new Map(cat.cards.map(c => [c.id, c]));
+  let total = 0, pics = '';
+  if (d) {
+    d.toys.forEach((x, i) => { const t = toyBy.get(x.id); if (!t) return; total += t.baseG || 0;
+      const th = (t.thumbs || {})[x.attr]; pics += th ? `<img data-src="${th}" style="left:${10 + i * 28}px;top:58px;width:28px;height:28px" alt="">` : ''; });
+    [...GATE_COLORS.map(c => d.gates[c]), ...AB_COLORS.map(c => d.abilities[c])].forEach((id, i) => { const c = cardBy.get(id); if (c && c.art) pics += `<img data-src="${c.art}" style="left:${96 + i * 25}px;top:54px;width:22px;height:30px" alt="">`; });
+  }
+  $('topUI').innerHTML = img('banner_team', 56, 7) +
+    `<div class="txt" style="left:16px;top:38px;font:italic 900 10px system-ui">CURRENT DECK</div><div class="box" style="left:6px;top:50px;width:244px;height:40px"></div>${pics}` +
+    `<div class="txt" style="left:0;right:0;top:104px;text-align:center;color:#ffd54a">Total G-Power</div><div class="txt" style="left:0;right:0;top:118px;text-align:center;font-size:20px;line-height:22px;color:#ffd54a">${d ? total : '—'}</div>`;
+  $('topUI').querySelectorAll('[data-src]').forEach(async im => { im.src = await pack.url(im.dataset.src); });
+  $('bot').innerHTML = img('arena_bot', 0, 0) +
+    `<div class="pill tap sel" id="dEdit" style="left:40px;top:40px;width:176px">Edit deck</div>` +
+    `<div class="pill tap" id="dAuto" style="left:40px;top:70px;width:176px">Auto-Create</div>` +
+    `<div class="pill tap" id="dReset" style="left:40px;top:100px;width:176px">Reset</div>`;
+  bar(d ? 'Use these to change your deck.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
+  const edit = async (start) => {
+    $('ds').style.visibility = 'hidden';
+    const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name });
+    $('ds').style.visibility = '';
+    if (r.deck) P.update(P.load().active, q => { q.deck = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities }; });
+    go('deck');
+  };
+  $('dEdit').onclick = () => edit();
+  $('dAuto').onclick = () => edit({ name: p.name, toys: [], gates: {}, abilities: {}, auto: true });
+  $('dReset').onclick = () => { P.update(P.load().active, q => { q.deck = null; }); go('deck'); };
+  backBtn(() => go('room'));
+}
+
+// Save: 6 players
+let deleting = false;
+function save() {
+  top3d(false, 'linear-gradient(#0b6f86, #49d3e6 60%, #0b6f86)');
+  const d = P.load();
+  $('topUI').innerHTML = `<div class="bubble" style="bottom:20px"><b>Save</b>${d.active === null ? 'Pick a slot to make your character.' : 'Your progress saves by itself. Pick a player, or an empty slot for a new one.'}</div>`;
+  let h = img('arena_bot', 0, 0);
+  d.slots.forEach((s, i) => {
+    const x = 8 + (i % 3) * 82, y = 22 + Math.floor(i / 3) * 76;
+    h += `<div class="slot tap ${d.active === i ? 'sel' : ''}" data-slot="${i}" style="left:${x}px;top:${y}px">` +
+      (s ? (s.face ? `<img class="face" src="${s.face}" alt="">` : '') + `<div class="nm">${esc(s.name)}</div>` : `<div class="empty">${deleting ? '' : 'NEW'}</div><div class="nm"></div>`) + `</div>`;
+  });
+  h += `<div class="pill tap ${deleting ? 'sel' : ''}" id="sDel" style="left:8px;top:172px;width:70px;height:16px;line-height:14px">${deleting ? 'Stop' : 'Delete'}</div>`;
+  $('bot').innerHTML = h;
+  bar(deleting ? 'Tap a player to delete it.' : 'Choose a player.');
+  $('bot').querySelectorAll('[data-slot]').forEach(b => b.onclick = async () => {
+    const i = +b.dataset.slot, dd = P.load(), s = dd.slots[i];
+    if (deleting) { if (s && confirm(`Delete ${s.name}? This can't be undone.`)) { dd.slots[i] = null; if (dd.active === i) dd.active = dd.slots.findIndex(Boolean) >= 0 ? dd.slots.findIndex(Boolean) : null; P.save(dd); } deleting = false; return go('save'); }
+    if (s) { dd.active = i; P.save(dd); return go('room'); }
+    slot = i; const n = await askName(''); if (!n) return go('save');
+    closetName = n; editCat = editPart = null; go('closet', { look: JSON.parse(JSON.stringify(DEFAULT_LOOK)), isNew: true, name: n });
+  });
+  $('sDel').onclick = () => { deleting = !deleting; go('save'); };
+  if (d.active !== null) backBtn(() => go('room')); else backBtn(() => { location.href = './'; });
+}
+
+// Info: Tips, Ranking, Statistics
+function info() {
+  const p = prof(); top3d(true); setView('full'); showAvatar(p.look);
+  $('topUI').innerHTML = `<div class="bubble"><b>${esc(p.name)}</b>What should I do?</div>`;
+  const items = [['tips', 'TIPS', '💬'], ['ranking', 'RANKING', '🏆'], ['stats', 'STATISTICS', '📄']];
+  $('bot').innerHTML = img('room_bot', 0, 0) + img('room_info', 4, 22) + `<div class="txt" style="left:76px;top:40px;font:italic 900 16px system-ui">INFO</div>` +
+    items.map(([k, t, e], i) => `<div class="tap" data-i="${k}" style="position:absolute;left:${18 + i * 78}px;top:82px;width:66px;height:52px;border-radius:6px;background:linear-gradient(#0d3b7a,#06204a);border:2px solid #39b8ff;text-align:center;font:22px/34px system-ui">${e}<div style="font:900 7px/10px system-ui;letter-spacing:.5px">${t}</div></div>`).join('');
+  bar('You can check your statistics on the computer.');
+  $('bot').querySelectorAll('[data-i]').forEach(b => b.onclick = () => go(b.dataset.i));
+  backBtn(() => go('room'));
+}
+// Tips from the Brawlers, about this game's rules
+const TIPS = {
+  dan: ['Hey! Let me know when you want to learn more about Bakugan!', 'Throw your Bakugan onto a Gate card. If it stops on the card it stands and opens — even if it only stops partly on the card.',
+    'Two of your Bakugan on one card? You can take that card, or move one to a card touching it.', 'Win 3 Gate cards and you win the match!'],
+  runo: ['Hi! Want some advice?', 'Speed is how hard your Bakugan hits. If it is less than the other Bakugan’s Defense, it just bounces off.',
+    'Magnet is how well your Bakugan sticks to the card. High Magnet means it barely slides when it gets hit.', 'Knock an opponent’s Bakugan off its card and you win that card — that’s a knockout!'],
+  marucho: ['Let me explain the numbers!', 'When a Gate card flips, each Bakugan gets that card’s bonus for its attribute. Check the card before you throw!',
+    'Set your Gate card where your Bakugan are strongest. It has to touch a card that is already on the field.', 'Each Bakugan can go up to 600G with upgrades.'],
+  shun: ['Focus.', 'Ability cards are played back and forth in a battle until both players pass. Save your best one for the end.',
+    'Red cards are thrown with your Bakugan. Some cards work before you throw or after your Bakugan stops — use the Ability cards button.', 'Your own Bakugan can’t be knocked around by your throw. Use that.'],
+  julie: ['Hiii! Want a tip?', 'Pick a character and Easy, Normal or Hard to play their deck. Pick You to play the deck you built in My Room.',
+    'Change your look in the Closet. The colors under each part change it too!', 'Your statistics are on the computer in My Room.'],
+};
+const TIP_FACE = { dan: 'title_pic1', runo: 'title_pic2', marucho: 'title_pic3', shun: 'title_pic0', julie: 'title_pic4' };
+function tips(who, n = 0) {
+  top3d(false, 'linear-gradient(#0b6f86, #49d3e6 60%, #0b6f86)');
+  const names = Object.keys(TIPS), ch = c => M.chars.find(x => x.id === c);
+  if (who) {
+    const list = TIPS[who];
+    $('topUI').innerHTML = img(TIP_FACE[who], 0, -40) + `<div class="bubble tap" id="tNext"><b>${ch(who).name}</b>${esc(list[n % list.length])}</div>`;
+    $('tNext').onclick = () => tips(who, n + 1);
+  } else $('topUI').innerHTML = `<div class="bubble"><b>Tips</b>Choose a Brawler to talk to.</div>`;
+  $('bot').innerHTML = img('arena_bot', 0, 0) + names.map((c, i) => { const x = 10 + (i % 3) * 82, y = 24 + Math.floor(i / 3) * 76;
+    return `<div class="slot tap ${who === c ? 'sel' : ''}" data-t="${c}" style="left:${x}px;top:${y}px"><img class="face" src="${urls.get(ch(c).face)}" alt=""><div class="nm">${ch(c).name}</div></div>`; }).join('');
+  bar(who ? 'Tap the message to hear more.' : 'Choose who to talk to.');
+  $('bot').querySelectorAll('[data-t]').forEach(b => b.onclick = () => tips(b.dataset.t, 1));
+  backBtn(() => go('info'));
+}
+// Ranking: the Battle Brawlers' points. Your RP comes with ranked play (Battle Arena is free play).
+const RANK = [['masquerade', 121500], ['shun', 112400], ['dan', 108500], ['klaus', 104200], ['chanlee', 101200], ['runo', 98800], ['marucho', 89500], ['julie', 86700],
+  ['julio', 83400], ['komba', 83300], ['billy', 80100], ['marduk', 76000], ['akira', 52000], ['shuji', 50500], ['jenny', 48000], ['jewls', 46500]];
+let rankTop = 0;
+function ranking() {
+  const p = prof(), rp = (p.stats && p.stats.rp) || 0, all = [...RANK.map(([id, v]) => ({ name: M.chars.find(c => c.id === id).name, rp: v })), { name: p.name, rp, me: true }].sort((a, b) => b.rp - a.rp);
+  const myRank = all.findIndex(x => x.me) + 1;
+  top3d(true, 'linear-gradient(#0a4d6a, #2aa6c8)'); setView('upper'); showAvatar(p.look);
+  $('topUI').innerHTML = `<div style="position:absolute;left:120px;top:24px;width:128px;font:800 10px/14px system-ui">
+    <div style="color:#bfe9ff">NAME</div><div style="border-bottom:1px solid #6fd3ff">${esc(p.name)}</div><div style="color:#bfe9ff;margin-top:6px">RANK</div><div style="text-align:right;border-bottom:1px solid #6fd3ff">${myRank}</div>
+    <div style="color:#bfe9ff;margin-top:6px">RP</div><div style="text-align:right;border-bottom:1px solid #6fd3ff">${rp}</div></div>
+    <div class="txt" style="right:6px;top:4px;font:italic 900 12px system-ui;color:#bfe9ff">RANKING</div>`;
+  holder.position.x = -0.32;
+  const rows = all.slice(rankTop, rankTop + 7);
+  $('bot').innerHTML = img('arena_bot', 0, 0) + img('rank_top', 48, 20) +
+    rows.map((r, i) => `<div class="row ${r.me ? 'me' : ''}" style="top:${40 + i * 18}px"><span>${rankTop + i + 1}&nbsp;&nbsp;${esc(r.name)}</span><span>${r.rp}</span></div>`).join('') +
+    `<div class="pill tap" id="rUp" style="left:226px;top:40px;width:24px">▲</div><div class="pill tap" id="rDn" style="left:226px;top:142px;width:24px">▼</div>`;
+  bar('Ranked play comes later — Battle Arena is free play, so it does not change your RP.');
+  $('rUp').onclick = () => { rankTop = Math.max(0, rankTop - 7); ranking(); };
+  $('rDn').onclick = () => { rankTop = Math.min(all.length - 1, rankTop + 7); ranking(); };
+  backBtn(() => { holder.position.x = 0; rankTop = 0; go('info'); });
+}
+// Statistics: battle data, title, wins by opponent
+function stats() {
+  const p = prof(), s = { ...P.newStats(), ...(p.stats || {}) }, pct = s.matches ? Math.round(s.wins / s.matches * 100) : 0;
+  top3d(false, 'linear-gradient(#0a4d6a, #2aa6c8)');
+  const line = (k, v) => `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #6fd3ff;padding:1px 0"><span>${k}</span><span>${v}</span></div>`;
+  $('topUI').innerHTML = `<div class="txt" style="right:6px;top:4px;font:italic 900 12px system-ui;color:#bfe9ff">STATISTICS</div>
+    <div style="position:absolute;left:14px;right:14px;top:26px;font:700 9px/12px system-ui">
+      <div style="color:#ffd54a;font-size:11px;margin-bottom:4px">${esc(p.name)} — ${P.titleFor(s.wins)}</div>
+      ${line('Matches', s.matches)}${line('Wins / Losses', `${s.wins}W - ${s.losses}L`)}${line('Win rate', pct + '%')}${line('Best win streak', s.best)}${line('Gate cards won', s.gates)}${line('Knockouts', s.knockouts)}</div>`;
+  const vs = Object.entries(s.vs || {}).sort((a, b) => (b[1].w + b[1].l) - (a[1].w + a[1].l)).slice(0, 7);
+  $('bot').innerHTML = img('arena_bot', 0, 0) + `<div class="txt" style="left:20px;top:22px;color:#bfe9ff">NUMBER OF WINS</div>` +
+    (vs.length ? vs.map(([id, v], i) => { const c = M.chars.find(x => x.id === id); return `<div class="row" style="top:${38 + i * 18}px"><span>${esc(c ? c.name : id)}</span><span>${v.w}W - ${v.l}L</span></div>`; }).join('')
+      : `<div class="txt" style="left:20px;top:60px;width:216px;font-weight:600">No matches yet. Play in the Battle Arena as You.</div>`);
+  bar('Your battle data. Matches you play as You count here.');
+  backBtn(() => go('info'));
+}
+
+// ---- start
+(async () => {
+  addEventListener('resize', fit); fit();
+  pack = await Pack.fromDevice();
+  if (!pack || !pack.catalog.menu || !pack.catalog.menu.files.room_bot) { document.body.insertAdjacentHTML('beforeend', '<p style="position:fixed;top:40%;left:0;right:0;text-align:center">Update the asset pack from Options first.</p>'); return; }
+  M = pack.catalog.menu;
+  await Promise.all([...new Set([...Object.values(M.files), ...M.chars.map(c => c.face)])].map(async f => { try { urls.set(f, await pack.url(f)); } catch {} }));
+  const q = new URLSearchParams(location.search).get('go');
+  go(q && ['save', 'closet', 'deck', 'info'].includes(q) && prof() ? q : prof() ? 'room' : 'save');
+  window.ROOM = { go, get screen() { return screen; }, prof };
+})();

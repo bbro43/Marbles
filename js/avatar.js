@@ -1,0 +1,98 @@
+// Your character, built from the New Vestroia game's character-creator parts (pack/creator).
+// Each part is its own model on the same skeleton in its rest pose, so loading them together assembles the body.
+// Colors are texture swaps: a material whose texture is e.g. "hair_00_00" gets "hair_03_02" (style 3, color 2).
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// what you can change, how many styles and colors each has (from pack/creator/catalog.json)
+export const PARTS = {
+  hair:    { styles: 10, colors: 6, label: 'Hair' },
+  cap:     { styles: 6, colors: 6, label: 'Hat', optional: true },
+  glasses: { styles: 6, colors: 4, label: 'Glasses', optional: true },
+  eye:     { styles: 6, colors: 6, label: 'Eyes' },
+  eyeblow: { styles: 6, colors: 6, label: 'Eyebrows' },
+  facial:  { styles: 6, colors: 5, label: 'Face' },
+  top:     { styles: 8, colors: 6, label: 'Top' },
+  down:    { styles: 8, colors: 6, label: 'Pants' },
+  shoes:   { styles: 4, colors: 6, label: 'Shoes' },
+};
+export const SKIN_TONES = 5;
+// a starting look (Liam-like: brown hair, black top, blue jeans)
+export const DEFAULT_LOOK = { hair: [0, 0], cap: [-1, 0], glasses: [-1, 0], eye: [0, 0], eyeblow: [0, 0], facial: [0, 0],
+  top: [1, 1], down: [0, 2], shoes: [0, 1], skin: 0 };
+const two = n => String(n).padStart(2, '0');
+export function randomLook() {
+  const r = n => Math.floor(Math.random() * n), L = { skin: r(SKIN_TONES) };
+  for (const [k, p] of Object.entries(PARTS)) L[k] = [p.optional && Math.random() < 0.6 ? -1 : r(p.styles), r(p.colors)];
+  L.eyeblow[1] = L.hair[1];
+  return L;
+}
+
+// which models make up a look
+function models(L) {
+  const m = ['head_00', 'top_' + two(L.top[0]), 'down_' + two(L.down[0]), 'shoes_' + two(L.shoes[0])];
+  m.push(L.cap[0] >= 0 ? 'cap_' + two(L.cap[0]) : 'hair_' + two(L.hair[0]));      // a hat comes with the hair under it
+  if (L.glasses[0] >= 0) m.push('glasses_' + two(L.glasses[0]));
+  return m;
+}
+// the texture a material should use, given the texture it was built with
+function variantFor(texName, L) {
+  const m = /^([a-z]+)_(\d\d)_(\d\d)$/.exec(texName || ''); if (!m) return null;
+  const kind = m[1], s = m[2];
+  switch (kind) {
+    case 'hair': return `hair_${two(L.hair[0])}_${two(L.hair[1])}`;
+    case 'caphair': return `caphair_${s}_${two(L.hair[1])}`;
+    case 'cap': return `cap_${s}_${two(L.cap[1])}`;
+    case 'glass': return `glass_${s}_${two(Math.min(4, L.glasses[1]))}`;
+    case 'glassf': return `glassf_${s}_${two(Math.min(3, L.glasses[1]))}`;
+    case 'eye': return `eye_${two(L.eye[0])}_${two(L.eye[1])}`;
+    case 'eyeblow': return `eyeblow_${two(L.eyeblow[0])}_${two(L.eyeblow[1])}`;
+    case 'facial': return `facial_${two(L.facial[0])}_${two(Math.min(4, L.facial[1]))}`;
+    case 'skin': return `skin_00_${two(Math.min(4, L.skin))}`;
+    case 'top': return `top_${s}_${two(L.top[1])}`;
+    case 'band': return `band_00_${two(L.top[1])}`;
+    case 'down': return `down_${s}_${two(L.down[1])}`;
+    case 'shoes': return `shoes_${s}_${two(L.shoes[1])}`;
+  }
+  return null;
+}
+
+// url(path in pack) -> fetchable URL. Returns a THREE.Group with the whole character, feet at y = 0.
+export async function buildAvatar(L, url) {
+  const loader = new GLTFLoader(), texLoader = new THREE.TextureLoader(), group = new THREE.Group();
+  const texCache = new Map();
+  const tex = async name => {
+    if (!texCache.has(name)) texCache.set(name, (async () => {
+      const t = await texLoader.loadAsync(await url(`creator/textures/${name}.png`));
+      t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t;
+    })().catch(() => { console.warn('no texture', name); return null; }));
+    return texCache.get(name);
+  };
+  const scenes = await Promise.all(models(L).map(async m => (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene));
+  const jobs = [];
+  for (const sc of scenes) {
+    sc.traverse(o => {
+      if (!o.isMesh) return;
+      o.frustumCulled = false;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      for (const mat of mats) {
+        const old = mat.map; if (!old) continue;
+        const want = variantFor(old.name, L); if (!want || want === old.name) continue;
+        jobs.push(tex(want).then(t => { if (t) { t.wrapS = old.wrapS; t.wrapT = old.wrapT; mat.map = t; mat.needsUpdate = true; } }));
+      }
+    });
+    group.add(sc);
+  }
+  await Promise.all(jobs);
+  // the parts are in a T-pose: bring the arms down to the sides
+  group.traverse(o => { if (o.isBone && /UpperArm$/.test(o.name)) o.rotateOnAxis(new THREE.Vector3(0, 0, -1), (o.name.includes('_L_') ? 1 : -1) * 1.25); });
+  group.updateMatrixWorld(true);
+  group.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
+  const box = new THREE.Box3().setFromObject(group, true);
+  const k = 1 / (box.max.y - box.min.y);                     // 1 unit tall, feet on the floor, centered
+  const wrap = new THREE.Group(); group.scale.setScalar(k);
+  const c = box.getCenter(new THREE.Vector3());
+  group.position.set(-c.x * k, -box.min.y * k, -c.z * k);
+  wrap.add(group);
+  return wrap;
+}

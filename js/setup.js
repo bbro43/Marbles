@@ -89,7 +89,8 @@ const pick = arr => arr[rand(arr.length)];
 
 // Resolves with { players: [{ name, toys, gates, abilities }], first }
 // picked: optional [{ id, name }] characters picked in the menu; each character keeps its own last team
-export async function setupTeams(cat, pack, picked = null) {
+// deck = { name, toys, gates, abilities } edits just that one deck (My Room) and resolves with { deck } (null = cancelled)
+export async function setupTeams(cat, pack, picked = null, deck = null) {
   const style = document.createElement('style'); style.textContent = CSS; document.head.append(style);
   const root = document.createElement('div'); root.id = 'setup'; document.body.append(root);
   // pictures: toy thumbnails, card art, blank card frames (all from the asset pack)
@@ -154,8 +155,9 @@ export async function setupTeams(cat, pack, picked = null) {
       // a computer player brings its own team (js/aiteams.js)
       if (c && c.team) return { name: c.name, fixed: true, toys: c.team.toys.map(x => ({ id: x.id, attr: x.attr })),
         gates: Object.fromEntries(GATE_COLORS.map(k => [k, c.team.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, c.team.abilities[k].id])) };
-      const t = restore(lastTeam(key(i)), i); if (c && !c.custom) t.name = c.name; return t;
+      const t = restore(lastTeam(key(i)), i); if (c && (!c.custom || c.profile != null)) t.name = c.name; return t;
     });
+    if (deck) { teams[0] = { name: deck.name || 'You', toys: [...(deck.toys || [])], gates: { ...(deck.gates || {}) }, abilities: { ...(deck.abilities || {}) } }; teams[1] = { fixed: true, name: '' }; if (deck.auto) autoFinish(teams[0], []); }
     const skipFixed = (w, dir) => { while (w >= 0 && w < 2 && teams[w].fixed) w += dir; return w; };
     let who = skipFixed(0, 1), gateTab = 'gold', abTab = 'red', search = '';
     const filt = new Set();   // attribute filter (empty = all)
@@ -229,8 +231,11 @@ export async function setupTeams(cat, pack, picked = null) {
       $('#srand').onclick = () => { Object.assign(t, randomTeam()); render(); };
       $('#sauto').onclick = () => { autoFinish(t, fa); render(); };
       root.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt.has(b.dataset.f) ? filt.delete(b.dataset.f) : filt.add(b.dataset.f); render(); });
+      if (deck) { $('#sdone').textContent = 'Save deck'; const c = document.createElement('button'); c.textContent = 'Cancel'; $('#sdone').before(c);
+        c.onclick = () => { root.remove(); style.remove(); resolve({ deck: null }); }; }
       $('#sdone').onclick = () => {
         if (!complete(t)) return;
+        if (deck) { root.remove(); style.remove(); resolve({ deck: { name: t.name, toys: t.toys, gates: t.gates, abilities: t.abilities } }); return; }
         saveTeam(key(who), t); who = skipFixed(who + 1, 1); search = ''; filt.clear(); gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
       };
     }

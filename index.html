@@ -57,7 +57,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 39;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 40;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -104,7 +104,7 @@ function render() {
 const BTN = [['story', 'Play through the Bakugan story! (coming later)', null],
   ['arena', 'Practice your Bakugan skills in the Battle Arena.', () => go('arena')],
   ['tutorial', 'Learn how to play Bakugan. (coming later)', null],
-  ['myroom', 'Go to My Room: the Bakugan Index — models, stats and colors.', () => { location.href = 'viewer.html'; }],
+  ['myroom', 'Go to My Room and get tips, change your deck, and more.', () => { location.href = 'room.html'; }],
   ['options', 'Change the game options.', () => go('options')]];
 const BTN_X = [3, 15, 7, 15, 23];
 let pic = 0;
@@ -157,7 +157,7 @@ function computer() {
 // Single Player: you pick yours, then the computer's character and how hard it plays.
 let mode = 'multi', pickFor = 0, picks = [null, null], level = null, page = 'bb';   // page: Battle Brawlers / New Vestroia characters
 function chars() {
-  const M = Pack.cat.menu, G = M.grid, face = c => Pack.urls.get(c.face);
+  const M = Pack.cat.menu, G = M.grid, face = c => c.face && c.face.startsWith('data:') ? c.face : Pack.urls.get(c.face);
   const rowTop = (p, y) => img('hex_empty', 22, y) + img('namebar_' + (picks[p] ? (p ? 'red' : 'blue') : 'grey'), 48, y) +
     (picks[p] ? `<img src="${face(picks[p])}" style="left:27px;top:${y + 3}px" alt="">` : '') +
     img('tag_p' + (p + 1), 16, y - 4) +
@@ -181,7 +181,7 @@ function chars() {
     const custom = picks.some(c => c.custom);
     $('bar').remove(); bar(`${picks[0].name} vs ${picks[1].name}` + (custom ? ' — build your deck!' : ' — battle!'));
     try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode, players: picks.map((c, p) => ({ id: c.id, name: c.name, face: c.face,
-      ...(c.custom ? { custom: true } : { level: c.level }), ...(mode === 'single' && p === 1 ? { ai: true } : {}) })) })); } catch {}
+      ...(c.custom ? { custom: true, ...(c.profile !== undefined ? { profile: c.profile } : {}) } : { level: c.level }), ...(mode === 'single' && p === 1 ? { ai: true } : {}) })) })); } catch {}
     setTimeout(() => { location.href = 'battle.html'; }, 900);
   };
   const next = () => { if (pickFor === 0) { pickFor = 1; render(); } else { render(); start(); } };
@@ -195,7 +195,12 @@ function chars() {
   $('pgL').onclick = $('pgR').onclick = () => { page = page === 'nv' ? 'bb' : 'nv'; render(); };
   if ($('cYou')) $('cYou').onclick = () => {
     if (cpu) { $('bar').remove(); bar('The computer plays a character — pick one of them.'); return; }
-    choose({ id: 'you', custom: true, name: mode === 'single' ? 'You' : `Player ${pickFor + 1}`, face: M.files.face_you, col: 0, row: 0, page: 'bb' });
+    // You = the player picked in My Room (name, face, deck). Player 2 on this device builds a deck instead.
+    let pr = null; try { const d = JSON.parse(localStorage.getItem('marbles-profiles') || 'null'); if (d && d.active !== null) pr = d.slots[d.active]; if (pr) pr.idx = d.active; } catch {}
+    const taken = picks.some(c => c && c.profile !== undefined);
+    if (!pr && !taken && pickFor === 0) { $('bar').remove(); bar('Make your character in My Room first (Title > My Room).'); return; }
+    if (pr && !taken) return choose({ id: 'you', custom: true, profile: pr.idx, name: pr.name, face: pr.face || M.files.face_you, col: 0, row: 0, page: 'bb' });
+    choose({ id: 'you', custom: true, name: `Player ${pickFor + 1}`, face: M.files.face_you, col: 0, row: 0, page: 'bb' });
   };
   $('bBack').onclick = () => { if (pickFor === 1) { pickFor = 0; picks = [null, null]; render(); } else go(mode === 'single' ? 'computer' : 'arena'); };
 }
