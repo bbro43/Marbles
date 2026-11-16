@@ -2,7 +2,7 @@
 // Usage: node tools/aiteams.mjs <catalog.json>
 import fs from 'fs';
 import { fitsAttrs, abilityScore, lineBlocked, GATE_COLORS, AB_COLORS } from '../js/setup.js';
-import { isCoded } from '../js/abilities.js';
+import { isCoded, toyMatches } from '../js/abilities.js';
 import { TRAP_SLOTS } from '../js/profiles.js';
 const cat = JSON.parse(fs.readFileSync(process.argv[2]));
 const byName = new Map(cat.toys.filter(t => t.baseG).map(t => [t.name, t]));
@@ -67,7 +67,7 @@ const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = c
 const out = {}, problems = [];
 // Gold Gate cards are character cards (a picture of one Bakugan, which gets the bonus twice).
 // A prebuilt deck only takes a gold card for a Bakugan it has.
-const goldFor = (g, names) => names.includes(g.name) || (g.name === "Preyas's" && names.some(n => n.startsWith('Preyas II'))) || (g.name === 'Viper Helios' && names.includes('Helios')) || (g.forToy && names.includes(g.forToy));
+const goldFor = (g, names) => names.some(n => toyMatches(n, g.name));   // any version of the pictured Bakugan
 function pickGates(names, attr, rank) {
   const gt = {};
   for (const c of GATE_COLORS) {

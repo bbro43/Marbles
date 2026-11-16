@@ -35,7 +35,12 @@ const captured = (s, p) => s.players[p].captured.length;
 const teamAttrs = (s, p) => new Set(s.players[p].toys.map(t => t.attr));
 const always = () => true;
 // "Preyas's" is the Preyas II card (either half); otherwise the card name is the toy name
-const toyMatches = (toyName, cardName) => cardName === "Preyas's" ? toyName.startsWith('Preyas II') : toyName === cardName;
+// A card that names a Bakugan works for every version of it (Billy, Nov 16): "Delta Dragonoid II" means any Dragonoid,
+// "Preyas's" any Preyas (Preyas, Preyas II Angelo or Diablo). Names with no family are matched as written.
+export const BASES = ['Dragonoid', 'Tigrerra', 'Preyas', 'Gorem', 'Skyress', 'Hydranoid', 'Leonidas', 'Vladitor', 'Ingram', 'Elfin',
+  'Percival', 'Wilda', 'Nemus', 'Helios', 'Vulcan', 'Hades', 'Elico', 'Altair', 'Brontes'];
+export const baseOf = name => BASES.find(b => new RegExp(`\\b${b}\\b`).test(name)) || name.replace(/'s$/, '');
+export const toyMatches = (toyName, cardName) => { const b = baseOf(cardName); return toyName === b || new RegExp(`\\b${b}\\b`).test(toyName); };
 
 // ---------- Ability card builders
 const plain = (can = always) => ({ when: 'battle', can, add: bonusOf });
@@ -168,25 +173,6 @@ export const GATE_EFFECTS = {
   'Trick Jump': { add: (c, sd) => 100 * c.s.players[sd.p].abilityUsed.length },
   'Mega Warrior': { add: (c, sd) => 100 * captured(c.s, sd.p) },
   "Naga's Wrath": { add: (c, sd) => 150 * standing(c.s, sd.p).filter(x => c.s.field[x.k] !== c.field).length },
-  // custom gold cards from Billy's own cards (the Vexos):
-  // Vulcan: every Vulcan (Premo Vulcan) gets the Gate bonus twice
-  'Vulcan': { gate: c => { for (const sd of c.sides) if (/Vulcan/.test(sd.name)) sd.gateMult *= 2; } },
-  // Myriad Hades: a player with a Hades not in this battle can swap it in (counted as Hades's G-Power when that is higher)
-  'Myriad Hades': { add: (c, sd) => {
-    const pl = c.s.players[sd.p], h = pl.toys.findIndex((x, t) => x.name === 'Hades' && t !== sd.t && (pl.used.includes(t) || pl.unused.includes(t)));
-    return h < 0 ? 0 : Math.max(0, pl.toys[h].g - sd.printed);
-  } },
-  // Brontes: a Brontes can take its attribute bonus from any Gate card in the opponent's used pile instead (the best one)
-  'Brontes': { add: (c, sd) => {
-    if (!/Brontes/.test(sd.name)) return 0;
-    const opp = c.s.players[1 - sd.p], pile = c.s.nv ? opp.gateUsed : opp.captured;
-    const best = Math.max(0, ...pile.map(g => (g.bonus || {})[sd.attr] || 0));
-    return Math.max(0, best - ((c.card.bonus || {})[sd.attr] || 0));
-  } },
-  // custom gold card (Billy's own Washback card): the player with fewer Gate cards in their used pile gets one used Ability card back
-  'Washback': regainColor(c => { const [a, b] = c.sides.map(sd => c.s.nv ? c.s.players[sd.p].gateUsed.length : captured(c.s, sd.p)); return a === b ? null : c.sides[a < b ? 0 : 1].p; }, 'one'),
-  // custom gold card (Billy's own Viper Helios card): +200 for each side whose owner has a Helios in their used pile
-  'Viper Helios': { add: (c, sd) => c.s.players[sd.p].used.some(t => /^Helios$/.test(c.s.players[sd.p].toys[t].name)) ? 200 : 0 },
 };
 // Gold cards: the pictured toy gets the Gate bonus twice
 const goldEffect = card => ({ gate: c => { for (const sd of c.sides) if (toyMatches(sd.name, card.name)) sd.gateMult *= 2; } });
