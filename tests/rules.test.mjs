@@ -299,4 +299,58 @@ test('every coded card has a known kind', () => {
   assert.ok(isCoded({ name: 'Blaze', color: 'blue', type: 'ability' })); assert.ok(isCoded({ name: 'Another Throw', color: 'red', type: 'ability' })); assert.ok(!isCoded({ name: 'Nope', color: 'red', type: 'ability' }));
 });
 
+// ---------- Tag Team (2 vs 2) and Battle Royale (4 players)
+function multi(teams, nv = true) {
+  const pl = ['A', 'B', 'C', 'D'].map((n, i) => ({ name: n, toys: [toy('T' + i, 'pyrus', 300 + 10 * i), toy('U' + i, 'aquos', 200), toy('V' + i, 'haos', 250)],
+    gates: [gate(n + '1', { pyrus: 50 }), gate(n + '2', {}), gate(n + '3', {})] }));
+  return newMatch(pl, { nv, teams });
+}
+test('tag team: teammates fight together on one Gate card, the other team splits the damage', () => {
+  const s = multi([0, 1, 0, 1]); startTurn(s);
+  assert.equal(s.field.length, 4);                       // everyone sets an opening Gate card
+  land(s, 0, 0); assert.equal(s.turn, 1); startTurn(s);  // A (team 0) stands on card 0
+  land(s, 1, 1); startTurn(s);                           // B (team 1) somewhere else
+  const r = land(s, 0, 0);                               // C (team 0) lands with teammate A: no battle, card taken (uncontested)
+  assert.equal(r.battle, null);
+  startTurn(s);
+  // D (team 1) lands on card holding B -> teammate, no battle
+  const s2 = multi([0, 1, 0, 1]); startTurn(s2);
+  land(s2, 0, 0); startTurn(s2); land(s2, 0, 2); startTurn(s2);   // A on card 0, B on card 2
+  land(s2, 0, 2);                                       // C lands on B's card -> battle C vs B
+  // set up a 2v1 by hand: A and C (team 0) vs D (team 1) on one card
+  const s3 = multi([0, 1, 0, 1]); startTurn(s3);
+  s3.field[0].toys = [{ p: 0, t: 0 }, { p: 2, t: 0 }, { p: 3, t: 0 }];
+  const b = computeBattle(s3, 0);
+  assert.equal(b.teamTotal[0], (300 + 50) + (320 + 50)); assert.equal(b.teamTotal[1], 330 + 50); assert.equal(b.result, 0);
+  resolveBattle(s3, b);
+  assert.equal(s3.players[3].life, 500 - (720 - 380));   // D alone takes all of it
+  assert.equal(s3.players[1].life, 500);                 // B wasn't in the battle
+});
+test('battle royale: highest wins, every loser takes damage, last one standing wins', () => {
+  const s = multi([0, 1, 2, 3]); startTurn(s);
+  s.field[0].toys = [{ p: 0, t: 0 }, { p: 1, t: 0 }, { p: 2, t: 0 }];
+  const b = computeBattle(s, 0); assert.equal(b.result, 2);   // 370 beats 360 and 350
+  resolveBattle(s, b);
+  assert.equal(s.players[0].life, 480); assert.equal(s.players[1].life, 490); assert.equal(s.players[2].life, 500);
+  // knock three players out: the fourth wins
+  for (const p of [0, 1, 3]) { s.players[p].life = 10; }
+  s.field[1].toys = [{ p: 2, t: 1 }, { p: 0, t: 1 }]; s.turn = 2; resolveBattle(s, computeBattle(s, 1));
+  assert.ok(s.players[0].out || s.players[0].life === 10);
+  s.players[0].out = true; s.players[1].out = true; s.players[3].life = 1;
+  s.field = [{ card: gate('X', {}), owner: 2, cell: [0, 0], toys: [{ p: 2, t: 0 }, { p: 3, t: 1 }] }]; s.turn = 2;
+  resolveBattle(s, computeBattle(s, 0));
+  assert.ok(s.players[3].out); assert.equal(s.winner, 2);
+});
+test('turns skip players who are out', () => {
+  const s = multi([0, 1, 2, 3]); startTurn(s);
+  s.players[1].out = true; land(s, 0, null); assert.equal(s.turn, 2);
+});
+test('classic tag team: a team wins with 3 Gate cards between them', () => {
+  const s = multi([0, 1, 0, 1], false); startTurn(s);
+  s.players[0].captured = [gate('a', {}), gate('b', {})];
+  s.field[0].toys = [{ p: 2, t: 0 }, { p: 1, t: 0 }]; s.turn = 2;
+  resolveBattle(s, computeBattle(s, 0));
+  assert.equal(s.players[2].captured.length, 1); assert.equal(s.winner, 0);
+});
+
 console.log(`\n${n} tests passed`);

@@ -170,7 +170,8 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
 
   return await new Promise(resolve => {
     const key = i => picked && picked[i] && !picked[i].custom ? 'c-' + picked[i].id : i;
-    const teams = [0, 1].map(i => {
+    const N = picked && picked.length > 2 ? picked.length : 2;   // Tag Team and Battle Royale have 4 players
+    const teams = Array.from({ length: N }, (_, i) => i).map(i => {
       const c = picked && picked[i];
       // a computer player brings its own team (js/aiteams.js)
       if (c && c.team) return { name: c.name, owner: c.id, fixed: true, toys: c.team.toys.map(x => ({ id: x.id, attr: x.attr })),
@@ -179,7 +180,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
       const t = restore(lastTeam(key(i)), i); if (c && (!c.custom || c.profile != null)) t.name = c.name; return t;
     });
     if (deck) { teams[0] = { name: deck.name || 'You', toys: [...(deck.toys || [])], gates: { ...(deck.gates || {}) }, abilities: { ...(deck.abilities || {}) }, extra: JSON.parse(JSON.stringify(deck.extra || {})) }; teams[1] = { fixed: true, name: '' }; if (deck.auto) autoFinish(teams[0], []); }
-    const skipFixed = (w, dir) => { while (w >= 0 && w < 2 && teams[w].fixed) w += dir; return w; };
+    const skipFixed = (w, dir) => { while (w >= 0 && w < N && teams[w].fixed) w += dir; return w; };
     let who = skipFixed(0, 1), gateTab = 'gold', abTab = 'red', search = '';
     const filt = new Set();   // attribute filter (empty = all)
 
@@ -188,7 +189,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
 
     function render() {
       const t = teams[who];
-      if (who === 2) return renderFirst();
+      if (who >= N) return renderFirst();
       const mine = attrsOf(t);
       const slots = [0, 1, 2].map(k => {
         const x = t.toys[k];
@@ -271,12 +272,11 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
 
     function renderFirst() {
       root.innerHTML = `<h2>Who goes first?</h2>
-        <button class="big" data-first="0">${esc(teams[0].name)}</button>
-        <button class="big" data-first="1">${esc(teams[1].name)}</button>
+        ${teams.map((t, i) => `<button class="big" data-first="${i}">${esc(t.name)}</button>`).join('')}
         <button class="big" data-first="r">Random</button>
         <button class="big" id="sback" style="background:#1b2430">Back</button>`;
       root.querySelectorAll('[data-first]').forEach(b => b.onclick = () => {
-        const first = b.dataset.first === 'r' ? rand(2) : +b.dataset.first;
+        const first = b.dataset.first === 'r' ? rand(N) : +b.dataset.first;
         root.remove(); style.remove();
         resolve({
           first,
@@ -288,7 +288,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
           })),
         });
       });
-      root.querySelector('#sback').onclick = () => { who = skipFixed(1, -1); render(); };
+      root.querySelector('#sback').onclick = () => { who = skipFixed(N - 1, -1); render(); };
     }
 
     render();

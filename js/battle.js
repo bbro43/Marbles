@@ -18,7 +18,7 @@ const GATE_W = 7 * CM, GATE_D = 9.4 * CM;   // Gate cards are 7 x 9.4 cm
 const GATE_Z = GATE_D / 2;             // two cards, tips touching at the center
 // Players throw from opposite corners (the openings in the Arena rails).
 // DIR[p] points from the center toward player p's corner.
-const DIR = [new THREE.Vector3(1, 0, 1).normalize(), new THREE.Vector3(-1, 0, -1).normalize()];
+const DIR = [new THREE.Vector3(1, 0, 1).normalize(), new THREE.Vector3(-1, 0, -1).normalize(), new THREE.Vector3(1, 0, -1).normalize(), new THREE.Vector3(-1, 0, 1).normalize()];
 const START = (MAT - RADIUS - 2) * Math.SQRT2;   // distance from center to the throw spot in the corner
 const SETTLE_SPEED = 70;                          // below this the ball eases onto its base
 const FRICTION = 260;     // units/s^2
@@ -77,14 +77,17 @@ function cameraFor(p) {
 
 // ---------- game state
 let gateBack = null;   // card back image from the asset pack (face-down Gate cards)
-let pack, state, toysMesh = [[], []], gateMesh = new Map(), busy = false, selected = null;
+let pack, state, toysMesh = [[], [], [], []], gateMesh = new Map(), busy = false, selected = null;
 const loader = new GLTFLoader();
 
 // ---------- computer opponent
 // aiLevel[p] = 'easy' | 'normal' | 'hard' for a computer player, null for a person on this device.
-let aiLevel = [null, null];
+let aiLevel = [null, null, null, null];
 const isAI = p => !!aiLevel[p];
-const viewOf = p => isAI(p) && !isAI(1 - p) ? 1 - p : p;     // single player: the camera stays behind the person
+// the camera stays behind the one person on this device (if there is exactly one); otherwise it follows the turn
+const viewOf = p => { if (!isAI(p) || !state) return p; const people = state.players.map((_, q) => q).filter(q => !isAI(q)); return people.length === 1 ? people[0] : p; };
+const sameTeam = (a, b) => R.sameTeam(state, a, b);
+const foesOf = p => R.opponents(state, p);
 // how far off a throw can be: angle (radians) and distance (fraction), as a spread
 const AI_AIM = { easy: { ang: 0.17, dist: 0.28 }, normal: { ang: 0.08, dist: 0.13 }, hard: { ang: 0.035, dist: 0.06 } };
 const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
@@ -111,11 +114,12 @@ function aiPlan(p) {
   const options = [];
   for (const t of pl.unused) for (let k = 0; k < state.field.length; k++) {
     const f = state.field[k], toy = pl.toys[t];
-    const theirs = f.toys.filter(x => x.p !== p), mine = f.toys.filter(x => x.p === p);
-    const myG = toy.g + (lvl === 'hard' ? bonusFor(f.card, toy.attr) : 0);
+    const theirs = f.toys.filter(x => !sameTeam(x.p, p)), mine = f.toys.filter(x => sameTeam(x.p, p));
+    const gOf = x => { const o = state.players[x.p].toys[x.t]; return o.g + (lvl === 'hard' ? bonusFor(f.card, o.attr) : 0); };
+    const myG = toy.g + (lvl === 'hard' ? bonusFor(f.card, toy.attr) : 0) + mine.reduce((n, x) => n + gOf(x), 0);
     let v;
     if (theirs.length) {
-      const o = state.players[theirs[0].p].toys[theirs[0].t], oG = o.g + (lvl === 'hard' ? bonusFor(f.card, o.attr) : 0);
+      const oG = Math.max(...[...new Set(theirs.map(x => R.teamOf(state, x.p)))].map(tm => theirs.filter(x => R.teamOf(state, x.p) === tm).reduce((n, x) => n + gOf(x), 0)));
       v = myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
     } else if (mine.length) v = lvl === 'hard' ? 120 : 70;          // two of mine there: take the card
     else v = 30 + bonusFor(f.card, toy.attr) / 10 + (state.earlyVictory === p ? 120 : 0);   // Early Victory: an empty card wins it
@@ -162,21 +166,21 @@ function aiFieldCard(p, phase, landing) {
   const pl = state.players[p], hand = pl.abilityHand, opts = R.fieldCardOptions(state, phase, landing, p);
   const has = n => opts.find(i => hand[i].name === n);
   const power = (q, t, card) => state.players[q].toys[t].g + bonusFor(card, state.players[q].toys[t].attr);
-  const stand = q => state.field.map((f, k) => ({ f, k, x: f.toys.find(y => y.p === q) })).filter(o => o.x && !o.f.toys.some(y => y.p !== q));
+  const stand = q => state.field.map((f, k) => ({ f, k, x: f.toys.find(y => y.p === q) })).filter(o => o.x && !o.f.toys.some(y => !sameTeam(y.p, q)));
   if (phase === 'pre') {
     // pull a weaker opponent Bakugan onto one of my cards
     if (has('Surprise Attack') !== undefined) {
       let best = null;
-      for (const m of stand(p)) for (const o of stand(1 - p)) {
+      for (const m of stand(p)) for (const o of foesOf(p).flatMap(stand)) {
         if (m.k === o.k) continue;
-        const gap = power(p, m.x.t, m.f.card) - power(1 - p, o.x.t, m.f.card);
+        const gap = power(p, m.x.t, m.f.card) - power(o.x.p, o.x.t, m.f.card);
         if (gap > 0 && (!best || gap > best.gap)) best = { gap, m, o };
       }
       if (best) return { i: has('Surprise Attack'), ai: { mine: best.m.f.cell, theirs: best.o.f.cell } };
     }
     if (has('Another Throw') !== undefined && pl.unused.length >= 2 && (lvl === 'hard' || Math.random() < 0.5)) return { i: has('Another Throw') };
     if (has('Early Victory') !== undefined && state.field.some(f => !f.toys.length) && lvl !== 'easy') return { i: has('Early Victory') };
-    if (has('Invulnerable') !== undefined && state.players[1 - p].unused.length) {
+    if (has('Invulnerable') !== undefined && foesOf(p).some(q => state.players[q].unused.length)) {
       const mine = stand(p).sort((a, b) => power(p, b.x.t, b.f.card) - power(p, a.x.t, a.f.card))[0];
       if (mine) return { i: has('Invulnerable'), ai: { cell: mine.f.cell } };
     }
@@ -185,16 +189,16 @@ function aiFieldCard(p, phase, landing) {
   // after the throw: missed, or about to lose the battle where it stopped
   const missed = landing.fieldIdx === null || !postCtx.stands;
   if (missed) return has('Second Chance') !== undefined ? { i: has('Second Chance') } : null;
-  const f = state.field[landing.fieldIdx], foe = f.toys.find(y => y.p !== p);
+  const f = state.field[landing.fieldIdx], foe = f.toys.find(y => !sameTeam(y.p, p));
   if (!foe) return null;
-  const gap = power(p, landing.t, f.card) - power(1 - p, foe.t, f.card);
+  const gap = power(p, landing.t, f.card) - power(foe.p, foe.t, f.card);
   if (gap > 0) return null;
   if (has('Trickster') !== undefined) {
     const t2 = pl.unused.filter(t => t !== landing.t).sort((a, b) => power(p, b, f.card) - power(p, a, f.card))[0];
-    if (t2 !== undefined && power(p, t2, f.card) > power(1 - p, foe.t, f.card)) return { i: has('Trickster'), ai: { t2 } };
+    if (t2 !== undefined && power(p, t2, f.card) > power(foe.p, foe.t, f.card)) return { i: has('Trickster'), ai: { t2 } };
   }
   if (has('Sleight of Hand') !== undefined) {
-    const swing = c => power(p, landing.t, c) - power(1 - p, foe.t, c);
+    const swing = c => power(p, landing.t, c) - power(foe.p, foe.t, c);
     const gi = pl.gateHand.map((c, k) => k).sort((a, b) => swing(pl.gateHand[b]) - swing(pl.gateHand[a]))[0];
     if (gi !== undefined && swing(pl.gateHand[gi]) > 0) return { i: has('Sleight of Hand'), ai: { gi } };
   }
@@ -354,6 +358,8 @@ function hud() {
       ? `<div class="lg">${LG_COLORS.map((c, i) => { const per = R.START_LIFE / 5, w = Math.max(0, Math.min(1, (pl.life - i * per) / per));
           return `<i><b style="width:${w * 100}%;background:${c}"></b></i>`; }).join('')}</div><small>${pl.life} Life</small>`
       : [0, 1, 2].map(i => `<span class="dot ${i < pl.captured.length ? 'on' : ''}"></span>`).join('');
+    $('p' + p).hidden = false; $('p' + p).classList.toggle('out', !!pl.out);
+    document.querySelector('.top').classList.toggle('four', state.players.length > 2);
     $('p' + p).classList.toggle('active', state.turn === p && state.winner === null);
     $('p' + p).classList.toggle('nv', !!state.nv);
     requestAnimationFrame(placeMsg);
@@ -363,7 +369,7 @@ function hud() {
 function say(msg) { $('msg').textContent = msg; placeMsg(); }
 // keep the message just under the player boxes (they get taller with faces and Life Gauges)
 function placeMsg() {
-  const v = $('view').getBoundingClientRect(), b = Math.max($('p0').getBoundingClientRect().bottom, $('p1').getBoundingClientRect().bottom);
+  const v = $('view').getBoundingClientRect(), b = Math.max(...[...document.querySelectorAll('.top .pl')].filter(x => !x.hidden).map(x => x.getBoundingClientRect().bottom));
   $('msg').style.top = Math.round(b - v.top + 8) + 'px';
 }
 addEventListener('resize', placeMsg);
@@ -568,7 +574,7 @@ function throwToy(vel) {
   }));
   roll = { ball, stands };
   // for Second Chance: where everything was before the throw
-  snapshot = { t: selected, toys: [0, 1].flatMap(p => toysMesh[p].map((m, t) => ({ m, pos: m.holder.position.clone(), q: m.obj.quaternion.clone(), vis: m.holder.visible, open: m.open }))) };
+  snapshot = { t: selected, toys: state.players.map((_, p) => p).flatMap(p => toysMesh[p].map((m, t) => ({ m, pos: m.holder.position.clone(), q: m.obj.quaternion.clone(), vis: m.holder.visible, open: m.open }))) };
   fieldPhase = null; refreshAbilityButton();
   say('');
 }
@@ -583,9 +589,9 @@ async function standAndShow(ball, knocked) {
   if (spot.distanceTo(new THREE.Vector3(ball.pos.x, RADIUS, ball.pos.z)) > 0.5) await glide(tm, spot, 250);
   tm.obj.quaternion.copy(UPRIGHT); ball.pos.copy(tm.holder.position);
   await animateOpen(tm, 1);
-  const theirs = f.toys.find(x => x.p !== p), mine = f.toys.some(x => x.p === p);
-  say(theirs ? `${name} opens on ${f.card.name} — battle with ${state.players[1 - p].toys[theirs.t].name}!`
-    : mine ? `${name} opens next to your other Bakugan on ${f.card.name}!`
+  const theirs = f.toys.find(x => !sameTeam(x.p, p)), mine = f.toys.find(x => sameTeam(x.p, p));
+  say(theirs ? `${name} opens on ${f.card.name} — battle with ${state.players[theirs.p].toys[theirs.t].name}!`
+    : mine ? (mine.p === p ? `${name} opens next to your other Bakugan on ${f.card.name}!` : `${name} teams up with ${state.players[mine.p].name}'s ${state.players[mine.p].toys[mine.t].name} on ${f.card.name}!`)
     : `${name} opens on the Gate card!`);
 }
 async function rollStopped() {
@@ -594,7 +600,7 @@ async function rollStopped() {
   const p = state.turn;
   inFlight = tm;
   // 1. Knockouts are shown right away (they count after the Ability card window, so Second Chance can undo them).
-  const knockedNow = () => stands.filter(b => b.p !== p && b.moved && cardAt(b.pos) !== b.card && !isInvulnerable(b));
+  const knockedNow = () => stands.filter(b => !sameTeam(b.p, p) && b.moved && cardAt(b.pos) !== b.card && !isInvulnerable(b));
   for (const b of knockedNow()) { flash('KNOCKOUT!'); await animateOpen(b.tm, 0, 300); b.tm.holder.visible = false; }
   // 2. The thrown Bakugan settles onto the card it stopped over and opens, with the result on screen.
   await standAndShow(ball, knockedNow());
@@ -605,7 +611,7 @@ async function rollStopped() {
   // 4. Knockouts count now
   const knocked = knockedNow().map(b => ({ p: b.p, t: b.t, card: b.card }));
   if (knocked.length) {
-    for (const e of R.knockOff(state, knocked, t)) { if (e.type === 'capture') await captured(e); if (e.type === 'damage') await damaged(e); }
+    for (const e of R.knockOff(state, knocked, t)) { if (e.type === 'capture') await captured(e); if (e.type === 'damage') await damaged(e); if (e.type === 'out') await knockedOut(e); }
     if (state.winner !== null) { inFlight = null; return afterTurn(); }
   }
   const fieldIdx = landingIndexAt(pos);
@@ -613,7 +619,7 @@ async function rollStopped() {
   // Landed on a card with your own toy: take the card, or move to a touching card.
   let moveTo = null;
   const f = fieldIdx === null ? null : state.field[fieldIdx];
-  if (f && !isAI(p) && f.toys.some(x => x.p === p) && !f.toys.some(x => x.p !== p)) {
+  if (f && !isAI(p) && f.toys.some(x => sameTeam(x.p, p)) && !f.toys.some(x => !sameTeam(x.p, p))) {
     const opts = R.moveOptions(state, fieldIdx);
     if (opts.length) {
       await animateOpen(tm, 1);
@@ -653,13 +659,14 @@ async function runBattle(fieldIdx) {
     for (const e of ev) {
       if (e.type === 'capture') await captured(e, b);
       if (e.type === 'damage') await damaged(e);
+      if (e.type === 'out') await knockedOut(e);
       if (e.type === 'usedUp') await usedUp(e, b);
       if (e.type === 'tie' && state.nv) { say('Tie — no damage.'); await sleep(900); continue; }
       if (e.type === 'tie') { clearGate(b.card, b.sides); say(`Tie — nobody wins. ${b.card.name} goes back to ${state.players[e.returnedTo].name}.`); await sleep(1300); }
     }
   }
 }
-const knockouts = [0, 0];
+const knockouts = [0, 0, 0, 0];
 let matchPicked = null;   // the characters from the menu (to record a profile's statistics)
 async function captured(e, b) {
   const card = e.card;
@@ -674,6 +681,11 @@ async function damaged(e) {
   flash(`-${e.amount}`);
   say(`${state.players[e.p].name} takes ${e.amount} damage${e.how === 'knockout' ? ' from a knockout' : ''}! Life ${e.life}`);
   hud(); await sleep(1300);
+}
+// 3-4 players: someone's Life Gauge hit 0 — they're out, their Bakugan leave the field
+async function knockedOut(e) {
+  toysMesh[e.p].forEach(tm => { tm.holder.visible = false; setOpen(tm, 0); });
+  say(`${state.players[e.p].name} is out!`); flash('OUT!'); hud(); await sleep(1400);
 }
 async function usedUp(e, b) {
   clearGate(e.card, b && b.sides);
@@ -701,7 +713,7 @@ function clearGate(card) {
   removeGate(card);
   for (let i = trapMeshes.length - 1; i >= 0; i--) if (trapMeshes[i].card === card) { scene.remove(trapMeshes[i].tm.holder); trapMeshes.splice(i, 1); }
   // toys that were on that card leave the field
-  for (const p of [0, 1]) toysMesh[p].forEach((tm, t) => { if (tm !== inFlight && tm.holder.visible && !isStanding(p, t)) { tm.holder.visible = false; setOpen(tm, 0); } });
+  for (const p of state.players.keys()) toysMesh[p].forEach((tm, t) => { if (tm !== inFlight && tm.holder.visible && !isStanding(p, t)) { tm.holder.visible = false; setOpen(tm, 0); } });
 }
 function afterTurn() {
   hud();
@@ -786,14 +798,14 @@ async function useFieldCard(i, ai = null) {
     case 'Surprise Attack': {
       let mine = ai && ai.mine, theirs = ai && ai.theirs, glow;
       if (!mine) { say('Tap your Gate card to battle on'); glow = showSpots(myCells(p), p); mine = await tapSpot(myCells(p)); clearSpots(glow); }
-      const theirCells = myCells(1 - p).filter(c => c[0] !== mine[0] || c[1] !== mine[1]);
+      const theirCells = foesOf(p).flatMap(q => myCells(q)).filter(c => c[0] !== mine[0] || c[1] !== mine[1]);
       if (!theirCells.length) { say('No other opponent Bakugan to pull in.'); break; }
-      if (!theirs) { say("Tap the opponent's Bakugan to pull in"); glow = showSpots(theirCells, 1 - p); theirs = await tapSpot(theirCells); clearSpots(glow); }
-      const fi = cellIdx(theirs), ot = state.field[fi].toys.find(y => y.p !== p).t;
+      if (!theirs) { say("Tap the opponent's Bakugan to pull in"); glow = showSpots(theirCells, foesOf(p)[0]); theirs = await tapSpot(theirCells); clearSpots(glow); }
+      const fi = cellIdx(theirs), victim = state.field[fi].toys.find(y => !sameTeam(y.p, p)), ot = victim.t;
       const r = play({ mine: cellIdx(mine), theirs: { t: ot, fieldIdx: fi } });
       const ev = r.events.find(e => e.type === 'surprise');
       busy = true; fieldPhase = null; refreshAbilityButton(); $('picker').classList.add('off');
-      say('Surprise Attack!'); await glide(toysMesh[1 - p][ot], standSpot(mine, ev.slot)); await sleep(400);
+      say('Surprise Attack!'); await glide(toysMesh[victim.p][ot], standSpot(mine, ev.slot)); await sleep(400);
       await runBattle(r.battle.fieldIdx);
       afterTurn(); return 'ended';
     }
@@ -916,9 +928,10 @@ async function abilityPhase(bt) {
       <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
       <div class="g" id="g${i}">${total}G</div><div class="steps" id="steps${i}"></div></div>`;
   $('bplay').innerHTML = '';
-  $('bbody').innerHTML = head(c0.sides[0], 0, c0.sides[0].start) + `<div class="vs">vs</div>` + head(c0.sides[1], 1, c0.sides[1].start);
+  $('bbody').classList.toggle('multi', c0.sides.length > 2);
+  $('bbody').innerHTML = c0.sides.map((sd, i) => head(sd, i, sd.start)).join(`<div class="vs">vs</div>`);
   await sleep(900);
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < c0.sides.length; i++) {
     const sd = c0.sides[i];
     for (const st of sd.steps) {
       const line = document.createElement('div'); line.className = 'step';
@@ -938,7 +951,7 @@ async function abilityPhase(bt) {
       <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
       <div class="g">${bt.plays.length ? sd.total : before[sd.p]}G</div>
       <div class="steps">${gateLines[sd.p].map(t => `<div class="step">${t}</div>`).join('')}${bt.plays.filter(x => x.p === sd.p).map(x => `<div class="step">${x.card.name}</div>`).join('')}</div></div>`;
-    $('bbody').innerHTML = col(c.sides[0], 0) + `<div class="vs">vs</div>` + col(c.sides[1], 1);
+    $('bbody').innerHTML = c.sides.map((sd, i) => col(sd, i)).join(`<div class="vs">vs</div>`);
   };
   while (!R.abilityDone(bt)) {
     preview();
@@ -955,7 +968,7 @@ async function abilityPhase(bt) {
     $('bplay').innerHTML = `<div class="who2">${state.players[p].name}: play an Ability card?</div>` +
       opts.map(i => {
         // what it would do: change in the G-Power gap, worked out with the card added
-        const gap = c => { const me = c.sides.find(x => x.p === p), op = c.sides.find(x => x.p !== p); return me.total - op.total; };
+        const gap = c => { const mine = c.teamTotal[R.teamOf(state, p)] || 0; return mine - Math.max(...Object.entries(c.teamTotal).filter(([tm]) => +tm !== R.teamOf(state, p)).map(([, v]) => v)); };
         const d = gap(R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] })) - gap(R.computeBattle(state, bt));
         const tag = d > 0 ? `+${d} for you` : d < 0 ? `${d} for you` : 'no change right now';
         return `<button class="chip" data-a="${i}" style="--c:${ABILITY_COLOR[hand[i].color] || '#888'}"><b>${hand[i].name} <em>${tag}</em></b><span class="st">${hand[i].text || ''}</span></button>`;
@@ -981,11 +994,12 @@ async function showBattle(b, before = null) {
       <div class="g" id="g${i}">${before ? before[sd.p] : sd.start}G</div>
       <div class="steps" id="steps${i}"></div>
       <div class="winner" id="win${i}"></div></div>`;
-  $('bbody').innerHTML = col(b.sides[0], 0) + `<div class="vs" id="vs">vs</div>` + col(b.sides[1], 1);
+  $('bbody').classList.toggle('multi', b.sides.length > 2);
+  $('bbody').innerHTML = b.sides.length > 2 ? b.sides.map((sd, i) => col(sd, i)).join('') + `<div class="vs" id="vs" hidden></div>` : col(b.sides[0], 0) + `<div class="vs" id="vs">vs</div>` + col(b.sides[1], 1);
   if (!before) $('bcard').textContent = `Gate card: ${b.card.name}`;
   $('bnext').hidden = true;
   await sleep(500);
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < b.sides.length; i++) {
     const sd = b.sides[i], counted = before ? [...before.labels[sd.p]] : [];
     const gateStep = st => { const k = counted.indexOf(st.label); if (k < 0) return false; counted.splice(k, 1); return true; };
     let shown = before ? before[sd.p] : sd.start;
@@ -1001,11 +1015,17 @@ async function showBattle(b, before = null) {
     }
     if (shown !== sd.total) await countUp($('g' + i), shown, sd.total);   // the Gate bonus changed after Ability cards
   }
-  const [x, y] = b.sides.map(s => s.total);
-  $('vs').textContent = x > y ? '>' : x < y ? '<' : '=';
-  $('vs').classList.add('big');
-  if (b.result === 'tie') { $('win0').textContent = 'TIE'; $('win1').textContent = 'TIE'; }
-  else $('win' + (b.sides[0].p === b.result ? 0 : 1)).textContent = 'WINNER';
+  if (b.sides.length === 2) {
+    const [x, y] = b.sides.map(s => s.total);
+    $('vs').textContent = x > y ? '>' : x < y ? '<' : '=';
+    $('vs').classList.add('big');
+  }
+  // teams: their Bakugan add up (shown under each), the highest team wins
+  b.sides.forEach((sd, i) => {
+    const tm = R.teamOf(state, sd.p), mates = b.sides.filter(x => R.teamOf(state, x.p) === tm).length;
+    $('win' + i).textContent = b.result === 'tie' ? 'TIE' : tm === b.result ? 'WINNER' : '';
+    if (mates > 1) $('win' + i).insertAdjacentHTML('beforebegin', `<div class="team">Team total ${b.teamTotal[tm]}G</div>`);
+  });
   $('bnext').hidden = false;
   await new Promise(res => $('bnext').onclick = res);
   o.hidden = true;
@@ -1019,13 +1039,14 @@ async function countUp(el, from, to) {
 function gameOver() {
   const w = state.winner;
   $('over').hidden = false;
-  $('overText').textContent = w === 'draw' ? 'Draw!' : `${state.players[w].name} wins!`;
+  const names = w === 'draw' ? [] : state.players.map((pl, q) => q).filter(q => R.teamOf(state, q) === w).map(q => state.players[q].name);
+  $('overText').textContent = w === 'draw' ? 'Draw!' : `${names.join(' & ')} win${names.length > 1 ? '' : 's'}!`;
   say('');
   // your profile's statistics (My Room > Info > Statistics)
   if (matchPicked) matchPicked.forEach((c, p) => {
     if (c && c.profile !== undefined && c.profile !== null) {
-      const opp = matchPicked[1 - p] || {};
-      const bp = Profiles.record(c.profile, { opponent: opp.id, won: w === p, gates: state.players[p].captured.length, knockouts: knockouts[p], level: opp.level || 'normal' });
+      const opp = matchPicked[foesOf(p)[0] ?? state.players.findIndex((_, q) => !sameTeam(q, p))] || {};
+      const bp = Profiles.record(c.profile, { opponent: opp.id, won: w !== 'draw' && R.teamOf(state, p) === w, gates: state.players[p].captured.length, knockouts: knockouts[p], level: opp.level || 'normal' });
       $('overText').textContent += `  ${c.name} +${bp} BP`;
     }
   });
@@ -1155,7 +1176,8 @@ async function start() {
   const cat = pack.catalog;
   $('loading').hidden = true;
   let match = null; try { match = JSON.parse(sessionStorage.getItem('marbles-match') || 'null'); } catch {}
-  const picked = match && match.players && match.players.length === 2 ? match.players : null;
+  const picked = match && match.players && match.players.length >= 2 && match.players.length <= 4 ? match.players : null;
+  const TEAMS = picked && picked.length > 2 ? (match.teams || picked.map((_, i) => i)) : null;   // Tag Team [0,1,0,1], Battle Royale [0,1,2,3]
   // a character comes with its deck at the level picked (Easy / Normal / Hard); "You" builds your own
   const NV = !!(match && match.rules === 'nv');
   matchPicked = picked;
@@ -1187,7 +1209,7 @@ async function start() {
   if (picked) picked.forEach((c, p) => { if (c.profile !== undefined && c.profile !== null && !c.team) Profiles.update(c.profile, q => { q.deck = {
     toys: players[p].toys.map(t => ({ id: t.id, attr: t.attr })), gates: Object.fromEntries(GATE_COLORS.map((k, i) => [k, players[p].gates[i].id])),
     abilities: Object.fromEntries(AB_COLORS.map((k, i) => [k, players[p].abilities[i].id])) }; }); });
-  if (picked) for (let p = 0; p < 2; p++) { try { const u = picked[p].face && picked[p].face.startsWith('data:') ? picked[p].face : await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
+  if (picked) for (let p = 0; p < picked.length; p++) { try { const u = picked[p].face && picked[p].face.startsWith('data:') ? picked[p].face : await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
   $('loading').hidden = false;
   // a New Vestroia character's own Trap (js/aiteams.js)
   players.forEach((pl, p) => {
@@ -1203,9 +1225,9 @@ async function start() {
     if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, trapId: d.id, trapColor: tr.color, name: `Trap: ${d.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
   });
-  state = R.newMatch(players, { first, nv: NV });
+  state = R.newMatch(players, { first, nv: NV, teams: TEAMS });
   $('loading').textContent = 'Loading Bakugan…';
-  for (let p = 0; p < 2; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
+  for (let p = 0; p < state.players.length; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
   cameraFor(viewOf(first)); camera.position.copy(camGoal);
   $('loading').hidden = true;
   hud(); nextTurn();

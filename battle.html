@@ -74,6 +74,15 @@
   .g { font-size:42px; font-weight:800; font-variant-numeric:tabular-nums; }
   .steps { min-height:44px; } .step { font-size:13px; color:#cfe3ff; margin-top:4px; }
   .winner { margin-top:8px; font-size:22px; font-weight:900; color:#ffd54a; letter-spacing:1px; min-height:28px; }
+  /* 3-4 players: two columns of smaller boxes (Tag Team: teammates share a column) */
+  .top .col { display:flex; flex-direction:column; gap:4px; }
+  .top.four .pl { padding:3px 6px; min-width:0; } .top.four .pl.nv .face { width:28px; height:28px; } .top.four .lg i { width:11px; height:9px; }
+  .top.four .pl .n { font-size:12px; } .top.four .pl small { font-size:9px; }
+  #p3.nv, #p1.nv { grid-template-columns:1fr auto; text-align:right; } #p3.nv .face { grid-column:2; } #p3.nv .n, #p3.nv > div:last-child { grid-column:1; }
+  #p3 .lg { flex-direction:row-reverse; transform:skewX(28deg); } #p3 .lg i b { left:auto; right:0; }
+  .pl.out { opacity:.4; filter:grayscale(1); }
+  #bbody.multi { flex-wrap:wrap; } #bbody.multi .side { flex:1 1 44%; } #bbody.multi .vs { display:none; }
+  .side .team { font-size:11px; color:var(--dim); }
   .vs { align-self:center; font-size:22px; color:var(--dim); width:44px; text-align:center; }
   .vs.big { font-size:56px; color:#fff; font-weight:900; }
   .btn { display:block; width:100%; margin-top:14px; padding:14px; font:inherit; font-size:17px; font-weight:700; color:#fff; background:#d8322b; border:0; border-radius:12px; cursor:pointer; }
@@ -84,8 +93,10 @@
 <div id="wrap">
   <div id="view">
     <div class="top">
-      <div class="pl" id="p0"><div class="n" id="p0name">Player 1</div><div id="p0gates"></div></div>
-      <div class="pl" id="p1"><div class="n" id="p1name">Player 2</div><div id="p1gates"></div></div>
+      <div class="col"><div class="pl" id="p0"><div class="n" id="p0name">Player 1</div><div id="p0gates"></div></div>
+        <div class="pl" id="p2" hidden><div class="n" id="p2name">Player 3</div><div id="p2gates"></div></div></div>
+      <div class="col"><div class="pl" id="p1"><div class="n" id="p1name">Player 2</div><div id="p1gates"></div></div>
+        <div class="pl" id="p3" hidden><div class="n" id="p3name">Player 4</div><div id="p3gates"></div></div></div>
     </div>
     <div id="msg"></div>
     <div id="flash"></div>

@@ -185,7 +185,7 @@ export const FIELD_EFFECTS = {
   'Another Throw': { when: 'pre', can: c => c.s.players[c.p].unused.length >= 2 },
   'Early Victory': { when: 'pre', can: () => true },
   'Invulnerable': { when: 'pre', can: c => hasStanding(c.s, c.p), need: 'myStanding' },
-  'Surprise Attack': { when: 'pre', can: c => hasStanding(c.s, c.p) && hasStanding(c.s, 1 - c.p), need: 'surprise' },
+  'Surprise Attack': { when: 'pre', can: c => hasStanding(c.s, c.p) && c.s.field.some(f => f.toys.some(x => (c.s.teams ? c.s.teams[x.p] !== c.s.teams[c.p] : x.p !== c.p))), need: 'surprise' },
   'Second Chance': { when: 'post', can: () => true },
   'Trickster': { when: 'post', can: c => c.landing.fieldIdx !== null && c.s.players[c.p].unused.length >= 2, need: 'myUnused' },
   'Sleight of Hand': { when: 'post', can: c => c.landing.fieldIdx !== null && c.s.field[c.landing.fieldIdx].owner !== c.p && c.s.players[c.p].gateHand.length > 0, need: 'myGate' },

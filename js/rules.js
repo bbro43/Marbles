@@ -25,9 +25,12 @@ export const START_LIFE = 500, KO_MIN = 100;
 export const DEFAULT_GRID = { cMin: -3, cMax: 2, rMin: -2, rMax: 1 };
 export const DEFAULT_CORNERS = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
 
-export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DEFAULT_CORNERS, nv = false } = {}) {
+// More than 2 players: teams = each player's team number. Tag Team = [0, 1, 0, 1]; Battle Royale = [0, 1, 2, 3].
+// Teammates' Bakugan on the same Gate card fight together (their totals add up). s.winner is a team number
+// (in a 1-on-1 match the team number is the player number, so nothing changes there).
+export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DEFAULT_CORNERS, nv = false, teams = null } = {}) {
   return {
-    turn: first, grid, corners, placed: false, nv,
+    turn: first, grid, corners, placed: false, nv, teams: teams || players.map((_, i) => i),
     pending: [],          // Red "before you throw" cards played this turn: { p, t, card }
     players: players.map(p => ({
       name: p.name,
@@ -38,14 +41,20 @@ export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DE
       abilityHand: [...(p.abilities || []), ...(p.trap ? [p.trap] : [])],   // a Trap plays like an Ability card, once
       abilityUsed: [],
       captured: [],
-      life: START_LIFE, gateUsed: [],
+      life: START_LIFE, gateUsed: [], out: false,
     })),
     field: [],
     winner: null,
   };
 }
 
-const other = p => 1 - p;
+export const teamOf = (s, p) => s.teams ? s.teams[p] : p;
+export const sameTeam = (s, a, b) => teamOf(s, a) === teamOf(s, b);
+const alive = s => s.players.map((_, p) => p).filter(p => !s.players[p].out);
+const aliveTeams = s => [...new Set(alive(s).map(p => teamOf(s, p)))];
+// next player in seat order who is still in
+function nextPlayer(s, p) { const n = s.players.length; for (let k = 1; k <= n; k++) { const q = (p + k) % n; if (!s.players[q].out) return q; } return p; }
+export const opponents = (s, p) => alive(s).filter(q => !sameTeam(s, p, q));
 
 // The opening spot for a player: the cell of the center rectangle farthest from their throwing corner.
 export function openingCell(s, p) {
@@ -63,7 +72,7 @@ export function needsOpening(s) {
 export function openingPlayers(s) {
   if (!needsOpening(s)) return [];
   const order = s.players.map((_, i) => (s.turn + i) % s.players.length);
-  return order.filter(p => s.players[p].gateHand.length);
+  return order.filter(p => !s.players[p].out && s.players[p].gateHand.length);
 }
 
 // Start of a turn. Returns events describing what happened.
@@ -119,7 +128,7 @@ export function placeGate(s, handIdx, cell) {
 const touching = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
 export function moveOptions(s, fieldIdx, p = s.turn) {
   const here = s.field[fieldIdx].cell;
-  return s.field.map((f, k) => k).filter(k => k !== fieldIdx && touching(here, s.field[k].cell) && !s.field[k].toys.some(x => x.p === p));
+  return s.field.map((f, k) => k).filter(k => k !== fieldIdx && touching(here, s.field[k].cell) && !s.field[k].toys.some(x => sameTeam(s, x.p, p)));
 }
 
 export function canThrow(s, p = s.turn) {
@@ -151,8 +160,8 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
     ev.push(...capture(s, p, fieldIdx, 'early victory'));
     return endTurn(s, ev);
   }
-  const mine = g.toys.filter(x => x.p === p);
-  const theirs = g.toys.filter(x => x.p !== p);
+  const mine = g.toys.filter(x => sameTeam(s, x.p, p));      // my team's Bakugan already there
+  const theirs = g.toys.filter(x => !sameTeam(s, x.p, p));
 
   const at = (gate) => ({ cell: gate.cell, slot: gate.toys.length - 1 });   // where on the mat (for drawing)
   if (theirs.length) {
@@ -178,7 +187,7 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
   }
   otherGate.toys.push({ p, t });
   ev.push({ type: 'moved', p, t, from: fieldIdx, fieldIdx: otherIdx, ...at(otherGate) });
-  if (otherGate.toys.some(x => x.p !== p)) return { events: ev, battle: { fieldIdx: otherIdx } };
+  if (otherGate.toys.some(x => !sameTeam(s, x.p, p))) return { events: ev, battle: { fieldIdx: otherIdx } };
   return endTurn(s, ev);
 }
 
@@ -196,13 +205,13 @@ export function knockOff(s, knocked, by = null) {
     const g = s.field[idx];
     g.toys = g.toys.filter(x => !(x.p === k.p && x.t === k.t));
     ev.push({ type: 'knockedOff', p: k.p, t: k.t, card: k.card });
-    if (k.p !== s.turn && s.nv) {
+    if (!sameTeam(s, k.p, s.turn) && s.nv) {
       // New Vestroia: the knocked-off Bakugan's owner takes damage; the Bakugan goes back to their hand
       const atk = by === null ? 0 : s.players[s.turn].toys[by].g, def = s.players[k.p].toys[k.t].g;
       ev.push(...damage(s, k.p, Math.max(KO_MIN, atk - def), 'knockout'));
       backToHand(s, k.p, k.t);
       if (s.winner !== null) break;
-    } else if (k.p !== s.turn) {
+    } else if (!sameTeam(s, k.p, s.turn)) {
       ev.push(...capture(s, s.turn, idx, 'knockout'));
       if (s.winner !== null) break;
     }
@@ -240,8 +249,9 @@ export function playFieldCard(s, handIdx, phase, landing, target = {}, p = s.tur
     case 'Surprise Attack': {
       // the opponent's Bakugan joins yours on your card -> battle there
       const from = s.field[target.theirs.fieldIdx], to = s.field[target.mine];
-      from.toys = from.toys.filter(x => !(x.p !== p && x.t === target.theirs.t));
-      to.toys.push({ p: 1 - p, t: target.theirs.t });
+      const victim = (from.toys.find(x => !sameTeam(s, x.p, p) && x.t === target.theirs.t) || { p: opponents(s, p)[0] }).p;
+      from.toys = from.toys.filter(x => !(x.p === victim && x.t === target.theirs.t));
+      to.toys.push({ p: victim, t: target.theirs.t });
       ev.push({ type: 'surprise', fieldIdx: target.mine, t: target.theirs.t, slot: to.toys.length - 1 });
       return { events: ev, battle: { fieldIdx: target.mine } };
     }
@@ -270,7 +280,9 @@ export function playBeforeThrow(s, handIdx, t, p = s.turn) {
 // passes the chance to the other player; the window closes when both pass in a row.
 // The Gate card's effect may give players used Ability cards back first (b.events lists who got what).
 export function startBattle(s, fieldIdx) {
-  const b = { fieldIdx, plays: [], next: s.turn, passes: 0, events: [] };
+  const inIt = [...new Set(s.field[fieldIdx].toys.map(x => x.p))];
+  const order = s.players.map((_, i) => (s.turn + i) % s.players.length).filter(p => inIt.includes(p));
+  const b = { fieldIdx, plays: [], next: order[0], passes: 0, events: [], order };
   const ge = gateEffectOf(s.field[fieldIdx].card);
   if (ge && ge.regain) {
     const w = build(s, fieldIdx, []);
@@ -285,7 +297,8 @@ export function startBattle(s, fieldIdx) {
   }
   return b;
 }
-export const abilityDone = b => b.passes >= 2;
+export const abilityDone = b => b.passes >= (b.order ? b.order.length : 2);
+const nextIn = (b, p) => b.order ? b.order[(b.order.indexOf(p) + 1) % b.order.length] : 1 - p;
 export function abilityOptions(s, b, p = b.next) {
   const hand = s.players[p].abilityHand;
   const w = build(s, b.fieldIdx, b.plays);
@@ -304,27 +317,26 @@ export function playAbility(s, b, handIdx, p = b.next) {
   const card = s.players[p].abilityHand.splice(handIdx, 1)[0];
   s.players[p].abilityUsed.push(card);
   b.plays.push({ p, card });
-  b.passes = 0; b.next = 1 - p;
+  b.passes = 0; b.next = nextIn(b, p);
   return [{ type: 'ability', p, card, when: 'battle' }];
 }
-export function passAbility(s, b) { b.passes++; b.next = 1 - b.next; }
+export function passAbility(s, b) { b.passes++; b.next = nextIn(b, b.next); }
 
 // Sets up both sides and runs the attribute / Gate-table / Gate-use steps of every played card.
 function build(s, fieldIdx, plays) {
   const g = s.field[fieldIdx];
-  const a = g.toys.find(x => x.p === s.turn);
-  const b = g.toys.find(x => x.p !== s.turn);
-  const sides = [a, b].map(x => {
+  const a = g.toys.find(x => x.p === s.turn) || g.toys.find(x => sameTeam(s, x.p, s.turn)) || g.toys[0];
+  const sides = [a, ...g.toys.filter(x => x !== a)].map(x => {
     const toy = s.players[x.p].toys[x.t];
     return { p: x.p, t: x.t, name: toy.name, attr: toy.attr, printed: toy.g, start: toy.g, total: toy.g, steps: [],
       noGate: false, noAbility: false, useHighest: false, gateMult: 1, abilityMult: 1 };
   });
   // Clear toys take the opponent's attribute.
-  if (sides[0].attr === 'clear' && sides[1].attr !== 'clear') sides[0].attr = sides[1].attr;
-  if (sides[1].attr === 'clear' && sides[0].attr !== 'clear') sides[1].attr = sides[0].attr;
+  for (const sd of sides) if (sd.attr === 'clear') { const o = sides.find(x => !sameTeam(s, x.p, sd.p) && x.attr !== 'clear'); if (o) sd.attr = o.attr; }
   const table = { ...(g.card.bonus || {}) };
   const ctx = play => {
-    const me = sides.find(x => x.p === play.p), opp = sides.find(x => x !== me);
+    const me = sides.find(x => x.p === play.p) || sides[0];
+    const opp = sides.filter(x => !sameTeam(s, x.p, me.p)).sort((x, y) => y.total - x.total)[0] || sides.find(x => x !== me);
     return { s, field: g, gateCard: g.card, table, me, opp, sides, card: play.card, plays };
   };
   const gctx = () => ({ s, field: g, gateCard: g.card, table, sides, card: g.card });
@@ -359,7 +371,7 @@ export function computeBattle(s, b) {
   for (const pend of s.pending) {
     const e = effectOf(pend.card);
     for (const sd of sides) {
-      const other = sides.find(x => x !== sd);
+      const other = sides.find(x => !sameTeam(s, x.p, sd.p)) || sides.find(x => x !== sd);
       const amt = e.bonus({ side: sd, other, mine: sd.p === pend.p && sd.t === pend.t }) * sd.abilityMult;
       if (amt) step(sd, pend.card.name, amt);
     }
@@ -389,8 +401,12 @@ export function computeBattle(s, b) {
     const [a, c2] = sides, ta = a.total, tc = c2.total, label = swaps.at(-1).card.name;
     step(a, label, tc - ta, 'totals swapped'); step(c2, label, ta - tc, 'totals swapped');
   }
-  const result = sides[0].total === sides[1].total ? 'tie' : (sides[0].total > sides[1].total ? sides[0].p : sides[1].p);
-  return { fieldIdx: b.fieldIdx, card: g.card, sides, result };
+  // each team's total is its Bakugan added up; the highest team wins, a tie at the top is a tie
+  const teamTotal = {};
+  for (const sd of sides) teamTotal[teamOf(s, sd.p)] = (teamTotal[teamOf(s, sd.p)] || 0) + sd.total;
+  const ranked = Object.entries(teamTotal).sort((x, y) => y[1] - x[1]);
+  const result = ranked.length < 2 || ranked[0][1] === ranked[1][1] ? 'tie' : +ranked[0][0];
+  return { fieldIdx: b.fieldIdx, card: g.card, sides, result, teamTotal };
 }
 
 // Applies a computed battle to the state.
@@ -399,8 +415,13 @@ export function resolveBattle(s, battle) {
   const g = s.field[battle.fieldIdx];
   if (s.nv) {
     if (battle.result !== 'tie') {
-      const w = battle.sides.find(x => x.p === battle.result), l = battle.sides.find(x => x.p !== battle.result);
-      ev.push(...damage(s, l.p, w.total - l.total, 'battle'));
+      // every losing team takes the difference from the winning team's total, split between its players in the battle
+      const win = battle.teamTotal[battle.result];
+      for (const [tm, tot] of Object.entries(battle.teamTotal)) {
+        if (+tm === battle.result) continue;
+        const ps = [...new Set(battle.sides.filter(x => teamOf(s, x.p) === +tm).map(x => x.p))];
+        for (const p of ps) if (s.winner === null) ev.push(...damage(s, p, Math.round((win - tot) / ps.length), 'battle'));
+      }
     } else ev.push({ type: 'tie', fieldIdx: battle.fieldIdx, returnedTo: null, card: g.card });
     ev.push(...useUp(s, battle.fieldIdx, battle.result === 'tie' ? null : battle.result));
     return endTurn(s, ev).events;
@@ -411,7 +432,9 @@ export function resolveBattle(s, battle) {
     s.players[g.owner].gateHand.push(g.card);
     ev.push({ type: 'tie', fieldIdx: battle.fieldIdx, returnedTo: g.owner, card: g.card });
   } else {
-    ev.push(...capture(s, battle.result, battle.fieldIdx, 'battle'));
+    const taker = sameTeam(s, s.turn, battle.result) && teamOf(s, s.turn) === battle.result ? s.turn
+      : battle.sides.filter(x => teamOf(s, x.p) === battle.result).sort((x, y) => y.total - x.total)[0].p;
+    ev.push(...capture(s, taker, battle.fieldIdx, 'battle'));
   }
   return endTurn(s, ev).events;
 }
@@ -421,7 +444,8 @@ function capture(s, p, fieldIdx, how) {
   const g = s.field.splice(fieldIdx, 1)[0];
   s.players[p].captured.push(g.card);
   const ev = [{ type: 'capture', p, card: g.card, how, fieldIdx }];
-  if (s.players[p].captured.length >= WIN_GATES) { s.winner = p; ev.push({ type: 'win', p }); }
+  const tm = teamOf(s, p), got = s.players.reduce((n, pl, q) => n + (teamOf(s, q) === tm ? pl.captured.length : 0), 0);
+  if (got >= WIN_GATES) { s.winner = tm; ev.push({ type: 'win', p: tm }); }
   return ev;
 }
 
@@ -429,7 +453,13 @@ function capture(s, p, fieldIdx, how) {
 function damage(s, p, amount, how) {
   const pl = s.players[p]; pl.life = Math.max(0, pl.life - amount);
   const ev = [{ type: 'damage', p, amount, life: pl.life, how }];
-  if (pl.life <= 0 && s.winner === null) { s.winner = other(p); ev.push({ type: 'win', p: s.winner, reason: 'Life Gauge' }); }
+  if (pl.life <= 0 && !pl.out) {
+    // out of the match: their Bakugan leave the field (their Gate cards stay); last team standing wins
+    pl.out = true; ev.push({ type: 'out', p });
+    for (const f of s.field) f.toys = f.toys.filter(x => x.p !== p);
+    const left = aliveTeams(s);
+    if (left.length === 1 && s.winner === null) { s.winner = left[0]; ev.push({ type: 'win', p: s.winner, reason: 'Life Gauge' }); }
+  }
   return ev;
 }
 function backToHand(s, p, t) {
@@ -459,11 +489,13 @@ function endTurn(s, ev) {
     // most captured wins; equal = draw.
     const stuck = s.field.length === 0 && s.players.every(pl => pl.gateHand.length === 0);
     if (stuck) {
-      const [c0, c1] = s.players.map(pl => pl.captured.length);
-      s.winner = c0 === c1 ? 'draw' : (c0 > c1 ? 0 : 1);
+      const per = {};
+      s.players.forEach((pl, q) => { per[teamOf(s, q)] = (per[teamOf(s, q)] || 0) + pl.captured.length; });
+      const r = Object.entries(per).sort((x, y) => y[1] - x[1]);
+      s.winner = r.length > 1 && r[0][1] === r[1][1] ? 'draw' : +r[0][0];
       ev.push({ type: 'win', p: s.winner, reason: 'out of Gate cards' });
     } else {
-      s.turn = other(s.turn);
+      s.turn = nextPlayer(s, s.turn);
       ev.push({ type: 'turn', p: s.turn });
     }
   }
