@@ -356,6 +356,7 @@ function hud() {
       : [0, 1, 2].map(i => `<span class="dot ${i < pl.captured.length ? 'on' : ''}"></span>`).join('');
     $('p' + p).classList.toggle('active', state.turn === p && state.winner === null);
     $('p' + p).classList.toggle('nv', !!state.nv);
+    requestAnimationFrame(placeMsg);
     $('p' + p).style.setProperty('--pc', playerColor(p));
   });
 }

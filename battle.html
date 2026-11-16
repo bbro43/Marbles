@@ -15,13 +15,19 @@
   #wrap { position:fixed; inset:0; display:flex; flex-direction:column; padding-top: env(safe-area-inset-top); }
   #view { flex:1; position:relative; min-height:0; }
   canvas { display:block; width:100%; height:100%; touch-action:none; }
-  .top { position:absolute; top:8px; left:8px; right:8px; display:flex; justify-content:space-between; gap:8px; pointer-events:none; }
+  .top { position:absolute; top:8px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; pointer-events:none; }
   .pl { background:var(--panel); border:1px solid var(--line); border-left:6px solid var(--pc, #555); border-radius:12px; padding:6px 10px; min-width:110px; }
   .pl.active { border-color:var(--pc); box-shadow:0 0 0 2px var(--pc); }
   .pl.nv { background:linear-gradient(#6b7177, #34383d 55%, #4a4f55); border:2px solid #c3c9cf; border-left-width:2px; border-radius:10px; box-shadow:inset 0 0 0 2px #1d2024, 0 2px 6px #0008; padding:5px 10px 6px 6px; }
   .pl.nv.active { box-shadow:inset 0 0 0 2px #1d2024, 0 0 0 2px var(--pc), 0 2px 8px #000a; }
   .pl.nv .face { width:40px; height:40px; margin:0 8px 0 0; border:2px solid #e1e5e9; border-radius:5px; background:#f2f4f6; box-shadow:0 0 0 1px #1d2024; }
-  #p1.nv { text-align:right; } #p1.nv .face { float:right; margin:0 0 0 8px; }
+  /* New Vestroia boxes: face beside name, gauge and Life, mirrored for player 2, same height both sides */
+  .pl.nv { display:grid; grid-template-columns:auto 1fr; column-gap:8px; align-items:center; }
+  .pl.nv .face { grid-row:1 / 3; grid-column:1; float:none; margin:0; }
+  .pl.nv .n { grid-column:2; } .pl.nv > div:last-child { grid-column:2; }
+  #p1.nv { grid-template-columns:1fr auto; text-align:right; }
+  #p1.nv .face { grid-column:2; } #p1.nv .n, #p1.nv > div:last-child { grid-column:1; }
+  #p1.nv .lg { justify-content:flex-start; }
   .lg { display:flex; gap:2px; margin:4px 4px 1px; transform:skewX(-28deg); }
   #p1 .lg { flex-direction:row-reverse; transform:skewX(28deg); }
   .lg i { position:relative; width:16px; height:12px; background:#23272b; border:1px solid #0f1113; box-shadow:inset 0 1px 0 #fff2; overflow:hidden; }
