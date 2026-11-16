@@ -222,49 +222,58 @@ function askName(cur) {
 }
 
 // Deck: what you take into battle
+// Two decks: Classic (3 Ability cards) and New Vestroia (up to 9 Ability cards + your Trap)
+let deckMode = 'classic';
+const deckKey = () => deckMode === 'nv' ? 'deckNV' : 'deck';
+const deckOf = p => deckMode === 'nv' ? (p.deckNV || (p.deck && { ...p.deck })) : p.deck;
 function deck() {
   const p = prof(); if (!p) return go('save');
   top3d(false, `url(${art('arena_top')}) 0 0 / 256px 192px`);
-  const cat = pack.catalog, d = p.deck, toyBy = new Map(cat.toys.map(t => [t.id, t])), cardBy = new Map(cat.cards.map(c => [c.id, c]));
+  const nv = deckMode === 'nv', cat = pack.catalog, d = deckOf(p), toyBy = new Map(cat.toys.map(t => [t.id, t])), cardBy = new Map(cat.cards.map(c => [c.id, c]));
   let total = 0, pics = '';
   if (d) {
     d.toys.forEach((x, i) => { const t = toyBy.get(x.id); if (!t) return; total += t.baseG || 0;
       const th = (t.thumbs || {})[x.attr]; pics += th ? `<img data-src="${th}" style="left:${10 + i * 28}px;top:58px;width:28px;height:28px" alt="">` : ''; });
-    [...GATE_COLORS.map(c => d.gates[c]), ...AB_COLORS.map(c => d.abilities[c])].forEach((id, i) => { const c = cardBy.get(id); if (c && c.art) pics += `<img data-src="${c.art}" style="left:${96 + i * 25}px;top:54px;width:22px;height:30px" alt="">`; });
+    const ab = AB_COLORS.flatMap(c => [d.abilities[c], ...(nv ? ((d.extra || {})[c] || []) : [])]);
+    const cards = [...GATE_COLORS.map(c => d.gates[c]), ...ab], w = nv ? 12 : 25;
+    cards.forEach((id, i) => { const c = cardBy.get(id); if (c && c.art) pics += `<img data-src="${c.art}" style="left:${96 + i * w}px;top:${nv ? 58 : 54}px;width:${nv ? 11 : 22}px;height:${nv ? 15 : 30}px" alt="">`; });
+    if (nv) pics += `<div class="txt" style="left:96px;top:76px;font-size:7px">${ab.filter(Boolean).length} Ability cards</div>`;
   }
   $('topUI').innerHTML = img('banner_team', 56, 7) +
-    `<div class="txt" style="left:16px;top:38px;font:italic 900 10px system-ui">CURRENT DECK</div><div class="box" style="left:6px;top:50px;width:244px;height:40px"></div>${pics}` +
+    `<div class="txt" style="left:16px;top:38px;font:italic 900 10px system-ui">${nv ? 'NEW VESTROIA DECK' : 'CLASSIC DECK'}</div><div class="box" style="left:6px;top:50px;width:244px;height:40px"></div>${pics}` +
     `<div class="txt" style="left:0;right:0;top:104px;text-align:center;color:#ffd54a">Total G-Power</div><div class="txt" style="left:0;right:0;top:118px;text-align:center;font-size:20px;line-height:22px;color:#ffd54a">${d ? total : '—'}</div>`;
-  { const t = (p.owned.traps || []).find(x => x.uid === (d || {}).trap), td = t && (pack.catalog.traps || []).find(x => x.id === t.id);
+  if (nv) { const t = (p.owned.traps || []).find(x => x.uid === (d || {}).trap), td = t && (pack.catalog.traps || []).find(x => x.id === t.id);
     if (td && (td.thumbs || {})[t.color]) $('topUI').insertAdjacentHTML('beforeend', `<img data-src="${td.thumbs[t.color]}" style="left:220px;top:92px;width:30px;height:30px" alt=""><div class="txt" style="left:206px;top:122px;font-size:7px">TRAP</div>`); }
   $('topUI').querySelectorAll('[data-src]').forEach(async im => { im.src = await pack.url(im.dataset.src); });
-  $('bot').innerHTML = img('arena_bot', 0, 0) +
-    `<div class="pill tap sel" id="dEdit" style="left:40px;top:40px;width:176px">Edit deck</div>` +
-    `<div class="pill tap" id="dAuto" style="left:40px;top:70px;width:176px">Auto-Create</div>` +
+  const tabBtn = (m, label, x) => `<div class="pill tap ${deckMode === m ? 'sel' : ''}" data-mode="${m}" style="left:${x}px;top:22px;width:106px;height:16px;line-height:14px;font-size:9px">${label}</div>`;
+  $('bot').innerHTML = img('arena_bot', 0, 0) + tabBtn('classic', 'Classic deck', 18) + tabBtn('nv', 'New Vestroia deck', 132) +
+    `<div class="pill tap" id="dEdit" style="left:40px;top:48px;width:176px">Edit deck</div>` +
+    `<div class="pill tap" id="dAuto" style="left:40px;top:74px;width:176px">Auto-Create</div>` +
     `<div class="pill tap" id="dReset" style="left:40px;top:100px;width:176px">Reset</div>` +
-    `<div class="pill tap" id="dTrap" style="left:40px;top:130px;width:176px">Trap: ${esc(trapLabel(p))}</div>`;
-  bar(d ? 'Use these to change your deck.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
+    (nv ? `<div class="pill tap" id="dTrap" style="left:40px;top:126px;width:176px">Trap: ${esc(trapLabel(p))}</div>` : '');
+  bar(nv ? 'New Vestroia rules: up to 3 Ability cards of each color, plus your Trap.' : d ? 'Classic rules: 1 Ability card of each color.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
+  $('bot').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { deckMode = b.dataset.mode; go('deck'); });
   const edit = async (start) => {
     $('ds').style.visibility = 'hidden';
-    const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned, true);
+    const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned, nv);
     $('ds').style.visibility = '';
-    if (r.deck) P.update(P.load().active, q => { q.deck = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, extra: r.deck.extra || {}, trap: (q.deck || {}).trap || null }; });
+    if (r.deck) P.update(act(), q => { q[deckKey()] = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, extra: nv ? r.deck.extra || {} : {}, trap: nv ? (deckOf(q) || {}).trap || null : null }; });
     go('deck');
   };
   $('dEdit').onclick = () => edit();
   $('dAuto').onclick = () => edit({ name: p.name, toys: [], gates: {}, abilities: {}, auto: true });
-  $('dTrap').onclick = () => {
+  if ($('dTrap')) $('dTrap').onclick = () => {
     const list = p.owned.traps || [];
     if (!list.length) { bar('You have no Traps yet. Buy one in the Shop.'); return; }
-    const ids = [null, ...list.map(t => t.uid)], cur = ids.indexOf((p.deck || {}).trap || null);
-    P.update(act(), q => { if (q.deck) q.deck.trap = ids[(cur + 1) % ids.length]; }); go('deck');
+    const ids = [null, ...list.map(t => t.uid)], cur = ids.indexOf((d || {}).trap || null);
+    P.update(act(), q => { const dd = deckOf(q); if (dd) { dd.trap = ids[(cur + 1) % ids.length]; q.deckNV = dd; } }); go('deck');
   };
-  $('dReset').onclick = () => { P.update(P.load().active, q => { q.deck = null; }); go('deck'); };
+  $('dReset').onclick = () => { P.update(act(), q => { q[deckKey()] = null; }); go('deck'); };
   backBtn(() => go('room'));
 }
 
 function trapLabel(p) {
-  const t = (p.owned.traps || []).find(x => x.uid === (p.deck || {}).trap); if (!t) return 'none';
+  const t = (p.owned.traps || []).find(x => x.uid === ((p.deckNV || p.deck) || {}).trap); if (!t) return 'none';
   const d = (pack.catalog.traps || []).find(x => x.id === t.id); return `${d ? d.name : 'Trap'} · ${t.attrs.map(a => cap(a).slice(0, 3)).join('/')}`;
 }
 // Save: 6 players
@@ -408,7 +417,7 @@ function starter(sel = null) {
   bar('Your starter deck is 3 Bakugan and 6 cards of one attribute. Buy more in the Shop.');
   $('bot').querySelectorAll('[data-a]').forEach(b => b.onclick = () => starter(b.dataset.a));
   if ($('sOk')) $('sOk').onclick = () => {
-    P.update(act(), q => { P.ensureShop(q); q.deck = d; if (q.look && !q.look.band) q.look.band = sel; for (const x of d.toys) q.owned.toys[P.key(x.id, x.attr)] ||= { g: 0, st: {} };
+    P.update(act(), q => { P.ensureShop(q); q.deckNV = d; q.deck = { toys: d.toys, gates: d.gates, abilities: d.abilities, extra: {} }; if (q.look && !q.look.band) q.look.band = sel; for (const x of d.toys) q.owned.toys[P.key(x.id, x.attr)] ||= { g: 0, st: {} };
       q.owned.cards = [...new Set([...q.owned.cards, ...Object.values(d.gates), ...Object.values(d.abilities), ...Object.values(d.extra).flat()])]; });
     go('room');
   };
@@ -600,8 +609,8 @@ function trapShop() {
     if (p.bp < price) { bar(`You need ${price - p.bp} more BP.`); return; }
     const uid = 't' + Date.now().toString(36), attrs = ATTRS.filter(a => trapPick.attrs.includes(a));
     P.update(act(), q => { P.ensureShop(q); q.owned.traps = q.owned.traps || []; q.bp -= price; q.owned.traps.push({ uid, id: T.id, color, attrs });
-      if (q.deck && !q.deck.trap) q.deck.trap = uid; });
-    trapPick.attrs = []; trapShop(); bar(`Thanks! ${T.name} (${attrs.map(cap).join(', ')}) is yours. Choose your Trap in My Room > Deck.`);
+      const dd = q.deckNV || (q.deck && { ...q.deck }); if (dd && !dd.trap) { dd.trap = uid; q.deckNV = dd; } });
+    trapPick.attrs = []; trapShop(); bar(`Thanks! ${T.name} (${attrs.map(cap).join(', ')}) is yours. Choose your Trap in My Room > Deck > New Vestroia deck.`);
   };
   backBtn(() => go('shop'));
 }

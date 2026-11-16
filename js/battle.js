@@ -1052,13 +1052,14 @@ async function start() {
   let match = null; try { match = JSON.parse(sessionStorage.getItem('marbles-match') || 'null'); } catch {}
   const picked = match && match.players && match.players.length === 2 ? match.players : null;
   // a character comes with its deck at the level picked (Easy / Normal / Hard); "You" builds your own
+  const NV = !!(match && match.rules === 'nv');
   matchPicked = picked;
   // You: your profile's name, face and deck (built in My Room)
   if (picked) picked.forEach(c => {
     if (c.profile === undefined || c.profile === null) return;
     const pr = Profiles.load().slots[c.profile]; if (!pr) return;
     c.name = pr.name; c.face = pr.face || c.face;
-    const d = pr.deck;
+    const d = NV ? (pr.deckNV || pr.deck) : pr.deck;   // each rule set has its own deck
     if (d && d.toys && d.toys.length === 3 && GATE_COLORS.every(k => d.gates[k]) && AB_COLORS.every(k => d.abilities[k]))
       c.team = { upgrades: 0, toys: d.toys, gates: Object.fromEntries(GATE_COLORS.map(k => [k, { id: d.gates[k] }])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, { id: d.abilities[k] }])),
         extra: Object.fromEntries(AB_COLORS.map(k => [k, ((d.extra || {})[k] || []).map(id => ({ id }))])) };
@@ -1068,7 +1069,6 @@ async function start() {
     if (lvl && AI_TEAMS[c.id]) c.team = AI_TEAMS[c.id][lvl];
     if (c.ai) aiLevel[p] = lvl || 'normal';
   });
-  const NV = !!(match && match.rules === 'nv');
   const { players, first } = await setupTeams(cat, pack, picked, null, null, NV);
   // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap
   players.forEach((pl, p) => { const up = picked && picked[p].team ? picked[p].team.upgrades : 0; if (up) pl.toys.forEach(t => { t.g = Math.min(600, t.g + up * UPGRADE_G); }); });
@@ -1086,14 +1086,14 @@ async function start() {
   $('loading').hidden = false;
   // a New Vestroia character's own Trap (js/aiteams.js)
   players.forEach((pl, p) => {
-    const tr = picked && picked[p] && picked[p].team && picked[p].team.trap; if (!tr) return;
+    const tr = NV && picked && picked[p] && picked[p].team && picked[p].team.trap; if (!tr) return;   // Traps are for New Vestroia rules
     pl.trap = { type: 'trap', color: 'trap', id: 'ai-' + tr.id, name: `Trap: ${tr.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
   });
   // your Trap from My Room > Deck (one per game, played like an Ability card in a battle)
   players.forEach((pl, p) => {
     const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;
-    const pr = Profiles.load().slots[c.profile]; const tr = pr && pr.deck && pr.deck.trap && (pr.owned.traps || []).find(x => x.uid === pr.deck.trap);
+    const pr = Profiles.load().slots[c.profile]; const dk = pr && (pr.deckNV || pr.deck); const tr = NV && dk && dk.trap && (pr.owned.traps || []).find(x => x.uid === dk.trap);
     const d = tr && (cat.traps || []).find(x => x.id === tr.id);
     if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, name: `Trap: ${d.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
