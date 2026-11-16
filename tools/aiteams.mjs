@@ -53,6 +53,11 @@ const PARTNERS = {
 const TRAPS = { nv_dan: 'Scorpion', nv_shun: 'Hylash', nv_marucho: 'Tripod Epsilon', mira: 'Baliton', ace: 'Falcon Fly', baron: 'Piercian',
   spectra: 'Metalfencer', gus: 'Grakas Hound', mylene: 'Tripod Theta', volt: 'Dynamo', shadow: 'Fortress', lync: 'Spitarm' };
 const TRAP_ATTRS = { easy: 2, normal: 3, hard: 4 };
+// hand-picked Ability cards: [main card, then the 2 New Vestroia extras] per color
+const CARDS = {
+  // Klaus went 59-59 at Hard with generic cards; built around Sirenoid (Forcing Wave = Sirenoid +200G) he wins ~60% against the other Hards
+  klaus: { hard: { red: ['Aquos Double Input', 'Aquos Swap', 'Aquos Time Breaker'], blue: ['Summon Wave', 'The Shadow', 'G-Power Bump'], green: ['Forcing Wave', 'Imbalance', 'Surprise Attack'] } },
+};
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));
 // starter decks for new players: generic Bakugan only; cards = that attribute's main character's Easy cards
@@ -117,6 +122,12 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
           .sort((a, b) => gcards.reduce((n, g) => n + (g.bonus[b] || 0), 0) - gcards.reduce((n, g) => n + (g.bonus[a] || 0), 0));
         team.trap = { id: t.id, name: t.name, color: attr, attrs: [attr, ...others.slice(0, (TRAP_SLOTS[t.name] || TRAP_ATTRS[lvl]) - 1)] };
       }
+    }
+    if (CARDS[id] && CARDS[id][lvl]) {   // hand-picked cards (Billy: upgrade Klaus's deck)
+      const C = n => { const c = cat.cards.find(x => x.name === n); if (!c) problems.push(`${id}: no card ${n}`); return c && { id: c.id, name: c.name }; };
+      const h = CARDS[id][lvl];
+      team.abilities = Object.fromEntries(AB_COLORS.map(c => [c, C(h[c][0])]));
+      team.extra = Object.fromEntries(AB_COLORS.map(c => [c, h[c].slice(1).map(C)]));
     }
     out[id][lvl] = team;
   });

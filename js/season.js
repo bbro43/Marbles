@@ -5,8 +5,9 @@ import { buildPlayer, playMatch, makeRng } from './sim.js';
 import { AI_TEAMS, INTERSPACE } from './aiteams.js';
 
 export const ARENAS = 4, SLOTS = ['Morning', 'Afternoon', 'Evening'], DAYS = 364;
-export const LEVEL_OF = up => up <= 3 ? 'easy' : up <= 7 ? 'normal' : 'hard';
-export const START_UP = { easy: 2, normal: 5, hard: 9 };
+// a brawler's level (which cards they use) is fixed by STORY_START; upgrades (+10G each) are separate and start low
+export const START_UP = { easy: 0, normal: 2, hard: 5 };
+export const START_UP_OVERRIDE = { gus: 3 };
 const K = 32, START_ELO = 1500;
 // Season Ranking points: a match win, a draw, and how far you got in an event (winner, finalist, semifinal, quarterfinal)
 const MATCH_PTS = { win: 3, draw: 1 };
@@ -35,7 +36,8 @@ export function runSeason(cat, roster, { seed = 1, season = 1, challengeChance =
   const B = new Map(roster.map(r => {
     const def = AI_TEAMS[r.id] || INTERSPACE[r.id], name = (INTERSPACE[r.id] || {}).name || r.name || r.id;
     if (!def) throw new Error('no team for ' + r.id);
-    return [r.id, { id: r.id, name, up: r.upgrades ?? START_UP[r.level || 'normal'], startUp: r.upgrades ?? START_UP[r.level || 'normal'],
+    const up0 = r.upgrades ?? START_UP_OVERRIDE[r.id] ?? START_UP[r.level || 'normal'];
+    return [r.id, { id: r.id, name, level: r.level || 'normal', up: up0, startUp: up0,
       elo: r.elo ?? START_ELO, startElo: r.elo ?? START_ELO, pts: 0, rec: { w: 0, l: 0, d: 0 }, career: r.career || { w: 0, l: 0, d: 0, titles: [] }, titles: [], busy: new Set() }];
   }));
   const ids = [...B.keys()];
@@ -46,7 +48,7 @@ export function runSeason(cat, roster, { seed = 1, season = 1, challengeChance =
   // ---- one match on (day, slot): plays it, updates records, Elo, Season points
   function play(sideIds, { rules = 'nv', teams = null, day, slot, event = null }) {
     const flat = sideIds.flat();
-    const entrants = flat.map(id => { const b = B.get(id), lvl = LEVEL_OF(b.up), team = { ...(AI_TEAMS[id] || INTERSPACE[id])[lvl], upgrades: b.up };
+    const entrants = flat.map(id => { const b = B.get(id), lvl = b.level, team = { ...(AI_TEAMS[id] || INTERSPACE[id])[lvl], upgrades: b.up };
       return { name: b.name, level: lvl, player: buildPlayer(cat, team, { name: b.name, owner: id, nv: rules === 'nv' }) }; });
     const tm = teams || flat.map((_, i) => i);
     const r = playMatch(entrants, { nv: rules === 'nv', teams: tm, rng });
@@ -191,12 +193,11 @@ export function runSeason(cat, roster, { seed = 1, season = 1, challengeChance =
     }
   }
   matches.sort((a, b) => a.day * 3 + a.slot - (b.day * 3 + b.slot));
-  // ---- season end: Season Ranking, then levels move (top quarter +1 upgrade, bottom quarter -1)
+  // ---- season end: Season Ranking. Levels don't move yet (Billy: that comes with Season 2's newcomers); upgrades will come from BP.
   const seasonRank = [...ids].sort((a, b) => B.get(b).pts - B.get(a).pts || B.get(b).elo - B.get(a).elo);
-  const q = Math.floor(ids.length / 4);
-  seasonRank.forEach((id, i) => { const b = B.get(id); b.endUp = Math.max(0, Math.min(10, b.up + (i < q ? 1 : i >= ids.length - q ? -1 : 0))); });
+  seasonRank.forEach(id => { B.get(id).endUp = B.get(id).up; });
   const out = [...B.values()].map(b => ({ id: b.id, name: b.name, elo: Math.round(b.elo), startElo: b.startElo, pts: b.pts, record: b.rec, titles: b.titles,
-    level: LEVEL_OF(b.startUp), upgrades: b.startUp, endUpgrades: b.endUp, endLevel: LEVEL_OF(b.endUp), career: b.career,
+    level: b.level, upgrades: b.startUp, endUpgrades: b.endUp, career: b.career,
     matches: b.rec.w + b.rec.l + b.rec.d }));
   return {
     season, seed, events, matchCount: matches.length,

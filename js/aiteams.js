@@ -3400,27 +3400,27 @@ export const AI_TEAMS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_402",
-     "name": "Aquos Swap"
+     "id": "ds_426",
+     "name": "Aquos Double Input"
     },
     "blue": {
      "id": "ds_607",
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_523",
+     "name": "Forcing Wave"
     }
    },
    "extra": {
     "red": [
      {
-      "id": "ds_410",
-      "name": "Aquos Time Breaker"
+      "id": "ds_402",
+      "name": "Aquos Swap"
      },
      {
-      "id": "ds_701",
-      "name": "Another Throw"
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
      }
     ],
     "blue": [
@@ -3435,12 +3435,12 @@ export const AI_TEAMS = {
     ],
     "green": [
      {
-      "id": "ds_502",
-      "name": "No Trading"
+      "id": "ds_506",
+      "name": "Imbalance"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
