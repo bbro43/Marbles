@@ -46,8 +46,8 @@ export const TRAP_SLOTS = { 'Scorpion': 2, 'Hylash': 2, 'Tripod Epsilon': 3, 'Ba
   'Spyder Fencer': 1, 'Grakas Hound': 2, 'Dark Hound': 2, 'Grafias': 1, 'Brachium': 1, 'Spitarm': 2 };
 export const trapPrice = n => n <= 1 ? 1000 : 1500 + 1000 * (n - 2);
 // G-Power: +10G each. The stronger the Bakugan already is, and the more boosts it has had, the more the next one costs (Billy, Nov 16):
-// a 250G Bakugan's first boost is 100 BP; a 400G one's is 250 BP; each boost bought adds 20 BP on top.
-export const gPrice = (n, g = 250) => Math.max(100, g - 150) + 20 * n;
+// a 250G Bakugan's first boost is 300 BP; a 400G one's is 750 BP; each boost bought adds 60 BP on top (prices tripled, Billy).
+export const gPrice = (n, g = 250) => 3 * (Math.max(100, g - 150) + 20 * n);
 // Level: each level adds 1 to Speed, Defense or Magnet (your pick). Level 1 = no stat points added.
 export const levelPrice = lv => 300 * lv;
 export const key = (id, attr) => `${id}:${attr}`;
