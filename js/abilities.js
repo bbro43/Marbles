@@ -168,6 +168,21 @@ export const GATE_EFFECTS = {
   'Trick Jump': { add: (c, sd) => 100 * c.s.players[sd.p].abilityUsed.length },
   'Mega Warrior': { add: (c, sd) => 100 * captured(c.s, sd.p) },
   "Naga's Wrath": { add: (c, sd) => 150 * standing(c.s, sd.p).filter(x => c.s.field[x.k] !== c.field).length },
+  // custom gold cards from Billy's own cards (the Vexos):
+  // Vulcan: every Vulcan (Premo Vulcan) gets the Gate bonus twice
+  'Vulcan': { gate: c => { for (const sd of c.sides) if (/Vulcan/.test(sd.name)) sd.gateMult *= 2; } },
+  // Myriad Hades: a player with a Hades not in this battle can swap it in (counted as Hades's G-Power when that is higher)
+  'Myriad Hades': { add: (c, sd) => {
+    const pl = c.s.players[sd.p], h = pl.toys.findIndex((x, t) => x.name === 'Hades' && t !== sd.t && (pl.used.includes(t) || pl.unused.includes(t)));
+    return h < 0 ? 0 : Math.max(0, pl.toys[h].g - sd.printed);
+  } },
+  // Brontes: a Brontes can take its attribute bonus from any Gate card in the opponent's used pile instead (the best one)
+  'Brontes': { add: (c, sd) => {
+    if (!/Brontes/.test(sd.name)) return 0;
+    const opp = c.s.players[1 - sd.p], pile = c.s.nv ? opp.gateUsed : opp.captured;
+    const best = Math.max(0, ...pile.map(g => (g.bonus || {})[sd.attr] || 0));
+    return Math.max(0, best - ((c.card.bonus || {})[sd.attr] || 0));
+  } },
   // custom gold card (Billy's own Washback card): the player with fewer Gate cards in their used pile gets one used Ability card back
   'Washback': regainColor(c => { const [a, b] = c.sides.map(sd => c.s.nv ? c.s.players[sd.p].gateUsed.length : captured(c.s, sd.p)); return a === b ? null : c.sides[a < b ? 0 : 1].p; }, 'one'),
   // custom gold card (Billy's own Viper Helios card): +200 for each side whose owner has a Helios in their used pile
