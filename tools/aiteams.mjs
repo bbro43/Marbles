@@ -26,19 +26,19 @@ const CH = {
   klaus:      ['aquos',    ['Sirenoid', 'Stinglash', 'Serpenoid'],      ['Sirenoid', 'Reaper', 'Stinglash'],        ['Sirenoid', 'Warius', 'Laserman']],
   masquerade: ['darkus',   ['Hydranoid', 'Reaper', 'Fear Ripper'],      ['Hydranoid', 'Reaper', 'Laserman'],        ['Dual Hydranoid', 'Reaper', 'Warius']],
   marduk:     ['darkus',   ['Vladitor', 'Gargonoid', 'Fear Ripper'],    ['Vladitor', 'Reaper', 'Gargonoid'],        ['Battle Ax Vladitor', 'Reaper', 'Laserman']],
-  // New Vestroia: every New Vestroia Bakugan is someone's partner, so the others are generic Battle Brawlers Bakugan
+  // New Vestroia: generics are Classic Bakugan, except the six Vexos, who use the six Maxus Helios pieces (Billy, Nov 16)
   nv_dan:     ['pyrus',    ['Neo Dragonoid', 'Griffon', 'Falconeer'],   ['Neo Dragonoid', 'Laserman', 'Monarus'],   ['Hyper Dragonoid', 'Warius', 'Laserman']],
   nv_shun:    ['ventus',   ['Ingram', 'Ravenoid', 'Falconeer'],         ['Ingram', 'Monarus', 'Laserman'],          ['Cosmic Ingram', 'Monarus', 'Laserman']],
   nv_marucho: ['aquos',    ['Elfin', 'Stinglash', 'Griffon'],           ['Elfin', 'Preyas', 'Reaper'],              ['Dual Elfin', 'Preyas', 'Warius']],
   ace:        ['darkus',   ['Percival', 'Fear Ripper', 'Reaper'],       ['Percival', 'Reaper', 'Laserman'],         ['Midnight Percival', 'Warius', 'Laserman']],
   mira:       ['subterra', ['Wilda', 'Terrorclaw', 'Gargonoid'],        ['Wilda', 'Terrorclaw', 'Monarus'],         ['Thunder Wilda', 'Laserman', 'Terrorclaw']],
   baron:      ['haos',     ['Nemus', 'Ravenoid', 'Manion'],             ['Nemus', 'Monarus', 'Griffon'],            ['Mega Nemus', 'Laserman', 'Monarus']],
-  spectra:    ['pyrus',    ['Helios', 'Falconeer', 'Gargonoid'],        ['Helios', 'Laserman', 'Reaper'],           ['Helios', 'Warius', 'Laserman']],
-  mylene:     ['aquos',    ['Elico', 'Stinglash', 'Reaper'],            ['Elico', 'Reaper', 'Laserman'],            ['Elico', 'Warius', 'Laserman']],
-  volt:       ['haos',     ['Brontes', 'Manion', 'Griffon'],            ['Brontes', 'Monarus', 'Ravenoid'],         ['Brontes', 'Monarus', 'Laserman']],
-  gus:        ['subterra', ['Premo Vulcan', 'Gargonoid', 'Terrorclaw'], ['Premo Vulcan', 'Terrorclaw', 'Monarus'], ['Premo Vulcan', 'Laserman', 'Terrorclaw']],
-  shadow:     ['darkus',   ['Hades', 'Fear Ripper', 'Gargonoid'],       ['Hades', 'Reaper', 'Fear Ripper'],         ['Hades', 'Warius', 'Reaper']],
-  lync:       ['ventus',   ['Altair', 'Wired', 'Falconeer'],            ['Altair', 'Wired', 'Griffon'],             ['Altair', 'Wired', 'Monarus']],
+  spectra:    ['pyrus',    ['Helios', 'Klawgor', 'Foxbat'],           ['Helios', 'Fencer', 'Leefram'],            ['Helios', 'Spindle', 'Fencer']],
+  mylene:     ['aquos',    ['Elico', 'Foxbat', 'Klawgor'],            ['Elico', 'Foxbat', 'Scraper'],             ['Elico', 'Spindle', 'Scraper']],
+  volt:       ['haos',     ['Brontes', 'Leefram', 'Foxbat'],          ['Brontes', 'Fencer', 'Foxbat'],            ['Brontes', 'Fencer', 'Spindle']],
+  gus:        ['subterra', ['Premo Vulcan', 'Leefram', 'Klawgor'],    ['Premo Vulcan', 'Scraper', 'Leefram'],     ['Premo Vulcan', 'Scraper', 'Spindle']],
+  shadow:     ['darkus',   ['Hades', 'Klawgor', 'Leefram'],           ['Hades', 'Scraper', 'Klawgor'],            ['Hades', 'Fencer', 'Scraper']],
+  lync:       ['ventus',   ['Altair', 'Wired', 'Foxbat'],             ['Altair', 'Wired', 'Klawgor'],             ['Altair', 'Wired', 'Spindle']],
 };
 const NEW_VESTROIA = new Set(['nv_dan', 'nv_shun', 'nv_marucho', 'ace', 'mira', 'baron', 'spectra', 'mylene', 'volt', 'gus', 'shadow', 'lync']);
 // partner Bakugan and who they belong to (the same person in both series counts once: Dan, Shun, Marucho)

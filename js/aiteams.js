@@ -5594,20 +5594,20 @@ export const AI_TEAMS = {
      "name": "Helios"
     },
     {
-     "id": "bb_43",
+     "id": "dc_sp06_25",
      "attr": "pyrus",
-     "name": "Falconeer"
+     "name": "Klawgor"
     },
     {
-     "id": "bb_52",
+     "id": "dc_sp06_21",
      "attr": "pyrus",
-     "name": "Gargonoid"
+     "name": "Foxbat"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_226",
@@ -5670,7 +5670,7 @@ export const AI_TEAMS = {
     "color": "pyrus",
     "attrs": [
      "pyrus",
-     "ventus"
+     "subterra"
     ]
    }
   },
@@ -5684,20 +5684,20 @@ export const AI_TEAMS = {
      "name": "Helios"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp06_20",
      "attr": "pyrus",
-     "name": "Laserman"
+     "name": "Fencer"
     },
     {
-     "id": "bb_25",
+     "id": "dc_sp06_22",
      "attr": "pyrus",
-     "name": "Reaper"
+     "name": "Leefram"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_207",
@@ -5774,20 +5774,20 @@ export const AI_TEAMS = {
      "name": "Helios"
     },
     {
-     "id": "bb_60",
+     "id": "dc_sp06_24",
      "attr": "pyrus",
-     "name": "Warius"
+     "name": "Spindle"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp06_20",
      "attr": "pyrus",
-     "name": "Laserman"
+     "name": "Fencer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_134",
-     "name": "Warius"
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_216",
@@ -5867,20 +5867,20 @@ export const AI_TEAMS = {
      "name": "Elico"
     },
     {
-     "id": "bb_44",
+     "id": "dc_sp06_21",
      "attr": "aquos",
-     "name": "Stinglash"
+     "name": "Foxbat"
     },
     {
-     "id": "bb_25",
+     "id": "dc_sp06_25",
      "attr": "aquos",
-     "name": "Reaper"
+     "name": "Klawgor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
+     "id": "ds_106",
+     "name": "Preyas's"
     },
     "silver": {
      "id": "ds_225",
@@ -5958,20 +5958,20 @@ export const AI_TEAMS = {
      "name": "Elico"
     },
     {
-     "id": "bb_25",
+     "id": "dc_sp06_21",
      "attr": "aquos",
-     "name": "Reaper"
+     "name": "Foxbat"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp06_23",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Scraper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_106",
+     "name": "Preyas's"
     },
     "silver": {
      "id": "ds_204",
@@ -6034,8 +6034,8 @@ export const AI_TEAMS = {
     "color": "aquos",
     "attrs": [
      "aquos",
-     "darkus",
-     "subterra"
+     "subterra",
+     "darkus"
     ]
    }
   },
@@ -6049,20 +6049,20 @@ export const AI_TEAMS = {
      "name": "Elico"
     },
     {
-     "id": "bb_60",
+     "id": "dc_sp06_24",
      "attr": "aquos",
-     "name": "Warius"
+     "name": "Spindle"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp06_23",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Scraper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_106",
+     "name": "Preyas's"
     },
     "silver": {
      "id": "ds_208",
@@ -6126,7 +6126,7 @@ export const AI_TEAMS = {
     "attrs": [
      "aquos",
      "subterra",
-     "haos"
+     "pyrus"
     ]
    }
   }
@@ -6143,20 +6143,20 @@ export const AI_TEAMS = {
      "name": "Brontes"
     },
     {
-     "id": "bb_56",
+     "id": "dc_sp06_22",
      "attr": "haos",
-     "name": "Manion"
+     "name": "Leefram"
     },
     {
-     "id": "bb_45",
+     "id": "dc_sp06_21",
      "attr": "haos",
-     "name": "Griffon"
+     "name": "Foxbat"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_223",
@@ -6219,8 +6219,8 @@ export const AI_TEAMS = {
     "color": "haos",
     "attrs": [
      "haos",
-     "pyrus",
-     "darkus"
+     "darkus",
+     "pyrus"
     ]
    }
   },
@@ -6234,20 +6234,20 @@ export const AI_TEAMS = {
      "name": "Brontes"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp06_20",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Fencer"
     },
     {
-     "id": "bb_58",
+     "id": "dc_sp06_21",
      "attr": "haos",
-     "name": "Ravenoid"
+     "name": "Foxbat"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_209",
@@ -6310,8 +6310,8 @@ export const AI_TEAMS = {
     "color": "haos",
     "attrs": [
      "haos",
-     "subterra",
-     "darkus"
+     "darkus",
+     "subterra"
     ]
    }
   },
@@ -6325,20 +6325,20 @@ export const AI_TEAMS = {
      "name": "Brontes"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp06_20",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Fencer"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp06_24",
      "attr": "haos",
-     "name": "Laserman"
+     "name": "Spindle"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_203",
@@ -6419,20 +6419,20 @@ export const AI_TEAMS = {
      "name": "Premo Vulcan"
     },
     {
-     "id": "bb_52",
+     "id": "dc_sp06_22",
      "attr": "subterra",
-     "name": "Gargonoid"
+     "name": "Leefram"
     },
     {
-     "id": "bb_50",
+     "id": "dc_sp06_25",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Klawgor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_202",
@@ -6495,7 +6495,7 @@ export const AI_TEAMS = {
     "color": "subterra",
     "attrs": [
      "subterra",
-     "aquos"
+     "haos"
     ]
    }
   },
@@ -6509,20 +6509,20 @@ export const AI_TEAMS = {
      "name": "Premo Vulcan"
     },
     {
-     "id": "bb_50",
+     "id": "dc_sp06_23",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Scraper"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp06_22",
      "attr": "subterra",
-     "name": "Monarus"
+     "name": "Leefram"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_208",
@@ -6585,7 +6585,7 @@ export const AI_TEAMS = {
     "color": "subterra",
     "attrs": [
      "subterra",
-     "aquos"
+     "pyrus"
     ]
    }
   },
@@ -6599,20 +6599,20 @@ export const AI_TEAMS = {
      "name": "Premo Vulcan"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp06_23",
      "attr": "subterra",
-     "name": "Laserman"
+     "name": "Scraper"
     },
     {
-     "id": "bb_50",
+     "id": "dc_sp06_24",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Spindle"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_209",
@@ -6692,20 +6692,20 @@ export const AI_TEAMS = {
      "name": "Hades"
     },
     {
-     "id": "bb_48",
+     "id": "dc_sp06_25",
      "attr": "darkus",
-     "name": "Fear Ripper"
+     "name": "Klawgor"
     },
     {
-     "id": "bb_52",
+     "id": "dc_sp06_22",
      "attr": "darkus",
-     "name": "Gargonoid"
+     "name": "Leefram"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
     },
     "silver": {
      "id": "ds_222",
@@ -6782,20 +6782,20 @@ export const AI_TEAMS = {
      "name": "Hades"
     },
     {
-     "id": "bb_25",
+     "id": "dc_sp06_23",
      "attr": "darkus",
-     "name": "Reaper"
+     "name": "Scraper"
     },
     {
-     "id": "bb_48",
+     "id": "dc_sp06_25",
      "attr": "darkus",
-     "name": "Fear Ripper"
+     "name": "Klawgor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
     },
     "silver": {
      "id": "ds_203",
@@ -6872,20 +6872,20 @@ export const AI_TEAMS = {
      "name": "Hades"
     },
     {
-     "id": "bb_60",
+     "id": "dc_sp06_20",
      "attr": "darkus",
-     "name": "Warius"
+     "name": "Fencer"
     },
     {
-     "id": "bb_25",
+     "id": "dc_sp06_23",
      "attr": "darkus",
-     "name": "Reaper"
+     "name": "Scraper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
     },
     "silver": {
      "id": "ds_214",
@@ -6970,15 +6970,15 @@ export const AI_TEAMS = {
      "name": "Wired"
     },
     {
-     "id": "bb_43",
+     "id": "dc_sp06_21",
      "attr": "ventus",
-     "name": "Falconeer"
+     "name": "Foxbat"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_110",
+     "name": "Storm Skyress"
     },
     "silver": {
      "id": "ds_232",
@@ -7060,15 +7060,15 @@ export const AI_TEAMS = {
      "name": "Wired"
     },
     {
-     "id": "bb_45",
+     "id": "dc_sp06_25",
      "attr": "ventus",
-     "name": "Griffon"
+     "name": "Klawgor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_110",
+     "name": "Storm Skyress"
     },
     "silver": {
      "id": "ds_213",
@@ -7150,15 +7150,15 @@ export const AI_TEAMS = {
      "name": "Wired"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp06_24",
      "attr": "ventus",
-     "name": "Monarus"
+     "name": "Spindle"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_110",
+     "name": "Storm Skyress"
     },
     "silver": {
      "id": "ds_207",
@@ -7221,7 +7221,7 @@ export const AI_TEAMS = {
     "color": "ventus",
     "attrs": [
      "ventus",
-     "aquos"
+     "pyrus"
     ]
    }
   }
