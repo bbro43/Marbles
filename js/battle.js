@@ -238,7 +238,8 @@ async function loadToy(spec) {
   // ball in, then opens it (closed at ~22% of the clip, open from ~46%). Size and center them like the others.
   // Battle Trainer Bakugan (bt_) are built the same way but their clip is just the opening (closed -> open)
   if (/^(dc|bt)_/.test(spec.id || '') && t.action) {
-    if ((spec.id || '').startsWith('bt_')) { t.from = 0; t.to = 0.999; } else { t.from = 0.22; t.to = 0.46; }
+    // the Maxus Helios pieces and Wired were built as Traps: their clip starts closed and is open by about 34%
+    if ((spec.id || '').startsWith('bt_')) { t.from = 0; t.to = 0.999; } else if (/^dc_sp(06_2\d|13)$/.test(spec.id)) { t.from = 0; t.to = 0.34; } else { t.from = 0.22; t.to = 0.46; }
     obj.scale.setScalar(1); setOpen(t, 0);
     obj.updateMatrixWorld(true); obj.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
     const box = new THREE.Box3().setFromObject(obj, true), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());

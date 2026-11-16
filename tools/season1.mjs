@@ -1,4 +1,5 @@
 // Runs Season 1 of Interspace (the pre-season, one year after New Vestroia): the 24 characters from the show, in 3 leagues of 8.
+// LOCKED Nov 16, 2026 (Billy): data/season1.json from seed 2026 is the official Season 1. Re-running overwrites it.
 // Usage: node tools/season1.mjs <catalog.json> [seed]  -> data/season1.json (+ a summary on screen)
 import fs from 'fs';
 import { runSeason } from '../js/season.js';

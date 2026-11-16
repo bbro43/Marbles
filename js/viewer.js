@@ -69,7 +69,8 @@ async function show(d, attr) {
   if (g.animations.length) {
     t.mixer = new THREE.AnimationMixer(obj); t.action = t.mixer.clipAction(g.animations[0]);
     t.action.play(); t.action.paused = true; t.dur = g.animations[0].duration;
-    if (/^dc_sp\d+(_\d+)?$/.test(d.id) && !MAXUS_G[d.name]) { t.from = 0.22; t.to = 0.46; }   // New Vestroia Bakugan clips roll the ball in first
+    if (/^dc_sp(06_2\d|13)$/.test(d.id)) { t.from = 0; t.to = 0.34; }   // Maxus Helios pieces and Wired: built like Traps, closed at the start
+    else if (/^dc_sp\d+(_\d+)?$/.test(d.id) && !MAXUS_G[d.name]) { t.from = 0.22; t.to = 0.46; }   // New Vestroia Bakugan clips roll the ball in first
   }
   // size and center from the closed ball; leave room for the open model
   setOpen(t, 0);
