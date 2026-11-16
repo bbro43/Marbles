@@ -122,6 +122,47 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     out[id][lvl] = team;
   });
 }
+// ---------- Interspace brawlers (story mode): Billy's own characters from his Brawlers sheet.
+// Every Bakugan they carry is synthetic; each brawler's signature is one of the 23 unassigned Bakugan (each used once).
+// The other two are synthetics spread so every one of the 23 shows up about equally. Same Bakugan at every level.
+const INTERSPACE = [
+  ['maisie', 'Maisie', 'Vestal', ['pyrus', 'darkus', 'subterra'], 'Leefram'], ['richard', 'Richard', 'Human', ['pyrus', 'ventus', 'subterra'], 'Robotallion'],
+  ['ryan', 'Ryan', 'Human', ['ventus', 'aquos', 'haos'], 'Foxbat'], ['sarah', 'Sarah', 'Human', ['ventus', 'aquos', 'subterra'], 'Ravenoid'],
+  ['george', 'George', 'Human', ['darkus', 'aquos', 'subterra'], 'Klawgor'], ['ella', 'Ella', 'Vestal', ['pyrus', 'darkus'], 'Reaper'],
+  ['sophie', 'Sophie', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Scraper'], ['nico', 'Nico', 'Vestal', ['haos'], 'Fear Ripper'],
+  ['freya', 'Freya', 'Vestal', ['pyrus', 'aquos'], 'Monarus'], ['zoya', 'Zoya', 'Vestal', ['pyrus', 'subterra'], 'Hynoid'],
+  ['xander', 'Xander', 'Vestal', ['ventus', 'aquos'], 'Spindle'], ['heather', 'Heather', 'Human', ['aquos', 'subterra'], 'Gargonoid'],
+  ['brandon', 'Brandon', 'Human', ['pyrus'], 'Saurus'], ['rocco', 'Rocco', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Fencer'],
+  ['otto', 'Otto', 'Vestal', ['darkus', 'aquos', 'haos'], 'Laserman'], ['margaret', 'Margaret', 'Human', ['haos'], 'Warius'],
+  ['melissa', 'Melissa', 'Human', ['pyrus', 'darkus', 'aquos'], 'Serpenoid'], ['karen', 'Karen', 'Human', ['pyrus', 'darkus', 'haos'], 'Manion'],
+  ['brenda', 'Brenda', 'Human', ['pyrus', 'darkus', 'ventus'], 'Bee Striker'], ['ellie', 'Ellie', 'Vestal', ['aquos', 'subterra'], 'Terrorclaw'],
+  ['amanda', 'Amanda', 'Human', ['haos'], 'Griffon'], ['gary', 'Gary', 'Human', ['pyrus', 'darkus'], 'Falconeer'],
+  ['anthony', 'Anthony', 'Human', ['aquos', 'subterra'], 'Stinglash'],
+];
+const SYN = INTERSPACE.map(x => x[4]), used = Object.fromEntries(SYN.map(n => [n, 1]));
+if (new Set(SYN).size !== 23) problems.push('Interspace: signatures are not 23 different Bakugan');
+const inter = {};
+INTERSPACE.forEach(([id, name, species, attrs, sig], i) => {
+  for (const n of SYN) { if (!byName.get(n)) problems.push(`Interspace ${id}: no Bakugan ${n}`); if (ownerOf.has(n)) problems.push(`Interspace ${id}: ${n} is a partner`); }
+  // two more synthetics: least used so far, then a mix of strong and weak so decks stay close in power
+  const rest = SYN.filter(n => n !== sig).sort((a, b) => used[a] - used[b] || ((SYN.indexOf(a) * 7 + i * 3) % 23) - ((SYN.indexOf(b) * 7 + i * 3) % 23));
+  const names = [sig, rest[0], rest[1]]; used[rest[0]]++; used[rest[1]]++;
+  const toyAttr = names.map((n, k) => attrs[k % attrs.length]);
+  inter[id] = { name, species, attrs, signature: sig };
+  Object.keys(LEVELS).forEach(lvl => {
+    const { upgrades, rank } = LEVELS[lvl];
+    const team = { attr: attrs[0], upgrades, toys: names.map((n, k) => ({ id: byName.get(n).id, attr: toyAttr[k], name: n })), gates: pickGates(names, attrs[0], rank), abilities: {}, extra: {} };
+    for (const c of AB_COLORS) {
+      let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
+      const r = [...pool].sort((a, b) => abilityScore(b, attrs) - abilityScore(a, attrs)), a = r[Math.min(rank, r.length - 1)];
+      team.abilities[c] = { id: a.id, name: a.name };
+      const more = r.filter(x => x !== a), st = Math.min(rank, Math.max(0, more.length - 2));
+      team.extra[c] = more.slice(st, st + 2).map(x => ({ id: x.id, name: x.name }));
+    }
+    inter[id][lvl] = team;
+  });
+});
+const synCount = Object.entries(used).sort((a, b) => a[1] - b[1]);
 const starters = {};
 for (const [attr, [who, names]] of Object.entries(STARTERS)) {
   for (const n of names) { if (ownerOf.has(n)) problems.push(`starter ${attr}: ${n} is a partner`); if (!byName.get(n)) problems.push(`starter ${attr}: no Bakugan ${n}`); }
@@ -134,6 +175,8 @@ export const UPGRADE_G = ${UPG()};
 export const AI_TEAMS = ${JSON.stringify(out, null, 1)};
 // new players' starter decks, by attribute
 export const STARTERS = ${JSON.stringify(starters, null, 1)};
+// Interspace brawlers (story mode): all synthetic Bakugan
+export const INTERSPACE = ${JSON.stringify(inter, null, 1)};
 `);
 function UPG() { return 10; }
-console.log(problems.length ? problems.join('\n') : 'ok', Object.keys(out).length, 'characters');
+console.log(problems.length ? problems.join('\n') : 'ok', Object.keys(out).length, 'characters,', Object.keys(inter).length, 'Interspace brawlers; synthetic use:', synCount.map(x => x.join(' ')).join(', '));
