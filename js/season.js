@@ -7,7 +7,7 @@ import { AI_TEAMS, INTERSPACE } from './aiteams.js';
 export const ARENAS = 4, SLOTS = ['Morning', 'Afternoon', 'Evening'], DAYS = 364;
 // a brawler's level (which cards they use) is fixed by STORY_START; upgrades (+10G each) are separate and start low
 export const START_UP = { easy: 0, normal: 2, hard: 5 };
-export const START_UP_OVERRIDE = { gus: 3 };
+export const START_UP_OVERRIDE = { gus: 3, nv_dan: 2, masquerade: 6 };   // Billy: Dan toned down, the top 5 even
 const K = 32, START_ELO = 1500;
 // Season Ranking points: a match win, a draw, and how far you got in an event (winner, finalist, semifinal, quarterfinal)
 const MATCH_PTS = { win: 3, draw: 1 };

@@ -3654,8 +3654,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_705",
-     "name": "Early Victory"
+     "id": "ds_520",
+     "name": "Chaos of the Darkness"
     }
    },
    "extra": {
@@ -3685,8 +3685,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_708",
-      "name": "Invulnerable"
+      "id": "ds_705",
+      "name": "Early Victory"
      }
     ]
    }
@@ -5562,8 +5562,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_705",
-     "name": "Early Victory"
+     "id": "ds_506",
+     "name": "Imbalance"
     }
    },
    "extra": {
@@ -5593,8 +5593,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_708",
-      "name": "Invulnerable"
+      "id": "ds_705",
+      "name": "Early Victory"
      }
     ]
    },

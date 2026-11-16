@@ -57,6 +57,9 @@ const TRAP_ATTRS = { easy: 2, normal: 3, hard: 4 };
 const CARDS = {
   // Klaus went 59-59 at Hard with generic cards; built around Sirenoid (Forcing Wave = Sirenoid +200G) he wins ~60% against the other Hards
   klaus: { hard: { red: ['Aquos Double Input', 'Aquos Swap', 'Aquos Time Breaker'], blue: ['Summon Wave', 'The Shadow', 'G-Power Bump'], green: ['Forcing Wave', 'Imbalance', 'Surprise Attack'] } },
+  // Billy: Dan, Shun, Klaus, Masquerade and Spectra on even footing (each ~60% against the other Hards)
+  masquerade: { hard: { red: ['Darkus Swap', 'Darkus Time Breaker', 'Trickster'], blue: ['Power From Darkness', 'The Shadow', 'Dark Growth'], green: ['Chaos of the Darkness', 'No Trading', 'Early Victory'] } },
+  spectra: { hard: { red: ['Pyrus Swap', 'Pyrus Time Breaker', 'Trickster'], blue: ['Brushfire', 'Circle Of Fire', 'The Glow'], green: ['Imbalance', 'No Trading', 'Early Victory'] } },
 };
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));
