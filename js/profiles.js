@@ -54,8 +54,8 @@ export const key = (id, attr) => `${id}:${attr}`;
 export function ensureShop(p) {
   if (p.bp === undefined) p.bp = START_BP;
   if (p.owned && !p.owned.traps) p.owned.traps = [];
-  // the Maxus Helios pieces became Bakugan (build 58): Traps bought as those are refunded
-  const GONE = ['dc_spt_fencer', 'dc_spt_foxbat', 'dc_spt_leefram', 'dc_spt_scraper', 'dc_spt_spindle', 'dc_spt_klawgor'];
+  // the Maxus Helios pieces (build 58) and Wired (build 60) became Bakugan: Traps bought as those are refunded
+  const GONE = ['dc_spt_fencer', 'dc_spt_foxbat', 'dc_spt_leefram', 'dc_spt_scraper', 'dc_spt_spindle', 'dc_spt_klawgor', 'dc_spt11'];
   if (p.owned && p.owned.traps.some(t => GONE.includes(t.id))) {
     for (const t of p.owned.traps.filter(t => GONE.includes(t.id))) {
       p.bp += trapPrice((t.attrs || []).length);

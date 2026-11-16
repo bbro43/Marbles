@@ -6490,8 +6490,8 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt_grakashound",
+    "name": "Grakas Hound",
     "color": "subterra",
     "attrs": [
      "subterra",
@@ -6580,13 +6580,12 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt_grakashound",
+    "name": "Grakas Hound",
     "color": "subterra",
     "attrs": [
      "subterra",
-     "aquos",
-     "pyrus"
+     "aquos"
     ]
    }
   },
@@ -6671,14 +6670,12 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt_grakashound",
+    "name": "Grakas Hound",
     "color": "subterra",
     "attrs": [
      "subterra",
-     "haos",
-     "darkus",
-     "aquos"
+     "haos"
     ]
    }
   }
@@ -6968,9 +6965,9 @@ export const AI_TEAMS = {
      "name": "Altair"
     },
     {
-     "id": "bb_58",
+     "id": "dc_sp13",
      "attr": "ventus",
-     "name": "Ravenoid"
+     "name": "Wired"
     },
     {
      "id": "bb_43",
@@ -6980,8 +6977,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_232",
@@ -7044,7 +7041,7 @@ export const AI_TEAMS = {
     "color": "ventus",
     "attrs": [
      "ventus",
-     "haos"
+     "pyrus"
     ]
    }
   },
@@ -7058,9 +7055,9 @@ export const AI_TEAMS = {
      "name": "Altair"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp13",
      "attr": "ventus",
-     "name": "Monarus"
+     "name": "Wired"
     },
     {
      "id": "bb_45",
@@ -7070,8 +7067,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_213",
@@ -7134,7 +7131,7 @@ export const AI_TEAMS = {
     "color": "ventus",
     "attrs": [
      "ventus",
-     "aquos"
+     "pyrus"
     ]
    }
   },
@@ -7148,9 +7145,9 @@ export const AI_TEAMS = {
      "name": "Altair"
     },
     {
-     "id": "bb_46",
+     "id": "dc_sp13",
      "attr": "ventus",
-     "name": "Laserman"
+     "name": "Wired"
     },
     {
      "id": "bb_61",

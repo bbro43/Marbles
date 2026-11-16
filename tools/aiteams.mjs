@@ -38,7 +38,7 @@ const CH = {
   volt:       ['haos',     ['Brontes', 'Manion', 'Griffon'],            ['Brontes', 'Monarus', 'Ravenoid'],         ['Brontes', 'Monarus', 'Laserman']],
   gus:        ['subterra', ['Premo Vulcan', 'Gargonoid', 'Terrorclaw'], ['Premo Vulcan', 'Terrorclaw', 'Monarus'], ['Premo Vulcan', 'Laserman', 'Terrorclaw']],
   shadow:     ['darkus',   ['Hades', 'Fear Ripper', 'Gargonoid'],       ['Hades', 'Reaper', 'Fear Ripper'],         ['Hades', 'Warius', 'Reaper']],
-  lync:       ['ventus',   ['Altair', 'Ravenoid', 'Falconeer'],         ['Altair', 'Monarus', 'Griffon'],           ['Altair', 'Laserman', 'Monarus']],
+  lync:       ['ventus',   ['Altair', 'Wired', 'Falconeer'],            ['Altair', 'Wired', 'Griffon'],             ['Altair', 'Wired', 'Monarus']],
 };
 const NEW_VESTROIA = new Set(['nv_dan', 'nv_shun', 'nv_marucho', 'ace', 'mira', 'baron', 'spectra', 'mylene', 'volt', 'gus', 'shadow', 'lync']);
 // partner Bakugan and who they belong to (the same person in both series counts once: Dan, Shun, Marucho)
@@ -48,11 +48,11 @@ const PARTNERS = {
   shun: ['Skyress', 'Storm Skyress', 'Ingram', 'Cosmic Ingram'], masquerade: ['Hydranoid', 'Dual Hydranoid'], chanlee: ['Fortress'], klaus: ['Sirenoid'],
   julio: ['Tentaclear'], billy: ['Cycloid'], komba: ['Harpus'], marduk: ['Vladitor', 'Battle Ax Vladitor'], jenny: ['Siege'], jewls: ['Centipoid'],
   christopher: ['Juggernoid'], player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
-  spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico'], volt: ['Brontes'], shadow: ['Hades'], lync: ['Altair'],
+  spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico'], volt: ['Brontes'], shadow: ['Hades'], lync: ['Altair', 'Wired'],
 };
 // New Vestroia characters' Traps (only they get one). Gus and Lync get Maxus Helios pieces in their attribute.
 const TRAPS = { nv_dan: 'Scorpion', nv_shun: 'Hylash', nv_marucho: 'Tripod Epsilon', mira: 'Baliton', ace: 'Falcon Fly', baron: 'Piercian',
-  spectra: 'Metalfencer', gus: 'Wired', mylene: 'Tripod Theta', volt: 'Dynamo', shadow: 'Fortress', lync: 'Spitarm' };
+  spectra: 'Metalfencer', gus: 'Grakas Hound', mylene: 'Tripod Theta', volt: 'Dynamo', shadow: 'Fortress', lync: 'Spitarm' };
 const TRAP_ATTRS = { easy: 2, normal: 3, hard: 4 };
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));
