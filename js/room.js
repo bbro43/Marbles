@@ -1,7 +1,7 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
 import * as THREE from 'three';
 import { Pack } from './pack.js';
-import { buildAvatar, idle, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from './avatar.js';
+import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from './avatar.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -436,9 +436,14 @@ async function loadShop() {
   const hp = new THREE.Vector3(), fp = new THREE.Vector3();
   alice.getObjectByName('Bip01_Head').getWorldPosition(hp); (alice.getObjectByName('Bip01_L_Foot') || alice.getObjectByName('Bip01_L_Toe0')).getWorldPosition(fp);
   const k = 0.88 / (hp.y - fp.y); alice.scale.setScalar(k);
-  alice.traverse(o => { if (o.isBone && /UpperArm$/.test(o.name)) o.rotateOnAxis(new THREE.Vector3(0, 0, -1), (o.name.includes('_L_') ? 1 : -1) * 1.24); });
+  relaxArms(alice);
   const al = new THREE.Group(); alice.position.set(-hp.x * k, -fp.y * k + 0.03, -hp.z * k); al.add(alice);
-  al.position.set(-0.95, 0, 0.15); al.rotation.y = 4.71; alice = al;
+  // turn her to face the shop camera (like the DS game), whichever way the model was built facing
+  al.updateMatrixWorld(true);
+  const wp = n => alice.getObjectByName(n).getWorldPosition(new THREE.Vector3());
+  const lft = wp('Bip01_L_Clavicle').sub(wp('Bip01_R_Clavicle')).setY(0), fwd = new THREE.Vector3().crossVectors(lft, new THREE.Vector3(0, 1, 0));
+  al.position.set(-0.95, 0, 0.15);
+  al.rotation.y = Math.atan2(-2.75 - -0.95, 1.55 - 0.15) - Math.atan2(fwd.x, fwd.z); alice = al;
   alice.userData.bones = []; alice.traverse(o => { if (o.isBone) alice.userData.bones.push({ o, base: o.quaternion.clone() }); }); alice.userData.phase = 2;
   shop3d.add(alice); alice.scale.setScalar(1 / 0.0028); alice.position.multiplyScalar(1 / 0.0028);
   shop3d.visible = false; scene.add(shop3d);

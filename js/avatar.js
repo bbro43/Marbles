@@ -88,15 +88,9 @@ export async function buildAvatar(L, url) {
     group.add(sc);
   }
   await Promise.all(jobs);
-  // the parts are in a T-pose: a relaxed stance instead (arms down, elbows a little bent)
-  const Z = new THREE.Vector3(0, 0, 1);
-  group.traverse(o => {
-    if (!o.isBone) return;
-    const side = o.name.includes('_L_') ? 1 : -1;
-    if (/UpperArm$/.test(o.name)) o.rotateOnAxis(Z, -side * 1.24);
-    // elbows bend forward and slightly in, so the hands rest in front of the thighs
-    if (/Forearm$/.test(o.name)) { o.rotateOnAxis(Z, -side * 0.12); o.rotateOnAxis(new THREE.Vector3(0, 1, 0), side * 0.3); }
-  });
+  // the parts are in a T-pose: a relaxed stance instead (arms down, elbows a little bent).
+  // Each part has its own skeleton with its own bone axes, so the arms are aimed in world space (same result for every part).
+  relaxArms(group);
   const bones = []; group.traverse(o => { if (o.isBone) bones.push({ o, base: o.quaternion.clone() }); });
   group.updateMatrixWorld(true);
   group.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
@@ -108,6 +102,34 @@ export async function buildAvatar(L, url) {
   wrap.add(group);
   wrap.userData.bones = bones; wrap.userData.phase = Math.random() * 10;
   return wrap;
+}
+// Arms down from a T-pose, aimed in world space: upper arm down and a little out, forearm bent forward.
+export function relaxArms(root) {
+  root.updateMatrixWorld(true);
+  const W = o => o.getWorldPosition(new THREE.Vector3());
+  const skels = []; root.traverse(o => { if (o.isBone && /L_UpperArm$/.test(o.name)) skels.push(o.parent); });
+  for (const top of skels) {
+    // the root that holds this skeleton: walk up to the highest bone
+    let r = top; while (r.parent && r.parent.isBone) r = r.parent;
+    const find = re => { let f = null; r.traverse(o => { if (!f && o.isBone && re.test(o.name)) f = o; }); return f; };
+    const lh = find(/L_(Hand|Forearm)$/), rh = find(/R_(Hand|Forearm)$/); if (!lh || !rh) continue;
+    const left = W(lh).sub(W(rh)).setY(0).normalize(), up = new THREE.Vector3(0, 1, 0);
+    const fwd = new THREE.Vector3().crossVectors(left, up).normalize();
+    for (const side of [1, -1]) {
+      const tag = side > 0 ? 'L' : 'R', out = left.clone().multiplyScalar(side);
+      const ua = find(new RegExp(`${tag}_UpperArm$`)), fa = find(new RegExp(`${tag}_Forearm$`)), hd = find(new RegExp(`${tag}_Hand$`));
+      if (ua && fa) aim(ua, fa, new THREE.Vector3(0, -1, 0).addScaledVector(out, 0.2).addScaledVector(fwd, 0.04));
+      if (fa && hd) aim(fa, hd, new THREE.Vector3(0, -1, 0).addScaledVector(out, 0.05).addScaledVector(fwd, 0.42));
+    }
+  }
+  function aim(bone, child, dir) {
+    bone.updateMatrixWorld(true);
+    const cur = W(child).sub(W(bone)).normalize();
+    const q = new THREE.Quaternion().setFromUnitVectors(cur, dir.normalize());
+    const bw = bone.getWorldQuaternion(new THREE.Quaternion()), pw = bone.parent.getWorldQuaternion(new THREE.Quaternion());
+    bone.quaternion.copy(pw.invert().multiply(q).multiply(bw));
+    bone.updateMatrixWorld(true);
+  }
 }
 // idle: breathing, a little sway, looking around (call every frame with seconds)
 const _q = new THREE.Quaternion(), _e = new THREE.Euler();
