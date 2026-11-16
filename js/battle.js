@@ -172,8 +172,9 @@ async function loadToy(spec) {
   }
   // New Vestroia (DotC) models are about 30x smaller, sit on their base, and their animation first rolls the
   // ball in, then opens it (closed at ~22% of the clip, open from ~46%). Size and center them like the others.
-  if ((spec.id || '').startsWith('dc_') && t.action) {
-    t.from = 0.22; t.to = 0.46;
+  // Battle Trainer Bakugan (bt_) are built the same way but their clip is just the opening (closed -> open)
+  if (/^(dc|bt)_/.test(spec.id || '') && t.action) {
+    if ((spec.id || '').startsWith('bt_')) { t.from = 0; t.to = 0.999; } else { t.from = 0.22; t.to = 0.46; }
     obj.scale.setScalar(1); setOpen(t, 0);
     obj.updateMatrixWorld(true); obj.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
     const box = new THREE.Box3().setFromObject(obj, true), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
