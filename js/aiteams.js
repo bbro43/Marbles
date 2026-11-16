@@ -5879,8 +5879,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "cu_002",
+     "name": "Washback"
     },
     "silver": {
      "id": "ds_225",
@@ -5943,8 +5943,8 @@ export const AI_TEAMS = {
     "color": "aquos",
     "attrs": [
      "aquos",
-     "subterra",
-     "darkus"
+     "ventus",
+     "haos"
     ]
    }
   },
@@ -5970,8 +5970,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "cu_002",
+     "name": "Washback"
     },
     "silver": {
      "id": "ds_204",
@@ -6034,8 +6034,8 @@ export const AI_TEAMS = {
     "color": "aquos",
     "attrs": [
      "aquos",
-     "subterra",
-     "darkus"
+     "haos",
+     "subterra"
     ]
    }
   },
@@ -6061,8 +6061,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_106",
-     "name": "Preyas's"
+     "id": "cu_002",
+     "name": "Washback"
     },
     "silver": {
      "id": "ds_208",
@@ -6126,7 +6126,7 @@ export const AI_TEAMS = {
     "attrs": [
      "aquos",
      "subterra",
-     "pyrus"
+     "haos"
     ]
    }
   }

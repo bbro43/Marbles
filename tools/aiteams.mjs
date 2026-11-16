@@ -67,7 +67,7 @@ const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = c
 const out = {}, problems = [];
 // Gold Gate cards are character cards (a picture of one Bakugan, which gets the bonus twice).
 // A prebuilt deck only takes a gold card for a Bakugan it has.
-const goldFor = (g, names) => names.includes(g.name) || (g.name === "Preyas's" && names.some(n => n.startsWith('Preyas II'))) || (g.name === 'Viper Helios' && names.includes('Helios'));
+const goldFor = (g, names) => names.includes(g.name) || (g.name === "Preyas's" && names.some(n => n.startsWith('Preyas II'))) || (g.name === 'Viper Helios' && names.includes('Helios')) || (g.forToy && names.includes(g.forToy));
 function pickGates(names, attr, rank) {
   const gt = {};
   for (const c of GATE_COLORS) {

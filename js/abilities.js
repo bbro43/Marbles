@@ -168,6 +168,8 @@ export const GATE_EFFECTS = {
   'Trick Jump': { add: (c, sd) => 100 * c.s.players[sd.p].abilityUsed.length },
   'Mega Warrior': { add: (c, sd) => 100 * captured(c.s, sd.p) },
   "Naga's Wrath": { add: (c, sd) => 150 * standing(c.s, sd.p).filter(x => c.s.field[x.k] !== c.field).length },
+  // custom gold card (Billy's own Washback card): the player with fewer Gate cards in their used pile gets one used Ability card back
+  'Washback': regainColor(c => { const [a, b] = c.sides.map(sd => c.s.nv ? c.s.players[sd.p].gateUsed.length : captured(c.s, sd.p)); return a === b ? null : c.sides[a < b ? 0 : 1].p; }, 'one'),
   // custom gold card (Billy's own Viper Helios card): +200 for each side whose owner has a Helios in their used pile
   'Viper Helios': { add: (c, sd) => c.s.players[sd.p].used.some(t => /^Helios$/.test(c.s.players[sd.p].toys[t].name)) ? 200 : 0 },
 };

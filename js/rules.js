@@ -276,7 +276,7 @@ export function startBattle(s, fieldIdx) {
     const w = build(s, fieldIdx, []);
     for (const { p, color } of ge.regain(w.gctx())) {
       const pl = s.players[p];
-      const back = pl.abilityUsed.filter(c => color === 'all' || c.color === color);
+      const back = color === 'one' ? pl.abilityUsed.slice(-1) : pl.abilityUsed.filter(c => color === 'all' || c.color === color);   // 'one': the last card used
       if (!back.length) continue;
       pl.abilityUsed = pl.abilityUsed.filter(c => !back.includes(c));
       pl.abilityHand.push(...back);
