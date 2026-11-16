@@ -172,6 +172,7 @@ function closet(start) {
       const v = k === 'skin' ? i : def.optional ? i - 1 : i, cur = k === 'skin' ? look.skin : look[k][0];
       const pic = art(`part_${ICON[k]}${k === 'skin' ? i : def.optional ? i : i}`);
       const cols = styles > 9 ? 4 : 3, sz = cols === 4 ? 27 : 36;
+      if (k === 'skin') { right(`<div class="icon tap ${cur === v ? 'sel' : ''}" data-style="${v}" style="left:${140 + (i % 3) * 37}px;top:${44 + Math.floor(i / 3) * 37}px;background:${((M.swatch || {}).skin || [])[i] || '#ccc'};border:3px solid #c9ced4;box-shadow:inset 0 0 0 1px #0006"></div>`); continue; }
       right(`<img src="${pic}" class="icon tap ${cur === v ? 'sel' : ''}" data-style="${v}" style="left:${140 + (i % cols) * (sz + 1)}px;top:${44 + Math.floor(i / cols) * (sz + 1)}px;width:${sz}px;height:${sz}px" alt="">`);
     }
     if (k !== 'skin') {

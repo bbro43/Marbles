@@ -51,7 +51,7 @@ function variantFor(texName, L) {
     case 'glassf': return `glassf_${s}_${two(Math.min(3, L.glasses[1]))}`;
     case 'eye': return `eye_${two(L.eye[0])}_${two(L.eye[1])}`;
     case 'eyeblow': return `eyeblow_${two(L.eyeblow[0])}_${two(L.eyeblow[1])}`;
-    case 'facial': return `facial_${two(L.facial[0])}_${two(Math.min(4, L.facial[1]))}`;
+    case 'facial': return `facial_${two(L.facial[0])}_${two(Math.min(4, L.skin || 0))}`;   // the face is drawn in the skin tone
     case 'skin': return `skin_00_${two(Math.min(4, L.skin))}`;
     case 'top': return `top_${s}_${two(L.top[1])}`;
     case 'band': return `band_00_${two(L.top[1])}`;   // the gloves follow the top's color
@@ -104,7 +104,7 @@ export async function buildAvatar(L, url) {
   const k = 1 / (box.max.y - box.min.y);                     // 1 unit tall, feet on the floor, centered
   const wrap = new THREE.Group(); group.scale.setScalar(k);
   const c = box.getCenter(new THREE.Vector3());
-  group.position.set(-c.x * k, -box.min.y * k, -c.z * k);
+  group.position.set(-c.x * k, -box.min.y * k + 0.02, -c.z * k);   // a little above the floor so the shoes sit on the rug
   wrap.add(group);
   wrap.userData.bones = bones; wrap.userData.phase = Math.random() * 10;
   return wrap;
