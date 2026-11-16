@@ -37,7 +37,7 @@ const lv = (toy, k) => (toy.stats || {})[k] ?? 3;
 export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1), first = null, maxTurns = 400 } = {}) {
   const s = R.newMatch(entrants.map(e => e.player), { nv, teams, first: first ?? rng.int(entrants.length) });
   const lvl = p => entrants[p].level || 'normal';
-  const stats = entrants.map(() => ({ beaten: 0, gates: 0, life: 0, out: false }));
+  const stats = entrants.map(() => ({ beaten: 0, gates: 0, dealt: 0, life: 0, out: false }));
   const same = (a, b) => R.sameTeam(s, a, b);
   const home = p => { const [sx, sz] = s.corners[p]; return [sx * 3, sz * 3]; };
   const dist = (p, cell) => Math.hypot(cell[0] + 0.5 - home(p)[0], cell[1] + 0.5 - home(p)[1]);
@@ -81,7 +81,12 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
     if (lvl(p) === 'normal') return rng() < 0.75 ? best.i : -1;
     return now > 120 ? -1 : best.i;
   };
-  const count = ev => { for (const e of ev) { if (e.type === 'capture') stats[e.p].gates++; } };
+  // credit Gate cards won and damage dealt. In a battle the winning team's players share the credit; outside a battle, the thrower gets it.
+  const count = (ev, winners = null) => { for (const e of ev) {
+    const who = winners || [s.turn];
+    if (e.type === 'capture' || (e.type === 'usedUp' && e.p !== null && e.p !== undefined)) for (const q of who) stats[q].gates += 1 / who.length;
+    if (e.type === 'damage') for (const q of (winners || [s.turn]).filter(q => !same(q, e.p))) stats[q].dealt += e.amount / who.length;
+  } };
   const battle = fieldIdx => {
     const bt = R.startBattle(s, fieldIdx);
     while (!R.abilityDone(bt)) {
@@ -91,11 +96,12 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
       if (i < 0) R.passAbility(s, bt); else R.playAbility(s, bt, i);
     }
     const b = R.computeBattle(s, bt);
+    let winners = null;
     if (b.result !== 'tie') {
-      const beaten = b.sides.filter(x => R.teamOf(s, x.p) !== b.result).length, winners = [...new Set(b.sides.filter(x => R.teamOf(s, x.p) === b.result).map(x => x.p))];
+      const beaten = b.sides.filter(x => R.teamOf(s, x.p) !== b.result).length; winners = [...new Set(b.sides.filter(x => R.teamOf(s, x.p) === b.result).map(x => x.p))];
       for (const p of winners) stats[p].beaten += beaten / winners.length;
     }
-    count(R.resolveBattle(s, b));
+    count(R.resolveBattle(s, b), winners || []);
   };
 
   let turns = 0;
@@ -133,6 +139,6 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
     count(r.events);
     if (r.battle && s.winner === null) battle(r.battle.fieldIdx);
   }
-  s.players.forEach((pl, p) => { stats[p].life = pl.life; stats[p].out = !!pl.out; stats[p].beaten = Math.round(stats[p].beaten); });
+  s.players.forEach((pl, p) => { stats[p].life = pl.life; stats[p].out = !!pl.out; stats[p].beaten = Math.round(stats[p].beaten); stats[p].gates = Math.round(stats[p].gates); stats[p].dealt = Math.round(stats[p].dealt); });
   return { winner: s.winner === null ? 'draw' : s.winner, turns, stats, teams: s.teams };
 }
