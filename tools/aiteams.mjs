@@ -97,6 +97,9 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     for (const c of AB_COLORS) {
       let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
       const r = ranked(pool, a => abilityScore(a, attrs)); const a = r[Math.min(rank, r.length - 1)]; team.abilities[c] = { id: a.id, name: a.name };
+      // New Vestroia rules: 2 more of each color (the next best for the team; easier levels get weaker ones)
+      let more = r.filter(x => x !== a); if (more.length < 2) more = ranked(abilities.filter(x => x.color === c && x !== a), x => abilityScore(x, attrs));
+      team.extra = team.extra || {}; team.extra[c] = more.slice(Math.min(rank, Math.max(0, more.length - 2)), Math.min(rank, Math.max(0, more.length - 2)) + 2).map(x => ({ id: x.id, name: x.name }));
     }
     if (TRAPS[id]) {   // the character's attribute, then the attributes its Gate cards favor most
       const t = (cat.traps || []).find(x => x.name === TRAPS[id]);
@@ -115,7 +118,7 @@ const starters = {};
 for (const [attr, [who, names]] of Object.entries(STARTERS)) {
   for (const n of names) { if (ownerOf.has(n)) problems.push(`starter ${attr}: ${n} is a partner`); if (!byName.get(n)) problems.push(`starter ${attr}: no Bakugan ${n}`); }
   const e = out[who].easy;
-  starters[attr] = { toys: names.map(n => ({ id: byName.get(n).id, attr, name: n })), gates: pickGates(names, attr, 4), abilities: e.abilities };
+  starters[attr] = { toys: names.map(n => ({ id: byName.get(n).id, attr, name: n })), gates: pickGates(names, attr, 4), abilities: e.abilities, extra: e.extra };
 }
 fs.writeFileSync(new URL('../js/aiteams.js', import.meta.url), `// Computer opponents: each character's team at Easy / Normal / Hard. Built by tools/aiteams.mjs — edit the table there.
 // upgrades: each upgrade adds ${UPG()}G to every Bakugan on the team (capped at 600G).

@@ -57,7 +57,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 53;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 54;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -127,13 +127,17 @@ function title() {
 }
 
 // ---- Battle Arena selection: Single Player (needs the computer opponent) / Multiplayer
+const rules = () => { try { return localStorage.getItem('marbles-rules') || 'classic'; } catch { return 'classic'; } };
 function arena() {
   $('top').innerHTML = img('arena_top', 0, 0) + img('banner_arena', 56, 7);
   $('bot').innerHTML = img('arena_bot', 0, 0) +
     `<img src="${art('btn_single')}" class="tap" id="bSingle" style="left:32px;top:48px" alt="">` +
     `<img src="${art('btn_multi')}" class="tap" id="bMulti" style="left:32px;top:96px" alt="">` +
-    `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
-  bar('Select the type of game.');
+    `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">` +
+    // Rules: Classic (win 3 Gate cards) or New Vestroia (Life Gauge)
+    `<div class="obtn tap" id="bRules" style="top:150px;left:32px;width:180px">RULES: ${rules() === 'nv' ? 'NEW VESTROIA (LIFE GAUGE)' : 'CLASSIC (3 GATE CARDS)'}</div>`;
+  bar(rules() === 'nv' ? 'New Vestroia rules: bring Life to 0 to win. Up to 9 Ability cards.' : 'Select the type of game.');
+  $('bRules').onclick = () => { try { localStorage.setItem('marbles-rules', rules() === 'nv' ? 'classic' : 'nv'); } catch {} render(); };
   $('bSingle').onclick = () => go('computer');
   $('bMulti').onclick = () => { mode = 'multi'; pickFor = 0; picks = [null, null]; go('chars'); };
   $('bBack').onclick = () => go('title');
@@ -180,7 +184,7 @@ function chars() {
   const start = () => {
     const custom = picks.some(c => c.custom);
     $('bar').remove(); bar(`${picks[0].name} vs ${picks[1].name}` + (custom ? ' — build your deck!' : ' — battle!'));
-    try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode, players: picks.map((c, p) => ({ id: c.id, name: c.name, face: c.face,
+    try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode, rules: rules(), players: picks.map((c, p) => ({ id: c.id, name: c.name, face: c.face,
       ...(c.custom ? { custom: true, ...(c.profile !== undefined ? { profile: c.profile } : {}) } : { level: c.level }), ...(mode === 'single' && p === 1 ? { ai: true } : {}) })) })); } catch {}
     setTimeout(() => { location.href = 'battle.html'; }, 900);
   };

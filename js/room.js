@@ -246,9 +246,9 @@ function deck() {
   bar(d ? 'Use these to change your deck.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
   const edit = async (start) => {
     $('ds').style.visibility = 'hidden';
-    const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned);
+    const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned, true);
     $('ds').style.visibility = '';
-    if (r.deck) P.update(P.load().active, q => { q.deck = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, trap: (q.deck || {}).trap || null }; });
+    if (r.deck) P.update(P.load().active, q => { q.deck = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, extra: r.deck.extra || {}, trap: (q.deck || {}).trap || null }; });
     go('deck');
   };
   $('dEdit').onclick = () => edit();
@@ -392,7 +392,8 @@ const ATTR_HEX = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos
 const cap = s => s[0].toUpperCase() + s.slice(1);
 function starterDeck(attr) {
   const t = STARTERS[attr];
-  return { toys: t.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_COLORS.map(k => [k, t.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, t.abilities[k].id])) };
+  return { toys: t.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_COLORS.map(k => [k, t.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, t.abilities[k].id])),
+    extra: Object.fromEntries(AB_COLORS.map(k => [k, ((t.extra || {})[k] || []).map(x => x.id)])) };
 }
 function starter(sel = null) {
   const p = prof(); top3d(true); setView('full'); showAvatar(p.look);
@@ -408,7 +409,7 @@ function starter(sel = null) {
   $('bot').querySelectorAll('[data-a]').forEach(b => b.onclick = () => starter(b.dataset.a));
   if ($('sOk')) $('sOk').onclick = () => {
     P.update(act(), q => { P.ensureShop(q); q.deck = d; if (q.look && !q.look.band) q.look.band = sel; for (const x of d.toys) q.owned.toys[P.key(x.id, x.attr)] ||= { g: 0, st: {} };
-      q.owned.cards = [...new Set([...q.owned.cards, ...Object.values(d.gates), ...Object.values(d.abilities)])]; });
+      q.owned.cards = [...new Set([...q.owned.cards, ...Object.values(d.gates), ...Object.values(d.abilities), ...Object.values(d.extra).flat()])]; });
     go('room');
   };
 }

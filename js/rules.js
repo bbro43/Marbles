@@ -16,14 +16,18 @@ export { isCoded } from './abilities.js';
 
 export const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
 export const WIN_GATES = 3;
+// New Vestroia rules (newMatch(..., { nv: true })): no Gate card wins. Each player has a Life Gauge of START_LIFE;
+// losing a battle costs the difference in G-Power, a knockout costs the difference (at least KO_MIN). 0 Life loses.
+// Gate cards are used up after a battle and come back when you run out; Bakugan come back right after their battle.
+export const START_LIFE = 500, KO_MIN = 100;
 
 // Grid of card spots that fit on the mat (columns c, rows r), and each player's throwing corner as [sx, sz].
 export const DEFAULT_GRID = { cMin: -3, cMax: 2, rMin: -2, rMax: 1 };
 export const DEFAULT_CORNERS = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
 
-export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DEFAULT_CORNERS } = {}) {
+export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DEFAULT_CORNERS, nv = false } = {}) {
   return {
-    turn: first, grid, corners, placed: false,
+    turn: first, grid, corners, placed: false, nv,
     pending: [],          // Red "before you throw" cards played this turn: { p, t, card }
     players: players.map(p => ({
       name: p.name,
@@ -34,6 +38,7 @@ export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DE
       abilityHand: [...(p.abilities || []), ...(p.trap ? [p.trap] : [])],   // a Trap plays like an Ability card, once
       abilityUsed: [],
       captured: [],
+      life: START_LIFE, gateUsed: [],
     })),
     field: [],
     winner: null,
@@ -182,7 +187,7 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
 // - Opponent's toy knocked off -> the thrower wins that Gate card, no matter the G-Power.
 // - Your own toy knocked off -> it just leaves the card (already in your used pile).
 // Call this before land() for the thrown toy. Returns events.
-export function knockOff(s, knocked) {
+export function knockOff(s, knocked, by = null) {
   const ev = [];
   for (const k of knocked) {
     if (s.invulnerable && s.invulnerable.p === k.p && s.invulnerable.t === k.t) continue;   // Invulnerable
@@ -191,7 +196,13 @@ export function knockOff(s, knocked) {
     const g = s.field[idx];
     g.toys = g.toys.filter(x => !(x.p === k.p && x.t === k.t));
     ev.push({ type: 'knockedOff', p: k.p, t: k.t, card: k.card });
-    if (k.p !== s.turn) {
+    if (k.p !== s.turn && s.nv) {
+      // New Vestroia: the knocked-off Bakugan's owner takes damage; the Bakugan goes back to their hand
+      const atk = by === null ? 0 : s.players[s.turn].toys[by].g, def = s.players[k.p].toys[k.t].g;
+      ev.push(...damage(s, k.p, Math.max(KO_MIN, atk - def), 'knockout'));
+      backToHand(s, k.p, k.t);
+      if (s.winner !== null) break;
+    } else if (k.p !== s.turn) {
       ev.push(...capture(s, s.turn, idx, 'knockout'));
       if (s.winner !== null) break;
     }
@@ -386,6 +397,14 @@ export function computeBattle(s, b) {
 export function resolveBattle(s, battle) {
   const ev = [];
   const g = s.field[battle.fieldIdx];
+  if (s.nv) {
+    if (battle.result !== 'tie') {
+      const w = battle.sides.find(x => x.p === battle.result), l = battle.sides.find(x => x.p !== battle.result);
+      ev.push(...damage(s, l.p, w.total - l.total, 'battle'));
+    } else ev.push({ type: 'tie', fieldIdx: battle.fieldIdx, returnedTo: null, card: g.card });
+    ev.push(...useUp(s, battle.fieldIdx, battle.result === 'tie' ? null : battle.result));
+    return endTurn(s, ev).events;
+  }
   if (battle.result === 'tie') {
     // Decided: nobody wins it; the Gate card goes back to whoever set it, as unused.
     s.field.splice(battle.fieldIdx, 1);
@@ -398,6 +417,7 @@ export function resolveBattle(s, battle) {
 }
 
 function capture(s, p, fieldIdx, how) {
+  if (s.nv) return useUp(s, fieldIdx, p, how);
   const g = s.field.splice(fieldIdx, 1)[0];
   s.players[p].captured.push(g.card);
   const ev = [{ type: 'capture', p, card: g.card, how, fieldIdx }];
@@ -405,7 +425,28 @@ function capture(s, p, fieldIdx, how) {
   return ev;
 }
 
+// New Vestroia helpers
+function damage(s, p, amount, how) {
+  const pl = s.players[p]; pl.life = Math.max(0, pl.life - amount);
+  const ev = [{ type: 'damage', p, amount, life: pl.life, how }];
+  if (pl.life <= 0 && s.winner === null) { s.winner = other(p); ev.push({ type: 'win', p: s.winner, reason: 'Life Gauge' }); }
+  return ev;
+}
+function backToHand(s, p, t) {
+  const pl = s.players[p];
+  pl.used = pl.used.filter(x => x !== t); if (!pl.unused.includes(t)) pl.unused.push(t);
+}
+// a Gate card is used up: it goes to its owner's used pile and every Bakugan on it goes back to its owner's hand
+function useUp(s, fieldIdx, p = null, how = 'battle') {
+  const g = s.field.splice(fieldIdx, 1)[0];
+  s.players[g.owner].gateUsed.push(g.card);
+  for (const x of g.toys) backToHand(s, x.p, x.t);
+  return [{ type: 'usedUp', p, card: g.card, how, fieldIdx }];
+}
+
 function endTurn(s, ev) {
+  if (s.nv) for (const [p, pl] of s.players.entries())   // out of Gate cards: the used ones come back
+    if (!pl.gateHand.length && pl.gateUsed.length) { pl.gateHand.push(...pl.gateUsed.splice(0)); ev.push({ type: 'gatesBack', p }); }
   s.pending = [];
   s.earlyVictory = null;
   if (s.winner === null && s.extraThrow === s.turn) {        // Another Throw: same player goes again

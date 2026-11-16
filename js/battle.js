@@ -287,7 +287,9 @@ function standSpot(cell, k) {                   // only used when the rules move
 function hud() {
   state.players.forEach((pl, p) => {
     $('p' + p + 'name').textContent = pl.name;
-    $('p' + p + 'gates').innerHTML = [0, 1, 2].map(i => `<span class="dot ${i < pl.captured.length ? 'on' : ''}"></span>`).join('');
+    $('p' + p + 'gates').innerHTML = state.nv
+      ? `<div class="life"><i style="width:${pl.life / R.START_LIFE * 100}%;background:${pl.life > 250 ? '#4caf50' : pl.life > 100 ? '#f5b52e' : '#e53935'}"></i></div><small>${pl.life} Life</small>`
+      : [0, 1, 2].map(i => `<span class="dot ${i < pl.captured.length ? 'on' : ''}"></span>`).join('');
     $('p' + p).classList.toggle('active', state.turn === p && state.winner === null);
     $('p' + p).style.setProperty('--pc', playerColor(p));
   });
@@ -531,7 +533,7 @@ async function rollStopped() {
   // 4. Knockouts count now
   const knocked = knockedNow().map(b => ({ p: b.p, t: b.t, card: b.card }));
   if (knocked.length) {
-    for (const e of R.knockOff(state, knocked)) if (e.type === 'capture') await captured(e);
+    for (const e of R.knockOff(state, knocked, t)) { if (e.type === 'capture') await captured(e); if (e.type === 'damage') await damaged(e); }
     if (state.winner !== null) { inFlight = null; return afterTurn(); }
   }
   const fieldIdx = landingIndexAt(pos);
@@ -559,6 +561,7 @@ async function rollStopped() {
     if (e.type === 'stand' && tm.open < 1) { await animateOpen(tm, 1); }
     if (e.type === 'moved') { say('Moving to the touching Gate card.'); await sleep(500); await glide(tm, standSpot(e.cell, e.slot)); await animateOpen(tm, 1); await sleep(400); }
     if (e.type === 'capture') await captured(e);
+    if (e.type === 'usedUp') await usedUp(e);
   }
   if (res.battle) await runBattle(res.battle.fieldIdx);
   if (res.events.some(e => e.type === 'extraThrow')) { say(`Another Throw — ${state.players[p].name} throws again!`); await sleep(900); }
@@ -577,6 +580,9 @@ async function runBattle(fieldIdx) {
     const ev = R.resolveBattle(state, b);
     for (const e of ev) {
       if (e.type === 'capture') await captured(e, b);
+      if (e.type === 'damage') await damaged(e);
+      if (e.type === 'usedUp') await usedUp(e, b);
+      if (e.type === 'tie' && state.nv) { say('Tie — no damage.'); await sleep(900); continue; }
       if (e.type === 'tie') { clearGate(b.card, b.sides); say(`Tie — nobody wins. ${b.card.name} goes back to ${state.players[e.returnedTo].name}.`); await sleep(1300); }
     }
   }
@@ -590,6 +596,17 @@ async function captured(e, b) {
   say(`${state.players[e.p].name} wins ${card.name}${how}!`);
   clearGate(card, b && b.sides);
   hud(); await sleep(1300);
+}
+// New Vestroia rules: Life Gauge damage, Gate cards used up, Bakugan straight back to the hand
+async function damaged(e) {
+  flash(`-${e.amount}`);
+  say(`${state.players[e.p].name} takes ${e.amount} damage${e.how === 'knockout' ? ' from a knockout' : ''}! Life ${e.life}`);
+  hud(); await sleep(1300);
+}
+async function usedUp(e, b) {
+  clearGate(e.card, b && b.sides);
+  if (e.how === 'uncontested') say(`${e.card.name} is used up; ${state.players[e.p].name}'s Bakugan come back.`);
+  hud(); await sleep(e.how === 'uncontested' ? 1200 : 400);
 }
 function clearGate(card) {
   removeGate(card);
@@ -1043,14 +1060,16 @@ async function start() {
     c.name = pr.name; c.face = pr.face || c.face;
     const d = pr.deck;
     if (d && d.toys && d.toys.length === 3 && GATE_COLORS.every(k => d.gates[k]) && AB_COLORS.every(k => d.abilities[k]))
-      c.team = { upgrades: 0, toys: d.toys, gates: Object.fromEntries(GATE_COLORS.map(k => [k, { id: d.gates[k] }])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, { id: d.abilities[k] }])) };
+      c.team = { upgrades: 0, toys: d.toys, gates: Object.fromEntries(GATE_COLORS.map(k => [k, { id: d.gates[k] }])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, { id: d.abilities[k] }])),
+        extra: Object.fromEntries(AB_COLORS.map(k => [k, ((d.extra || {})[k] || []).map(id => ({ id }))])) };
   });
   if (picked) picked.forEach((c, p) => {
     const lvl = c.level || (typeof c.ai === 'string' ? c.ai : null);
     if (lvl && AI_TEAMS[c.id]) c.team = AI_TEAMS[c.id][lvl];
     if (c.ai) aiLevel[p] = lvl || 'normal';
   });
-  const { players, first } = await setupTeams(cat, pack, picked);
+  const NV = !!(match && match.rules === 'nv');
+  const { players, first } = await setupTeams(cat, pack, picked, null, null, NV);
   // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap
   players.forEach((pl, p) => { const up = picked && picked[p].team ? picked[p].team.upgrades : 0; if (up) pl.toys.forEach(t => { t.g = Math.min(600, t.g + up * UPGRADE_G); }); });
   // your Bakugan's upgrades from the Shop (G-Power and levels)
@@ -1079,7 +1098,7 @@ async function start() {
     if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, name: `Trap: ${d.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
   });
-  state = R.newMatch(players, { first });
+  state = R.newMatch(players, { first, nv: NV });
   $('loading').textContent = 'Loading Bakugan…';
   for (let p = 0; p < 2; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
   cameraFor(viewOf(first)); camera.position.copy(camGoal);

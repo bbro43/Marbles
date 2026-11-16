@@ -51,6 +51,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_407",
+      "name": "Twin Swap"
+     },
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     },
+     {
+      "id": "ds_607",
+      "name": "Summon Wave"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -100,6 +132,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_424",
+      "name": "Level Field"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -149,6 +213,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_614",
+      "name": "Circle Of Fire"
+     },
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -201,6 +297,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -250,6 +378,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_428",
+      "name": "Haos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -299,6 +459,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_412",
+      "name": "Haos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_610",
+      "name": "Flash"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -351,6 +543,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_605",
+      "name": "Home Advantage"
+     },
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -400,6 +624,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_426",
+      "name": "Aquos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     },
+     {
+      "id": "ds_611",
+      "name": "G-Power Bonus"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -449,6 +705,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -501,6 +789,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -550,6 +870,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_427",
+      "name": "Subterra Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     },
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -599,6 +951,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     },
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -651,6 +1035,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -700,6 +1116,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_430",
+      "name": "Ventus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -749,6 +1197,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_414",
+      "name": "Ventus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -801,6 +1281,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -850,6 +1362,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_427",
+      "name": "Subterra Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     },
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -899,6 +1443,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     },
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -951,6 +1527,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -1000,6 +1608,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_429",
+      "name": "Darkus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     },
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -1049,6 +1689,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -1101,6 +1773,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_605",
+      "name": "Home Advantage"
+     },
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -1150,6 +1854,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_426",
+      "name": "Aquos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     },
+     {
+      "id": "ds_611",
+      "name": "G-Power Bonus"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -1199,6 +1935,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -1251,6 +2019,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -1300,6 +2100,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_427",
+      "name": "Subterra Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     },
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -1349,6 +2181,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     },
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -1401,6 +2265,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -1450,6 +2346,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_427",
+      "name": "Subterra Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     },
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -1499,6 +2427,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     },
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -1551,6 +2511,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -1600,6 +2592,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_430",
+      "name": "Ventus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -1649,6 +2673,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_414",
+      "name": "Ventus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -1701,6 +2757,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -1750,6 +2838,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_428",
+      "name": "Haos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -1799,6 +2919,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_412",
+      "name": "Haos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_610",
+      "name": "Flash"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -1851,6 +3003,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_407",
+      "name": "Twin Swap"
+     },
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     },
+     {
+      "id": "ds_607",
+      "name": "Summon Wave"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -1900,6 +3084,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_424",
+      "name": "Level Field"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -1949,6 +3165,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_614",
+      "name": "Circle Of Fire"
+     },
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -2001,6 +3249,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_605",
+      "name": "Home Advantage"
+     },
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -2050,6 +3330,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_426",
+      "name": "Aquos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     },
+     {
+      "id": "ds_611",
+      "name": "G-Power Bonus"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -2099,6 +3411,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -2151,6 +3495,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -2200,6 +3576,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_429",
+      "name": "Darkus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     },
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -2249,6 +3657,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -2301,6 +3741,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    }
   },
   "normal": {
@@ -2350,6 +3822,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_429",
+      "name": "Darkus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     },
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    }
   },
   "hard": {
@@ -2399,6 +3903,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    }
   }
  },
@@ -2451,6 +3987,38 @@ export const AI_TEAMS = {
      "id": "ds_505",
      "name": "Negative Wave"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_407",
+      "name": "Twin Swap"
+     },
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     },
+     {
+      "id": "ds_607",
+      "name": "Summon Wave"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt00",
@@ -2510,6 +4078,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_424",
+      "name": "Level Field"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt00",
     "name": "Scorpion",
@@ -2567,6 +4167,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_614",
+      "name": "Circle Of Fire"
+     },
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt00",
@@ -2629,6 +4261,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt01",
     "name": "Hylash",
@@ -2687,6 +4351,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_430",
+      "name": "Ventus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt01",
     "name": "Hylash",
@@ -2744,6 +4440,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_414",
+      "name": "Ventus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt01",
@@ -2806,6 +4534,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_605",
+      "name": "Home Advantage"
+     },
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt02",
     "name": "Tripod Epsilon",
@@ -2865,6 +4625,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_426",
+      "name": "Aquos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     },
+     {
+      "id": "ds_611",
+      "name": "G-Power Bonus"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt02",
     "name": "Tripod Epsilon",
@@ -2923,6 +4715,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt02",
@@ -2986,6 +4810,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt03",
     "name": "Falcon Fly",
@@ -3044,6 +4900,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_429",
+      "name": "Darkus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     },
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt03",
     "name": "Falcon Fly",
@@ -3101,6 +4989,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt03",
@@ -3163,6 +5083,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt04",
     "name": "Baliton",
@@ -3221,6 +5173,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_427",
+      "name": "Subterra Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     },
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt04",
     "name": "Baliton",
@@ -3278,6 +5262,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     },
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt04",
@@ -3340,6 +5356,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt05",
     "name": "Piercian",
@@ -3399,6 +5447,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_428",
+      "name": "Haos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt05",
     "name": "Piercian",
@@ -3457,6 +5537,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_412",
+      "name": "Haos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_610",
+      "name": "Flash"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt05",
@@ -3520,6 +5632,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_407",
+      "name": "Twin Swap"
+     },
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     },
+     {
+      "id": "ds_607",
+      "name": "Summon Wave"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt06",
     "name": "Metalfencer",
@@ -3578,6 +5722,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_424",
+      "name": "Level Field"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt06",
     "name": "Metalfencer",
@@ -3635,6 +5811,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_614",
+      "name": "Circle Of Fire"
+     },
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt06",
@@ -3697,6 +5905,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_605",
+      "name": "Home Advantage"
+     },
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt07",
     "name": "Tripod Theta",
@@ -3756,6 +5996,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_426",
+      "name": "Aquos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     },
+     {
+      "id": "ds_611",
+      "name": "G-Power Bonus"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt07",
     "name": "Tripod Theta",
@@ -3814,6 +6086,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt07",
@@ -3877,6 +6181,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt08",
     "name": "Dynamo",
@@ -3936,6 +6272,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_428",
+      "name": "Haos Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt08",
     "name": "Dynamo",
@@ -3994,6 +6362,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_412",
+      "name": "Haos Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_610",
+      "name": "Flash"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt08",
@@ -4057,6 +6457,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_612",
+      "name": "G-Power Up"
+     },
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt_scraper",
     "name": "Scraper",
@@ -4114,6 +6546,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_427",
+      "name": "Subterra Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     },
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt_scraper",
@@ -4173,6 +6637,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_608",
+      "name": "Mega Impact"
+     },
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt_scraper",
@@ -4237,6 +6733,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt10",
     "name": "Fortress",
@@ -4295,6 +6823,38 @@ export const AI_TEAMS = {
      "name": "No Trading"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_429",
+      "name": "Darkus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     },
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt10",
     "name": "Fortress",
@@ -4352,6 +6912,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt10",
@@ -4414,6 +7006,38 @@ export const AI_TEAMS = {
      "name": "Negative Wave"
     }
    },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   },
    "trap": {
     "id": "dc_spt_klawgor",
     "name": "Klawgor",
@@ -4471,6 +7095,38 @@ export const AI_TEAMS = {
      "id": "ds_502",
      "name": "No Trading"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_430",
+      "name": "Ventus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt_klawgor",
@@ -4530,6 +7186,38 @@ export const AI_TEAMS = {
      "id": "ds_501",
      "name": "No Backsies"
     }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_414",
+      "name": "Ventus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
    },
    "trap": {
     "id": "dc_spt_klawgor",
@@ -4592,6 +7280,38 @@ export const STARTERS = {
     "id": "ds_505",
     "name": "Negative Wave"
    }
+  },
+  "extra": {
+   "red": [
+    {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    {
+     "id": "ds_408",
+     "name": "Counter Swap"
+    }
+   ],
+   "blue": [
+    {
+     "id": "ds_602",
+     "name": "G-Power Boost"
+    },
+    {
+     "id": "ds_607",
+     "name": "Summon Wave"
+    }
+   ],
+   "green": [
+    {
+     "id": "ds_506",
+     "name": "Imbalance"
+    },
+    {
+     "id": "ds_507",
+     "name": "Prevention"
+    }
+   ]
   }
  },
  "aquos": {
@@ -4639,6 +7359,38 @@ export const STARTERS = {
     "id": "ds_505",
     "name": "Negative Wave"
    }
+  },
+  "extra": {
+   "red": [
+    {
+     "id": "ds_408",
+     "name": "Counter Swap"
+    },
+    {
+     "id": "ds_415",
+     "name": "Twin Time Breaker"
+    }
+   ],
+   "blue": [
+    {
+     "id": "ds_605",
+     "name": "Home Advantage"
+    },
+    {
+     "id": "ds_608",
+     "name": "Mega Impact"
+    }
+   ],
+   "green": [
+    {
+     "id": "ds_506",
+     "name": "Imbalance"
+    },
+    {
+     "id": "ds_507",
+     "name": "Prevention"
+    }
+   ]
   }
  },
  "subterra": {
@@ -4686,6 +7438,38 @@ export const STARTERS = {
     "id": "ds_505",
     "name": "Negative Wave"
    }
+  },
+  "extra": {
+   "red": [
+    {
+     "id": "ds_408",
+     "name": "Counter Swap"
+    },
+    {
+     "id": "ds_415",
+     "name": "Twin Time Breaker"
+    }
+   ],
+   "blue": [
+    {
+     "id": "ds_612",
+     "name": "G-Power Up"
+    },
+    {
+     "id": "ds_601",
+     "name": "Bright Light"
+    }
+   ],
+   "green": [
+    {
+     "id": "ds_506",
+     "name": "Imbalance"
+    },
+    {
+     "id": "ds_507",
+     "name": "Prevention"
+    }
+   ]
   }
  },
  "haos": {
@@ -4733,6 +7517,38 @@ export const STARTERS = {
     "id": "ds_505",
     "name": "Negative Wave"
    }
+  },
+  "extra": {
+   "red": [
+    {
+     "id": "ds_408",
+     "name": "Counter Swap"
+    },
+    {
+     "id": "ds_415",
+     "name": "Twin Time Breaker"
+    }
+   ],
+   "blue": [
+    {
+     "id": "ds_612",
+     "name": "G-Power Up"
+    },
+    {
+     "id": "ds_617",
+     "name": "G-Power Increase"
+    }
+   ],
+   "green": [
+    {
+     "id": "ds_506",
+     "name": "Imbalance"
+    },
+    {
+     "id": "ds_507",
+     "name": "Prevention"
+    }
+   ]
   }
  },
  "darkus": {
@@ -4780,6 +7596,38 @@ export const STARTERS = {
     "id": "ds_505",
     "name": "Negative Wave"
    }
+  },
+  "extra": {
+   "red": [
+    {
+     "id": "ds_408",
+     "name": "Counter Swap"
+    },
+    {
+     "id": "ds_415",
+     "name": "Twin Time Breaker"
+    }
+   ],
+   "blue": [
+    {
+     "id": "ds_601",
+     "name": "Bright Light"
+    },
+    {
+     "id": "ds_609",
+     "name": "Hot Wind"
+    }
+   ],
+   "green": [
+    {
+     "id": "ds_506",
+     "name": "Imbalance"
+    },
+    {
+     "id": "ds_507",
+     "name": "Prevention"
+    }
+   ]
   }
  },
  "ventus": {
@@ -4827,6 +7675,38 @@ export const STARTERS = {
     "id": "ds_505",
     "name": "Negative Wave"
    }
+  },
+  "extra": {
+   "red": [
+    {
+     "id": "ds_408",
+     "name": "Counter Swap"
+    },
+    {
+     "id": "ds_415",
+     "name": "Twin Time Breaker"
+    }
+   ],
+   "blue": [
+    {
+     "id": "ds_617",
+     "name": "G-Power Increase"
+    },
+    {
+     "id": "ds_604",
+     "name": "Blaze"
+    }
+   ],
+   "green": [
+    {
+     "id": "ds_506",
+     "name": "Imbalance"
+    },
+    {
+     "id": "ds_507",
+     "name": "Prevention"
+    }
+   ]
   }
  }
 };

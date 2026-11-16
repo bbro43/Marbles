@@ -91,7 +91,8 @@ const pick = arr => arr[rand(arr.length)];
 // picked: optional [{ id, name }] characters picked in the menu; each character keeps its own last team
 // deck = { name, toys, gates, abilities } edits just that one deck (My Room) and resolves with { deck } (null = cancelled)
 // owned (from a profile, js/profiles.js): only the Bakugan (in the attributes owned) and cards that player has
-export async function setupTeams(cat, pack, picked = null, deck = null, owned = null) {
+// nv: New Vestroia rules — up to 3 Ability cards of each color (t.extra[color] holds the 2nd and 3rd)
+export async function setupTeams(cat, pack, picked = null, deck = null, owned = null, nv = false) {
   const style = document.createElement('style'); style.textContent = CSS; document.head.append(style);
   const root = document.createElement('div'); root.id = 'setup'; document.body.append(root);
   // pictures: toy thumbnails, card art, blank card frames (all from the asset pack)
@@ -118,15 +119,17 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
     toys: (() => { const out = []; let n = 0; while (out.length < 3 && n++ < 300 && toys.length) { const d = pick(toys); if (!lineBlocked(out, d.id)) out.push({ id: d.id, attr: pick(Object.keys(d.attributes)) }); } return out; })(),
     gates: Object.fromEntries(GATE_COLORS.map(c => [c, pick(gates.filter(g => g.color === c))?.id])),
     abilities: Object.fromEntries(AB_COLORS.map(c => [c, pick(abilities.filter(a => a.color === c))?.id])),
+    extra: {},
   });
   // a saved team, keeping only what still exists in this asset pack
   const restore = (saved, i) => {
-    const t = { name: `Player ${i + 1}`, toys: [], gates: {}, abilities: {} };
+    const t = { name: `Player ${i + 1}`, toys: [], gates: {}, abilities: {}, extra: {} };
     if (!saved) return t;
     t.name = saved.name || t.name;
     t.toys = (saved.toys || []).filter(x => toyById.get(x.id) && toyById.get(x.id).attributes[x.attr]).slice(0, 3);
     for (const c of GATE_COLORS) if (cardById.get((saved.gates || {})[c])) t.gates[c] = saved.gates[c];
     for (const c of AB_COLORS) if (cardById.get((saved.abilities || {})[c])) t.abilities[c] = saved.abilities[c];
+    for (const c of AB_COLORS) t.extra[c] = ((saved.extra || {})[c] || []).filter(id => cardById.get(id) && id !== t.abilities[c]).slice(0, 2);
     return t;
   };
 
@@ -153,6 +156,15 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
       const pool = abilities.filter(a => a.color === c && fitsAttrs(a, team));
       t.abilities[c] = topPick(pool.length ? pool : abilities.filter(a => a.color === c), a => abilityScore(a, attrs))?.id;
     }
+    if (nv) {   // New Vestroia: fill to 3 of each color
+      t.extra = t.extra || {};
+      for (const c of AB_COLORS) {
+        const ex = (t.extra[c] = (t.extra[c] || []).filter(Boolean));
+        let pool = abilities.filter(a => a.color === c && fitsAttrs(a, team)); if (pool.length < 3) pool = abilities.filter(a => a.color === c);
+        const ranked = [...pool].sort((a, b) => abilityScore(b, attrs) - abilityScore(a, attrs));
+        for (const a of ranked) { if (ex.length >= 2) break; if (a.id !== t.abilities[c] && !ex.includes(a.id)) ex.push(a.id); }
+      }
+    }
   }
 
   return await new Promise(resolve => {
@@ -161,10 +173,11 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
       const c = picked && picked[i];
       // a computer player brings its own team (js/aiteams.js)
       if (c && c.team) return { name: c.name, fixed: true, toys: c.team.toys.map(x => ({ id: x.id, attr: x.attr })),
-        gates: Object.fromEntries(GATE_COLORS.map(k => [k, c.team.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, c.team.abilities[k].id])) };
+        gates: Object.fromEntries(GATE_COLORS.map(k => [k, c.team.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, c.team.abilities[k].id])),
+        extra: nv ? Object.fromEntries(AB_COLORS.map(k => [k, ((c.team.extra || {})[k] || []).map(x => x.id || x)])) : {} };
       const t = restore(lastTeam(key(i)), i); if (c && (!c.custom || c.profile != null)) t.name = c.name; return t;
     });
-    if (deck) { teams[0] = { name: deck.name || 'You', toys: [...(deck.toys || [])], gates: { ...(deck.gates || {}) }, abilities: { ...(deck.abilities || {}) } }; teams[1] = { fixed: true, name: '' }; if (deck.auto) autoFinish(teams[0], []); }
+    if (deck) { teams[0] = { name: deck.name || 'You', toys: [...(deck.toys || [])], gates: { ...(deck.gates || {}) }, abilities: { ...(deck.abilities || {}) }, extra: JSON.parse(JSON.stringify(deck.extra || {})) }; teams[1] = { fixed: true, name: '' }; if (deck.auto) autoFinish(teams[0], []); }
     const skipFixed = (w, dir) => { while (w >= 0 && w < 2 && teams[w].fixed) w += dir; return w; };
     let who = skipFixed(0, 1), gateTab = 'gold', abTab = 'red', search = '';
     const filt = new Set();   // attribute filter (empty = all)
@@ -197,8 +210,8 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
         `<button class="item card ${t.gates[gateTab] === g.id ? 'sel' : ''}" data-gate="${esc(g.id)}" style="--c:${COLOR_HEX[g.color]}">${cardPic(g)}<b>${esc(g.name)}</b>
           <span>${focus.map(a => `${cap(a)} +${g.bonus[a] || 0}`).join(' · ')}</span>${g.text ? `<span>${esc(g.text)}</span>` : ''}</button>`).join('');
       const abList = abilities.filter(a => a.color === abTab && hit(a.name, a.text) && (!fa.length || fitsAttrs(a, fa))).map(a =>
-        `<button class="item card ${t.abilities[abTab] === a.id ? 'sel' : ''}" data-ab="${esc(a.id)}" style="--c:${COLOR_HEX[a.color]}">${cardPic(a)}<b>${esc(a.name)}</b><span>${esc(a.text)}</span></button>`).join('');
-      const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${chosen ? cardPic(cardById.get(chosen)) : ''}${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}</small></button>`;
+        `<button class="item card ${t.abilities[abTab] === a.id || (nv && ((t.extra || {})[abTab] || []).includes(a.id)) ? 'sel' : ''}" data-ab="${esc(a.id)}" style="--c:${COLOR_HEX[a.color]}">${cardPic(a)}<b>${esc(a.name)}</b><span>${esc(a.text)}</span></button>`).join('');
+      const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${chosen ? cardPic(cardById.get(chosen)) : ''}${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}${kind === 'a' && nv ? ` (${(chosen ? 1 : 0) + ((t.extra || {})[c] || []).length}/3)` : ''}</small></button>`;
       root.innerHTML = `
         <h2>${esc(t.name)}: set up your team</h2>
         ${picked && picked[who] && !picked[who].custom ? '' : `<div class="row"><input type="text" id="sname" maxlength="16" value="${esc(t.name)}" placeholder="Name"></div>`}
@@ -212,7 +225,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
         <h3>Gate cards</h3>
         <div class="tabs">${GATE_COLORS.map(c => tab('g', c, t.gates[c], c === gateTab)).join('')}</div>
         <div class="list">${gateList || '<span class="none">No matches</span>'}</div>
-        <h3>Ability cards</h3>
+        <h3>Ability cards${nv ? ' <small>(New Vestroia rules: up to 3 of each color)</small>' : ''}</h3>
         <div class="tabs">${AB_COLORS.map(c => tab('a', c, t.abilities[c], c === abTab)).join('')}</div>
         <div class="list">${abList || '<span class="none">No matches</span>'}</div>
         <div class="bar"><button id="srand">Random</button><button id="sauto">Auto finish</button><button class="go" id="sdone" ${complete(t) ? '' : 'disabled'}>${skipFixed(who + 1, 1) < 2 ? 'Next player' : 'Done'}</button></div>`;
@@ -230,6 +243,14 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
         gateTab = GATE_COLORS.find(c => !t.gates[c]) || gateTab; render();
       });
       root.querySelectorAll('[data-ab]').forEach(b => b.onclick = () => {
+        if (nv) {   // tap to add or remove; the first one is the main card
+          const id = b.dataset.ab, ex = ((t.extra = t.extra || {})[abTab] = t.extra[abTab] || []);
+          if (t.abilities[abTab] === id) { t.abilities[abTab] = ex.shift() || undefined; }
+          else if (ex.includes(id)) ex.splice(ex.indexOf(id), 1);
+          else if (!t.abilities[abTab]) t.abilities[abTab] = id;
+          else if (ex.length < 2) ex.push(id);
+          render(); return;
+        }
         t.abilities[abTab] = b.dataset.ab;
         abTab = AB_COLORS.find(c => !t.abilities[c]) || abTab; render();
       });
@@ -242,7 +263,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
         c.onclick = () => { root.remove(); style.remove(); resolve({ deck: null }); }; }
       $('#sdone').onclick = () => {
         if (!complete(t)) return;
-        if (deck) { root.remove(); style.remove(); resolve({ deck: { name: t.name, toys: t.toys, gates: t.gates, abilities: t.abilities } }); return; }
+        if (deck) { root.remove(); style.remove(); resolve({ deck: { name: t.name, toys: t.toys, gates: t.gates, abilities: t.abilities, extra: t.extra || {} } }); return; }
         saveTeam(key(who), t); who = skipFixed(who + 1, 1); search = ''; filt.clear(); gateTab = 'gold'; abTab = 'red'; render(); root.scrollTop = 0;
       };
     }
@@ -262,7 +283,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
             name: t.name,
             toys: t.toys.map(x => makeToy(toyById.get(x.id), x.attr)),
             gates: GATE_COLORS.map(c => cardById.get(t.gates[c])),
-            abilities: AB_COLORS.map(c => cardById.get(t.abilities[c])),
+            abilities: [...AB_COLORS.map(c => cardById.get(t.abilities[c])), ...(nv ? AB_COLORS.flatMap(c => ((t.extra || {})[c] || []).map(id => cardById.get(id))).filter(Boolean) : [])],
           })),
         });
       });
