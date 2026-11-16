@@ -344,7 +344,7 @@ function tips(who, n = 0) {
 }
 // Ranking: the Battle Brawlers' points. Your RP comes with ranked play (Battle Arena is free play).
 const RANK = [['masquerade', 121500], ['shun', 112400], ['dan', 108500], ['klaus', 104200], ['chanlee', 101200], ['runo', 98800], ['marucho', 89500], ['julie', 86700],
-  ['julio', 83400], ['komba', 83300], ['billy', 80100], ['marduk', 76000], ['akira', 52000], ['shuji', 50500], ['jenny', 48000], ['jewls', 46500]];
+  ['julio', 83400], ['komba', 83300], ['billy', 80100], ['akira', 52000], ['shuji', 50500], ['jenny', 48000], ['jewls', 46500]];
 let rankTop = 0;
 function ranking() {
   const p = prof(), rp = (p.stats && p.stats.rp) || 0, all = [...RANK.map(([id, v]) => ({ name: M.chars.find(c => c.id === id).name, rp: v })), { name: p.name, rp, me: true }].sort((a, b) => b.rp - a.rp);

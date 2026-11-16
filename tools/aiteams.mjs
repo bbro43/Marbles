@@ -25,7 +25,6 @@ const CH = {
   chanlee:    ['pyrus',    ['Fortress', 'Gargonoid', 'Ravenoid'],       ['Fortress', 'Falconeer', 'Griffon'],       ['Fortress', 'Warius', 'Laserman']],
   klaus:      ['aquos',    ['Sirenoid', 'Stinglash', 'Serpenoid'],      ['Sirenoid', 'Reaper', 'Stinglash'],        ['Sirenoid', 'Warius', 'Laserman']],
   masquerade: ['darkus',   ['Hydranoid', 'Reaper', 'Fear Ripper'],      ['Hydranoid', 'Reaper', 'Laserman'],        ['Dual Hydranoid', 'Reaper', 'Warius']],
-  marduk:     ['darkus',   ['Vladitor', 'Gargonoid', 'Fear Ripper'],    ['Vladitor', 'Reaper', 'Gargonoid'],        ['Battle Ax Vladitor', 'Reaper', 'Laserman']],
   // New Vestroia: generics are Classic Bakugan, except the six Vexos, who use the six Maxus Helios pieces (Billy, Nov 16)
   nv_dan:     ['pyrus',    ['Neo Dragonoid', 'Griffon', 'Falconeer'],   ['Neo Dragonoid', 'Laserman', 'Monarus'],   ['Hyper Dragonoid', 'Warius', 'Laserman']],
   nv_shun:    ['ventus',   ['Ingram', 'Ravenoid', 'Falconeer'],         ['Ingram', 'Monarus', 'Laserman'],          ['Cosmic Ingram', 'Monarus', 'Laserman']],
@@ -46,7 +45,7 @@ const PARTNERS = {
   dan: ['Dragonoid', 'Delta Dragonoid II', 'Neo Dragonoid', 'Hyper Dragonoid', 'Maxus Dragonoid'], runo: ['Tigrerra', 'Blade Tigrerra'],
   marucho: ['Preyas', 'Preyas II (Angelo)', 'Preyas II (Diablo)', 'Elfin', 'Dual Elfin'], julie: ['Gorem', 'Hammer Gorem'],
   shun: ['Skyress', 'Storm Skyress', 'Ingram', 'Cosmic Ingram'], masquerade: ['Hydranoid', 'Dual Hydranoid'], chanlee: ['Fortress'], klaus: ['Sirenoid'],
-  julio: ['Tentaclear'], billy: ['Cycloid'], komba: ['Harpus'], marduk: ['Vladitor', 'Battle Ax Vladitor'], jenny: ['Siege'], jewls: ['Centipoid'],
+  julio: ['Tentaclear'], billy: ['Cycloid'], komba: ['Harpus'], marduk: ['Vladitor', 'Battle Ax Vladitor'] /* Marduk is out for now; Vladitor stays his */, jenny: ['Siege'], jewls: ['Centipoid'],
   christopher: ['Juggernoid'], player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
   spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico'], volt: ['Brontes'], shadow: ['Hades'], lync: ['Altair', 'Wired'],
 };
@@ -163,6 +162,21 @@ INTERSPACE.forEach(([id, name, species, attrs, sig], i) => {
   });
 });
 const synCount = Object.entries(used).sort((a, b) => a[1] - b[1]);
+// ---------- Story mode: each character's starting level (Billy, Nov 16). From the show's rankings, split in thirds:
+// Classic, end of the first season: Masquerade, Klaus, Chan Lee | Runo, Julie, Julio, Komba | Billy; not ranked: Easy.
+// Dan, Shun and Marucho play as their New Vestroia selves. Vexos: Spectra, Gus | Mylene, Volt | Shadow, Lync.
+// Resistance: Dan, Shun | Mira, Ace | Marucho, Baron. Interspace brawlers: from Billy's Brawlers sheet order.
+const STORY_LEVEL = {
+  hard: ['masquerade', 'klaus', 'chanlee', 'spectra', 'gus', 'nv_dan', 'nv_shun', 'xander'],
+  normal: ['runo', 'julie', 'julio', 'komba', 'mylene', 'volt', 'mira', 'ace', 'maisie', 'richard', 'heather', 'brandon', 'rocco', 'ryan', 'otto', 'margaret'],
+  easy: ['billy', 'akira', 'shuji', 'jenny', 'jewls', 'shadow', 'lync', 'nv_marucho', 'baron', 'melissa', 'sarah', 'karen', 'brenda', 'george', 'ellie',
+         'amanda', 'gary', 'ella', 'anthony', 'sophie', 'nico', 'freya', 'zoya'],
+};
+const storyStart = {};
+for (const [lvl, ids] of Object.entries(STORY_LEVEL)) for (const id of ids) {
+  if (!out[id] && !inter[id]) problems.push(`story: no character ${id}`); storyStart[id] = lvl;
+}
+for (const id of [...Object.keys(out).filter(k => !['dan', 'shun', 'marucho'].includes(k)), ...Object.keys(inter)]) if (!storyStart[id]) problems.push(`story: ${id} has no starting level`);
 const starters = {};
 for (const [attr, [who, names]] of Object.entries(STARTERS)) {
   for (const n of names) { if (ownerOf.has(n)) problems.push(`starter ${attr}: ${n} is a partner`); if (!byName.get(n)) problems.push(`starter ${attr}: no Bakugan ${n}`); }
@@ -175,6 +189,8 @@ export const UPGRADE_G = ${UPG()};
 export const AI_TEAMS = ${JSON.stringify(out, null, 1)};
 // new players' starter decks, by attribute
 export const STARTERS = ${JSON.stringify(starters, null, 1)};
+// story mode: each character's starting level
+export const STORY_START = ${JSON.stringify(storyStart)};
 // Interspace brawlers (story mode): all synthetic Bakugan
 export const INTERSPACE = ${JSON.stringify(inter, null, 1)};
 `);
