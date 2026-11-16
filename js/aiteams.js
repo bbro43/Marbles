@@ -7459,7 +7459,7 @@ export const STARTERS = {
  }
 };
 // story mode: each character's starting level
-export const STORY_START = {"masquerade":"hard","klaus":"hard","chanlee":"hard","spectra":"hard","gus":"hard","nv_dan":"hard","nv_shun":"hard","xander":"hard","runo":"normal","julie":"normal","julio":"normal","komba":"normal","mylene":"normal","volt":"normal","mira":"normal","ace":"normal","maisie":"normal","richard":"normal","heather":"normal","brandon":"normal","rocco":"normal","ryan":"normal","otto":"normal","margaret":"normal","billy":"easy","akira":"easy","shuji":"easy","jenny":"easy","jewls":"easy","shadow":"easy","lync":"easy","nv_marucho":"easy","baron":"easy","melissa":"easy","sarah":"easy","karen":"easy","brenda":"easy","george":"easy","ellie":"easy","amanda":"easy","gary":"easy","ella":"easy","anthony":"easy","sophie":"easy","nico":"easy","freya":"easy","zoya":"easy"};
+export const STORY_START = {"masquerade":"hard","klaus":"hard","chanlee":"hard","spectra":"hard","gus":"hard","nv_dan":"hard","nv_shun":"hard","xander":"hard","runo":"normal","julie":"normal","julio":"normal","komba":"normal","billy":"normal","mylene":"normal","volt":"normal","shadow":"normal","lync":"normal","mira":"normal","ace":"normal","nv_marucho":"normal","baron":"normal","maisie":"normal","richard":"normal","brandon":"normal","otto":"normal","akira":"easy","shuji":"easy","jenny":"easy","jewls":"easy","heather":"easy","rocco":"easy","ryan":"easy","margaret":"easy","melissa":"easy","sarah":"easy","karen":"easy","brenda":"easy","george":"easy","ellie":"easy","amanda":"easy","gary":"easy","ella":"easy","anthony":"easy","sophie":"easy","nico":"easy","freya":"easy","zoya":"easy"};
 // Interspace brawlers (story mode): all synthetic Bakugan
 export const INTERSPACE = {
  "maisie": {

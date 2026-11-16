@@ -163,13 +163,14 @@ INTERSPACE.forEach(([id, name, species, attrs, sig], i) => {
 });
 const synCount = Object.entries(used).sort((a, b) => a[1] - b[1]);
 // ---------- Story mode: each character's starting level (Billy, Nov 16). From the show's rankings, split in thirds:
-// Classic, end of the first season: Masquerade, Klaus, Chan Lee | Runo, Julie, Julio, Komba | Billy; not ranked: Easy.
+// Classic, end of the first season: Masquerade, Klaus, Chan Lee | the rest Normal; not ranked: Easy.
 // Dan, Shun and Marucho play as their New Vestroia selves. Vexos: Spectra, Gus | Mylene, Volt | Shadow, Lync.
-// Resistance: Dan, Shun | Mira, Ace | Marucho, Baron. Interspace brawlers: from Billy's Brawlers sheet order.
-const STORY_LEVEL = {
+// Resistance: Dan, Shun | the rest Normal. Interspace brawlers: Xander Hard, Maisie, Richard, Brandon, Otto Normal, the rest Easy.
+const STORY_LEVEL = {   // updated by Billy, Nov 16
   hard: ['masquerade', 'klaus', 'chanlee', 'spectra', 'gus', 'nv_dan', 'nv_shun', 'xander'],
-  normal: ['runo', 'julie', 'julio', 'komba', 'mylene', 'volt', 'mira', 'ace', 'maisie', 'richard', 'heather', 'brandon', 'rocco', 'ryan', 'otto', 'margaret'],
-  easy: ['billy', 'akira', 'shuji', 'jenny', 'jewls', 'shadow', 'lync', 'nv_marucho', 'baron', 'melissa', 'sarah', 'karen', 'brenda', 'george', 'ellie',
+  normal: ['runo', 'julie', 'julio', 'komba', 'billy', 'mylene', 'volt', 'shadow', 'lync', 'mira', 'ace', 'nv_marucho', 'baron',
+           'maisie', 'richard', 'brandon', 'otto'],
+  easy: ['akira', 'shuji', 'jenny', 'jewls', 'heather', 'rocco', 'ryan', 'margaret', 'melissa', 'sarah', 'karen', 'brenda', 'george', 'ellie',
          'amanda', 'gary', 'ella', 'anthony', 'sophie', 'nico', 'freya', 'zoya'],
 };
 const storyStart = {};
