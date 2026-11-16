@@ -80,9 +80,10 @@ export function abilityScore(card, attrs) {
 function lastTeam(i) { try { return JSON.parse(localStorage.getItem('marbles-team-' + i) || 'null'); } catch { return null; } }
 function saveTeam(i, t) { try { localStorage.setItem('marbles-team-' + i, JSON.stringify(t)); } catch {} }
 
-export function makeToy(t, attr) {
+// owner: the character using it; some partners have that character's own colors (t.special[owner][attr], e.g. Spectra's Helios)
+export function makeToy(t, attr, owner = null) {
   return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: { speed: 3, defense: 3, magnet: 3, ...(t.stats || {}) },
-    model: t.model, attrTexture: t.attributes[attr] };
+    model: t.model, attrTexture: (owner && t.special?.[owner]?.[attr]) || t.attributes[attr] };
 }
 const rand = n => Math.floor(Math.random() * n);
 const pick = arr => arr[rand(arr.length)];
@@ -172,7 +173,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
     const teams = [0, 1].map(i => {
       const c = picked && picked[i];
       // a computer player brings its own team (js/aiteams.js)
-      if (c && c.team) return { name: c.name, fixed: true, toys: c.team.toys.map(x => ({ id: x.id, attr: x.attr })),
+      if (c && c.team) return { name: c.name, owner: c.id, fixed: true, toys: c.team.toys.map(x => ({ id: x.id, attr: x.attr })),
         gates: Object.fromEntries(GATE_COLORS.map(k => [k, c.team.gates[k].id])), abilities: Object.fromEntries(AB_COLORS.map(k => [k, c.team.abilities[k].id])),
         extra: nv ? Object.fromEntries(AB_COLORS.map(k => [k, ((c.team.extra || {})[k] || []).map(x => x.id || x)])) : {} };
       const t = restore(lastTeam(key(i)), i); if (c && (!c.custom || c.profile != null)) t.name = c.name; return t;
@@ -281,7 +282,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
           first,
           players: teams.map(t => ({
             name: t.name,
-            toys: t.toys.map(x => makeToy(toyById.get(x.id), x.attr)),
+            toys: t.toys.map(x => makeToy(toyById.get(x.id), x.attr, t.owner)),
             gates: GATE_COLORS.map(c => cardById.get(t.gates[c])),
             abilities: [...AB_COLORS.map(c => cardById.get(t.abilities[c])), ...(nv ? AB_COLORS.flatMap(c => ((t.extra || {})[c] || []).map(id => cardById.get(id))).filter(Boolean) : [])],
           })),
