@@ -101,6 +101,14 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
       let more = r.filter(x => x !== a); if (more.length < 2) more = ranked(abilities.filter(x => x.color === c && x !== a), x => abilityScore(x, attrs));
       team.extra = team.extra || {}; team.extra[c] = more.slice(Math.min(rank, Math.max(0, more.length - 2)), Math.min(rank, Math.max(0, more.length - 2)) + 2).map(x => ({ id: x.id, name: x.name }));
     }
+    // before/after-throw cards (no G bonus, so the ranking above never picks them): Normal and Hard get some
+    if (lvl !== 'easy') {
+      const FIELD = { red: ['Another Throw', 'Second Chance', 'Trickster', 'Sleight of Hand'], green: ['Surprise Attack', 'Invulnerable', 'Early Victory', 'Road Trip'] };
+      const h = [...id].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7) >>> 0;
+      const fc = (color, k) => { const n = FIELD[color][(h + k) % FIELD[color].length]; const c = cat.cards.find(x => x.name === n); return { id: c.id, name: c.name }; };
+      team.extra.red[1] = fc('red', lvl === 'hard' ? 1 : 0);                                  // New Vestroia: one red one (Normal), plus a green one (Hard)
+      if (lvl === 'hard') { team.extra.green[1] = fc('green', 0); team.abilities.green = fc('green', 1); }   // Classic Hard: the green card is one too
+    }
     if (TRAPS[id]) {   // the character's attribute, then the attributes its Gate cards favor most
       const t = (cat.traps || []).find(x => x.name === TRAPS[id]);
       if (!t) problems.push(`${id}: no Trap ${TRAPS[id]}`);

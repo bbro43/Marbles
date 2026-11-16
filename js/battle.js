@@ -118,7 +118,7 @@ function aiPlan(p) {
       const o = state.players[theirs[0].p].toys[theirs[0].t], oG = o.g + (lvl === 'hard' ? bonusFor(f.card, o.attr) : 0);
       v = myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
     } else if (mine.length) v = lvl === 'hard' ? 120 : 70;          // two of mine there: take the card
-    else v = 30 + bonusFor(f.card, toy.attr) / 10;
+    else v = 30 + bonusFor(f.card, toy.attr) / 10 + (state.earlyVictory === p ? 120 : 0);   // Early Victory: an empty card wins it
     v -= cellCenter(f.cell).distanceTo(home) / (lvl === 'hard' ? 60 : 30);   // far cards are harder to hit
     v += Math.random() * (lvl === 'normal' ? 40 : 10);
     options.push({ t, k, v });
@@ -152,6 +152,66 @@ function aiAbility(p, bt, opts) {
   if (!best || best.g <= now) return -1;
   if (lvl === 'normal') return Math.random() < 0.75 ? best.i : -1;
   return now > 0 && now > 120 ? -1 : best.i;      // hard: saves cards when already well ahead
+}
+// ---------- the computer's before-throw and after-throw Ability cards
+// how likely each level is to look for one: Easy sometimes, Normal often, Hard always
+const AI_FIELD_CHANCE = { easy: 0.3, normal: 0.7, hard: 1 };
+function aiFieldCard(p, phase, landing) {
+  const lvl = aiLevel[p] || 'normal';
+  if (Math.random() > AI_FIELD_CHANCE[lvl]) return null;
+  const pl = state.players[p], hand = pl.abilityHand, opts = R.fieldCardOptions(state, phase, landing, p);
+  const has = n => opts.find(i => hand[i].name === n);
+  const power = (q, t, card) => state.players[q].toys[t].g + bonusFor(card, state.players[q].toys[t].attr);
+  const stand = q => state.field.map((f, k) => ({ f, k, x: f.toys.find(y => y.p === q) })).filter(o => o.x && !o.f.toys.some(y => y.p !== q));
+  if (phase === 'pre') {
+    // pull a weaker opponent Bakugan onto one of my cards
+    if (has('Surprise Attack') !== undefined) {
+      let best = null;
+      for (const m of stand(p)) for (const o of stand(1 - p)) {
+        if (m.k === o.k) continue;
+        const gap = power(p, m.x.t, m.f.card) - power(1 - p, o.x.t, m.f.card);
+        if (gap > 0 && (!best || gap > best.gap)) best = { gap, m, o };
+      }
+      if (best) return { i: has('Surprise Attack'), ai: { mine: best.m.f.cell, theirs: best.o.f.cell } };
+    }
+    if (has('Another Throw') !== undefined && pl.unused.length >= 2 && (lvl === 'hard' || Math.random() < 0.5)) return { i: has('Another Throw') };
+    if (has('Early Victory') !== undefined && state.field.some(f => !f.toys.length) && lvl !== 'easy') return { i: has('Early Victory') };
+    if (has('Invulnerable') !== undefined && state.players[1 - p].unused.length) {
+      const mine = stand(p).sort((a, b) => power(p, b.x.t, b.f.card) - power(p, a.x.t, a.f.card))[0];
+      if (mine) return { i: has('Invulnerable'), ai: { cell: mine.f.cell } };
+    }
+    return null;
+  }
+  // after the throw: missed, or about to lose the battle where it stopped
+  const missed = landing.fieldIdx === null || !postCtx.stands;
+  if (missed) return has('Second Chance') !== undefined ? { i: has('Second Chance') } : null;
+  const f = state.field[landing.fieldIdx], foe = f.toys.find(y => y.p !== p);
+  if (!foe) return null;
+  const gap = power(p, landing.t, f.card) - power(1 - p, foe.t, f.card);
+  if (gap > 0) return null;
+  if (has('Trickster') !== undefined) {
+    const t2 = pl.unused.filter(t => t !== landing.t).sort((a, b) => power(p, b, f.card) - power(p, a, f.card))[0];
+    if (t2 !== undefined && power(p, t2, f.card) > power(1 - p, foe.t, f.card)) return { i: has('Trickster'), ai: { t2 } };
+  }
+  if (has('Sleight of Hand') !== undefined) {
+    const swing = c => power(p, landing.t, c) - power(1 - p, foe.t, c);
+    const gi = pl.gateHand.map((c, k) => k).sort((a, b) => swing(pl.gateHand[b]) - swing(pl.gateHand[a]))[0];
+    if (gi !== undefined && swing(pl.gateHand[gi]) > 0) return { i: has('Sleight of Hand'), ai: { gi } };
+  }
+  if (gap < -100 && has('Second Chance') !== undefined) return { i: has('Second Chance') };
+  if (gap < -100 && has('Road Trip') !== undefined && lvl === 'hard') return { i: has('Road Trip') };
+  return null;
+}
+// before throwing: returns true if the turn ended (Surprise Attack battles instead of a throw)
+async function aiPreCards(p) {
+  for (let k = 0; k < (aiLevel[p] === 'hard' ? 2 : 1); k++) {
+    const c = aiFieldCard(p, 'pre', null);
+    if (!c) break;
+    await sleep(500);
+    if (await useFieldCard(c.i, c.ai) === 'ended') return true;
+    await sleep(700);
+  }
+  return false;
 }
 const mixers = new Set();
 
@@ -299,7 +359,13 @@ function hud() {
     $('p' + p).style.setProperty('--pc', playerColor(p));
   });
 }
-function say(msg) { $('msg').textContent = msg; }
+function say(msg) { $('msg').textContent = msg; placeMsg(); }
+// keep the message just under the player boxes (they get taller with faces and Life Gauges)
+function placeMsg() {
+  const v = $('view').getBoundingClientRect(), b = Math.max($('p0').getBoundingClientRect().bottom, $('p1').getBoundingClientRect().bottom);
+  $('msg').style.top = Math.round(b - v.top + 8) + 'px';
+}
+addEventListener('resize', placeMsg);
 function flash(text) {
   const f = $('flash'); f.textContent = text; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
 }
@@ -313,7 +379,7 @@ function showPicker() {
   armed = null;
   if (pl.unused.length === 1) select(pl.unused[0]);
   fieldPhase = 'pre'; refreshAbilityButton();
-  if (isAI(p)) { $('picker').classList.add('off'); aiThrow(p); return; }
+  if (isAI(p)) { $('picker').classList.add('off'); aiPreCards(p).then(ended => { if (!ended) aiThrow(p); }); return; }
   $('picker').classList.remove('off');
   if (promptOn() && !promptedPre && R.fieldCardOptions(state, 'pre').length) {
     promptedPre = true;
@@ -699,7 +765,7 @@ function closeAbilityPanel() {
   $('apanel').hidden = true;
   if (fieldPhase === 'post' && postResolve) { const r = postResolve; postResolve = null; r('continue'); }
 }
-async function useFieldCard(i) {
+async function useFieldCard(i, ai = null) {
   const p = state.turn, card = state.players[p].abilityHand[i];
   stopTimer(); $('apanel').hidden = true;
   const phase = fieldPhase, landing = phase === 'post' ? postCtx.landing : null;
@@ -711,36 +777,38 @@ async function useFieldCard(i) {
     case 'Another Throw': play(); say('You get another throw after this one.'); break;
     case 'Early Victory': play(); say('If this throw stands on an empty Gate card, you win it.'); break;
     case 'Invulnerable': {
-      say('Tap the Gate card with your Bakugan to protect');
-      const glow = showSpots(myCells(p), p); const cell = await tapSpot(myCells(p)); clearSpots(glow);
+      let cell = ai && ai.cell;
+      if (!cell) { say('Tap the Gate card with your Bakugan to protect'); const glow = showSpots(myCells(p), p); cell = await tapSpot(myCells(p)); clearSpots(glow); }
       const f = state.field[cellIdx(cell)], x = f.toys.find(y => y.p === p);
       play({ t: x.t }); say(`${state.players[p].toys[x.t].name} can't be knocked off until your next turn.`); break;
     }
     case 'Surprise Attack': {
-      say('Tap your Gate card to battle on');
-      let glow = showSpots(myCells(p), p); const mine = await tapSpot(myCells(p)); clearSpots(glow);
-      say("Tap the opponent's Bakugan to pull in");
+      let mine = ai && ai.mine, theirs = ai && ai.theirs, glow;
+      if (!mine) { say('Tap your Gate card to battle on'); glow = showSpots(myCells(p), p); mine = await tapSpot(myCells(p)); clearSpots(glow); }
       const theirCells = myCells(1 - p).filter(c => c[0] !== mine[0] || c[1] !== mine[1]);
       if (!theirCells.length) { say('No other opponent Bakugan to pull in.'); break; }
-      glow = showSpots(theirCells, 1 - p); const theirs = await tapSpot(theirCells); clearSpots(glow);
+      if (!theirs) { say("Tap the opponent's Bakugan to pull in"); glow = showSpots(theirCells, 1 - p); theirs = await tapSpot(theirCells); clearSpots(glow); }
       const fi = cellIdx(theirs), ot = state.field[fi].toys.find(y => y.p !== p).t;
       const r = play({ mine: cellIdx(mine), theirs: { t: ot, fieldIdx: fi } });
       const ev = r.events.find(e => e.type === 'surprise');
       busy = true; fieldPhase = null; refreshAbilityButton(); $('picker').classList.add('off');
       say('Surprise Attack!'); await glide(toysMesh[1 - p][ot], standSpot(mine, ev.slot)); await sleep(400);
       await runBattle(r.battle.fieldIdx);
-      return afterTurn();
+      afterTurn(); return 'ended';
     }
     case 'Second Chance': play(); if (postResolve) { const r = postResolve; postResolve = null; r('redo'); } return;
     case 'Trickster': {
-      say('Pick the Bakugan to switch in');
       const pl = state.players[p], others = pl.unused.filter(t => t !== postCtx.ball.t);
-      $('picker').classList.remove('off');
-      $('picker').innerHTML = others.map(t => `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[pl.toys[t].attr]}"><b>${pl.toys[t].name}</b><span>${pl.toys[t].g}G</span></button>`).join('');
-      pickWait = true;
-      const t2 = await new Promise(res => $('picker').querySelectorAll('button').forEach(b => b.onclick = () => res(+b.dataset.t)));
-      pickWait = false;
-      $('picker').classList.add('off');
+      let t2 = ai ? ai.t2 : undefined;
+      if (t2 === undefined) {
+        say('Pick the Bakugan to switch in');
+        $('picker').classList.remove('off');
+        $('picker').innerHTML = others.map(t => `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[pl.toys[t].attr]}"><b>${pl.toys[t].name}</b><span>${pl.toys[t].g}G</span></button>`).join('');
+        pickWait = true;
+        t2 = await new Promise(res => $('picker').querySelectorAll('button').forEach(b => b.onclick = () => res(+b.dataset.t)));
+        pickWait = false;
+        $('picker').classList.add('off');
+      }
       play();
       const b = postCtx.ball, old = b.tm, tm2 = toysMesh[p][t2];
       tm2.holder.position.copy(old.holder.position); tm2.obj.quaternion.copy(UPRIGHT); tm2.holder.visible = true; setOpen(tm2, old.open);
@@ -750,13 +818,16 @@ async function useFieldCard(i) {
       break;
     }
     case 'Sleight of Hand': {
-      say('Pick one of your Gate cards to switch in');
       const gh = state.players[p].gateHand;
-      $('picker').classList.remove('off'); $('picker').innerHTML = gh.map(gateChip).join('');
-      pickWait = true;
-      const gi = await new Promise(res => $('picker').querySelectorAll('button').forEach(b => b.onclick = () => res(+b.dataset.g)));
-      pickWait = false;
-      $('picker').classList.add('off');
+      let gi = ai ? ai.gi : undefined;
+      if (gi === undefined) {
+        say('Pick one of your Gate cards to switch in');
+        $('picker').classList.remove('off'); $('picker').innerHTML = gh.map(gateChip).join('');
+        pickWait = true;
+        gi = await new Promise(res => $('picker').querySelectorAll('button').forEach(b => b.onclick = () => res(+b.dataset.g)));
+        pickWait = false;
+        $('picker').classList.add('off');
+      }
       const r = play({ gateIdx: gi, fieldIdx: landing.fieldIdx });
       const e = r.events.find(x => x.type === 'gateSwapped');
       removeGate(e.old); addGateMesh(e.card, p, state.field[e.fieldIdx].cell);
@@ -776,7 +847,7 @@ async function useFieldCard(i) {
     }
   }
   refreshAbilityButton();
-  if (fieldPhase === 'post') {            // keep the window open: more cards, or Continue
+  if (fieldPhase === 'post' && !isAI(p)) {            // keep the window open: more cards, or Continue
     if (!fieldOpts().length) { if (postResolve) { const r = postResolve; postResolve = null; r('continue'); } }
     else if (promptOn()) openAbilityPanel(); else showContinue();
   }
@@ -792,13 +863,23 @@ function showContinue() {
 async function postThrowCards(ball, stands) {
   postCtx = { ball, stands, landing: { t: ball.t, fieldIdx: landingIndexAt(ball.pos) } };
   fieldPhase = 'post'; refreshAbilityButton();
-  if (!fieldOpts().length || isAI(state.turn)) {   // nothing playable (or the computer's turn): short pause, then go on
+  if (!fieldOpts().length) {   // nothing playable: short pause, then go on
     fieldPhase = null; refreshAbilityButton();
     await new Promise(res => startTimer(NOCARD_SECONDS, 'Next in', res));
     return 'continue';
   }
   const done = new Promise(res => { postResolve = res; });
-  if (promptOn()) {
+  if (isAI(state.turn)) {          // the computer decides on its own
+    (async () => {
+      const p = state.turn; await sleep(600);
+      for (let k = 0; k < 2 && postResolve; k++) {
+        const c = aiFieldCard(p, 'post', postCtx.landing);
+        if (!c) break;
+        await useFieldCard(c.i, c.ai); await sleep(600);
+      }
+      if (postResolve) { const r = postResolve; postResolve = null; r('continue'); }
+    })();
+  } else if (promptOn()) {
     askUse('Use an Ability card before the turn goes on?', ASK_SECONDS).then(yes => {
       if (yes) openAbilityPanel(); else if (postResolve) { const r = postResolve; postResolve = null; r('continue'); }
     });

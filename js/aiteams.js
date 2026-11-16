@@ -140,8 +140,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_424",
-      "name": "Level Field"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -210,8 +210,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -221,8 +221,8 @@ export const AI_TEAMS = {
       "name": "Pyrus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -241,8 +241,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_705",
+      "name": "Early Victory"
      }
     ]
    }
@@ -386,8 +386,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_428",
-      "name": "Haos Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -456,8 +456,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -467,8 +467,8 @@ export const AI_TEAMS = {
       "name": "Haos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -487,8 +487,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -632,8 +632,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_426",
-      "name": "Aquos Double Input"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -702,8 +702,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -713,8 +713,8 @@ export const AI_TEAMS = {
       "name": "Aquos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -733,8 +733,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -878,8 +878,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -948,8 +948,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -959,8 +959,8 @@ export const AI_TEAMS = {
       "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -979,8 +979,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_705",
+      "name": "Early Victory"
      }
     ]
    }
@@ -1124,8 +1124,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_430",
-      "name": "Ventus Double Input"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -1194,8 +1194,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_705",
+     "name": "Early Victory"
     }
    },
    "extra": {
@@ -1205,8 +1205,8 @@ export const AI_TEAMS = {
       "name": "Ventus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -1225,8 +1225,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    }
@@ -1370,8 +1370,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -1440,8 +1440,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -1451,8 +1451,8 @@ export const AI_TEAMS = {
       "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -1471,8 +1471,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -1616,8 +1616,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_429",
-      "name": "Darkus Double Input"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -1686,8 +1686,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -1697,8 +1697,8 @@ export const AI_TEAMS = {
       "name": "Darkus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -1717,8 +1717,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -1862,8 +1862,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_426",
-      "name": "Aquos Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -1932,8 +1932,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -1943,8 +1943,8 @@ export const AI_TEAMS = {
       "name": "Aquos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -1963,8 +1963,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -2108,8 +2108,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -2178,8 +2178,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -2189,8 +2189,8 @@ export const AI_TEAMS = {
       "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -2209,8 +2209,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -2354,8 +2354,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -2424,8 +2424,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -2435,8 +2435,8 @@ export const AI_TEAMS = {
       "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -2455,8 +2455,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -2600,8 +2600,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_430",
-      "name": "Ventus Double Input"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -2670,8 +2670,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_705",
+     "name": "Early Victory"
     }
    },
    "extra": {
@@ -2681,8 +2681,8 @@ export const AI_TEAMS = {
       "name": "Ventus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -2701,8 +2701,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    }
@@ -2846,8 +2846,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_428",
-      "name": "Haos Double Input"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -2916,8 +2916,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -2927,8 +2927,8 @@ export const AI_TEAMS = {
       "name": "Haos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -2947,8 +2947,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -3092,8 +3092,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_424",
-      "name": "Level Field"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -3162,8 +3162,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -3173,8 +3173,8 @@ export const AI_TEAMS = {
       "name": "Pyrus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -3193,8 +3193,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -3338,8 +3338,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_426",
-      "name": "Aquos Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -3408,8 +3408,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -3419,8 +3419,8 @@ export const AI_TEAMS = {
       "name": "Aquos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -3439,8 +3439,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -3584,8 +3584,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_429",
-      "name": "Darkus Double Input"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -3654,8 +3654,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_705",
+     "name": "Early Victory"
     }
    },
    "extra": {
@@ -3665,8 +3665,8 @@ export const AI_TEAMS = {
       "name": "Darkus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -3685,8 +3685,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    }
@@ -3830,8 +3830,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_429",
-      "name": "Darkus Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -3900,8 +3900,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -3911,8 +3911,8 @@ export const AI_TEAMS = {
       "name": "Darkus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -3931,8 +3931,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -4085,8 +4085,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_424",
-      "name": "Level Field"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -4164,8 +4164,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_705",
+     "name": "Early Victory"
     }
    },
    "extra": {
@@ -4175,8 +4175,8 @@ export const AI_TEAMS = {
       "name": "Pyrus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -4195,8 +4195,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    },
@@ -4358,8 +4358,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_430",
-      "name": "Ventus Double Input"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -4437,8 +4437,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -4448,8 +4448,8 @@ export const AI_TEAMS = {
       "name": "Ventus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -4468,8 +4468,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_705",
+      "name": "Early Victory"
      }
     ]
    },
@@ -4632,8 +4632,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_426",
-      "name": "Aquos Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -4712,8 +4712,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -4723,8 +4723,8 @@ export const AI_TEAMS = {
       "name": "Aquos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -4743,8 +4743,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    },
@@ -4907,8 +4907,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_429",
-      "name": "Darkus Double Input"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -4986,8 +4986,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -4997,8 +4997,8 @@ export const AI_TEAMS = {
       "name": "Darkus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -5017,8 +5017,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -5180,8 +5180,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -5259,8 +5259,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -5270,8 +5270,8 @@ export const AI_TEAMS = {
       "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -5290,8 +5290,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_705",
+      "name": "Early Victory"
      }
     ]
    },
@@ -5454,8 +5454,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_428",
-      "name": "Haos Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -5534,8 +5534,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -5545,8 +5545,8 @@ export const AI_TEAMS = {
       "name": "Haos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -5565,8 +5565,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    },
@@ -5729,8 +5729,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_424",
-      "name": "Level Field"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -5808,8 +5808,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_705",
+     "name": "Early Victory"
     }
    },
    "extra": {
@@ -5819,8 +5819,8 @@ export const AI_TEAMS = {
       "name": "Pyrus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -5839,8 +5839,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    },
@@ -6003,8 +6003,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_426",
-      "name": "Aquos Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -6083,8 +6083,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -6094,8 +6094,8 @@ export const AI_TEAMS = {
       "name": "Aquos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -6114,8 +6114,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    },
@@ -6279,8 +6279,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_428",
-      "name": "Haos Double Input"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -6359,8 +6359,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -6370,8 +6370,8 @@ export const AI_TEAMS = {
       "name": "Haos Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -6390,8 +6390,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -6554,8 +6554,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -6633,8 +6633,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -6644,8 +6644,8 @@ export const AI_TEAMS = {
       "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -6664,8 +6664,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_705",
+      "name": "Early Victory"
      }
     ]
    },
@@ -6827,8 +6827,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_429",
-      "name": "Darkus Double Input"
+      "id": "ds_703",
+      "name": "Sleight of Hand"
      }
     ],
     "blue": [
@@ -6906,8 +6906,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -6917,8 +6917,8 @@ export const AI_TEAMS = {
       "name": "Darkus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_701",
+      "name": "Another Throw"
      }
     ],
     "blue": [
@@ -6937,8 +6937,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    },
@@ -7100,8 +7100,8 @@ export const AI_TEAMS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_430",
-      "name": "Ventus Double Input"
+      "id": "ds_702",
+      "name": "Second Chance"
      }
     ],
     "blue": [
@@ -7179,8 +7179,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
+     "id": "ds_705",
+     "name": "Early Victory"
     }
    },
    "extra": {
@@ -7190,8 +7190,8 @@ export const AI_TEAMS = {
       "name": "Ventus Time Breaker"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_704",
+      "name": "Trickster"
      }
     ],
     "blue": [
@@ -7210,8 +7210,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_503",
-      "name": "Out Of Time"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    },
