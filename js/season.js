@@ -6,12 +6,15 @@
 // - Brawlers spend BP on upgrades (+10G each) as soon as they can afford one. Levels (which cards they use) stay fixed.
 import { buildPlayer, playMatch, makeRng } from './sim.js';
 import { AI_TEAMS, INTERSPACE } from './aiteams.js';
+import { gPrice, G_CAP } from './profiles.js';
 
 export const ARENAS = 4, SLOTS = ['Morning', 'Afternoon', 'Evening'], WEEKS = 13, DAYS = WEEKS * 7;
 export const START_UP = { easy: 0, normal: 2, hard: 5 };
 export const START_UP_OVERRIDE = { gus: 3, nv_dan: 2, masquerade: 6 };   // Billy: Dan toned down, the top 5 even
-export const BP = { win: 100, beaten: 20, gate: 50, dealtPer: 5, event: { Open: 500, Major: 1000, Masters: 2000, Finale: 5000 } };
-export const UPGRADE_COST = 1500, MAX_UP = 10;
+export const BP = { win: 100, beaten: 20, gate: 50, dealtPer: 5, maxBeaten: 3, maxGates: 3,   // per match: Bakugan beaten and Gate cards won count up to 3 each (Billy)
+  event: { Open: 500, Major: 1000, Masters: 2000, Finale: 5000 } };
+// an upgrade = +10G to each of the brawler's 3 Bakugan; it costs what those 3 boosts cost in the Shop (gPrice), so it rises every time
+export const MAX_UP = 10;
 const K = 32, START_ELO = 1500;
 // Tag Team pairs that always enter together (Billy: canon or sensible pairs; everyone else is drawn)
 export const TAG_PAIRS = [['runo', 'julie'], ['nv_dan', 'nv_shun'], ['spectra', 'gus'], ['mylene', 'shadow'], ['volt', 'lync'], ['mira', 'ace'],
@@ -47,8 +50,10 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
   }));
   const ids = [...B.keys()], used = new Map(), matches = [], events = [];
   const avgE = g => g.reduce((n, id) => n + B.get(id).elo, 0) / g.length;
+  const baseG = new Map(cat.toys.map(t => [t.id, t.baseG || 250]));
+  const upCost = b => (AI_TEAMS[b.id] || INTERSPACE[b.id])[b.level].toys.reduce((n, x) => n + gPrice(b.up, Math.min(G_CAP, baseG.get(x.id) + b.up * 10)), 0);
   const earn = (id, n) => { const b = B.get(id); b.bp += n; b.wallet += n;
-    while (b.wallet >= UPGRADE_COST && b.up < MAX_UP) { b.wallet -= UPGRADE_COST; b.up++; } };
+    for (let c = upCost(b); b.wallet >= c && b.up < MAX_UP; c = upCost(b)) { b.wallet -= c; b.up++; } };
 
   // ---- one match: plays it, then records, BP and Elo
   function play(sideIds, { rules = 'nv', teams = null, day, slot, event = null, league = null }) {
@@ -63,7 +68,7 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
     flat.forEach((id, i) => {
       const st = r.stats[i], b = B.get(id), side = order.indexOf(tm[i]);
       const k = winIdx === null ? 'd' : side === winIdx ? 'w' : 'l';
-      const bp = (k === 'w' ? BP.win : 0) + st.beaten * BP.beaten + st.gates * BP.gate + Math.floor(st.dealt / BP.dealtPer);
+      const bp = (k === 'w' ? BP.win : 0) + Math.min(BP.maxBeaten, st.beaten) * BP.beaten + Math.min(BP.maxGates, st.gates) * BP.gate + Math.floor(st.dealt / BP.dealtPer);
       bpOf[id] = bp; earn(id, bp);
       b.rec[k]++; b.career[k] = (b.career[k] || 0) + 1;
       if (league !== null) { b.lg[k]++; b.lg.pts += k === 'w' ? 3 : k === 'd' ? 1 : 0; b.lg.bp += bp; }

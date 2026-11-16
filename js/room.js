@@ -556,7 +556,7 @@ function upgrade(sel = 0) {
   if (!mine.length) { bar('You have no Bakugan yet.'); return go('shop'); }
   sel = Math.min(sel, mine.length - 1);
   const x = mine[sel], u = p.owned.toys[x.k], up = P.upgraded(x.t, x.attr, p.owned), gN = u.g || 0;
-  const gCost = P.gPrice(gN), lvCost = P.levelPrice(up.level), gMax = up.g >= P.G_CAP;
+  const gCost = P.gPrice(gN, up.g), lvCost = P.levelPrice(up.level), gMax = up.g >= P.G_CAP;
   statTop(x.t.name, 'UPGRADE', null, up.stats, up.g, up.level);
   if ((x.t.thumbs || {})[x.attr]) pack.url(x.t.thumbs[x.attr]).then(url => { const im = document.createElement('img'); im.src = url; im.style.cssText = 'left:14px;top:34px;width:96px;height:96px'; $('topUI').append(im); });
   const statBtn = (k, i) => { const max = up.stats[k] >= P.STAT_CAP;
