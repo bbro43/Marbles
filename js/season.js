@@ -1,5 +1,5 @@
 // Story mode: an Interspace season (3 months = 13 weeks). Every match is played by js/sim.js; seeded = repeatable.
-// - Leagues: each league is a single round robin; top 2 go up, bottom 2 go down (table ranked by BP, with W-D-L points kept alongside).
+// - Leagues: each league is a single round robin; top 2 go up, bottom 2 go down. Table = points (3 win, 1 draw), BP earned in league matches breaks ties.
 // - Events: 3 Opens, a Major, a Masters and the season finale, in every format; some use Classic rules.
 // - 4 arenas x 3 slots a day (Morning, Afternoon, Evening); one match per brawler per slot.
 // - BP: every BP a brawler earns is also a ranking point. Season Ranking = BP earned this season. All-Time Ranking = Elo.
@@ -173,7 +173,7 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
   }
   matches.sort((a, b) => a.day * 3 + a.slot - (b.day * 3 + b.slot));
 
-  // ---- league tables: by BP (decides promotion) and by W-D-L points (kept to compare)
+  // ---- league tables: by points (decides promotion, Billy) and by BP (kept to compare)
   const tables = leagues.map(lg => ({
     byBP: [...lg].sort((a, b) => B.get(b).lg.bp - B.get(a).lg.bp || B.get(b).lg.pts - B.get(a).lg.pts),
     byPts: [...lg].sort((a, b) => B.get(b).lg.pts - B.get(a).lg.pts || B.get(b).lg.bp - B.get(a).lg.bp),
@@ -189,7 +189,7 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
   return {
     season, seed, theme, weeks: WEEKS, events, matchCount: matches.length,
     leagues: tables.map((t, i) => ({ league: i + 1, byBP: t.byBP.map(out), byPts: t.byPts.map(out) })),
-    nextLeagues: nextLeagues('byBP'), nextLeaguesIfPoints: nextLeagues('byPts'),
+    nextLeagues: nextLeagues('byPts'), nextLeaguesIfBP: nextLeagues('byBP'),
     seasonRanking: byBP(ids).map(out), allTime: [...ids].sort((a, b) => B.get(b).elo - B.get(a).elo).map(out),
     matches: matches.map(m => ({ d: m.day, s: m.slot, e: m.event, l: m.league, r: m.rules === 'classic' ? 'c' : 'nv', sides: m.sides, w: m.winner, bp: m.bp })),
   };

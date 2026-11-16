@@ -25,5 +25,5 @@ console.log('\nSEASON RANKING (BP) | Elo | W-L-D | matches | upgrades | titles')
 s.seasonRanking.forEach((r, i) => console.log(`${String(i + 1).padStart(2)}. ${nm(r.id).padEnd(11)} ${String(r.bp).padStart(6)} | ${r.elo} | ${r.record.w}-${r.record.l}-${r.record.d} | ${r.matches} | +${r.upgrades} -> +${r.endUpgrades} | ${r.titles.join(', ')}`));
 console.log('\nEVENTS');
 for (const e of s.events) console.log(`wk ${String(e.week).padStart(2)} ${e.name.padEnd(14)} ${e.format.padEnd(10)} ${e.rules.padEnd(7)} n=${e.entrants}  winner: ${e.winner.map(nm).join(' & ')}  (runner-up ${e.runnerUp.map(nm).join(' & ')})`);
-console.log('\nNEXT SEASON (by BP):', s.nextLeagues.map(l => l.map(nm).join(', ')).join('  ||  '));
-console.log('IF BY POINTS:       ', s.nextLeaguesIfPoints.map(l => l.map(nm).join(', ')).join('  ||  '));
+console.log('\nNEXT SEASON (by points):', s.nextLeagues.map(l => l.map(nm).join(', ')).join('  ||  '));
+console.log('IF BY BP:               ', s.nextLeaguesIfBP.map(l => l.map(nm).join(', ')).join('  ||  '));
