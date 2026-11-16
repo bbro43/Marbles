@@ -95,6 +95,12 @@ export function startTurn(s, pickGate = () => 0) {
     const standing = new Set(s.field.flatMap(f => f.toys.filter(x => x.p === s.turn).map(x => x.t)));
     me.unused = me.used.filter(t => !standing.has(t));
     me.used = me.used.filter(t => standing.has(t));
+    // Every Bakugan is standing on a Gate card: pick them all back up (the cards stay), or the match would stall.
+    if (me.unused.length === 0 && me.used.length) {
+      for (const f of s.field) f.toys = f.toys.filter(x => x.p !== s.turn);
+      me.unused = [...me.used]; me.used = [];
+      ev.push({ type: 'pickUp', p: s.turn, toys: [...me.unused] });
+    }
     ev.push({ type: 'recycle', p: s.turn, toys: [...me.unused] });
   }
   return ev;

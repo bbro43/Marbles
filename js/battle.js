@@ -438,7 +438,10 @@ async function nextTurn() {
   const ev = R.startTurn(state, p => picks[p]);
   for (const e of ev) {
     if (e.type === 'gateSet') addGateMesh(e.card, e.p, e.cell);
-    if (e.type === 'recycle') say(`${state.players[e.p].name}'s Bakugan come back from the used pile`);
+    if (e.type === 'pickUp') {
+      toysMesh[e.p].forEach(tm => { if (tm.holder.visible) { tm.holder.visible = false; setOpen(tm, 0); } });
+      say(`All of ${state.players[e.p].name}'s Bakugan were standing, so they pick them back up`);
+    } else if (e.type === 'recycle') say(`${state.players[e.p].name}'s Bakugan come back from the used pile`);
   }
   if (ev.some(e => e.type === 'gateSet')) { say('Gate cards — set!'); await sleep(900); }
   // After the opening: may set one more Gate card next to one already on the field.
