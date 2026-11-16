@@ -5,10 +5,7 @@ import { runSeason } from '../js/season.js';
 import { STORY_START } from '../js/aiteams.js';
 const cat = JSON.parse(fs.readFileSync(process.argv[2]));
 const seed = +(process.argv[3] || 2026);
-// starting order, from the show (draft: Billy to move people up and down)
-export const SHOW_RANK = ['nv_dan', 'nv_shun', 'masquerade', 'spectra', 'klaus', 'gus', 'chanlee', 'ace',
-  'volt', 'mylene', 'nv_marucho', 'julio', 'shadow', 'mira', 'komba', 'runo',
-  'lync', 'julie', 'baron', 'billy', 'jenny', 'jewls', 'akira', 'shuji'];
+import { SHOW_RANK } from '../js/showrank.js';
 const leagues = [SHOW_RANK.slice(0, 8), SHOW_RANK.slice(8, 16), SHOW_RANK.slice(16)];
 const roster = SHOW_RANK.map(id => ({ id, level: STORY_START[id] }));
 const s = runSeason(cat, roster, leagues, { seed, season: 1 });

@@ -10,7 +10,7 @@ import { gPrice, G_CAP } from './profiles.js';
 
 export const ARENAS = 4, SLOTS = ['Morning', 'Afternoon', 'Evening'], WEEKS = 13, DAYS = WEEKS * 7;
 export const START_UP = { easy: 0, normal: 2, hard: 5 };
-export const START_UP_OVERRIDE = { gus: 3, nv_dan: 2, masquerade: 6 };   // Billy: Dan toned down, the top 5 even
+export const START_UP_OVERRIDE = { gus: 3, nv_dan: 2, masquerade: 6, spectra: 3 };   // Billy: Dan toned down, the top 5 even
 export const BP = { win: 100, beaten: 20, gate: 50, dealtPer: 5, maxBeaten: 3, maxGates: 3,   // per match: Bakugan beaten and Gate cards won count up to 3 each (Billy)
   event: { Open: 500, Major: 1000, Masters: 2000, Finale: 5000 } };
 // an upgrade = +10G to each of the brawler's 3 Bakugan; it costs what those 3 boosts cost in the Shop (gPrice), so it rises every time
@@ -171,10 +171,10 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
       continue;
     }
     const e = item.event, from = e.day * 3, opts = { rules: e.rules, event: e.name };
-    // entry: Major, Masters and Finale go by Season Ranking (BP so far, then rating); Opens draw from everyone, lower leagues keener
+    // entry: Major, Masters and Finale go by Season Ranking (BP so far, then rating); Opens are for Leagues 2 and below (League 1 gets the invites instead, Billy)
     let entrants;
     if (e.invite) entrants = invites(e.size);
-    else entrants = rng.shuffle(ids.filter(id => rng() < ([0.45, 0.7, 0.9, 0.95][leagueOf(id)] ?? 0.9))).slice(0, e.size);
+    else entrants = rng.shuffle(ids.filter(id => rng() < ([0, 0.85, 0.95, 0.95][leagueOf(id)] ?? 0.9))).slice(0, e.size);
     if (e.format === 'tag' && entrants.length % 2) entrants = entrants.slice(0, -1);
     let res;
     if (e.format === 'knockout') res = knockout(byBP(entrants).map(id => [id]), from, opts);
