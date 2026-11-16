@@ -284,13 +284,17 @@ function standSpot(cell, k) {                   // only used when the rules move
 }
 
 // ---------- HUD
+// Life Gauge like the anime's: five slanted segments, red next to the face through green at the far end
+const LG_COLORS = ['#e8322b', '#f2701f', '#f2c12e', '#9cc93b', '#3fae46'];
 function hud() {
   state.players.forEach((pl, p) => {
     $('p' + p + 'name').textContent = pl.name;
     $('p' + p + 'gates').innerHTML = state.nv
-      ? `<div class="life"><i style="width:${pl.life / R.START_LIFE * 100}%;background:${pl.life > 250 ? '#4caf50' : pl.life > 100 ? '#f5b52e' : '#e53935'}"></i></div><small>${pl.life} Life</small>`
+      ? `<div class="lg">${LG_COLORS.map((c, i) => { const per = R.START_LIFE / 5, w = Math.max(0, Math.min(1, (pl.life - i * per) / per));
+          return `<i><b style="width:${w * 100}%;background:${c}"></b></i>`; }).join('')}</div><small>${pl.life} Life</small>`
       : [0, 1, 2].map(i => `<span class="dot ${i < pl.captured.length ? 'on' : ''}"></span>`).join('');
     $('p' + p).classList.toggle('active', state.turn === p && state.winner === null);
+    $('p' + p).classList.toggle('nv', !!state.nv);
     $('p' + p).style.setProperty('--pc', playerColor(p));
   });
 }
@@ -608,8 +612,26 @@ async function usedUp(e, b) {
   if (e.how === 'uncontested') say(`${e.card.name} is used up; ${state.players[e.p].name}'s Bakugan come back.`);
   hud(); await sleep(e.how === 'uncontested' ? 1200 : 400);
 }
+// A Trap played in a battle: its model drops onto the Gate card beside your Bakugan and opens
+const trapMeshes = [];
+async function placeTrap(card, p, bt) {
+  const d = (pack.catalog.traps || []).find(x => x.id === card.trapId); if (!d) return;
+  const f = state.field[bt.fieldIdx], mine = f.toys.find(x => x.p === p); if (!mine) return;
+  const tm = await loadToy({ id: d.id, model: d.model, attrTexture: (d.attributes || {})[card.trapColor] });
+  const at = toysMesh[p][mine.t].holder.position, c = cellCenter(f.cell);
+  const side = new THREE.Vector3(at.x - c.x, 0, at.z - c.z); if (side.lengthSq() < 1) side.set(1, 0, 0);
+  const spot = c.clone().add(side.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2).multiplyScalar(GATE_W * 0.28));
+  tm.holder.position.set(spot.x, at.y + 25, spot.z); tm.holder.rotation.y = toysMesh[p][mine.t].holder.rotation.y; tm.holder.scale.setScalar(1.6); tm.holder.visible = true;
+  trapMeshes.push({ tm, card: f.card });
+  const panel = $('battle'), op = panel.style.opacity; panel.style.opacity = '0.12';
+  say(`${state.players[p].name} sets ${card.name.replace('Trap: ', '')} on ${f.card.name}!`);
+  await glide(tm, new THREE.Vector3(spot.x, at.y, spot.z), 450);
+  await animateOpen(tm, 1, 500); await sleep(700);
+  panel.style.opacity = op;
+}
 function clearGate(card) {
   removeGate(card);
+  for (let i = trapMeshes.length - 1; i >= 0; i--) if (trapMeshes[i].card === card) { scene.remove(trapMeshes[i].tm.holder); trapMeshes.splice(i, 1); }
   // toys that were on that card leave the field
   for (const p of [0, 1]) toysMesh[p].forEach((tm, t) => { if (tm !== inFlight && tm.holder.visible && !isStanding(p, t)) { tm.holder.visible = false; setOpen(tm, 0); } });
 }
@@ -844,7 +866,7 @@ async function abilityPhase(bt) {
       $('bplay').innerHTML = `<div class="who2">${state.players[p].name} is thinking…</div>`;
       await sleep(900);
       const i = aiAbility(p, bt, opts);
-      if (i < 0) R.passAbility(state, bt); else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(700); }
+      if (i < 0) R.passAbility(state, bt); else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(700); if (card.type === 'trap') await placeTrap(card, p, bt); }
       continue;
     }
     $('bplay').innerHTML = `<div class="who2">${state.players[p].name}: play an Ability card?</div>` +
@@ -861,7 +883,7 @@ async function abilityPhase(bt) {
       $('bplay').querySelectorAll('button').forEach(b => b.onclick = () => { abilityResolve = null; res(+b.dataset.a); });
     });
     if (i < 0) R.passAbility(state, bt);
-    else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(500); }
+    else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(500); if (card.type === 'trap') await placeTrap(card, p, bt); }
   }
   $('bplay').innerHTML = '';
   return before;
@@ -1012,7 +1034,7 @@ renderer.setAnimationLoop(() => {
   camera.position.lerp(camGoal, 0.08);
   camera.lookAt(camTarget);
   if (roll) stepPhysics(dt);
-  for (const side of toysMesh) for (const tm of side) {
+  for (const tm of [...toysMesh.flat(), ...trapMeshes.map(x => x.tm)]) {
     if (tm.anim) {
       const k = Math.min(1, (performance.now() - tm.anim.t0) / tm.anim.ms);
       setOpen(tm, tm.anim.from + (tm.anim.to - tm.anim.from) * k);
@@ -1087,7 +1109,7 @@ async function start() {
   // a New Vestroia character's own Trap (js/aiteams.js)
   players.forEach((pl, p) => {
     const tr = NV && picked && picked[p] && picked[p].team && picked[p].team.trap; if (!tr) return;   // Traps are for New Vestroia rules
-    pl.trap = { type: 'trap', color: 'trap', id: 'ai-' + tr.id, name: `Trap: ${tr.name}`, attrs: tr.attrs,
+    pl.trap = { type: 'trap', color: 'trap', id: 'ai-' + tr.id, trapId: tr.id, trapColor: tr.color, name: `Trap: ${tr.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
   });
   // your Trap from My Room > Deck (one per game, played like an Ability card in a battle)
@@ -1095,7 +1117,7 @@ async function start() {
     const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;
     const pr = Profiles.load().slots[c.profile]; const dk = pr && (pr.deckNV || pr.deck); const tr = NV && dk && dk.trap && (pr.owned.traps || []).find(x => x.uid === dk.trap);
     const d = tr && (cat.traps || []).find(x => x.id === tr.id);
-    if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, name: `Trap: ${d.name}`, attrs: tr.attrs,
+    if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, trapId: d.id, trapColor: tr.color, name: `Trap: ${d.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
   });
   state = R.newMatch(players, { first, nv: NV });
