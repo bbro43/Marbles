@@ -175,6 +175,7 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
     let entrants;
     if (e.invite) entrants = invites(e.size);
     else entrants = rng.shuffle(ids.filter(id => rng() < ([0, 0.85, 0.95, 0.95][leagueOf(id)] ?? 0.9))).slice(0, e.size);
+    if (e.format === 'tag' && !e.invite) entrants = rng.shuffle(ids.filter(id => leagueOf(id) > 0)).slice(0, e.size);   // Tag Team Opens are always full (Billy)
     if (e.format === 'tag' && entrants.length % 2) entrants = entrants.slice(0, -1);
     let res;
     if (e.format === 'knockout') res = knockout(byBP(entrants).map(id => [id]), from, opts);
