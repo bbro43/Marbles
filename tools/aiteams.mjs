@@ -52,7 +52,7 @@ const PARTNERS = {
 };
 // New Vestroia characters' Traps (only they get one). Gus and Lync get Maxus Helios pieces in their attribute.
 const TRAPS = { nv_dan: 'Scorpion', nv_shun: 'Hylash', nv_marucho: 'Tripod Epsilon', mira: 'Baliton', ace: 'Falcon Fly', baron: 'Piercian',
-  spectra: 'Metalfencer', gus: 'Scraper', mylene: 'Tripod Theta', volt: 'Dynamo', shadow: 'Fortress', lync: 'Klawgor' };
+  spectra: 'Metalfencer', gus: 'Wired', mylene: 'Tripod Theta', volt: 'Dynamo', shadow: 'Fortress', lync: 'Spitarm' };
 const TRAP_ATTRS = { easy: 2, normal: 3, hard: 4 };
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));

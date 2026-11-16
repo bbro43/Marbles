@@ -6490,8 +6490,8 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt_scraper",
-    "name": "Scraper",
+    "id": "dc_spt11",
+    "name": "Wired",
     "color": "subterra",
     "attrs": [
      "subterra",
@@ -6580,8 +6580,8 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt_scraper",
-    "name": "Scraper",
+    "id": "dc_spt11",
+    "name": "Wired",
     "color": "subterra",
     "attrs": [
      "subterra",
@@ -6671,8 +6671,8 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt_scraper",
-    "name": "Scraper",
+    "id": "dc_spt11",
+    "name": "Wired",
     "color": "subterra",
     "attrs": [
      "subterra",
@@ -7039,8 +7039,8 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt_klawgor",
-    "name": "Klawgor",
+    "id": "dc_spt_spitarm",
+    "name": "Spitarm",
     "color": "ventus",
     "attrs": [
      "ventus",
@@ -7129,13 +7129,12 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt_klawgor",
-    "name": "Klawgor",
+    "id": "dc_spt_spitarm",
+    "name": "Spitarm",
     "color": "ventus",
     "attrs": [
      "ventus",
-     "aquos",
-     "subterra"
+     "aquos"
     ]
    }
   },
@@ -7220,14 +7219,12 @@ export const AI_TEAMS = {
     ]
    },
    "trap": {
-    "id": "dc_spt_klawgor",
-    "name": "Klawgor",
+    "id": "dc_spt_spitarm",
+    "name": "Spitarm",
     "color": "ventus",
     "attrs": [
      "ventus",
-     "aquos",
-     "pyrus",
-     "haos"
+     "aquos"
     ]
    }
   }
