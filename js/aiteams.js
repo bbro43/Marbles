@@ -5606,8 +5606,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "cu_001",
+     "name": "Viper Helios"
     },
     "silver": {
      "id": "ds_226",
@@ -5670,7 +5670,7 @@ export const AI_TEAMS = {
     "color": "pyrus",
     "attrs": [
      "pyrus",
-     "subterra"
+     "ventus"
     ]
    }
   },
@@ -5696,8 +5696,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "cu_001",
+     "name": "Viper Helios"
     },
     "silver": {
      "id": "ds_207",
@@ -5786,8 +5786,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "cu_001",
+     "name": "Viper Helios"
     },
     "silver": {
      "id": "ds_216",

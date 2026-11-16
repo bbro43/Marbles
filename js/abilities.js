@@ -168,6 +168,8 @@ export const GATE_EFFECTS = {
   'Trick Jump': { add: (c, sd) => 100 * c.s.players[sd.p].abilityUsed.length },
   'Mega Warrior': { add: (c, sd) => 100 * captured(c.s, sd.p) },
   "Naga's Wrath": { add: (c, sd) => 150 * standing(c.s, sd.p).filter(x => c.s.field[x.k] !== c.field).length },
+  // custom gold card (Billy's own Viper Helios card): +200 for each side whose owner has a Helios in their used pile
+  'Viper Helios': { add: (c, sd) => c.s.players[sd.p].used.some(t => /^Helios$/.test(c.s.players[sd.p].toys[t].name)) ? 200 : 0 },
 };
 // Gold cards: the pictured toy gets the Gate bonus twice
 const goldEffect = card => ({ gate: c => { for (const sd of c.sides) if (toyMatches(sd.name, card.name)) sd.gateMult *= 2; } });
@@ -193,7 +195,7 @@ export const fieldEffectOf = card => FIELD_EFFECTS[card.name] || null;
 const TRAP = { when: 'battle', can: () => true, add: c => (c.card.attrs || []).reduce((n, a) => n + (c.table[a] || 0), 0) };
 export const effectOf = card => card.type === 'trap' ? TRAP : EFFECTS[card.name + '|' + card.color] || EFFECTS[card.name] || null;
 export function gateEffectOf(card) {
-  if (card.color === 'gold') return goldEffect(card);
+  if (card.color === 'gold') return GATE_EFFECTS[card.name] || goldEffect(card);   // custom gold cards have their own effect
   return GATE_EFFECTS[card.name] || null;
 }
 // Gate cards always work (their bonus counts); an Ability card counts as coded only if it has an effect.
