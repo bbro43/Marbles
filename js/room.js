@@ -573,8 +573,8 @@ function trapShop() {
   $('topUI').innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:22px;background:linear-gradient(#b0122a,#6b0d22);border-bottom:1px solid #fff5;font:900 11px/22px system-ui;text-align:center">
       <span style="position:absolute;left:4px;font:italic 900 7px/22px system-ui;color:#fffa">TRAP ››</span>${esc(T.name)}</div>
     <div style="position:absolute;left:126px;top:30px;width:120px;background:#2a0b1fcc;padding:6px;border-radius:3px;font:600 8.5px/12px system-ui">
-      0G of its own. Once per game, add it to a battle like an Ability card: it gets the Gate card's bonus for <b>each</b> of its attributes.
-      <div style="margin-top:6px;color:#9fd4ff">${slots === 6 ? 'Has all 6 attributes' : slots ? `Has exactly ${slots} attributes` : 'Pick 2 or more attributes'}</div>
+      0G of its own. Once per game, add it to a battle like an Ability card: it gets the Gate card's bonus for <b>each</b> of its attributes.${T.maxus ? `<div style="margin-top:4px;color:#9fd4ff">A piece of Maxus ${T.maxus === 'sp00_01' ? 'Dragonoid' : 'Helios'}.</div>` : ''}
+      <div style="margin-top:6px;color:#9fd4ff">${slots === 6 ? 'Has all 6 attributes' : slots === 1 ? 'Has 1 attribute' : slots ? `Has exactly ${slots} attributes` : 'Pick 2 or more attributes'}</div>
       <div style="margin-top:2px;color:#ffd0c8">${n ? trapPick.attrs.map(cap).join(', ') : ''}</div>
       <div style="margin-top:4px;color:#ffcf3a;font-weight:900">${price} BP</div></div>
     <div class="txt" style="left:8px;top:168px;font-size:9px">You own ${mine.length} Trap${mine.length === 1 ? '' : 's'}</div>`;

@@ -3878,16 +3878,13 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt09",
-    "name": "Hexados",
+    "id": "dc_spt08",
+    "name": "Dynamo",
     "color": "haos",
     "attrs": [
      "haos",
      "pyrus",
-     "darkus",
-     "ventus",
-     "subterra",
-     "aquos"
+     "darkus"
     ]
    }
   },
@@ -3940,16 +3937,13 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt09",
-    "name": "Hexados",
+    "id": "dc_spt08",
+    "name": "Dynamo",
     "color": "haos",
     "attrs": [
      "haos",
      "subterra",
-     "darkus",
-     "aquos",
-     "ventus",
-     "pyrus"
+     "darkus"
     ]
    }
   },
@@ -4002,16 +3996,13 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt09",
-    "name": "Hexados",
+    "id": "dc_spt08",
+    "name": "Dynamo",
     "color": "haos",
     "attrs": [
      "haos",
      "darkus",
-     "subterra",
-     "ventus",
-     "pyrus",
-     "aquos"
+     "subterra"
     ]
    }
   }
@@ -4067,8 +4058,8 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt08",
-    "name": "Fencer",
+    "id": "dc_spt_scraper",
+    "name": "Scraper",
     "color": "subterra",
     "attrs": [
      "subterra",
@@ -4125,8 +4116,8 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt08",
-    "name": "Fencer",
+    "id": "dc_spt_scraper",
+    "name": "Scraper",
     "color": "subterra",
     "attrs": [
      "subterra",
@@ -4184,8 +4175,8 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt08",
-    "name": "Fencer",
+    "id": "dc_spt_scraper",
+    "name": "Scraper",
     "color": "subterra",
     "attrs": [
      "subterra",
@@ -4247,8 +4238,8 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt10",
+    "name": "Fortress",
     "color": "darkus",
     "attrs": [
      "darkus",
@@ -4305,13 +4296,12 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt10",
+    "name": "Fortress",
     "color": "darkus",
     "attrs": [
      "darkus",
-     "haos",
-     "ventus"
+     "haos"
     ]
    }
   },
@@ -4364,14 +4354,12 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt11",
-    "name": "Wired",
+    "id": "dc_spt10",
+    "name": "Fortress",
     "color": "darkus",
     "attrs": [
      "darkus",
-     "subterra",
-     "pyrus",
-     "ventus"
+     "subterra"
     ]
    }
   }
@@ -4427,16 +4415,12 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt10",
-    "name": "Pythantus",
+    "id": "dc_spt_klawgor",
+    "name": "Klawgor",
     "color": "ventus",
     "attrs": [
      "ventus",
-     "haos",
-     "pyrus",
-     "subterra",
-     "aquos",
-     "darkus"
+     "haos"
     ]
    }
   },
@@ -4489,16 +4473,13 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt10",
-    "name": "Pythantus",
+    "id": "dc_spt_klawgor",
+    "name": "Klawgor",
     "color": "ventus",
     "attrs": [
      "ventus",
      "aquos",
-     "subterra",
-     "pyrus",
-     "haos",
-     "darkus"
+     "subterra"
     ]
    }
   },
@@ -4551,16 +4532,14 @@ export const AI_TEAMS = {
     }
    },
    "trap": {
-    "id": "dc_spt10",
-    "name": "Pythantus",
+    "id": "dc_spt_klawgor",
+    "name": "Klawgor",
     "color": "ventus",
     "attrs": [
      "ventus",
      "aquos",
      "pyrus",
-     "haos",
-     "subterra",
-     "darkus"
+     "haos"
     ]
    }
   }
