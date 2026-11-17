@@ -6,7 +6,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // what you can change, how many styles and colors each has (from pack/creator/catalog.json)
 export const PARTS = {
-  hair:    { styles: 10, colors: 12, label: 'Hair' },   // colors 6-11 are the bright Vestal colors (scripts/haircolors.py)
+  hair:    { styles: 16, colors: 12, label: 'Hair' },   // styles 10-15 are our own (scripts/girlhair.mjs); colors 6-11 are the bright Vestal colors (scripts/haircolors.py)
   cap:     { styles: 6, colors: 6, label: 'Hat', optional: true },
   glasses: { styles: 6, colors: 4, label: 'Glasses', optional: true },
   eye:     { styles: 6, colors: 6, label: 'Eyes' },
