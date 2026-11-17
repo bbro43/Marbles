@@ -9,7 +9,7 @@ export const PARTS = {
   hair:    { styles: 16, colors: 12, label: 'Hair' },   // styles 10-15 are our own (scripts/girlhair.mjs); colors 6-11 are the bright Vestal colors (scripts/haircolors.py)
   cap:     { styles: 6, colors: 6, label: 'Hat', optional: true },
   glasses: { styles: 6, colors: 4, label: 'Glasses', optional: true },
-  eye:     { styles: 6, colors: 6, label: 'Eyes' },
+  eye:     { styles: 6, colors: 12, label: 'Eyes' },   // 6-11: same colors with a tinted pupil instead of black, for Vestals (scripts/vestaleyes.py)
   eyeblow: { styles: 8, colors: 12, label: 'Eyebrows' },   // 6-7 are softer (scripts/softbrows.py)
   facial:  { styles: 6, colors: 5, label: 'Face' },
   top:     { styles: 8, colors: 6, label: 'Top' },
