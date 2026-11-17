@@ -10,10 +10,10 @@ export const PARTS = {
   cap:     { styles: 6, colors: 6, label: 'Hat', optional: true },
   glasses: { styles: 6, colors: 4, label: 'Glasses', optional: true },
   eye:     { styles: 6, colors: 6, label: 'Eyes' },
-  eyeblow: { styles: 6, colors: 12, label: 'Eyebrows' },
+  eyeblow: { styles: 8, colors: 12, label: 'Eyebrows' },   // 6-7 are softer (scripts/softbrows.py)
   facial:  { styles: 6, colors: 5, label: 'Face' },
   top:     { styles: 8, colors: 6, label: 'Top' },
-  down:    { styles: 8, colors: 6, label: 'Pants' },
+  down:    { styles: 10, colors: 6, label: 'Pants' },   // 8-9 are skirts (scripts/girlskirt.mjs)
   shoes:   { styles: 4, colors: 6, label: 'Shoes' },
 };
 export const SKIN_TONES = 5;
