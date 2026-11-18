@@ -8,6 +8,7 @@ import { BP, MAX_UP, UPS_PER_SEASON, ATTRS6 } from './season.js';
 import { setupSeason2, LEAGUE_NAMES } from './season2.js';
 import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
+import { mountCommons } from './commons3d.js';
 
 const $ = id => document.getElementById(id);
 const KEY = 'marbles-story';
@@ -200,13 +201,11 @@ function render(view = save.view || 'commons') {
   if (save.day >= DAYS) view = save.view = 'standings';
   if (view === 'commons') {
     const line = f ? `League match today against ${nameOf(f.opp)}. Arena 1 is reserved for you.`
-      : `${SLOTS[save.slot]} slot. Where would you like to go?`;
+      : `${SLOTS[save.slot]} slot. Tap a building to go there.`;
     body = `<div class="isa"><div class="isaname">ISA</div><div>${line}</div></div>
       ${f ? `<button class="big" id="playLeague">Play league match: vs ${nameOf(f.opp)}</button>` : ''}
-      <div class="grid">${PLACES.map(([k, n]) => `<button data-go="${k}">${n}</button>`).join('')}
-        <button data-go="calendar">Calendar</button><button data-go="standings">Standings</button>
-        <button data-go="messages">Messages${save.messages.length ? ` (${save.messages.length})` : ''}</button><button data-go="inventory">Inventory</button>
-        <button id="rest">Rest</button></div>`;
+      <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button></div>`;
+  }
   } else if (view === 'shop') {
     const c = upCost('you'), b = save.season.B.you, left = UPS_PER_SEASON - (b.up - b.startUp);
     body = `<h2>The Shop</h2><p>G-Power boost: +10G to all three of your Bakugan.</p>
@@ -224,6 +223,7 @@ function render(view = save.view || 'commons') {
         return `<button class="row ${save.you.partner === x.id ? 'on' : ''}" data-partner="${x.id}"><span class="dot" style="background:${ATTR_COLOR[x.attr]}"></span>${d.name} · ${g}G${save.you.partner === x.id ? ' · Partner' : ''}</button>`; }).join('') + back();
   }
   $('main').innerHTML = header() + body;
+  showMap(view === 'commons', f);
   $('main').querySelectorAll('[data-go]').forEach(b => b.onclick = () => render(b.dataset.go));
   $('main').querySelectorAll('[data-back]').forEach(b => b.onclick = () => render('commons'));
   $('main').querySelectorAll('[data-challenge]').forEach(b => b.onclick = () => challenge(b.dataset.challenge));
@@ -232,6 +232,19 @@ function render(view = save.view || 'commons') {
   if ($('playLeague')) $('playLeague').onclick = () => launch(f.opp, { key: f.key, league: true });
   if ($('buy')) $('buy').onclick = () => { const b = save.season.B.you, c = upCost('you'); if (b.wallet >= c) { b.wallet -= c; b.up++; msg('ISA', `G-Power boost purchased. Your Bakugan are now +${b.up}.`); store(); render('shop'); } };
   store();
+}
+let map = null, mapKey = '';
+function showMap(on, f) {
+  const host = $('map'), key = `${save.day}-${save.slot}-${!!f}`;
+  if (!on) { host.hidden = true; document.body.appendChild(host); return; }
+  host.hidden = false; $('main').firstElementChild.after(host);
+  if (map && mapKey === key) return;
+  const yaw = map?.yaw; if (map) map.dispose();
+  const counts = f ? {} : Object.fromEntries(Object.entries(presence()).map(([k, v]) => [k, v.length]));
+  if (save.messages.length) counts.messages = Math.min(save.messages.length, 99);
+  map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw,
+    onPick: k => { if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
+  mapKey = key;
 }
 const back = () => `<button class="back" data-back>Back to The Commons</button>`;
 function who(place) {
