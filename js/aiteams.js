@@ -7075,9 +7075,9 @@ export const STARTERS = {
     "name": "Serpenoid"
    },
    {
-    "id": "bb_49",
+    "id": "bb_50",
     "attr": "aquos",
-    "name": "Siege"
+    "name": "Terrorclaw"
    }
   ],
   "gates": {
