@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bakugan · Interspace</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192-v2.png">
+<style>
+  :root { --bg: #0e1726; --panel: #172338; --edge: #2c3e5e; --text: #e6edf7; --dim: #93a4bf; --accent: #39b6ff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: radial-gradient(circle at 50% 0, #1b2c48, var(--bg) 70%); color: var(--text); font: 15px/1.4 system-ui, sans-serif; min-height: 100vh; }
+  #main { max-width: 520px; margin: 0 auto; padding: 12px 12px 180px; }
+  .hdr { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 12px; font-size: 13px; color: var(--dim); }
+  .hdr b { color: var(--text); }
+  h2 { margin: 16px 0 8px; font-size: 18px; } h3 { margin: 14px 0 6px; font-size: 15px; color: var(--accent); }
+  .isa { margin: 14px 0; padding: 12px; border-radius: 12px; background: linear-gradient(180deg, #13304d, #0f2238); border: 1px solid #2d6da1; box-shadow: 0 0 18px #2a8ad455 inset; }
+  .isaname, .isa2 { color: #7fd3ff; font-weight: 700; letter-spacing: .08em; font-size: 12px; }
+  button { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px; cursor: pointer; }
+  button:disabled { opacity: .45; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .big { width: 100%; margin: 8px 0; background: #1d4d2c; border-color: #3aa35c; font-weight: 700; }
+  .back { width: 100%; margin-top: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px; margin: 8px 0; }
+  .card .say { color: var(--dim); font-style: italic; margin: 4px 0 8px; }
+  .note { color: var(--dim); }
+  .row { display: flex; align-items: center; gap: 8px; width: 100%; margin: 6px 0; text-align: left; }
+  .row.on { border-color: var(--accent); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .msg { background: var(--panel); border-radius: 8px; padding: 8px 10px; margin: 6px 0; } .msg span { display: block; font-size: 12px; color: var(--dim); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; } th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #22314c; } tr.me td { color: #ffd76a; font-weight: 700; }
+  .wk { background: var(--panel); border-radius: 8px; padding: 8px 10px; margin: 6px 0; font-size: 13px; } .wk.now { border: 1px solid var(--accent); }
+  #dlg { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 520px; background: linear-gradient(180deg, #13304d, #0c1b2d); border: 2px solid #3b8fd0;
+    border-radius: 14px 14px 0 0; padding: 12px 14px 22px; min-height: 140px; box-shadow: 0 -6px 24px #0008; }
+  .dname { font-weight: 700; margin-bottom: 4px; } .dtext { font-size: 16px; }
+  .dnext { text-align: right; color: #7fd3ff; animation: blink 1s infinite; } @keyframes blink { 50% { opacity: .2; } }
+  .dch { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; } .dch button { text-align: left; }
+  #dlg input { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid var(--edge); background: #0b1626; color: var(--text); font: inherit; }
+  .top { display: flex; justify-content: space-between; max-width: 520px; margin: 0 auto; padding: 8px 12px 0; font-size: 13px; }
+  .top a, .top button { color: var(--dim); background: none; border: none; padding: 4px; text-decoration: none; }
+</style>
+<script src="vendor/jszip.min.js"></script>
+<script type="importmap">{ "imports": { "three": "./vendor/three/build/three.module.js", "three/addons/": "./vendor/three/examples/jsm/" } }</script>
+</head>
+<body>
+<div class="top"><a href="index.html">‹ Home</a><span>The Commons</span><button id="newgame">New story</button></div>
+<div id="main"></div>
+<div id="dlg" hidden></div>
+<script type="module" src="js/story.js"></script>
+</body>
+</html>

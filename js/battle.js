@@ -659,6 +659,10 @@ async function runBattle(fieldIdx) {
     const before = await abilityPhase(bt);
     const b = R.computeBattle(state, bt);
     await showBattle(b, before);
+    if (b.result !== 'tie') {   // story mode: Bakugan beaten and Gate cards won, for BP
+      const win = [...new Set(b.sides.filter(x => R.teamOf(state, x.p) === b.result).map(x => x.p))], lost = b.sides.filter(x => R.teamOf(state, x.p) !== b.result).length;
+      for (const q of win) { storyStats[q].beaten += lost / win.length; storyStats[q].gates += 1 / win.length; }
+    }
     const ev = R.resolveBattle(state, b);
     for (const e of ev) {
       if (e.type === 'capture') await captured(e, b);
@@ -671,6 +675,8 @@ async function runBattle(fieldIdx) {
   }
 }
 const knockouts = [0, 0, 0, 0];
+const storyStats = [0, 0, 0, 0].map(() => ({ beaten: 0, gates: 0 }));
+let storyMatch = null;   // set when the match comes from story mode (story.html)
 let matchPicked = null;   // the characters from the menu (to record a profile's statistics)
 async function captured(e, b) {
   const card = e.card;
@@ -1057,6 +1063,14 @@ function gameOver() {
   const names = w === 'draw' ? [] : state.players.map((pl, q) => q).filter(q => R.teamOf(state, q) === w).map(q => state.players[q].name);
   $('overText').textContent = w === 'draw' ? 'Draw!' : `${names.join(' & ')} win${names.length > 1 ? '' : 's'}!`;
   say('');
+  // story mode: hand the result back to The Commons
+  if (storyMatch) {
+    const res = { key: storyMatch.key, winner: w, players: state.players.map((pl, q) => ({
+      team: R.teamOf(state, q), beaten: Math.round(storyStats[q].beaten), gates: Math.round(storyStats[q].gates),
+      life: pl.life, dealt: state.nv ? state.players.filter((o, r) => !sameTeam(q, r)).reduce((n, o) => n + (R.START_LIFE - Math.max(0, o.life)), 0) : 0 })) };
+    try { sessionStorage.setItem('marbles-story-result', JSON.stringify(res)); } catch {}
+    $('again').textContent = 'Back to The Commons'; $('again').onclick = () => { location.href = 'story.html'; };
+  }
   // your profile's statistics (My Room > Info > Statistics)
   if (matchPicked) matchPicked.forEach((c, p) => {
     if (c && c.profile !== undefined && c.profile !== null) {
@@ -1207,6 +1221,7 @@ async function start() {
   // a character comes with its deck at the level picked (Easy / Normal / Hard); "You" builds your own
   const NV = !!(match && match.rules === 'nv');
   matchPicked = picked;
+  storyMatch = match && match.story || null;
   // You: your profile's name, face and deck (built in My Room)
   if (picked) picked.forEach(c => {
     if (c.profile === undefined || c.profile === null) return;
@@ -1219,7 +1234,7 @@ async function start() {
   });
   if (picked) picked.forEach((c, p) => {
     const lvl = c.level || (typeof c.ai === 'string' ? c.ai : null);
-    if (lvl && AI_TEAMS[c.id]) c.team = AI_TEAMS[c.id][lvl];
+    if (lvl && AI_TEAMS[c.id] && !c.team) c.team = AI_TEAMS[c.id][lvl];   // story mode passes its own team (with that season's upgrades)
     if (c.ai) aiLevel[p] = lvl || 'normal';
   });
   const { players, first } = await setupTeams(cat, pack, picked, null, null, NV);
