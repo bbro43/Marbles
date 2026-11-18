@@ -949,16 +949,25 @@ async function abilityPhase(bt) {
   before.labels = Object.fromEntries(c0.sides.map(sd => [sd.p, sd.steps.map(st => st.label)]));
   const gateLines = Object.fromEntries(c0.sides.map(sd => [sd.p, sd.steps.map(st => `${st.label.replace(/^Gate card: .*/, 'Gate bonus')}  ${st.amount >= 0 ? '+' : ''}${st.amount}`)]));
   // 3. then the Ability cards, back and forth
-  const preview = () => {
+  // live G-Power (Billy): after every card, each Bakugan's G counts up or down to its new total, like the show
+  const shown = c0.sides.map(sd => before[sd.p]);
+  const preview = async () => {
     const c = R.computeBattle(state, bt);    // shows attributes and totals after any changes
     const col = (sd, i) => `<div class="side"><div class="who">${state.players[sd.p].name}</div>
       <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
-      <div class="g">${bt.plays.length ? sd.total : before[sd.p]}G</div>
+      <div class="g" id="lg${i}">${shown[i] ?? sd.total}G</div>
       <div class="steps">${gateLines[sd.p].map(t => `<div class="step">${t}</div>`).join('')}${bt.plays.filter(x => x.p === sd.p).map(x => `<div class="step">${x.card.name}</div>`).join('')}</div></div>`;
     $('bbody').innerHTML = c.sides.map((sd, i) => col(sd, i)).join(`<div class="vs">vs</div>`);
+    const target = c.sides.map(sd => bt.plays.length ? sd.total : before[sd.p]);
+    await Promise.all(target.map((t, i) => (shown[i] ?? t) !== t ? countUp($('lg' + i), shown[i], t) : null));
+    target.forEach((t, i) => { shown[i] = t; });
   };
+  // card pictures for the picker
+  const artOf = new Map();
+  for (const p0 of new Set(c0.sides.map(sd => sd.p))) for (const card of state.players[p0].abilityHand)
+    if (card.art && !artOf.has(card)) { try { artOf.set(card, await pack.url(card.art)); } catch {} }
   while (!R.abilityDone(bt)) {
-    preview();
+    await preview();
     const p = bt.next, opts = R.abilityOptions(state, bt);
     if (!opts.length) { R.passAbility(state, bt); continue; }
     const hand = state.players[p].abilityHand;
@@ -975,7 +984,8 @@ async function abilityPhase(bt) {
         const gap = c => { const mine = c.teamTotal[R.teamOf(state, p)] || 0; return mine - Math.max(...Object.entries(c.teamTotal).filter(([tm]) => +tm !== R.teamOf(state, p)).map(([, v]) => v)); };
         const d = gap(R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] })) - gap(R.computeBattle(state, bt));
         const tag = d > 0 ? `+${d} for you` : d < 0 ? `${d} for you` : 'no change right now';
-        return `<button class="chip" data-a="${i}" style="--c:${ABILITY_COLOR[hand[i].color] || '#888'}"><b>${hand[i].name} <em>${tag}</em></b><span class="st">${hand[i].text || ''}</span></button>`;
+        const art = artOf.get(hand[i]);
+        return `<button class="chip withart" data-a="${i}" style="--c:${ABILITY_COLOR[hand[i].color] || '#888'}">${art ? `<img class="cart" src="${art}" alt="">` : ''}<span class="ctext"><b>${hand[i].name} <em>${tag}</em></b><span class="st">${hand[i].text || ''}</span></span></button>`;
       }).join('') +
       `<button class="chip skip" data-a="-1"><b>Pass</b></button>`;
     const i = await new Promise(res => {
@@ -985,6 +995,7 @@ async function abilityPhase(bt) {
     if (i < 0) R.passAbility(state, bt);
     else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(500); if (card.type === 'trap') await placeTrap(card, p, bt); }
   }
+  await preview();
   $('bplay').innerHTML = '';
   return before;
 }
