@@ -1141,6 +1141,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
   camera.position.lerp(camGoal, 0.08);
   camera.lookAt(camTarget);
+  hideOccluders();
   if (roll) stepPhysics(dt);
   for (const tm of [...toysMesh.flat(), ...trapMeshes.map(x => x.tm)]) {
     if (tm.anim) {
@@ -1164,13 +1165,23 @@ function wireAbilityButton() {
   $('aprompt').onchange = e => setPrompt(e.target.checked);
 }
 
+let arenaDef = null; const arenaMeshes = [];
+// Some attribute arenas have scenery between the camera and the mat (the Pyrus volcano): hide whatever blocks the view of the mat.
+const _occ = new THREE.Raycaster(); let _occN = 0;
+function hideOccluders() {
+  if (!arenaMeshes.length || ++_occN % 10) return;
+  const dir = camTarget.clone().sub(camera.position), dist = dir.length(); _occ.set(camera.position, dir.normalize()); _occ.far = dist - 20;
+  for (const h of _occ.intersectObjects(arenaMeshes, false)) h.object.visible = false;
+}
 async function start() {
   wireAbilityButton();
   try { pack = await Pack.fromDevice(); } catch (e) { pack = null; }
   if (!pack) { $('loading').textContent = 'No asset pack on this device yet. Go back and load it first.'; return; }
   $('loading').textContent = 'Loading arena…';
-  const arena = await loader.loadAsync(await pack.url(pack.catalog.arenas[0].model));
-  arena.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  let match0 = null; try { match0 = JSON.parse(sessionStorage.getItem('marbles-match') || 'null'); } catch {}
+  arenaDef = pack.catalog.arenas.find(a => match0 && a.id === match0.arena) || pack.catalog.arenas[0];
+  const arena = await loader.loadAsync(await pack.url(arenaDef.model));
+  arena.scene.traverse(o => { if (o.isMesh) { o.frustumCulled = false; arenaMeshes.push(o); } });
   scene.add(arena.scene);
   const backPath = (pack.catalog.cardBacks || {}).gate;
   if (backPath) {
@@ -1229,7 +1240,8 @@ async function start() {
     if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, trapId: d.id, trapColor: tr.color, name: `Trap: ${d.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };
   });
-  state = R.newMatch(players, { first, nv: NV, teams: TEAMS });
+  state = R.newMatch(players, { first, nv: NV, teams: TEAMS, arena: arenaDef.attr || null });
+  if (arenaDef.attr) say(`${arenaDef.name}: ${arenaDef.attr[0].toUpperCase() + arenaDef.attr.slice(1)} Bakugan get +${R.ARENA_BONUS}G`);
   $('loading').textContent = 'Loading Bakugan…';
   for (let p = 0; p < state.players.length; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
   cameraFor(viewOf(first)); camera.position.copy(camGoal);

@@ -354,3 +354,14 @@ test('classic tag team: a team wins with 3 Gate cards between them', () => {
 });
 
 console.log(`\n${n} tests passed`);
+
+
+test('attribute arena: +50G to every Bakugan of that attribute, on either side', () => {
+  const { s, b } = battleSetup([], [], gcard('Ga', 'silver', {}), [toy('a', 'pyrus', 300)], [toy('b', 'pyrus', 320)]);
+  const plain = computeBattle(s, b).sides.map(x => x.total);
+  s.arena = 'pyrus';
+  const field = computeBattle(s, b).sides.map(x => x.total);
+  assert.deepEqual(field, plain.map(t => t + 50));
+  s.arena = 'aquos';
+  assert.deepEqual(computeBattle(s, b).sides.map(x => x.total), plain);
+});

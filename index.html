@@ -57,7 +57,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 87;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 88;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -128,6 +128,8 @@ function title() {
 
 // ---- Battle Arena selection: Single Player (needs the computer opponent) / Multiplayer
 const rules = () => { try { return localStorage.getItem('marbles-rules') || 'classic'; } catch { return 'classic'; } };
+const ARENAS = [['arena', 'ARENA'], ['field_pyrus', 'PYRUS FIELD'], ['field_aquos', 'AQUOS FIELD'], ['field_subterra', 'SUBTERRA FIELD'], ['field_haos', 'HAOS FIELD'], ['field_darkus', 'DARKUS FIELD'], ['field_ventus', 'VENTUS FIELD']];
+const arenaPick = () => { try { return localStorage.getItem('marbles-arena') || 'arena'; } catch { return 'arena'; } };
 function arena() {
   $('top').innerHTML = img('arena_top', 0, 0) + img('banner_arena', 56, 7);
   $('bot').innerHTML = img('arena_bot', 0, 0) +
@@ -135,8 +137,10 @@ function arena() {
     `<img src="${art('btn_multi')}" class="tap" id="bMulti" style="left:32px;top:96px" alt="">` +
     `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">` +
     // Rules: Classic (win 3 Gate cards) or New Vestroia (Life Gauge)
-    `<div class="obtn tap" id="bRules" style="top:150px;left:32px;width:180px">RULES: ${rules() === 'nv' ? 'NEW VESTROIA (LIFE GAUGE)' : 'CLASSIC (3 GATE CARDS)'}</div>`;
+    `<div class="obtn tap" id="bRules" style="top:150px;left:32px;width:180px">RULES: ${rules() === 'nv' ? 'NEW VESTROIA (LIFE GAUGE)' : 'CLASSIC (3 GATE CARDS)'}</div>` +
+    `<div class="obtn tap" id="bArena" style="top:122px;left:32px;width:180px">ARENA: ${(ARENAS.find(a => a[0] === arenaPick()) || ARENAS[0])[1]}</div>`;
   bar(rules() === 'nv' ? 'New Vestroia rules: bring Life to 0 to win. Up to 9 Ability cards.' : 'Select the type of game.');
+  $('bArena').onclick = () => { const i = ARENAS.findIndex(a => a[0] === arenaPick()); try { localStorage.setItem('marbles-arena', ARENAS[(i + 1) % ARENAS.length][0]); } catch {} render(); };
   $('bRules').onclick = () => { try { localStorage.setItem('marbles-rules', rules() === 'nv' ? 'classic' : 'nv'); } catch {} render(); };
   $('bSingle').onclick = () => go('computer');
   $('bMulti').onclick = () => { mode = 'multi'; pickFor = 0; picks = [null, null]; teams = null; go('chars'); };
@@ -197,7 +201,7 @@ function chars() {
     const title = picks.length === 2 ? `${picks[0].name} vs ${picks[1].name}`
       : teams && teams[2] === 0 ? `${picks[0].name} & ${picks[2].name} vs ${picks[1].name} & ${picks[3].name}` : picks.map(c => c.name).join(' vs ');
     $('bar').remove(); bar(title + (custom ? ' — build your deck!' : ' — battle!'));
-    try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode, rules: rules(), ...(picks.length > 2 ? { teams } : {}), players: picks.map((c, p) => ({ id: c.id, name: c.name, face: c.face,
+    try { sessionStorage.setItem('marbles-match', JSON.stringify({ mode, rules: rules(), arena: arenaPick(), ...(picks.length > 2 ? { teams } : {}), players: picks.map((c, p) => ({ id: c.id, name: c.name, face: c.face,
       ...(c.custom ? { custom: true, ...(c.profile !== undefined ? { profile: c.profile } : {}) } : { level: c.level }), ...(mode === 'single' && p >= 1 ? { ai: true } : {}) })) })); } catch {}
     setTimeout(() => { location.href = 'battle.html'; }, 900);
   };
