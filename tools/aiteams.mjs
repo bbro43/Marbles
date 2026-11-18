@@ -64,10 +64,11 @@ const CARDS = {
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));
 // starter decks for new players: generic Bakugan only; cards = that attribute's main character's Easy cards
+// Billy (Nov 17): every attribute's starter is different, but the 3 Bakugan's G add up to within 50 of every other starter (630-640 now)
 const STARTERS = {
-  pyrus: ['dan', ['Serpenoid', 'Saurus', 'Falconeer']], aquos: ['marucho', ['Stinglash', 'Serpenoid', 'Robotallion']],
-  subterra: ['julie', ['Robotallion', 'Saurus', 'Manion']], haos: ['runo', ['Saurus', 'Manion', 'Ravenoid']],
-  darkus: ['masquerade', ['Fear Ripper', 'Gargonoid', 'Serpenoid']], ventus: ['shun', ['Ravenoid', 'Manion', 'Stinglash']],
+  pyrus: ['dan', ['Saurus', 'Falconeer', 'Robotallion']], aquos: ['marucho', ['Stinglash', 'Serpenoid', 'Siege']],
+  subterra: ['julie', ['Gargonoid', 'Robotallion', 'Saurus']], haos: ['runo', ['Saurus', 'Manion', 'Griffon']],
+  darkus: ['masquerade', ['Fear Ripper', 'Serpenoid', 'Stinglash']], ventus: ['shun', ['Ravenoid', 'Stinglash', 'Saurus']],
 };
 const LEVELS = { easy: { upgrades: 0, rank: 4 }, normal: { upgrades: 5, rank: 1 }, hard: { upgrades: 10, rank: 0 } };   // rank 0 = best card for the team
 const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));

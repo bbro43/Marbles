@@ -6986,11 +6986,6 @@ export const STARTERS = {
  "pyrus": {
   "toys": [
    {
-    "id": "bb_42",
-    "attr": "pyrus",
-    "name": "Serpenoid"
-   },
-   {
     "id": "bb_41",
     "attr": "pyrus",
     "name": "Saurus"
@@ -6999,12 +6994,17 @@ export const STARTERS = {
     "id": "bb_43",
     "attr": "pyrus",
     "name": "Falconeer"
+   },
+   {
+    "id": "bb_40",
+    "attr": "pyrus",
+    "name": "Robotallion"
    }
   ],
   "gates": {
    "gold": {
-    "id": "ds_122",
-    "name": "Serpenoid"
+    "id": "ds_121",
+    "name": "Saurus"
    },
    "silver": {
     "id": "ds_226",
@@ -7075,9 +7075,9 @@ export const STARTERS = {
     "name": "Serpenoid"
    },
    {
-    "id": "bb_40",
+    "id": "bb_49",
     "attr": "aquos",
-    "name": "Robotallion"
+    "name": "Siege"
    }
   ],
   "gates": {
@@ -7144,6 +7144,11 @@ export const STARTERS = {
  "subterra": {
   "toys": [
    {
+    "id": "bb_52",
+    "attr": "subterra",
+    "name": "Gargonoid"
+   },
+   {
     "id": "bb_40",
     "attr": "subterra",
     "name": "Robotallion"
@@ -7152,17 +7157,12 @@ export const STARTERS = {
     "id": "bb_41",
     "attr": "subterra",
     "name": "Saurus"
-   },
-   {
-    "id": "bb_56",
-    "attr": "subterra",
-    "name": "Manion"
    }
   ],
   "gates": {
    "gold": {
-    "id": "ds_120",
-    "name": "Robotallion"
+    "id": "ds_131",
+    "name": "Gargonoid"
    },
    "silver": {
     "id": "ds_202",
@@ -7233,9 +7233,9 @@ export const STARTERS = {
     "name": "Manion"
    },
    {
-    "id": "bb_58",
+    "id": "bb_45",
     "attr": "haos",
-    "name": "Ravenoid"
+    "name": "Griffon"
    }
   ],
   "gates": {
@@ -7307,14 +7307,14 @@ export const STARTERS = {
     "name": "Fear Ripper"
    },
    {
-    "id": "bb_52",
-    "attr": "darkus",
-    "name": "Gargonoid"
-   },
-   {
     "id": "bb_42",
     "attr": "darkus",
     "name": "Serpenoid"
+   },
+   {
+    "id": "bb_44",
+    "attr": "darkus",
+    "name": "Stinglash"
    }
   ],
   "gates": {
@@ -7386,14 +7386,14 @@ export const STARTERS = {
     "name": "Ravenoid"
    },
    {
-    "id": "bb_56",
-    "attr": "ventus",
-    "name": "Manion"
-   },
-   {
     "id": "bb_44",
     "attr": "ventus",
     "name": "Stinglash"
+   },
+   {
+    "id": "bb_41",
+    "attr": "ventus",
+    "name": "Saurus"
    }
   ],
   "gates": {
