@@ -34,8 +34,8 @@ const lv = (toy, k) => (toy.stats || {})[k] ?? 3;
 
 // play one match. entrants: [{ name, level, player }] (player from buildPlayer). opts: { nv, teams, rng, first }
 // returns { winner (team number or 'draw'), turns, stats: [{ beaten, gates, life, out }] }
-export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1), first = null, maxTurns = 400 } = {}) {
-  const s = R.newMatch(entrants.map(e => e.player), { nv, teams, first: first ?? rng.int(entrants.length) });
+export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1), first = null, maxTurns = 400, arena = null } = {}) {
+  const s = R.newMatch(entrants.map(e => e.player), { nv, teams, arena, first: first ?? rng.int(entrants.length) });
   const lvl = p => entrants[p].level || 'normal';
   const stats = entrants.map(() => ({ beaten: 0, gates: 0, dealt: 0, life: 0, out: false }));
   const same = (a, b) => R.sameTeam(s, a, b);

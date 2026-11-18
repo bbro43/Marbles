@@ -12,7 +12,7 @@ export const ARENAS = 4, SLOTS = ['Morning', 'Afternoon', 'Evening'], WEEKS = 13
 export const START_UP = { easy: 0, normal: 2, hard: 5 };
 export const START_UP_OVERRIDE = { gus: 3, nv_dan: 2, masquerade: 6, spectra: 3 };   // Billy: Dan toned down, the top 5 even
 export const BP = { win: 100, beaten: 20, gate: 50, dealtPer: 5, maxBeaten: 3, maxGates: 3,   // per match: Bakugan beaten and Gate cards won count up to 3 each (Billy)
-  event: { Open: 500, Major: 1000, Masters: 2000, Finale: 5000 } };
+  event: { Open: 500, Major: 1000, Royal: 1000, Masters: 2000, Finale: 5000 } };
 // an upgrade = +10G to each of the brawler's 3 Bakugan; it costs what those 3 boosts cost in the Shop (gPrice), so it rises every time
 export const MAX_UP = 10, UPS_PER_SEASON = 2;   // Billy: upgrades are capped per season
 const K = 32, START_ELO = 1500;
@@ -39,29 +39,34 @@ export function calendar(theme = 'mix') {
 const LEAGUE_DAYS = n => [0, 2, 4, 6, 8, 10, 11, 1, 3, 5, 7, 9].slice(0, n).sort((a, b) => a - b).map(w => w * 7 + 2);
 
 // roster: [{ id, level, name?, upgrades?, elo?, wallet?, career? }]; leagues: [[ids], [ids], ...] top league first
-export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 'mix' } = {}) {
+export const ATTRS6 = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
+// prize Bakugan for field events (Billy): a random Bakugan of the field's attribute, in a G range that suits the league the event is aimed at
+export const PRIZE_BAND = { 1: [400, 480], 2: [350, 420], 3: [300, 370], 4: [250, 320] };
+// opts.events: the season's calendar (default: calendar(theme)); opts.promote(tables, ids) -> next season's leagues; opts.names: league names
+export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 'mix', events: calEvents = null, promote = null, names = null } = {}) {
   const rng = makeRng(seed);
   const B = new Map(roster.map(r => {
-    const def = AI_TEAMS[r.id] || INTERSPACE[r.id]; if (!def) throw new Error('no team for ' + r.id);
+    const def = r.team || AI_TEAMS[r.id] || INTERSPACE[r.id]; if (!def) throw new Error('no team for ' + r.id);
     const up0 = r.upgrades ?? START_UP_OVERRIDE[r.id] ?? START_UP[r.level || 'normal'];
     return [r.id, { id: r.id, name: r.name || (INTERSPACE[r.id] || {}).name || r.id, level: r.level || 'normal', up: up0, startUp: up0,
       elo: r.elo ?? START_ELO, startElo: r.elo ?? START_ELO, bp: 0, wallet: r.wallet || 0, rec: { w: 0, l: 0, d: 0 },
-      lg: { w: 0, l: 0, d: 0, pts: 0, bp: 0 }, career: r.career || { w: 0, l: 0, d: 0, titles: [] }, titles: [], busy: new Set() }];
+      lg: { w: 0, l: 0, d: 0, pts: 0, bp: 0 }, career: r.career || { w: 0, l: 0, d: 0, titles: [] }, titles: [], prizes: [], busy: new Set(), def }];
   }));
   const ids = [...B.keys()], used = new Map(), matches = [], events = [];
   const avgE = g => g.reduce((n, id) => n + B.get(id).elo, 0) / g.length;
   const baseG = new Map(cat.toys.map(t => [t.id, t.baseG || 250]));
-  const upCost = b => (AI_TEAMS[b.id] || INTERSPACE[b.id])[b.level].toys.reduce((n, x) => n + gPrice(b.up, Math.min(G_CAP, baseG.get(x.id) + b.up * 10)), 0);
+  const upCost = b => b.def[b.level].toys.reduce((n, x) => n + gPrice(b.up, Math.min(G_CAP, baseG.get(x.id) + b.up * 10)), 0);
   const earn = (id, n) => { const b = B.get(id); b.bp += n; b.wallet += n;
     for (let c = upCost(b); b.wallet >= c && b.up < MAX_UP && b.up - b.startUp < UPS_PER_SEASON; c = upCost(b)) { b.wallet -= c; b.up++; } };
 
   // ---- one match: plays it, then records, BP and Elo
-  function play(sideIds, { rules = 'nv', teams = null, day, slot, event = null, league = null }) {
+  function play(sideIds, { rules = 'nv', teams = null, day, slot, event = null, league = null, arena = null }) {
     const flat = sideIds.flat();
-    const entrants = flat.map(id => { const b = B.get(id), team = { ...(AI_TEAMS[id] || INTERSPACE[id])[b.level], upgrades: b.up };
+    const entrants = flat.map(id => { const b = B.get(id), team = { ...b.def[b.level], upgrades: b.up };
       return { name: b.name, level: b.level, player: buildPlayer(cat, team, { name: b.name, owner: id, nv: rules === 'nv' }) }; });
     const tm = teams || flat.map((_, i) => i);
-    const r = playMatch(entrants, { nv: rules === 'nv', teams: tm, rng });
+    const field = arena === 'random' ? rng.pick(ATTRS6) : arena;   // 'random' = a random field for each match (Classic events, Billy)
+    const r = playMatch(entrants, { nv: rules === 'nv', teams: tm, rng, arena: field });
     const order = [...new Set(tm)], teamIds = order.map(t => flat.filter((_, i) => tm[i] === t));
     const winIdx = r.winner === 'draw' ? null : order.indexOf(r.winner);
     const bpOf = {};
@@ -81,7 +86,7 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
       delta[a] += k * (sa - ea); delta[b] -= k * (sa - ea);
     }
     teamIds.forEach((g, i) => g.forEach(id => { B.get(id).elo += delta[i]; }));
-    const m = { day, slot, event, league, rules, sides: teamIds, winner: winIdx, turns: r.turns, bp: bpOf };
+    const m = { day, slot, event, league, rules, arena: field, sides: teamIds, winner: winIdx, turns: r.turns, bp: bpOf };
     matches.push(m); return m;
   }
   function book(ids2, from) {
@@ -164,16 +169,19 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
   // ---- league rounds and events, in date order
   const leagueRounds = leagues.map(lg => rounds(lg));
   const nRounds = Math.max(...leagueRounds.map(r => r.length)), lDays = LEAGUE_DAYS(nRounds);
-  const todo = [...lDays.map((day, r) => ({ day, round: r })), ...calendar(theme).map(e => ({ day: e.day, event: e }))].sort((a, b) => a.day - b.day);
+  const todo = [...lDays.map((day, r) => ({ day, round: r })), ...(calEvents || calendar(theme)).map(e => ({ day: e.day ?? e.week * 7, event: { ...e, day: e.day ?? e.week * 7 } }))].sort((a, b) => a.day - b.day);
   for (const item of todo) {
     if (item.round !== undefined) {
       leagueRounds.forEach((rs, li) => { for (const [x, y] of rs[item.round] || []) game([[x], [y]], item.day * 3, { rules: 'nv', league: li }); });
       continue;
     }
-    const e = item.event, from = e.day * 3, opts = { rules: e.rules, event: e.name };
+    const e = item.event, from = e.day * 3, opts = { rules: e.rules, event: e.name, arena: e.arena || null };
     // entry: Major, Masters and Finale go by Season Ranking (BP so far, then rating); Opens are for Leagues 2 and below (League 1 gets the invites instead, Billy)
     let entrants;
-    if (e.invite) entrants = invites(e.size);
+    if (e.entry === 'royal') {   // the Vexos' Royal Challenge: all six Vexos, plus the best of everyone else outside League 1 by Season Ranking
+      const vex = (e.hosts || []).filter(id => B.has(id));
+      entrants = [...vex, ...byBP(ids.filter(id => !vex.includes(id) && leagueOf(id) > 0)).slice(0, e.size - vex.length)];
+    } else if (e.invite) entrants = invites(e.size);
     else entrants = rng.shuffle(ids.filter(id => rng() < ([0, 0.85, 0.95, 0.95][leagueOf(id)] ?? 0.9))).slice(0, e.size);
     if (e.format === 'tag' && !e.invite) entrants = rng.shuffle(ids.filter(id => leagueOf(id) > 0)).slice(0, e.size);   // Tag Team Opens are always full (Billy)
     if (e.format === 'tag' && entrants.length % 2) entrants = entrants.slice(0, -1);
@@ -191,8 +199,14 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
     }
     if (e.final) { const f = knockout([res.order[0], res.order[1]], res.next, opts); res.order = [...f.order, ...res.order.slice(2)]; res.next = f.next; }
     if (e.tier === 'Open') res.order.slice(0, 4).forEach((side, i) => side.forEach(id => { const p = i === 0 ? 1 : i === 1 ? 2 : 3; if (!openPlace.has(id) || openPlace.get(id) > p) openPlace.set(id, p); }));
-    res.order[0].forEach(id => { earn(id, BP.event[e.tier]); B.get(id).titles.push(e.name); B.get(id).career.titles = [...(B.get(id).career.titles || []), `S${season} ${e.name}`]; });
-    events.push({ ...e, entrants: entrants.length, invited: e.invite ? { ...lastWhy } : undefined, winner: res.order[0], runnerUp: res.order[1] || [], endDay: Math.floor((res.next - 1) / 3) });
+    let prize = null;
+    if (e.prize) {   // a random Bakugan of the field's attribute, in the G range for the league the event is aimed at
+      const [lo, hi] = PRIZE_BAND[e.prize.league] || PRIZE_BAND[3], attr = e.prize.attr || (ATTRS6.includes(e.arena) ? e.arena : rng.pick(ATTRS6));
+      const pool = cat.toys.filter(t => t.game === 'bb' && t.baseG >= lo && t.baseG <= hi && (!t.attributes || t.attributes[attr]) && !(e.prize.exclude || []).includes(t.name));
+      if (pool.length) { const t = rng.pick(pool); prize = { id: t.id, name: t.name, attr, g: t.baseG }; res.order[0].forEach(id => B.get(id).prizes.push({ ...prize, event: e.name })); }
+    }
+    res.order[0].forEach(id => { earn(id, BP.event[e.tier] || 0); B.get(id).titles.push(e.name); B.get(id).career.titles = [...(B.get(id).career.titles || []), `S${season} ${e.name}`]; });
+    events.push({ ...e, prizeWon: prize, entrants: entrants.length, invited: e.invite ? { ...lastWhy } : undefined, winner: res.order[0], runnerUp: res.order[1] || [], endDay: Math.floor((res.next - 1) / 3) });
   }
   matches.sort((a, b) => a.day * 3 + a.slot - (b.day * 3 + b.slot));
 
@@ -208,11 +222,11 @@ export function runSeason(cat, roster, leagues, { seed = 1, season = 1, theme = 
     return nl;
   };
   const out = id => { const b = B.get(id); return { id, name: b.name, level: b.level, elo: Math.round(b.elo), startElo: b.startElo, bp: b.bp, wallet: b.wallet,
-    upgrades: b.startUp, endUpgrades: b.up, record: b.rec, league: b.lg, titles: b.titles, career: b.career, matches: b.rec.w + b.rec.l + b.rec.d }; };
+    upgrades: b.startUp, endUpgrades: b.up, prizes: b.prizes, record: b.rec, league: b.lg, titles: b.titles, career: b.career, matches: b.rec.w + b.rec.l + b.rec.d }; };
   return {
     season, seed, theme, weeks: WEEKS, events, matchCount: matches.length,
     leagues: tables.map((t, i) => ({ league: i + 1, byBP: t.byBP.map(out), byPts: t.byPts.map(out) })),
-    nextLeagues: nextLeagues('byPts'), nextLeaguesIfBP: nextLeagues('byBP'),
+    nextLeagues: promote ? promote(tables.map(t => t.byPts)) : nextLeagues('byPts'), nextLeaguesIfBP: promote ? null : nextLeagues('byBP'), names,
     seasonRanking: byBP(ids).map(out), allTime: [...ids].sort((a, b) => B.get(b).elo - B.get(a).elo).map(out),
     matches: matches.map(m => ({ d: m.day, s: m.slot, e: m.event, l: m.league, r: m.rules === 'classic' ? 'c' : 'nv', sides: m.sides, w: m.winner, bp: m.bp })),
   };
