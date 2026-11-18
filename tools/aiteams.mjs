@@ -67,8 +67,8 @@ const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.m
 // Billy (Nov 17): every attribute's starter is different, but the 3 Bakugan's G add up to within 50 of every other starter (630-640 now)
 const STARTERS = {
   pyrus: ['dan', ['Saurus', 'Falconeer', 'Robotallion']], aquos: ['marucho', ['Stinglash', 'Serpenoid', 'Terrorclaw']],
-  subterra: ['julie', ['Gargonoid', 'Robotallion', 'Saurus']], haos: ['runo', ['Saurus', 'Manion', 'Griffon']],
-  darkus: ['masquerade', ['Fear Ripper', 'Serpenoid', 'Stinglash']], ventus: ['shun', ['Ravenoid', 'Stinglash', 'Saurus']],
+  subterra: ['julie', ['Gargonoid', 'Stinglash', 'Saurus']], haos: ['runo', ['Saurus', 'Manion', 'Griffon']],
+  darkus: ['masquerade', ['Fear Ripper', 'Serpenoid', 'Stinglash']], ventus: ['shun', ['Ravenoid', 'Robotallion', 'Saurus']],
 };
 const LEVELS = { easy: { upgrades: 0, rank: 4 }, normal: { upgrades: 5, rank: 1 }, hard: { upgrades: 10, rank: 0 } };   // rank 0 = best card for the team
 const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));

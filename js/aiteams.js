@@ -7149,9 +7149,9 @@ export const STARTERS = {
     "name": "Gargonoid"
    },
    {
-    "id": "bb_40",
+    "id": "bb_44",
     "attr": "subterra",
-    "name": "Robotallion"
+    "name": "Stinglash"
    },
    {
     "id": "bb_41",
@@ -7386,9 +7386,9 @@ export const STARTERS = {
     "name": "Ravenoid"
    },
    {
-    "id": "bb_44",
+    "id": "bb_40",
     "attr": "ventus",
-    "name": "Stinglash"
+    "name": "Robotallion"
    },
    {
     "id": "bb_41",
