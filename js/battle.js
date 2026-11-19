@@ -1048,7 +1048,7 @@ async function showBattle(b, before = null) {
   const col = (sd, i) => `<div class="side" id="side${i}">
       <div class="who">${state.players[sd.p].name}</div>
       <div class="toy"><span class="attr" style="background:${ATTR_COLOR[sd.attr]}"></span>${sd.name}</div>
-      <div class="g" id="g${i}">${before ? before[sd.p] : sd.start}G</div>
+      <div class="g" id="g${i}">${before ? sd.total : sd.start}G</div>
       <div class="steps" id="steps${i}"></div>
       <div class="winner" id="win${i}"></div></div>`;
   $('bbody').classList.toggle('multi', b.sides.length > 2);
@@ -1057,8 +1057,7 @@ async function showBattle(b, before = null) {
   $('bnext').hidden = true;
   await sleep(500);
   for (let i = 0; i < b.sides.length; i++) {
-    const sd = b.sides[i], counted = before ? [...before.labels[sd.p]] : [];
-    const gateStep = st => { const k = counted.indexOf(st.label); if (k < 0) return false; counted.splice(k, 1); return true; };
+    const sd = b.sides[i];
     let shown = before ? before[sd.p] : sd.start;
     for (const st of sd.steps) {
       const line = document.createElement('div'); line.className = 'step';
@@ -1066,11 +1065,11 @@ async function showBattle(b, before = null) {
       const label = st.label.replace(/^Gate card: .*/, 'Gate bonus');
       line.textContent = st.note ? `${label} (${st.note})${amt}` : `${label}${amt || '  +0'}`;
       $('steps' + i).append(line);
-      if (before && gateStep(st)) continue;          // already counted in before the Ability cards
+      if (before) continue;   // the Ability card screen already counted everything up live: just list the steps
       await countUp($('g' + i), shown, shown + st.amount); shown += st.amount;
       await sleep(250);
     }
-    if (shown !== sd.total) await countUp($('g' + i), shown, sd.total);   // the Gate bonus changed after Ability cards
+    if (!before && shown !== sd.total) await countUp($('g' + i), shown, sd.total);
   }
   if (b.sides.length === 2) {
     const [x, y] = b.sides.map(s => s.total);
