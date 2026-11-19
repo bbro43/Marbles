@@ -377,12 +377,43 @@ addEventListener('resize', placeMsg);
 function flash(text) {
   const f = $('flash'); f.textContent = text; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
 }
+// pictures in the pickers: <img data-pic="path"> filled in from the asset pack once the bar is drawn
+const picCache = new Map();
+function fillPics(root) {
+  if (!pack) return;
+  root.querySelectorAll('img[data-pic]').forEach(im => {
+    const k = im.dataset.pic; im.removeAttribute('data-pic');
+    if (!picCache.has(k)) picCache.set(k, pack.url(k).catch(() => ''));
+    picCache.get(k).then(u => { if (u) im.src = u; else im.remove(); });
+  });
+}
+// Bakugan pictures: a snapshot of each player's own 3D Bakugan (ball form), taken once when the match loads
+const toySnap = [[], [], [], []];
+function snapToys() {
+  const W = 128, r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(W, W); r.outputColorSpace = THREE.SRGBColorSpace;
+  const sc = new THREE.Scene(); sc.add(new THREE.AmbientLight(0xffffff, 1.6)); const l = new THREE.DirectionalLight(0xffffff, 2.2); l.position.set(1, 2, 3); sc.add(l);
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+  toysMesh.forEach((list, p) => list.forEach((t, i) => {
+    const h = t.holder, parent = h.parent, vis = h.visible, pos = h.position.clone(), rot = h.rotation.clone();
+    try {
+      sc.add(h); h.visible = true; h.position.set(0, 0, 0); h.rotation.set(0, 0.6, 0); h.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(h, true), c = box.getCenter(new THREE.Vector3()), d = box.getSize(new THREE.Vector3()).length();
+      cam.position.set(c.x, c.y + d * 0.35, c.z + d * 1.7); cam.lookAt(c); r.render(sc, cam);
+      toySnap[p][i] = r.domElement.toDataURL('image/png');
+    } catch {}
+    if (parent) parent.add(h); h.visible = vis; h.position.copy(pos); h.rotation.copy(rot);
+  }));
+  r.dispose();
+}
+const toyPic = (p, t) => toySnap[p][t] ? `<img class="tpic" src="${toySnap[p][t]}" alt="">` : '';
+const cardPic = card => card.art ? `<img class="cart" data-pic="${card.art}" alt="">` : '';
 function showPicker() {
   const p = state.turn, pl = state.players[p];
   $('picker').innerHTML = pl.unused.map(t => {
     const toy = pl.toys[t];
-    return `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')}</span></button>`;
+    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')}</span></span></button>`;
   }).join('');
+  fillPics($('picker'));
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));
   armed = null;
   if (pl.unused.length === 1) select(pl.unused[0]);
@@ -469,7 +500,7 @@ const COLOR_HEX = { gold: '#e2b84a', silver: '#c9d1da', copper: '#c67a43' };
 function gateChip(card, i) {
   const top = Object.entries(card.bonus || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 3)
     .map(([a, v]) => `${a[0].toUpperCase() + a.slice(1)} +${v}`).join(' · ');
-  return `<button class="chip" data-g="${i}" style="--c:${COLOR_HEX[card.color] || '#888'}"><b>${card.name}</b><span>${card.color || ''} Gate</span><span class="st">${top || 'effect card'}</span></button>`;
+  return `<button class="chip withart" data-g="${i}" style="--c:${COLOR_HEX[card.color] || '#888'}">${cardPic(card)}<span class="ctext"><b>${card.name}</b><span>${card.color || ''} Gate</span><span class="st">${top || card.text || 'effect card'}</span></span></button>`;
 }
 // Shows player p's Gate cards in the bottom bar. Resolves with the hand index, or null for Skip.
 // msg = null keeps the current message and the current bar (used while a spot is being picked).
@@ -488,7 +519,7 @@ function chooseGate(p, msg, canSkip) {
       say(msg);
       const hand = state.players[p].gateHand;
       $('picker').innerHTML = hand.map(gateChip).join('') + (canSkip ? `<button class="chip skip" data-g="-1"><b>Skip</b><span>throw a Bakugan</span></button>` : '');
-      $('picker').classList.remove('off');
+      fillPics($('picker')); $('picker').classList.remove('off');
     }
     $('picker').querySelectorAll('button').forEach(b => b.onclick = () => {
       $('picker').querySelectorAll('button').forEach(x => x.classList.toggle('sel', x === b && b.dataset.g !== '-1'));
@@ -826,7 +857,8 @@ async function useFieldCard(i, ai = null) {
       if (t2 === undefined) {
         say('Pick the Bakugan to switch in');
         $('picker').classList.remove('off');
-        $('picker').innerHTML = others.map(t => `<button class="chip" data-t="${t}" style="--c:${ATTR_COLOR[pl.toys[t].attr]}"><b>${pl.toys[t].name}</b><span>${pl.toys[t].g}G</span></button>`).join('');
+        $('picker').innerHTML = others.map(t => `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[pl.toys[t].attr]}">${toyPic(p, t)}<span class="ctext"><b>${pl.toys[t].name}</b><span>${pl.toys[t].g}G</span></span></button>`).join('');
+        fillPics($('picker'));
         pickWait = true;
         t2 = await new Promise(res => $('picker').querySelectorAll('button').forEach(b => b.onclick = () => res(+b.dataset.t)));
         pickWait = false;
@@ -988,10 +1020,14 @@ async function abilityPhase(bt) {
       opts.map(i => {
         // what it would do: change in the G-Power gap, worked out with the card added
         const gap = c => { const mine = c.teamTotal[R.teamOf(state, p)] || 0; return mine - Math.max(...Object.entries(c.teamTotal).filter(([tm]) => +tm !== R.teamOf(state, p)).map(([, v]) => v)); };
-        const d = gap(R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] })) - gap(R.computeBattle(state, bt));
-        const tag = d > 0 ? `+${d} for you` : d < 0 ? `${d} for you` : 'no change right now';
+        const now = R.computeBattle(state, bt), next = R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] });
+        const d = gap(next) - gap(now);
+        // green helps you, red hurts you, yellow changes something without moving the gap
+        const moved = next.sides.some((sd, k) => sd.total !== now.sides[k].total) || next.result !== now.result
+          || /return|instead|draw|discard|remove|block|cancel|move|switch|nullif|ignore|win the|loses? the|back to/i.test(hand[i].text || '');
+        const [tag, tone] = d > 0 ? [`+${d} for you`, 'up'] : d < 0 ? [`${d} for you`, 'down'] : moved ? ['changes the battle', 'mid'] : ['no change right now', 'none'];
         const art = artOf.get(hand[i]);
-        return `<button class="chip withart" data-a="${i}" style="--c:${ABILITY_COLOR[hand[i].color] || '#888'}">${art ? `<img class="cart" src="${art}" alt="">` : ''}<span class="ctext"><b>${hand[i].name} <em>${tag}</em></b><span class="st">${hand[i].text || ''}</span></span></button>`;
+        return `<button class="chip withart" data-a="${i}" style="--c:${ABILITY_COLOR[hand[i].color] || '#888'}">${art ? `<img class="cart" src="${art}" alt="">` : ''}<span class="ctext"><b>${hand[i].name} <em class="${tone}">${tag}</em></b><span class="st">${hand[i].text || ''}</span></span></button>`;
       }).join('') +
       `<button class="chip skip" data-a="-1"><b>Pass</b></button>`;
     const i = await new Promise(res => {
@@ -1270,6 +1306,7 @@ async function start() {
   if (arenaDef.attr) say(`${arenaDef.name}: ${arenaDef.attr[0].toUpperCase() + arenaDef.attr.slice(1)} Bakugan get +${R.ARENA_BONUS}G`);
   $('loading').textContent = 'Loading Bakugan…';
   for (let p = 0; p < state.players.length; p++) for (const t of state.players[p].toys) toysMesh[p].push(await loadToy(t));
+  snapToys();
   cameraFor(viewOf(first)); camera.position.copy(camGoal);
   $('loading').hidden = true;
   hud(); nextTurn();
