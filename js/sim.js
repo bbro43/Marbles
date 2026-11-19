@@ -59,9 +59,10 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
       let v;
       if (theirs.length) {
         const oG = Math.max(...[...new Set(theirs.map(x => R.teamOf(s, x.p)))].map(tm => theirs.filter(x => R.teamOf(s, x.p) === tm).reduce((n, x) => n + gOf(x), 0)));
-        v = myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
-      } else if (mine.length) v = lvl(p) === 'hard' ? 120 : 70;
-      else v = 30 + bonusFor(f.card, toy.attr) / 10;
+        v = s.nv ? (myG > oG ? 160 + (myG - oG) / 3 : myG === oG ? 0 : -90 + (myG - oG) / 5)   // New Vestroia: a won battle is damage
+          : myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
+      } else if (mine.length) v = s.nv ? 5 : lvl(p) === 'hard' ? 120 : 70;
+      else v = s.nv ? 15 + bonusFor(f.card, toy.attr) / 20 : 30 + bonusFor(f.card, toy.attr) / 10;
       v -= dist(p, f.cell) * (lvl(p) === 'hard' ? 2 : 4);
       v += rng() * (lvl(p) === 'normal' ? 40 : 10);
       options.push({ t, k, v });
@@ -107,7 +108,8 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
   let turns = 0;
   while (s.winner === null && turns < maxTurns) {
     turns++;
-    R.startTurn(s, (p) => gateIdx(p));
+    const sev = R.startTurn(s, (p) => gateIdx(p));
+    if (sev.some(e => e.type === 'skip')) { R.skipTurn(s); continue; }
     const p = s.turn;
     // set a Gate card next to the field, nearest my corner
     const cells = R.placeCells(s, p);

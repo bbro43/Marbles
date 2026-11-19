@@ -77,6 +77,15 @@ export function openingPlayers(s) {
 
 // Start of a turn. Returns events describing what happened.
 // pickGate(p, hand) chooses which Gate card a player sets in the opening (index into hand).
+// a player whose Bakugan are all standing on Gate cards (nothing in hand, nothing to recycle)
+function stuck(s, q) {
+  const pl = s.players[q];
+  if (pl.unused.length) return false;
+  const standing = new Set(s.field.flatMap(f => f.toys.filter(x => x.p === q).map(x => x.t)));
+  return pl.used.length > 0 && pl.used.every(t => standing.has(t));
+}
+// New Vestroia: the turn passes without a throw (startTurn returned a 'skip' event)
+export function skipTurn(s) { return endTurn(s, [{ type: 'skipped', p: s.turn }]).events; }
 export function startTurn(s, pickGate = () => 0) {
   const ev = [];
   s.placed = false;
@@ -95,7 +104,13 @@ export function startTurn(s, pickGate = () => 0) {
     const standing = new Set(s.field.flatMap(f => f.toys.filter(x => x.p === s.turn).map(x => x.t)));
     me.unused = me.used.filter(t => !standing.has(t));
     me.used = me.used.filter(t => standing.has(t));
-    // Every Bakugan is standing on a Gate card: pick them all back up (the cards stay), or the match would stall.
+    // Every Bakugan is standing on a Gate card.
+    // New Vestroia: you sit this turn out until one of them battles and comes back (unless everyone is stuck that way).
+    // Classic (or everyone stuck): pick them all back up (the cards stay), or the match would stall.
+    if (me.unused.length === 0 && me.used.length && s.nv && !alive(s).every(q => stuck(s, q))) {
+      ev.push({ type: 'skip', p: s.turn });
+      return ev;
+    }
     if (me.unused.length === 0 && me.used.length) {
       for (const f of s.field) f.toys = f.toys.filter(x => x.p !== s.turn);
       me.unused = [...me.used]; me.used = [];
@@ -163,7 +178,13 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
     s.earlyVictory = null;
     g.toys.push({ p, t });
     ev.push({ type: 'stand', p, t, fieldIdx, cell: g.cell, slot: 0 });
-    ev.push(...capture(s, p, fieldIdx, 'early victory'));
+    if (s.nv) {
+      // New Vestroia (Billy): the Gate card's power hits right away. Every opponent takes your Bakugan's
+      // Gate bonus from that card as damage (at least 100), then the card is used up and your Bakugan comes back.
+      const hit = Math.max(KO_MIN, (g.card.bonus || {})[me.toys[t].attr] || 0);
+      for (const q of opponents(s, p)) { ev.push(...damage(s, q, hit, 'early victory')); if (s.winner !== null) break; }
+      if (s.winner === null) ev.push(...useUp(s, fieldIdx, p, 'early victory'));
+    } else ev.push(...capture(s, p, fieldIdx, 'early victory'));
     return endTurn(s, ev);
   }
   const mine = g.toys.filter(x => sameTeam(s, x.p, p));      // my team's Bakugan already there

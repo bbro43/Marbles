@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { newMatch, startTurn, land, computeBattle, resolveBattle, knockOff, placeCells, placeGate, moveOptions, openingCell,
   startBattle, abilityOptions, playAbility, passAbility, abilityDone, isCoded } from '../js/rules.js';
 import { EFFECTS } from '../js/abilities.js';
-import { fieldCardOptions, playFieldCard } from '../js/rules.js';
+import { fieldCardOptions, playFieldCard, skipTurn } from '../js/rules.js';
 
 const gate = (name, bonus) => ({ name, bonus });
 const toy = (name, attr, g) => ({ name, attr, g });
@@ -351,6 +351,31 @@ test('classic tag team: a team wins with 3 Gate cards between them', () => {
   s.field[0].toys = [{ p: 2, t: 0 }, { p: 1, t: 0 }]; s.turn = 2;
   resolveBattle(s, computeBattle(s, 0));
   assert.equal(s.players[2].captured.length, 1); assert.equal(s.winner, 0);
+});
+
+test('New Vestroia: all three Bakugan standing on Gate cards means the turn is skipped, not picked back up', () => {
+  const s = multi([0, 1]); startTurn(s);
+  const me = s.players[0]; me.unused = []; me.used = [0, 1, 2];
+  s.field[0].toys = [{ p: 0, t: 0 }, { p: 0, t: 1 }]; s.field[1].toys = [{ p: 0, t: 2 }];
+  s.turn = 0; const ev = startTurn(s);
+  assert.ok(ev.some(e => e.type === 'skip')); assert.equal(me.unused.length, 0);
+  skipTurn(s); assert.equal(s.turn, 1);
+});
+test('New Vestroia: if every player is stuck that way, they pick up instead', () => {
+  const s = multi([0, 1]); startTurn(s);
+  for (const q of [0, 1]) { s.players[q].unused = []; s.players[q].used = [0, 1, 2]; }
+  for (const q of [2, 3]) if (s.players[q]) s.players[q].out = true;
+  s.field[0].toys = [{ p: 0, t: 0 }, { p: 0, t: 1 }, { p: 0, t: 2 }]; s.field[1].toys = [{ p: 1, t: 0 }, { p: 1, t: 1 }, { p: 1, t: 2 }];
+  s.turn = 0; const ev = startTurn(s);
+  assert.ok(ev.some(e => e.type === 'pickUp')); assert.equal(s.players[0].unused.length, 3);
+});
+test('New Vestroia: Early Victory on an empty Gate card deals its bonus as damage', () => {
+  const s = multi([0, 1]); startTurn(s);
+  s.turn = 0; s.earlyVictory = 0;
+  const k = s.field.findIndex(f => (f.card.bonus || {}).pyrus === 50 && !f.toys.length);
+  land(s, 0, k);
+  assert.equal(s.players[1].life, 500 - 100);   // bonus 50 is under the 100 minimum
+  assert.ok(s.players[0].unused.includes(0));
 });
 
 console.log(`\n${n} tests passed`);

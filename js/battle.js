@@ -120,9 +120,10 @@ function aiPlan(p) {
     let v;
     if (theirs.length) {
       const oG = Math.max(...[...new Set(theirs.map(x => R.teamOf(state, x.p)))].map(tm => theirs.filter(x => R.teamOf(state, x.p) === tm).reduce((n, x) => n + gOf(x), 0)));
-      v = myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
-    } else if (mine.length) v = lvl === 'hard' ? 120 : 70;          // two of mine there: take the card
-    else v = 30 + bonusFor(f.card, toy.attr) / 10 + (state.earlyVictory === p ? 120 : 0);   // Early Victory: an empty card wins it
+      v = state.nv ? (myG > oG ? 160 + (myG - oG) / 3 : myG === oG ? 0 : -90 + (myG - oG) / 5)   // New Vestroia: a won battle is damage
+        : myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
+    } else if (mine.length) v = state.nv ? 5 : lvl === 'hard' ? 120 : 70;          // Classic: two of mine there takes the card
+    else v = (state.nv ? 15 + bonusFor(f.card, toy.attr) / 20 : 30 + bonusFor(f.card, toy.attr) / 10) + (state.earlyVictory === p ? 120 : 0);   // Early Victory: an empty card pays off
     v -= cellCenter(f.cell).distanceTo(home) / (lvl === 'hard' ? 60 : 30);   // far cards are harder to hit
     v += Math.random() * (lvl === 'normal' ? 40 : 10);
     options.push({ t, k, v });
@@ -476,6 +477,11 @@ async function nextTurn() {
     } else if (e.type === 'recycle') say(`${state.players[e.p].name}'s Bakugan come back from the used pile`);
   }
   if (ev.some(e => e.type === 'gateSet')) { say('Gate cards — set!'); await sleep(900); }
+  if (ev.some(e => e.type === 'skip')) {   // New Vestroia: all three Bakugan are out on Gate cards
+    say(`All of ${state.players[state.turn].name}'s Bakugan are on Gate cards. Turn skipped until one battles.`);
+    $('picker').innerHTML = ''; await sleep(1800);
+    R.skipTurn(state); afterTurn(); return;
+  }
   // After the opening: may set one more Gate card next to one already on the field.
   if (R.placeCells(state).length) {
     const pl = state.players[state.turn];
