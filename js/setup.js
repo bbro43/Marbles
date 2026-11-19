@@ -28,6 +28,7 @@ const CSS = `
 #setup .item b { display:block; font-size:14px; } #setup .item span { display:block; color:#93a2b2; font-size:12px; }
 #setup .tabs { display:flex; gap:6px; } #setup .tab { flex:1; background:#151d27; color:#e8edf2; border:2px solid #2a3644; border-top:5px solid var(--c); border-radius:10px; padding:7px; font:inherit; cursor:pointer; text-align:left; }
 #setup .tab.on { border-color:#fff; border-top-color:var(--c); } #setup .tab small { display:block; color:#93a2b2; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#setup .warn { color:#ffd84a !important; font-weight:600; }
 #setup .bar { position:fixed; left:0; right:0; bottom:0; display:flex; gap:8px; padding:10px 14px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); background:#121820; border-top:1px solid #2a3644; }
 #setup .bar button, #setup .big { flex:1; background:#2a3644; color:#e8edf2; border:0; border-radius:12px; padding:13px; font:inherit; font-weight:700; cursor:pointer; }
 #setup .bar .go { background:#d33; } #setup .bar .go:disabled { opacity:.4; }
@@ -93,6 +94,9 @@ const pick = arr => arr[rand(arr.length)];
 // deck = { name, toys, gates, abilities } edits just that one deck (My Room) and resolves with { deck } (null = cancelled)
 // owned (from a profile, js/profiles.js): only the Bakugan (in the attributes owned) and cards that player has
 // nv: New Vestroia rules — up to 3 Ability cards of each color (t.extra[color] holds the 2nd and 3rd)
+// cards with nothing to do under New Vestroia rules (Billy: allowed, but warned, and never auto-picked)
+const NV_NO_EFFECT = new Set(['Early Victory']);
+const NV_WARN = 'This card won\'t have any effect in this mode.';
 export async function setupTeams(cat, pack, picked = null, deck = null, owned = null, nv = false) {
   const style = document.createElement('style'); style.textContent = CSS; document.head.append(style);
   const root = document.createElement('div'); root.id = 'setup'; document.body.append(root);
@@ -137,6 +141,17 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
   // Auto finish: keep what's picked and fill the rest to suit it.
   // Toys: the team's main attribute (or the attribute filter), strongest first. Cards: the best fit for the team's attributes.
   const topPick = (arr, score) => { const s = [...arr].sort((a, b) => score(b) - score(a)).slice(0, 3); return s[rand(s.length)]; };
+  // New Vestroia: swap out any no-effect card that random / auto picked for another card of the same color
+  function nvScrub(t) {
+    if (!nv) return;
+    for (const c of AB_COLORS) {
+      const used = new Set([t.abilities[c], ...((t.extra || {})[c] || [])]);
+      const spare = () => { const a = abilities.find(x => x.color === c && !used.has(x.id) && !NV_NO_EFFECT.has(x.name)); if (a) used.add(a.id); return a && a.id; };
+      const bad = id => id && NV_NO_EFFECT.has((cardById.get(id) || {}).name);
+      if (bad(t.abilities[c])) t.abilities[c] = spare();
+      if (t.extra && t.extra[c]) t.extra[c] = t.extra[c].map(id => bad(id) ? spare() : id).filter(Boolean);
+    }
+  }
   function autoFinish(t, fa) {
     const counts = {}; t.toys.forEach(x => counts[x.attr] = (counts[x.attr] || 0) + 1);
     const main = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || fa[0];
@@ -212,7 +227,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
         `<button class="item card ${t.gates[gateTab] === g.id ? 'sel' : ''}" data-gate="${esc(g.id)}" style="--c:${COLOR_HEX[g.color]}">${cardPic(g)}<b>${esc(g.name)}</b>
           <span>${focus.map(a => `${cap(a)} +${g.bonus[a] || 0}`).join(' · ')}</span>${g.text ? `<span>${esc(g.text)}</span>` : ''}</button>`).join('');
       const abList = abilities.filter(a => a.color === abTab && hit(a.name, a.text) && (!fa.length || fitsAttrs(a, fa))).map(a =>
-        `<button class="item card ${t.abilities[abTab] === a.id || (nv && ((t.extra || {})[abTab] || []).includes(a.id)) ? 'sel' : ''}" data-ab="${esc(a.id)}" style="--c:${COLOR_HEX[a.color]}">${cardPic(a)}<b>${esc(a.name)}</b><span>${esc(a.text)}</span></button>`).join('');
+        `<button class="item card ${t.abilities[abTab] === a.id || (nv && ((t.extra || {})[abTab] || []).includes(a.id)) ? 'sel' : ''}" data-ab="${esc(a.id)}" style="--c:${COLOR_HEX[a.color]}">${cardPic(a)}<b>${esc(a.name)}</b><span>${esc(a.text)}</span>${nv && NV_NO_EFFECT.has(a.name) ? `<span class="warn">⚠ ${NV_WARN}</span>` : ''}</button>`).join('');
       const tab = (kind, c, chosen, on) => `<button class="tab ${on ? 'on' : ''}" data-${kind}tab="${c}" style="--c:${COLOR_HEX[c]}">${chosen ? cardPic(cardById.get(chosen)) : ''}${cap(c)}<small>${chosen ? esc(cardById.get(chosen).name) : '—'}${kind === 'a' && nv ? ` (${(chosen ? 1 : 0) + ((t.extra || {})[c] || []).length}/3)` : ''}</small></button>`;
       root.innerHTML = `
         <h2>${esc(t.name)}: set up your team</h2>
@@ -251,15 +266,18 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
           else if (ex.includes(id)) ex.splice(ex.indexOf(id), 1);
           else if (!t.abilities[abTab]) t.abilities[abTab] = id;
           else if (ex.length < 2) ex.push(id);
-          render(); return;
+          render();
+          const c = cardById.get(id), inDeck = t.abilities[abTab] === id || (t.extra[abTab] || []).includes(id);
+          if (c && NV_NO_EFFECT.has(c.name) && inDeck) alert(`${c.name}: ${NV_WARN}`);
+          return;
         }
         t.abilities[abTab] = b.dataset.ab;
         abTab = AB_COLORS.find(c => !t.abilities[c]) || abTab; render();
       });
       root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { gateTab = b.dataset.gtab; render(); });
       root.querySelectorAll('[data-atab]').forEach(b => b.onclick = () => { abTab = b.dataset.atab; render(); });
-      $('#srand').onclick = () => { Object.assign(t, randomTeam()); render(); };
-      $('#sauto').onclick = () => { autoFinish(t, fa); render(); };
+      $('#srand').onclick = () => { Object.assign(t, randomTeam()); nvScrub(t); render(); };
+      $('#sauto').onclick = () => { autoFinish(t, fa); nvScrub(t); render(); };
       root.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt.has(b.dataset.f) ? filt.delete(b.dataset.f) : filt.add(b.dataset.f); render(); });
       if (deck) { $('#sdone').textContent = 'Save deck'; const c = document.createElement('button'); c.textContent = 'Cancel'; $('#sdone').before(c);
         c.onclick = () => { root.remove(); style.remove(); resolve({ deck: null }); }; }

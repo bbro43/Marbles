@@ -210,8 +210,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_707",
-     "name": "Road Trip"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -241,8 +241,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_705",
-      "name": "Early Victory"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -456,8 +456,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -487,8 +487,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -979,8 +979,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_705",
-      "name": "Early Victory"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    }
@@ -1194,8 +1194,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_705",
-     "name": "Early Victory"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -1225,8 +1225,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_708",
-      "name": "Invulnerable"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -1686,8 +1686,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_708",
-     "name": "Invulnerable"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -1717,8 +1717,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_706",
-      "name": "Surprise Attack"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -1932,8 +1932,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -1963,8 +1963,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -2178,8 +2178,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_708",
-     "name": "Invulnerable"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -2209,8 +2209,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_706",
-      "name": "Surprise Attack"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    }
@@ -2424,8 +2424,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -2455,8 +2455,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    }
@@ -2670,8 +2670,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_705",
-     "name": "Early Victory"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -2916,8 +2916,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_708",
-     "name": "Invulnerable"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -2947,8 +2947,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_706",
-      "name": "Surprise Attack"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    }
@@ -3162,8 +3162,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -3193,8 +3193,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    }
@@ -3685,8 +3685,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_705",
-      "name": "Early Victory"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    }
@@ -3918,8 +3918,8 @@ export const AI_TEAMS = {
      "name": "Brushfire"
     },
     "green": {
-     "id": "ds_705",
-     "name": "Early Victory"
+     "id": "ds_706",
+     "name": "Surprise Attack"
     }
    },
    "extra": {
@@ -3949,8 +3949,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_708",
-      "name": "Invulnerable"
+      "id": "ds_707",
+      "name": "Road Trip"
      }
     ]
    },
@@ -4191,8 +4191,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_707",
-     "name": "Road Trip"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -4222,8 +4222,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_705",
-      "name": "Early Victory"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -4466,8 +4466,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -4497,8 +4497,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -4740,8 +4740,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_708",
-     "name": "Invulnerable"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -4771,8 +4771,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_706",
-      "name": "Surprise Attack"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    },
@@ -5013,8 +5013,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_707",
-     "name": "Road Trip"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -5044,8 +5044,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_705",
-      "name": "Early Victory"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -5288,8 +5288,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -5319,8 +5319,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -5593,8 +5593,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_705",
-      "name": "Early Victory"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    },
@@ -5837,8 +5837,8 @@ export const AI_TEAMS = {
      "name": "Summon Wave"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -5868,8 +5868,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    },
@@ -6113,8 +6113,8 @@ export const AI_TEAMS = {
      "name": "The Glow"
     },
     "green": {
-     "id": "ds_708",
-     "name": "Invulnerable"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {
@@ -6144,8 +6144,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_706",
-      "name": "Surprise Attack"
+      "id": "ds_708",
+      "name": "Invulnerable"
      }
     ]
    },
@@ -6387,8 +6387,8 @@ export const AI_TEAMS = {
      "name": "Home Advantage"
     },
     "green": {
-     "id": "ds_707",
-     "name": "Road Trip"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -6418,8 +6418,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_705",
-      "name": "Early Victory"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -6660,8 +6660,8 @@ export const AI_TEAMS = {
      "name": "Power From Darkness"
     },
     "green": {
-     "id": "ds_706",
-     "name": "Surprise Attack"
+     "id": "ds_708",
+     "name": "Invulnerable"
     }
    },
    "extra": {
@@ -6691,8 +6691,8 @@ export const AI_TEAMS = {
       "name": "No Trading"
      },
      {
-      "id": "ds_707",
-      "name": "Road Trip"
+      "id": "ds_706",
+      "name": "Surprise Attack"
      }
     ]
    },
@@ -6933,8 +6933,8 @@ export const AI_TEAMS = {
      "name": "Updraft"
     },
     "green": {
-     "id": "ds_705",
-     "name": "Early Victory"
+     "id": "ds_707",
+     "name": "Road Trip"
     }
    },
    "extra": {

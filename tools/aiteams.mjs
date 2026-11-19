@@ -58,8 +58,8 @@ const CARDS = {
   // Klaus went 59-59 at Hard with generic cards; built around Sirenoid (Forcing Wave = Sirenoid +200G) he wins ~60% against the other Hards
   klaus: { hard: { red: ['Aquos Double Input', 'Aquos Swap', 'Aquos Time Breaker'], blue: ['Summon Wave', 'The Shadow', 'G-Power Bump'], green: ['Forcing Wave', 'Imbalance', 'Surprise Attack'] } },
   // Billy: Dan, Shun, Klaus, Masquerade and Spectra on even footing (each ~60% against the other Hards)
-  masquerade: { hard: { red: ['Darkus Swap', 'Darkus Time Breaker', 'Trickster'], blue: ['Power From Darkness', 'The Shadow', 'Dark Growth'], green: ['Chaos of the Darkness', 'No Trading', 'Early Victory'] } },
-  spectra: { hard: { red: ['Pyrus Swap', 'Pyrus Time Breaker', 'Trickster'], blue: ['Brushfire', 'Circle Of Fire', 'The Glow'], green: ['Imbalance', 'No Trading', 'Early Victory'] } },
+  masquerade: { hard: { red: ['Darkus Swap', 'Darkus Time Breaker', 'Trickster'], blue: ['Power From Darkness', 'The Shadow', 'Dark Growth'], green: ['Chaos of the Darkness', 'No Trading', 'Surprise Attack'] } },
+  spectra: { hard: { red: ['Pyrus Swap', 'Pyrus Time Breaker', 'Trickster'], blue: ['Brushfire', 'Circle Of Fire', 'The Glow'], green: ['Imbalance', 'No Trading', 'Invulnerable'] } },
 };
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));
@@ -103,7 +103,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     const team = { attr, upgrades, toys, gates: {}, abilities: {} };
     team.gates = pickGates(toys.map(x => x.name), attr, rank);
     for (const c of AB_COLORS) {
-      let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
+      let pool = abilities.filter(a => a.name !== 'Early Victory').filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
       const r = ranked(pool, a => abilityScore(a, attrs)); const a = r[Math.min(rank, r.length - 1)]; team.abilities[c] = { id: a.id, name: a.name };
       // New Vestroia rules: 2 more of each color (the next best for the team; easier levels get weaker ones)
       let more = r.filter(x => x !== a); if (more.length < 2) more = ranked(abilities.filter(x => x.color === c && x !== a), x => abilityScore(x, attrs));
@@ -111,7 +111,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     }
     // before/after-throw cards (no G bonus, so the ranking above never picks them): Normal and Hard get some
     if (lvl !== 'easy') {
-      const FIELD = { red: ['Another Throw', 'Second Chance', 'Trickster', 'Sleight of Hand'], green: ['Surprise Attack', 'Invulnerable', 'Early Victory', 'Road Trip'] };
+      const FIELD = { red: ['Another Throw', 'Second Chance', 'Trickster', 'Sleight of Hand'], green: ['Surprise Attack', 'Invulnerable', 'Road Trip'] };   // no Early Victory (Billy): it does nothing in New Vestroia
       const h = [...id].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7) >>> 0;
       const fc = (color, k) => { const n = FIELD[color][(h + k) % FIELD[color].length]; const c = cat.cards.find(x => x.name === n); return { id: c.id, name: c.name }; };
       team.extra.red[1] = fc('red', lvl === 'hard' ? 1 : 0);                                  // New Vestroia: one red one (Normal), plus a green one (Hard)

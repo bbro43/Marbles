@@ -178,13 +178,7 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
     s.earlyVictory = null;
     g.toys.push({ p, t });
     ev.push({ type: 'stand', p, t, fieldIdx, cell: g.cell, slot: 0 });
-    if (s.nv) {
-      // New Vestroia (Billy): the Gate card's power hits right away. Every opponent takes your Bakugan's
-      // Gate bonus from that card as damage (at least 100), then the card is used up and your Bakugan comes back.
-      const hit = Math.max(KO_MIN, (g.card.bonus || {})[me.toys[t].attr] || 0);
-      for (const q of opponents(s, p)) { ev.push(...damage(s, q, hit, 'early victory')); if (s.winner !== null) break; }
-      if (s.winner === null) ev.push(...useUp(s, fieldIdx, p, 'early victory'));
-    } else ev.push(...capture(s, p, fieldIdx, 'early victory'));
+    ev.push(...capture(s, p, fieldIdx, 'early victory'));   // New Vestroia: the card is just used up (no effect there; kept out of prebuilt decks)
     return endTurn(s, ev);
   }
   const mine = g.toys.filter(x => sameTeam(s, x.p, p));      // my team's Bakugan already there

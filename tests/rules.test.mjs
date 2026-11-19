@@ -369,14 +369,6 @@ test('New Vestroia: if every player is stuck that way, they pick up instead', ()
   s.turn = 0; const ev = startTurn(s);
   assert.ok(ev.some(e => e.type === 'pickUp')); assert.equal(s.players[0].unused.length, 3);
 });
-test('New Vestroia: Early Victory on an empty Gate card deals its bonus as damage', () => {
-  const s = multi([0, 1]); startTurn(s);
-  s.turn = 0; s.earlyVictory = 0;
-  const k = s.field.findIndex(f => (f.card.bonus || {}).pyrus === 50 && !f.toys.length);
-  land(s, 0, k);
-  assert.equal(s.players[1].life, 500 - 100);   // bonus 50 is under the 100 minimum
-  assert.ok(s.players[0].unused.includes(0));
-});
 
 console.log(`\n${n} tests passed`);
 

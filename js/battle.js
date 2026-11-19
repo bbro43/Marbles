@@ -123,7 +123,7 @@ function aiPlan(p) {
       v = state.nv ? (myG > oG ? 160 + (myG - oG) / 3 : myG === oG ? 0 : -90 + (myG - oG) / 5)   // New Vestroia: a won battle is damage
         : myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
     } else if (mine.length) v = state.nv ? 5 : lvl === 'hard' ? 120 : 70;          // Classic: two of mine there takes the card
-    else v = (state.nv ? 15 + bonusFor(f.card, toy.attr) / 20 : 30 + bonusFor(f.card, toy.attr) / 10) + (state.earlyVictory === p ? 120 : 0);   // Early Victory: an empty card pays off
+    else v = (state.nv ? 15 + bonusFor(f.card, toy.attr) / 20 : 30 + bonusFor(f.card, toy.attr) / 10) + (state.earlyVictory === p && !state.nv ? 120 : 0);   // Early Victory (Classic): an empty card wins it
     v -= cellCenter(f.cell).distanceTo(home) / (lvl === 'hard' ? 60 : 30);   // far cards are harder to hit
     v += Math.random() * (lvl === 'normal' ? 40 : 10);
     options.push({ t, k, v });
@@ -180,7 +180,7 @@ function aiFieldCard(p, phase, landing) {
       if (best) return { i: has('Surprise Attack'), ai: { mine: best.m.f.cell, theirs: best.o.f.cell } };
     }
     if (has('Another Throw') !== undefined && pl.unused.length >= 2 && (lvl === 'hard' || Math.random() < 0.5)) return { i: has('Another Throw') };
-    if (has('Early Victory') !== undefined && state.field.some(f => !f.toys.length) && lvl !== 'easy') return { i: has('Early Victory') };
+    if (has('Early Victory') !== undefined && !state.nv && state.field.some(f => !f.toys.length) && lvl !== 'easy') return { i: has('Early Victory') };
     if (has('Invulnerable') !== undefined && foesOf(p).some(q => state.players[q].unused.length)) {
       const mine = stand(p).sort((a, b) => power(p, b.x.t, b.f.card) - power(p, a.x.t, a.f.card))[0];
       if (mine) return { i: has('Invulnerable'), ai: { cell: mine.f.cell } };
