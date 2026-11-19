@@ -26,9 +26,18 @@
   #barText.run { animation: tick linear infinite; }
   @keyframes tick { from { transform: translateX(256px); } to { transform: translateX(var(--to)); } }
   .txt { position:absolute; font: 700 10px/12px system-ui,sans-serif; color:#fff; text-shadow:0 1px 0 #000; }
-  .obtn { position:absolute; left:40px; width:176px; height:17px; background:#4a110c; border:1px solid #e3241b; color:#fff;
-          font: italic 800 9px/15px system-ui,sans-serif; text-align:center; letter-spacing:.3px; text-shadow:0 1px 0 #000; }
-  .obtn.sel, .obtn:active { background:#a87a78; border-color:#f05a50; }
+  /* our raised buttons: light metal frame, red face, clipped corners, pressed look when tapped */
+  .obtn { position:absolute; left:40px; width:176px; height:20px; padding:0 8px; box-sizing:border-box; color:#fff; border:0; cursor:pointer;
+          font: italic 800 9px/20px system-ui,sans-serif; text-align:center; letter-spacing:.3px; text-shadow:0 1px 0 #000, 0 0 3px #000;
+          background: linear-gradient(#e2574e, #b3221b 48%, #8e1510 52%, #a51d16);
+          clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+          box-shadow: inset 0 0 0 1.5px #d9dde3, inset 0 0 0 2.5px #6b6f76, inset 0 3px 0 2px #ff9c94aa, 0 2px 0 #000; }
+  .obtn.sel { background: linear-gradient(#f5d36a, #d99a1e 48%, #b77d10 52%, #c88a18); color:#2a1500; text-shadow:0 1px 0 #ffe9a8; }
+  .obtn:active { transform: translateY(1.5px); filter: brightness(.85); }
+  .obtn.big { height:30px; font-size:10px; line-height:13px; display:flex; flex-direction:column; justify-content:center; }
+  .obtn.big small { font: 700 7px/9px system-ui,sans-serif; letter-spacing:1px; color:#ffd9d4; font-style:normal; }
+  .obtn.big .arr { position:absolute; top:0; bottom:0; width:18px; font:900 13px/30px system-ui,sans-serif; font-style:normal; color:#ffd9d4; }
+  .obtn.big .arr.l { left:6px; } .obtn.big .arr.r { right:6px; }
   .rows { position:absolute; left:26px; right:20px; top:44px; font: 600 8.5px/12px system-ui,sans-serif; }
   .rows div { display:flex; justify-content:space-between; border-bottom:1px solid #ffffff22; }
   .rows span:last-child { color:#ffd0c8; }
@@ -57,7 +66,7 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 94;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 95;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -135,12 +144,13 @@ function arena() {
   $('bot').innerHTML = img('arena_bot', 0, 0) +
     `<img src="${art('btn_single')}" class="tap" id="bSingle" style="left:32px;top:48px" alt="">` +
     `<img src="${art('btn_multi')}" class="tap" id="bMulti" style="left:32px;top:96px" alt="">` +
-    `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">` +
-    // Rules: Classic (win 3 Gate cards) or New Vestroia (Life Gauge)
-    `<div class="obtn tap" id="bRules" style="top:150px;left:32px;width:180px">RULES: ${rules() === 'nv' ? 'NEW VESTROIA (LIFE GAUGE)' : 'CLASSIC (3 GATE CARDS)'}</div>` +
-    `<div class="obtn tap" id="bArena" style="top:122px;left:32px;width:180px">ARENA: ${(ARENAS.find(a => a[0] === arenaPick()) || ARENAS[0])[1]}</div>`;
+    `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
+  // Arena and Rules on the top screen, as buttons: tap to cycle
+  $('top').innerHTML += `<div class="obtn big tap" id="bArena" style="top:66px;left:28px;width:200px"><i class="arr l">‹</i><small>ARENA</small>${(ARENAS.find(a => a[0] === arenaPick()) || ARENAS[0])[1]}<i class="arr r">›</i></div>` +
+    `<div class="obtn big tap" id="bRules" style="top:112px;left:28px;width:200px"><i class="arr l">‹</i><small>RULES</small>${rules() === 'nv' ? 'NEW VESTROIA (LIFE GAUGE)' : 'CLASSIC (3 GATE CARDS)'}<i class="arr r">›</i></div>`;
   bar(rules() === 'nv' ? 'New Vestroia rules: bring Life to 0 to win. Up to 9 Ability cards.' : 'Select the type of game.');
-  $('bArena').onclick = () => { const i = ARENAS.findIndex(a => a[0] === arenaPick()); try { localStorage.setItem('marbles-arena', ARENAS[(i + 1) % ARENAS.length][0]); } catch {} render(); };
+  $('bArena').onclick = e => { const b = e.currentTarget.getBoundingClientRect(), d = e.clientX < b.left + b.width / 2 ? -1 : 1;   // left half goes back, right half forward
+    const i = ARENAS.findIndex(a => a[0] === arenaPick()); try { localStorage.setItem('marbles-arena', ARENAS[(i + d + ARENAS.length) % ARENAS.length][0]); } catch {} render(); };
   $('bRules').onclick = () => { try { localStorage.setItem('marbles-rules', rules() === 'nv' ? 'classic' : 'nv'); } catch {} render(); };
   $('bSingle').onclick = () => go('computer');
   $('bMulti').onclick = () => { mode = 'multi'; pickFor = 0; picks = [null, null]; teams = null; go('chars'); };
