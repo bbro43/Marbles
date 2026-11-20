@@ -48,6 +48,20 @@ function newSeason(s1, name, attr) {
   return { seed, B, leagues: S.leagues, names: S.names, events: S.events.map(e => ({ ...e, day: e.week * 7 })), fixtures: S.leagues.map(rounds), done: {}, eventsDone: [] };
 }
 
+// ---------- fixed teams (story-mode-design.md); Team Ranking = the members' average Elo
+const TEAMS = [
+  { name: 'Vexos', ids: ['spectra', 'gus', 'mylene', 'volt', 'shadow', 'lync'] },
+  { name: 'Battle Brawlers', ids: ['nv_dan', 'nv_shun', 'nv_marucho', 'runo', 'julie'] },
+  { name: 'Resistance', ids: ['ace', 'mira', 'baron'] },
+  { name: "Masquerade's team", ids: ['masquerade', 'klaus', 'chanlee', 'julio', 'komba', 'billy'] },
+];
+// Flash sales: some days the Shop marks G-Power boosts down (seeded, so everyone sees the same sale that day)
+function flashSale(day = save.day) {
+  const r = makeRng(save.season.seed + day * 104729)();
+  return r < 0.18 ? 40 : r < 0.4 ? 25 : 0;   // percent off
+}
+const boostCost = () => Math.round(upCost('you') * (100 - flashSale()) / 100);
+
 // ---------- results: records, BP, Elo, league table, upgrades
 function upCost(id) {
   const b = save.season.B[id], t = teamOf(id);
@@ -207,9 +221,9 @@ function render(view = save.view || 'commons') {
       <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button></div>`;
   }
   } else if (view === 'shop') {
-    const c = upCost('you'), b = save.season.B.you, left = UPS_PER_SEASON - (b.up - b.startUp);
-    body = `<h2>The Shop</h2><p>G-Power boost: +10G to all three of your Bakugan.</p>
-      <p>Cost: <b>${c} BP</b>. You have ${b.wallet} BP. Boosts left this season: ${left}.</p>
+    const c = boostCost(), sale = flashSale(), b = save.season.B.you, left = UPS_PER_SEASON - (b.up - b.startUp);
+    body = `<h2>The Shop</h2>${sale ? `<p class="sale">FLASH SALE today: ${sale}% off G-Power boosts!</p>` : ''}<p>G-Power boost: +10G to all three of your Bakugan.</p>
+      <p>Cost: <b>${c} BP</b>${sale ? ` <s>${upCost('you')}</s>` : ''}. You have ${b.wallet} BP. Boosts left this season: ${left}.</p>
       <button class="big" id="buy" ${b.wallet < c || left <= 0 ? 'disabled' : ''}>Buy boost</button>` + who('shop') + back();
   } else if (view.startsWith('arena')) {
     body = `<h2>${PLACES.find(p => p[0] === view)[1]}</h2>` + who(view) + back();
@@ -230,8 +244,51 @@ function render(view = save.view || 'commons') {
   $('main').querySelectorAll('[data-partner]').forEach(b => b.onclick = () => { save.you.partner = b.dataset.partner; store(); render('inventory'); });
   if ($('rest')) $('rest').onclick = rest;
   if ($('playLeague')) $('playLeague').onclick = () => launch(f.opp, { key: f.key, league: true });
-  if ($('buy')) $('buy').onclick = () => { const b = save.season.B.you, c = upCost('you'); if (b.wallet >= c) { b.wallet -= c; b.up++; msg('ISA', `G-Power boost purchased. Your Bakugan are now +${b.up}.`); store(); render('shop'); } };
+  if ($('buy')) $('buy').onclick = () => { const b = save.season.B.you, c = boostCost(); if (b.wallet >= c) { b.wallet -= c; b.up++; msg('ISA', `G-Power boost purchased. Your Bakugan are now +${b.up}.`); store(); render('shop'); } };
   store();
+}
+// ---------- the floating boards: short versions on the map, full versions in a popup
+function teamRanks() {
+  const B = save.season.B;
+  return TEAMS.map(t => { const m = t.ids.filter(id => B[id]); return { ...t, m, elo: m.reduce((n, id) => n + B[id].elo, 0) / (m.length || 1) }; })
+    .filter(t => t.m.length >= 3).sort((a, b) => b.elo - a.elo);
+}
+function eloRanks() { const B = save.season.B; return Object.keys(B).sort((a, b) => B[b].elo - B[a].elo); }
+function newsItems() {
+  const out = [], sale = flashSale(), next = save.season.events.filter(e => e.day >= save.day).sort((a, b) => a.day - b.day)[0];
+  if (sale) out.push({ text: `FLASH SALE: ${sale}% off G-Power boosts today`, hot: true });
+  if (flashSale(save.day + 1)) out.push({ text: `Tomorrow: ${flashSale(save.day + 1)}% off boosts at The Shop` });
+  if (next) out.push({ text: next.day === save.day ? `Today: ${next.name}` : `${next.name} in ${next.day - save.day} day${next.day - save.day > 1 ? 's' : ''}` });
+  for (const name of [...save.season.eventsDone].reverse().slice(0, 2)) { const w = (save.season.B && Object.values(save.season.B).find(b => b.titles.includes(name))); if (w) out.push({ text: `${w.name} won the ${name}` }); }
+  const top = eloRanks()[0]; out.push({ text: `No. 1 in Interspace: ${nameOf(top)}` });
+  const lead = teamRanks()[0]; if (lead) out.push({ text: `Top team: ${lead.name}` });
+  return out;
+}
+function boards() {
+  const B = save.season.B, li = leagueOf('you');
+  const lg = [...save.season.leagues[li]].sort((a, b) => B[b].lg.pts - B[a].lg.pts || B[b].lg.bp - B[a].lg.bp);
+  const me = lg.indexOf('you');
+  return [
+    { key: 'news', title: 'Interspace News', color: 0xf08a24, lines: newsItems() },
+    { key: 'league', title: save.season.names[li], color: 0x2f8fd8, lines: [...lg.slice(0, 5).map((id, i) => ({ text: `${i + 1}. ${nameOf(id)}  ${B[id].lg.pts} pts`, hot: id === 'you' })),
+      ...(me >= 5 ? [{ text: `${me + 1}. You  ${B.you.lg.pts} pts`, hot: true }] : [])] },
+    { key: 'rankings', title: 'Rankings', color: 0xd94a3a, lines: eloRanks().slice(0, 6).map((id, i) => ({ text: `${i + 1}. ${nameOf(id)}  ${Math.round(B[id].elo)}`, hot: id === 'you' })) },
+    { key: 'teams', title: 'Team Rankings', color: 0x8a5cc7, lines: teamRanks().map((t, i) => `${i + 1}. ${t.name}  ${Math.round(t.elo)}`) },
+  ];
+}
+function boardPopup(key) {
+  const B = save.season.B, el = document.createElement('div'); el.className = 'pop';
+  let h = '';
+  if (key === 'news') h = `<h2>Interspace News</h2>` + newsItems().map(n => `<p class="${n.hot ? 'sale' : ''}">${n.text}</p>`).join('');
+  else if (key === 'league') h = standings();
+  else if (key === 'rankings') { const ids = eloRanks(), mi = ids.indexOf('you');
+    h = `<h2>Rankings</h2><p class="note">Everyone in Interspace, by Elo. You're No. ${mi + 1}.</p><table><tr><th></th><th>Brawler</th><th>Elo</th><th>W-L</th></tr>` +
+      ids.map((id, i) => `<tr class="${id === 'you' ? 'me' : ''}"><td>${i + 1}</td><td>${nameOf(id)}</td><td>${Math.round(B[id].elo)}</td><td>${B[id].rec.w}-${B[id].rec.l}</td></tr>`).join('') + '</table>'; }
+  else if (key === 'teams') h = `<h2>Team Rankings</h2><p class="note">A team's ranking is its members' average Elo.</p>` + teamRanks().map((t, i) =>
+      `<div class="card"><b>${i + 1}. ${t.name}</b> · ${Math.round(t.elo)}<div class="note">${t.m.map(id => `${nameOf(id)} (${Math.round(B[id].elo)})`).join(', ')}</div></div>`).join('');
+  el.innerHTML = `<div class="popin">${h}<button class="big" data-close>Close</button></div>`;
+  el.onclick = e => { if (e.target === el || e.target.dataset.close !== undefined) el.remove(); };
+  document.body.appendChild(el);
 }
 let map = null, mapKey = '';
 function showMap(on, f) {
@@ -242,8 +299,8 @@ function showMap(on, f) {
   const yaw = map?.yaw; if (map) map.dispose();
   const counts = f ? {} : Object.fromEntries(Object.entries(presence()).map(([k, v]) => [k, v.length]));
   if (save.messages.length) counts.messages = Math.min(save.messages.length, 99);
-  map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw,
-    onPick: k => { if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
+  map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(),
+    onPick: k => { if (k.startsWith('board:')) return boardPopup(k.slice(6)); if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
   mapKey = key;
 }
 const back = () => `<button class="back" data-back>Back to The Commons</button>`;

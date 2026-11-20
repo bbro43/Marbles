@@ -249,6 +249,39 @@ function skyDome(scene, slot) {
   scene.fog = new THREE.Fog(s.bot, 220, 420);
 }
 
+// ---------- floating boards over the plaza (our own: see-through green screens with live text)
+function boardTexture(b) {
+  const W = 512, H = 340, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  const accent = '#' + b.color.toString(16).padStart(6, '0');
+  g.fillStyle = 'rgba(40,190,120,0.55)'; g.fillRect(0, 0, W, H);
+  g.strokeStyle = 'rgba(200,255,220,0.25)'; g.lineWidth = 1;
+  for (let x = 0; x < W; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
+  for (let y = 0; y < H; y += 32) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+  g.strokeStyle = '#d9ffe8'; g.lineWidth = 8; g.strokeRect(4, 4, W - 8, H - 8);
+  g.fillStyle = accent; g.fillRect(8, 8, W - 16, 58);
+  g.fillStyle = '#fff'; g.font = 'italic 900 36px system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText(b.title.toUpperCase(), 24, 38);
+  g.font = '700 25px system-ui, sans-serif';
+  (b.lines || []).slice(0, 6).forEach((ln, i) => {
+    const y = 96 + i * 40;
+    g.fillStyle = i % 2 ? 'rgba(0,60,30,0.25)' : 'rgba(255,255,255,0.12)'; g.fillRect(16, y - 18, W - 32, 36);
+    g.fillStyle = ln.hot ? '#ffe36b' : '#ffffff'; g.fillText(String(ln.text || ln).slice(0, 34), 28, y);
+  });
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+function addBoards(scene, list) {
+  const out = [];
+  list.forEach((b, i) => {
+    const a = (i / list.length) * Math.PI * 2 + 0.4, rr = 34, y = 48 + (i % 2) * 10;
+    const grp = new THREE.Group(); grp.position.set(Math.sin(a) * rr, y, Math.cos(a) * rr);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(34, 22.6), new THREE.MeshBasicMaterial({ map: boardTexture(b), transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+    m.userData.key = 'board:' + b.key; m.renderOrder = 5; grp.add(m);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.6, y - 9, 6, 1, true), new THREE.MeshBasicMaterial({ color: 0x7fffc0, transparent: true, opacity: 0.18, depthWrite: false }));
+    beam.position.y = -(y - 9) / 2 - 11; grp.add(beam); b.beam = beam;   // a faint light beam down to the plaza
+    scene.add(grp); out.push({ grp, m, y, ph: i * 1.7, beam });
+  });
+  return out;
+}
+
 // ---------- mount
 // opts: { slot, counts: {place: n}, highlight: key, onPick(key) }
 export function mountCommons(host, opts) {
@@ -265,6 +298,7 @@ export function mountCommons(host, opts) {
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -110, right: 110, top: 110, bottom: -110, near: 10, far: 400 }); sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.6;
   ground(scene);
   const fx = plazaCenter(scene);
+  const boards = addBoards(scene, opts.boards || []);
 
   // landmarks
   const picks = [], labels = [];
@@ -295,7 +329,7 @@ export function mountCommons(host, opts) {
 
   const flat = ['PlaneGeometry', 'RingGeometry', 'CircleGeometry'];
   scene.traverse(o => { if (!o.isMesh || o.material.wireframe || o.material.side === THREE.BackSide) return;
-    o.receiveShadow = true; o.castShadow = !flat.includes(o.geometry.type); });
+    o.receiveShadow = true; o.castShadow = !flat.includes(o.geometry.type) && !o.material.transparent; if (o.material.transparent) o.receiveShadow = false; });
 
   // camera: orbit around the plaza, drag to turn, pinch / wheel to zoom
   const cam = new THREE.PerspectiveCamera(50, w / h, 1, 1200);
@@ -316,7 +350,7 @@ export function mountCommons(host, opts) {
     if (was === 1 && moved < 6 && e.type === 'pointerup') {   // a tap: pick a building
       const rc = new THREE.Raycaster(), b = el.getBoundingClientRect();
       rc.setFromCamera(new THREE.Vector2((e.clientX - b.left) / b.width * 2 - 1, -(e.clientY - b.top) / b.height * 2 + 1), cam);
-      const hit = rc.intersectObjects(picks, true).find(x => x.object.userData.key);
+      const hit = rc.intersectObjects([...boards.map(b => b.m), ...picks], true).find(x => x.object.userData.key);
       if (hit) opts.onPick(hit.object.userData.key);
     }
   };
@@ -329,6 +363,12 @@ export function mountCommons(host, opts) {
     if (!alive) return;
     const t = (performance.now() - t0) / 1000;
     fx.ring.rotation.x = Math.PI / 2 + Math.sin(t * 0.7) * 0.25; fx.ring.rotation.z = t * 0.6; fx.core.rotation.y = t; fx.core.position.y = 9 + Math.sin(t * 1.5) * 0.4;
+    for (const b of boards) {   // face the camera, bob gently
+      b.grp.quaternion.copy(cam.quaternion);   // always face the screen
+      b.m.material.opacity = Math.min(1, Math.max(0.12, (dist - 110) / 60));   // fade out when zoomed in on the plaza
+      b.grp.position.y = b.y + Math.sin(t * 0.8 + b.ph) * 0.8;
+      b.beam.quaternion.copy(cam.quaternion).invert();   // keep the beam pointing straight down
+    }
     renderer.render(scene, cam);
     const W = el.clientWidth, H = el.clientHeight;
     for (const L of labels) {
