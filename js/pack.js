@@ -50,6 +50,15 @@ export class Pack {
         if (find(f)) th[a] = f;
       }
       if (Object.keys(th).length) t.thumbs = th;
+    }    // Trap pictures named traps/<id>/thumb-<attribute>.png fill in each Trap's thumbs the same way
+    for (const t of p.catalog.traps || []) {
+      if (t.thumbs) continue;
+      const th = {};
+      for (const a of ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus']) {
+        const f = `traps/${t.id}/thumb-${a}.png`;
+        if (find(f)) th[a] = f;
+      }
+      if (Object.keys(th).length) t.thumbs = th;
     }
     p.zip = { file: find };   // old callers use pack.zip.file(path)
     p.urls = new Map();
