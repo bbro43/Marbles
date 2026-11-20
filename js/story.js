@@ -13,6 +13,7 @@ import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
 import { mountCommons } from './commons3d.js';
 import { playLogin } from './login3d.js';
+import { buildAvatar, DEFAULT_LOOK } from './avatar.js';
 import { mountTeamRoom } from './teamroom3d.js';
 import { stock, trapAttrCap, priceTrap, salesFor, salesOnDay, discountOn, saleText } from './storyshop.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -946,6 +947,7 @@ async function start() {
   if (!pack) { $('main').innerHTML = '<p>No asset pack on this device yet. Go back and load it first.</p>'; return; }
   cat = pack.catalog; PACK = pack;
   save = load();
+  if (loginCtl) { avatarSent = true; loginCtl.setAvatar(buildAvatar((save && save.you && save.you.look) || DEFAULT_LOOK, p => pack.url(p)).catch(() => null)); }   // you, in your login pod
   const s1 = await (await fetch('data/season1.json')).json();
   if (!save) { $('main').innerHTML = '<div class="hdr"><b>Bakugan Interspace</b></div>'; opening(s1); return; }
   if (save.season && save.you) { ensureColl(); migrateUps(); store(); }
@@ -957,6 +959,6 @@ async function start() {
 $('newgame').onclick = () => { if (confirm('Start a new story? This erases your current one.')) { localStorage.removeItem(KEY); location.reload(); } };
 // The login corridor plays each time you open Story mode from the menu (not when you come back from a battle or the Shop).
 // It stays up at least 4 seconds, or until the page has finished loading.
-let loginDone = null;
-try { if (!sessionStorage.getItem('marbles-story-in')) { sessionStorage.setItem('marbles-story-in', '1'); const ready = new Promise(r => { loginDone = r; }); playLogin({ ready }); } } catch {}
-start().catch(e => console.error(e)).finally(() => loginDone && loginDone());
+let loginDone = null, loginCtl = null, avatarSent = false;
+try { if (!sessionStorage.getItem('marbles-story-in')) { sessionStorage.setItem('marbles-story-in', '1'); const ready = new Promise(r => { loginDone = r; }); loginCtl = playLogin({ ready }); } } catch {}
+start().catch(e => console.error(e)).finally(() => { if (loginCtl && !avatarSent) loginCtl.setAvatar(null); loginDone && loginDone(); });
