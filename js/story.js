@@ -9,6 +9,8 @@ import { setupSeason2, LEAGUE_NAMES } from './season2.js';
 import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
 import { mountCommons } from './commons3d.js';
+import { stock, trapAttrCap, priceTrap } from './storyshop.js';
+import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 
 const $ = id => document.getElementById(id);
 const KEY = 'marbles-story';
@@ -20,7 +22,7 @@ const ATTR_COLOR = { pyrus: '#e2453c', aquos: '#3b82e0', subterra: '#b07a3a', ha
 const cap = s => s[0].toUpperCase() + s.slice(1);
 const NAME = { nv_dan: 'Dan', nv_shun: 'Shun', nv_marucho: 'Marucho', chanlee: 'Chan Lee' };
 
-let cat = null, save = null;
+let cat = null, save = null, PACK = null;
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } };
 const store = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch {} };
 
@@ -29,7 +31,7 @@ const teamDef = id => id === 'you' ? null : AI_TEAMS[id] || INTERSPACE[id];
 const nameOf = id => id === 'you' ? save.you.name : NAME[id] || (INTERSPACE[id] || {}).name || cap(id);
 function teamOf(id) {   // the deck for this brawler right now (level cards + this season's upgrades)
   const b = save.season.B[id];
-  if (id === 'you') return { ...STARTERS[save.you.attr], upgrades: b.up };
+  if (id === 'you') { ensureColl(); return { ...save.you.deck, upgrades: b.up }; }
   return { ...teamDef(id)[b.level], upgrades: b.up };
 }
 const mainAttr = id => (teamOf(id).toys[0] || {}).attr || 'pyrus';
@@ -47,6 +49,18 @@ function newSeason(s1, name, attr) {
     elo: r.elo || 1500, bp: 0, wallet: r.wallet || 0, rec: { w: 0, l: 0, d: 0 }, lg: { w: 0, l: 0, d: 0, pts: 0, bp: 0 }, titles: [] };
   return { seed, B, leagues: S.leagues, names: S.names, events: S.events.map(e => ({ ...e, day: e.week * 7 })), fixtures: S.leagues.map(rounds), done: {}, eventsDone: [] };
 }
+
+// ---------- your collection and deck (start: your starter set; grows with Shop buys and prizes)
+const tkey = (id, attr) => `${id}:${attr}`;
+function ensureColl() {
+  const y = save.you; if (y.coll && y.deck) return;
+  const st = STARTERS[y.attr];
+  y.deck = JSON.parse(JSON.stringify({ toys: st.toys, gates: st.gates, abilities: st.abilities, extra: st.extra || {}, trap: null }));
+  y.coll = { toys: Object.fromEntries(st.toys.map(t => [tkey(t.id, t.attr), {}])),
+    cards: [...new Set([...Object.values(st.gates), ...Object.values(st.abilities), ...Object.values(st.extra || {}).flat()].map(c => c.id))], traps: [] };
+}
+// League 1 is the top. League 4 covers all three divisions.
+const leagueNum = (id = 'you') => Math.min(4, leagueOf(id) + 1);
 
 // ---------- fixed teams (story-mode-design.md); Team Ranking = the members' average Elo
 const TEAMS = [
@@ -241,23 +255,27 @@ function render(view = save.view || 'commons') {
     body = `<div class="isa"><div class="isaname">ISA</div><div>${line}</div></div>
       ${f ? `<button class="big" id="playLeague">Play league match: vs ${nameOf(f.opp)}</button>` : ''}
       <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button></div>`;
-  }
   } else if (view === 'shop') {
-    const c = boostCost(), sale = discount({ kind: 'upgrades' }), b = save.season.B.you, left = UPS_PER_SEASON - (b.up - b.startUp);
-    body = `<h2>The Shop</h2>${salesOn().map(x => `<p class="sale">On sale: ${saleText(x)}${x.to > save.day ? ` (until day ${x.to + 1})` : ' (last day)'}</p>`).join('')}<p>G-Power boost: +10G to all three of your Bakugan.</p>
-      <p>Cost: <b>${c} BP</b>${sale ? ` <s>${upCost('you')}</s>` : ''}. You have ${b.wallet} BP. Boosts left this season: ${left}.</p>
-      <button class="big" id="buy" ${b.wallet < c || left <= 0 ? 'disabled' : ''}>Buy boost</button>` + who('shop') + back();
+    body = shopView();
   } else if (view.startsWith('arena')) {
     body = `<h2>${PLACES.find(p => p[0] === view)[1]}</h2>` + who(view) + back();
   } else if (view === 'standings') body = standings() + back();
   else if (view === 'calendar') body = calendar() + back();
   else if (view === 'messages') body = `<h2>Messages</h2>` + (save.messages.map(m => `<div class="msg"><span>Day ${m.day + 1} · ${m.from}</span>${m.text}</div>`).join('') || '<p>No messages.</p>') + back();
   else if (view === 'inventory') {
-    const t = teamOf('you');
-    body = `<h2>Inventory</h2><p>Tap a Bakugan to name it your partner. (Just your favorite. It doesn't change how it battles.)</p>` +
-      t.toys.map(x => { const d = cat.toys.find(y => y.id === x.id) || {}; const g = Math.min(G_CAP, (d.baseG || 0) + save.season.B.you.up * 10);
-        return `<button class="row ${save.you.partner === x.id ? 'on' : ''}" data-partner="${x.id}"><span class="dot" style="background:${ATTR_COLOR[x.attr]}"></span>${d.name} · ${g}G${save.you.partner === x.id ? ' · Partner' : ''}</button>`; }).join('') + back();
+    ensureColl(); const y = save.you, t = y.deck, up = save.season.B.you.up;
+    const nm = id => (cat.cards.find(c => c.id === id) || {}).name || '?';
+    body = `<h2>My Room</h2><h3>Deck</h3>` +
+      t.toys.map(x => { const d = cat.toys.find(q => q.id === x.id) || {}; const g = Math.min(G_CAP, (d.baseG || 0) + up * 10);
+        return `<button class="row ${y.partner === x.id ? 'on' : ''}" data-partner="${x.id}"><span class="dot" style="background:${ATTR_COLOR[x.attr]}"></span>${d.name} · ${g}G${y.partner === x.id ? ' · Partner' : ''}</button>`; }).join('') +
+      `<p class="note">Tap a Bakugan to name it your partner (just your favorite; it doesn't change how it battles).</p>
+      <p>Gate cards: ${GATE_COLORS.map(c => nm((t.gates[c] || {}).id)).join(', ')}</p>
+      <p>Ability cards: ${AB_COLORS.map(c => [t.abilities[c], ...((t.extra || {})[c] || [])].filter(Boolean).map(x => nm(x.id || x)).join(', ')).join(' · ')}</p>
+      <button class="big" id="editDeck">Edit deck</button>
+      <h3>Trap</h3>${y.coll.traps.length ? y.coll.traps.map(x => `<button class="row ${t.trap && t.trap.id === x.id && t.trap.attrs.join() === x.attrs.join() ? 'on' : ''}" data-usetrap="${x.uid}">${x.name} · ${x.attrs.map(cap).join(', ')}</button>`).join('') : '<p class="note">No Traps yet. The Shop sells them.</p>'}
+      <p class="note">Collection: ${Object.keys(y.coll.toys).length} Bakugan, ${y.coll.cards.length} cards, ${y.coll.traps.length} Traps.</p>` + back();
   }
+  { const mh = $('map'); if (mh && mh.parentNode === $('main')) document.body.appendChild(mh); }   // keep the 3D map when the page is redrawn
   $('main').innerHTML = header() + body;
   showMap(view === 'commons', f);
   $('main').querySelectorAll('[data-go]').forEach(b => b.onclick = () => render(b.dataset.go));
@@ -265,8 +283,12 @@ function render(view = save.view || 'commons') {
   $('main').querySelectorAll('[data-challenge]').forEach(b => b.onclick = () => challenge(b.dataset.challenge));
   $('main').querySelectorAll('[data-partner]').forEach(b => b.onclick = () => { save.you.partner = b.dataset.partner; store(); render('inventory'); });
   if ($('rest')) $('rest').onclick = rest;
+  if ($('editDeck')) $('editDeck').onclick = editDeck;
+  $('main').querySelectorAll('[data-usetrap]').forEach(e => e.onclick = () => { const x = save.you.coll.traps.find(q => q.uid === e.dataset.usetrap);
+    save.you.deck.trap = { id: x.id, name: x.name, attrs: x.attrs }; store(); render('inventory'); });
   if ($('playLeague')) $('playLeague').onclick = () => launch(f.opp, { key: f.key, league: true });
-  if ($('buy')) $('buy').onclick = () => { const b = save.season.B.you, c = boostCost(); if (b.wallet >= c) { b.wallet -= c; b.up++; msg('ISA', `G-Power boost purchased. Your Bakugan are now +${b.up}.`); store(); render('shop'); } };
+  if (view === 'shop') shopWire();
+  if ($('buy')) $('buy').onclick = () => { const b = save.season.B.you, c = boostCost(); if (b.wallet >= c && b.up - b.startUp < UPS_PER_SEASON) { b.wallet -= c; b.up++; msg('ISA', `G-Power boost purchased. Your Bakugan are now +${b.up}.`); store(); render('shop'); } };
   store();
 }
 // ---------- the floating boards: short versions on the map, full versions in a popup
@@ -313,6 +335,72 @@ function boardPopup(key) {
   el.onclick = e => { if (e.target === el || e.target.dataset.close !== undefined) el.remove(); };
   document.body.appendChild(el);
 }
+// ---------- The Shop: boosts, Bakugan, Gate cards, Ability cards, Traps. Locked items show which league unlocks them.
+let shopTab = 'boost', shopAttr = null, shopColor = null, trapPick = { id: null, attrs: [] }, STOCK = null;
+const LOCK = n => `<span class="lock">League ${n}+</span>`;
+const salePrice = (price, item) => Math.round(price * (100 - discount(item)) / 100);
+function priceTag(price, item) { const p = salePrice(price, item); return p < price ? `<b>${p} BP</b> <s>${price}</s>` : `<b>${price} BP</b>`; }
+function shopView() {
+  ensureColl(); STOCK = STOCK || stock(cat);
+  const b = save.season.B.you, L = leagueNum(), y = save.you;
+  shopAttr = shopAttr || y.attr;
+  const tabs = [['boost', 'Boosts'], ['bakugan', 'Bakugan'], ['gate', 'Gate cards'], ['ability', 'Ability cards'], ['trap', 'Traps']];
+  let h = `<h2>The Shop</h2><p class="note">You have <b>${b.wallet} BP</b>. You're in ${save.season.names[leagueOf('you')]}: higher leagues unlock stronger stock.</p>` +
+    salesOn().map(x => `<p class="sale">On sale: ${saleText(x)}${x.to > save.day ? ` (until day ${x.to + 1})` : ' (last day)'}</p>`).join('') +
+    `<div class="tabs">${tabs.map(([k, n]) => `<button class="${shopTab === k ? 'on' : ''}" data-stab="${k}">${n}</button>`).join('')}</div>`;
+  if (shopTab === 'boost') {
+    const c = boostCost(), full = upCost('you'), left = UPS_PER_SEASON - (b.up - b.startUp);
+    h += `<p>G-Power boost: +10G to every Bakugan you own.</p><p>Cost: ${priceTag(full, { kind: 'upgrades' })}. Boosts left this season: ${left}.</p>
+      <button class="big" id="buy" ${b.wallet < c || left <= 0 ? 'disabled' : ''}>Buy boost</button>`;
+  } else if (shopTab === 'bakugan') {
+    h += `<div class="tabs">${ATTRS6.map(a => `<button class="${shopAttr === a ? 'on' : ''}" data-sattr="${a}" style="border-color:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>` +
+      STOCK.toys.filter(x => x.t.attributes[shopAttr]).map(x => {
+        const own = y.coll.toys[tkey(x.t.id, shopAttr)], it = { kind: 'bakugan', attr: shopAttr }, lock = x.tier < L;
+        return `<div class="item ${lock ? 'locked' : ''}"><span class="dot" style="background:${ATTR_COLOR[shopAttr]}"></span><span class="nm">${x.t.name} <small>${x.t.baseG}G</small></span>
+          ${own ? '<span class="own">Owned</span>' : lock ? LOCK(x.tier) : `${priceTag(x.price, it)} <button data-buy="toy:${x.t.id}" ${b.wallet < salePrice(x.price, it) ? 'disabled' : ''}>Buy</button>`}</div>`; }).join('');
+  } else if (shopTab === 'gate' || shopTab === 'ability') {
+    const cols = shopTab === 'gate' ? GATE_COLORS : AB_COLORS; if (!cols.includes(shopColor)) shopColor = cols[0];
+    const list = (shopTab === 'gate' ? STOCK.gates : STOCK.abilities).filter(x => x.c.color === shopColor).sort((p, q) => q.tier - p.tier || p.price - q.price);
+    h += `<div class="tabs">${cols.map(c => `<button class="${shopColor === c ? 'on' : ''}" data-scol="${c}">${cap(c)}</button>`).join('')}</div>` +
+      list.map(x => { const own = y.coll.cards.includes(x.c.id), it = { kind: shopTab, color: x.c.color }, lock = x.tier < L;
+        const sub = shopTab === 'gate' ? Object.entries(x.c.bonus).filter(([, v]) => v).map(([k, v]) => `${cap(k).slice(0, 3)} ${v}`).join(' · ') : (x.c.text || '');
+        return `<div class="item ${lock ? 'locked' : ''}"><span class="nm">${x.c.name}<small>${sub}</small></span>
+          ${own ? '<span class="own">Owned</span>' : lock ? LOCK(x.tier) : `${priceTag(x.price, it)} <button data-buy="card:${x.c.id}" ${b.wallet < salePrice(x.price, it) ? 'disabled' : ''}>Buy</button>`}</div>`; }).join('');
+  } else if (shopTab === 'trap') {
+    const capN = trapAttrCap(L), n = Math.max(1, trapPick.attrs.length), price = priceTrap(n), it = { kind: 'trap' };
+    h += `<p class="note">A Trap covers up to <b>${capN}</b> attribute${capN > 1 ? 's' : ''} in your league${L > 1 ? ' (League ' + (L - 1) + ' allows more)' : ''}. Each extra attribute costs more. Traps are used in New Vestroia matches.</p>` +
+      STOCK.traps.map(x => `<button class="row ${trapPick.id === x.t.id ? 'on' : ''}" data-trap="${x.t.id}">${x.t.name}</button>`).join('') +
+      (trapPick.id ? `<p>Attributes (${trapPick.attrs.length}/${capN}):</p><div class="tabs">${ATTRS6.map(a => `<button class="${trapPick.attrs.includes(a) ? 'on' : ''}" data-tattr="${a}" style="border-color:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>
+        <p>Cost: ${priceTag(price, it)}</p><button class="big" id="buyTrap" ${!trapPick.attrs.length || b.wallet < salePrice(price, it) ? 'disabled' : ''}>Buy Trap</button>` : '');
+  }
+  return h + who('shop') + back();
+}
+function shopWire() {
+  const m = $('main'), b = save.season.B.you, y = save.you;
+  m.querySelectorAll('[data-stab]').forEach(e => e.onclick = () => { shopTab = e.dataset.stab; render('shop'); });
+  m.querySelectorAll('[data-sattr]').forEach(e => e.onclick = () => { shopAttr = e.dataset.sattr; render('shop'); });
+  m.querySelectorAll('[data-scol]').forEach(e => e.onclick = () => { shopColor = e.dataset.scol; render('shop'); });
+  m.querySelectorAll('[data-trap]').forEach(e => e.onclick = () => { trapPick = { id: e.dataset.trap, attrs: [] }; render('shop'); });
+  m.querySelectorAll('[data-tattr]').forEach(e => e.onclick = () => { const a = e.dataset.tattr, i = trapPick.attrs.indexOf(a);
+    if (i >= 0) trapPick.attrs.splice(i, 1); else if (trapPick.attrs.length < trapAttrCap(leagueNum())) trapPick.attrs.push(a); render('shop'); });
+  m.querySelectorAll('[data-buy]').forEach(e => e.onclick = () => {
+    const [kind, id] = e.dataset.buy.split(':');
+    if (kind === 'toy') { const x = STOCK.toys.find(q => q.t.id === id), p = salePrice(x.price, { kind: 'bakugan', attr: shopAttr });
+      if (x.tier < leagueNum() || b.wallet < p) return; b.wallet -= p; y.coll.toys[tkey(id, shopAttr)] = {};
+      msg('ISA', `${x.t.name} (${cap(shopAttr)}) added to your collection for ${p} BP. Add it to your deck from My Room.`); }
+    else { const x = [...STOCK.gates, ...STOCK.abilities].find(q => q.c.id === id), p = salePrice(x.price, { kind: x.c.type === 'gate' ? 'gate' : 'ability', color: x.c.color });
+      if (x.tier < leagueNum() || b.wallet < p || y.coll.cards.includes(id)) return; b.wallet -= p; y.coll.cards.push(id);
+      msg('ISA', `${x.c.name} added to your collection for ${p} BP.`); }
+    store(); render('shop');
+  });
+  if ($('buyTrap')) $('buyTrap').onclick = () => {
+    const T = STOCK.traps.find(q => q.t.id === trapPick.id).t, p = salePrice(priceTrap(trapPick.attrs.length), { kind: 'trap' });
+    if (b.wallet < p || !trapPick.attrs.length || trapPick.attrs.length > trapAttrCap(leagueNum())) return;
+    b.wallet -= p; y.coll.traps.push({ uid: 'tr' + Date.now(), id: T.id, name: T.name, attrs: [...trapPick.attrs] });
+    if (!y.deck.trap) y.deck.trap = { id: T.id, name: T.name, attrs: [...trapPick.attrs] };
+    msg('ISA', `Trap ${T.name} (${trapPick.attrs.map(cap).join(', ')}) purchased for ${p} BP.`); trapPick = { id: null, attrs: [] }; store(); render('shop');
+  };
+}
 let map = null, mapKey = '';
 function showMap(on, f) {
   const host = $('map'), key = `${save.day}-${save.slot}-${!!f}`;
@@ -325,6 +413,28 @@ function showMap(on, f) {
   map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(),
     onPick: k => { if (k.startsWith('board:')) return boardPopup(k.slice(6)); if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
   mapKey = key;
+}
+// deck editor (the same one as My Room in the main game), limited to what you own
+async function editDeck() {
+  const y = save.you, d = y.deck, idOf = x => x && (x.id || x);
+  const owned = { toys: y.coll.toys, cards: y.coll.cards };
+  const start = { name: y.name, toys: d.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_COLORS.map(c => [c, idOf(d.gates[c])])),
+    abilities: Object.fromEntries(AB_COLORS.map(c => [c, idOf(d.abilities[c])])), extra: Object.fromEntries(AB_COLORS.map(c => [c, ((d.extra || {})[c] || []).map(idOf)])) };
+  $('main').hidden = true; $('map').hidden = true;
+  const r = await setupTeams(cat, PACK, [{ id: 'you', name: y.name }, null], start, owned, true);
+  $('main').hidden = false;
+  if (r && r.deck) {
+    const card = id => { const c = cat.cards.find(q => q.id === id); return c ? { id: c.id, name: c.name } : null; };
+    const full = r.deck.toys.length === 3 && GATE_COLORS.every(c => r.deck.gates[c]) && AB_COLORS.every(c => r.deck.abilities[c]);
+    if (full) {
+      y.deck = { toys: r.deck.toys.map(x => ({ id: x.id, attr: x.attr, name: (cat.toys.find(q => q.id === x.id) || {}).name })),
+        gates: Object.fromEntries(GATE_COLORS.map(c => [c, card(r.deck.gates[c])])), abilities: Object.fromEntries(AB_COLORS.map(c => [c, card(r.deck.abilities[c])])),
+        extra: Object.fromEntries(AB_COLORS.map(c => [c, ((r.deck.extra || {})[c] || []).map(card).filter(Boolean)])), trap: d.trap };
+      if (!y.deck.toys.some(x => x.id === y.partner)) y.partner = null;
+      store();
+    }
+  }
+  render('inventory');
 }
 const back = () => `<button class="back" data-back>Back to The Commons</button>`;
 function who(place) {
@@ -419,7 +529,7 @@ function placement() {
 async function start() {
   let pack = null; try { pack = await Pack.fromDevice(); } catch {}
   if (!pack) { $('main').innerHTML = '<p>No asset pack on this device yet. Go back and load it first.</p>'; return; }
-  cat = pack.catalog;
+  cat = pack.catalog; PACK = pack;
   save = load();
   const s1 = await (await fetch('data/season1.json')).json();
   if (!save) { $('main').innerHTML = '<div class="hdr"><b>Bakugan Interspace</b></div>'; opening(s1); return; }

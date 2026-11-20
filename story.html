@@ -48,6 +48,15 @@
   .pop { position: fixed; inset: 0; background: #0008; display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
   .popin { background: #0f2a22; border: 2px solid #7fffc0; border-radius: 14px; padding: 12px 14px; width: min(560px, 100%); max-height: 82vh; overflow: auto; box-shadow: 0 0 24px #2fd88a66; }
   .sale { color: #ffe36b; font-weight: 800; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
+  .tabs button { padding: 6px 10px; border-radius: 8px; background: #1b2430; color: #cfe; border: 1px solid #2f3d50; font-weight: 700; font-size: 13px; }
+  .tabs button.on { background: #39b6ff; color: #0e1726; }
+  .item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-bottom: 1px solid #22303f; font-size: 14px; }
+  .item .nm { flex: 1; display: flex; flex-direction: column; } .item .nm small { color: #93a4bf; font-size: 11px; }
+  .item button { padding: 5px 12px; border-radius: 8px; background: #2fb36a; color: #fff; border: 0; font-weight: 800; }
+  .item button:disabled { background: #3a4656; color: #8899aa; }
+  .item.locked { opacity: .55; } .lock { background: #3a2a10; color: #ffcf3a; border: 1px solid #ffcf3a66; border-radius: 6px; padding: 2px 6px; font-size: 11px; font-weight: 800; }
+  .own { color: #8fe3ff; font-weight: 800; font-size: 12px; } .item s { color: #93a4bf; font-size: 11px; }
 </style>
 <script src="vendor/jszip.min.js"></script>
 <script type="importmap">{ "imports": { "three": "./vendor/three/build/three.module.js", "three/addons/": "./vendor/three/examples/jsm/" } }</script>
