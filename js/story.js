@@ -1,11 +1,14 @@
-// Story mode: Season 2 of Interspace, played a day at a time from The Commons.
-// Stage 1: opening scenes, The Commons, locations and who's there, free challenges, league match days, the rest of the
-// league simulated day by day, standings, calendar, messages, partner, a simple upgrade shop, Rest.
-// (Events are simulated without you in this stage; entering them comes next.)
+// Story mode: Interspace, played a day at a time from The Commons, season after season.
+// - Days: three slots (Morning, Afternoon, Evening) and Rest. League match days are fixed; the rest of each league plays itself.
+// - Events (Opens, Royal Challenge, Field Open, Major, Masters, Finale): you enter and play your own matches; everything else is simulated.
+// - End of season: promotion (Season 2's special rule, then top 2 up / bottom 2 down), the next season, and the upgrade reset every 4 seasons.
+// - Social: teams (fixed show teams, computer teams that form, your own), friendship, rivals, trade offers.
+// - Scenes and places that aren't written/built yet have hooks: scene(key) and PLACE_VIEWS (search "PLACEHOLDER").
 import { Pack } from './pack.js';
 import { makeRng, playMatch, buildPlayer } from './sim.js';
 import { BP, MAX_UP, UPS_PER_SEASON, ATTRS6 } from './season.js';
-import { setupSeason2, LEAGUE_NAMES } from './season2.js';
+import { setupSeason2, LEAGUE_NAMES, season2Events, promoteSeason2, VEXOS } from './season2.js';
+import { PRIZE_BAND } from './season.js';
 import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
 import { mountCommons } from './commons3d.js';
@@ -62,13 +65,138 @@ function ensureColl() {
 // League 1 is the top. League 4 covers all three divisions.
 const leagueNum = (id = 'you') => Math.min(4, leagueOf(id) + 1);
 
-// ---------- fixed teams (story-mode-design.md); Team Ranking = the members' average Elo
-const TEAMS = [
-  { name: 'Vexos', ids: ['spectra', 'gus', 'mylene', 'volt', 'shadow', 'lync'] },
-  { name: 'Battle Brawlers', ids: ['nv_dan', 'nv_shun', 'nv_marucho', 'runo', 'julie'] },
-  { name: 'Resistance', ids: ['ace', 'mira', 'baron'] },
-  { name: "Masquerade's team", ids: ['masquerade', 'klaus', 'chanlee', 'julio', 'komba', 'billy'] },
+// ---------- teams (story-mode-design.md). Teams don't change battles. 3+ members = a team room (PLACEHOLDER place) and a spot in
+// Team Rankings (the members' average Elo). Max 6. The four show teams are fixed; computer brawlers form teams from week 3; you can
+// create one, invite brawlers, accept invites, and leave (-25 friendship with every former teammate).
+const FIXED_TEAMS = [
+  { id: 'vexos', name: 'Vexos', ids: ['spectra', 'gus', 'mylene', 'volt', 'shadow', 'lync'] },
+  { id: 'brawlers', name: 'Battle Brawlers', ids: ['nv_dan', 'nv_shun', 'nv_marucho', 'runo', 'julie'] },
+  { id: 'resistance', name: 'Resistance', ids: ['ace', 'mira', 'baron'] },
+  { id: 'masq', name: "Masquerade's team", ids: ['masquerade', 'klaus', 'chanlee', 'julio', 'komba', 'billy'] },
 ];
+// our own team names for computer teams
+const TEAM_NAMES = ['Nova Squad', 'Iron Comets', 'Sky Breakers', 'Pulse Riders', 'Storm Circuit', 'Crimson Orbit', 'Tidal Core', 'Granite Edge',
+  'Solar Flux', 'Shadow Relay', 'Ember Line', 'Gale Force', 'Prism Pact', 'Static Crew', 'Quartz Guard', 'Vortex Union', 'Neon Drift', 'Echo Rally'];
+const TEAM_MAX = 6, TEAM_ROOM = 3;
+function teamsList() { if (!save.teams) save.teams = FIXED_TEAMS.map(t => ({ ...t, ids: [...t.ids], fixed: true })); return save.teams; }
+const teamWith = id => teamsList().find(t => t.ids.includes(id)) || null;
+const myTeam = () => teamWith('you');
+const oppositeTeams = id => { const a = myTeam(), b = teamWith(id); return !!(a && b && a !== b); };
+// computer teams form from week 3: free brawlers group up with others in their league or division
+function formTeams(rng) {
+  if (week(save.day) < 3) return;
+  const taken = new Set(teamsList().flatMap(t => t.ids)), free = Object.keys(save.season.B).filter(id => id !== 'you' && !taken.has(id));
+  const byLeague = {}; free.forEach(id => (byLeague[leagueOf(id)] = byLeague[leagueOf(id)] || []).push(id));
+  let made = 0;
+  for (const li of rng.shuffle(Object.keys(byLeague))) {
+    const pool = rng.shuffle(byLeague[li]);
+    while (pool.length >= 3 && made < 2 && rng() < 0.6) {
+      const size = pool.length >= 4 && rng() < 0.5 ? 4 : 3, used = new Set(teamsList().map(t => t.name));
+      const name = TEAM_NAMES.find(n => !used.has(n)) || `Team ${teamsList().length + 1}`;
+      teamsList().push({ id: 't' + save.day + '_' + made, name, ids: pool.splice(0, size), fixed: false }); made++;
+    }
+  }
+  if (made) msg('ISA', `New team${made > 1 ? 's' : ''} registered this week: ${teamsList().slice(-made).map(t => t.name).join(', ')}.`);
+}
+// a computer team with an opening may invite you (more likely if you're friends with its members)
+function teamInvites(rng) {
+  if (myTeam() || week(save.day) < 2) return;
+  const open = teamsList().filter(t => !t.fixed && t.ids.length < TEAM_MAX);
+  for (const t of rng.shuffle(open)) {
+    const f = t.ids.reduce((n, id) => n + friendship(id), 0) / t.ids.length, chance = f >= 40 ? 0.6 : f >= 10 ? 0.3 : f >= 0 ? 0.12 : 0;
+    if (rng() < chance) { addOffer({ type: 'team', team: t.id, from: t.ids[0] }); msg(nameOf(t.ids[0]), `${t.name} has an opening. Want to join us? (Teams screen)`); scene('teamInvite', { team: t.id }); return; }
+  }
+}
+function addOffer(o) { save.offers = (save.offers || []).filter(x => !(x.type === o.type && x.team === o.team)); save.offers.push({ ...o, day: save.day }); }
+function joinTeam(tid) {
+  const t = teamsList().find(x => x.id === tid); if (!t || t.ids.length >= TEAM_MAX || myTeam()) return false;
+  t.ids.push('you'); save.offers = (save.offers || []).filter(x => x.team !== tid);
+  msg('ISA', `You joined ${t.name}.`); if (t.ids.length >= TEAM_ROOM) scene('teamRoomOpen', { team: t.id });
+  return true;
+}
+function leaveTeam() {
+  const t = myTeam(); if (!t) return;
+  t.ids = t.ids.filter(id => id !== 'you'); t.ids.forEach(id => befriend(id, -25, true));
+  if (!t.ids.length || (t.mine && t.ids.length < 2)) save.teams = teamsList().filter(x => x !== t);
+  msg('ISA', `You left ${t.name}. Your former teammates took it personally.`);
+}
+function createTeam(name) {
+  if (myTeam()) return;
+  teamsList().push({ id: 'you_' + save.day, name: name || `${save.you.name}'s team`, ids: ['you'], fixed: false, mine: true });
+  msg('ISA', `Team ${name} registered. Invite brawlers from the Teams screen. A team room opens at ${TEAM_ROOM} members.`);
+}
+// you invite a brawler: they accept by friendship; brawlers on a show team never leave it
+function inviteToTeam(id) {
+  const t = myTeam(); if (!t || t.ids.length >= TEAM_MAX) return 'Your team is full.';
+  const theirs = teamWith(id); if (theirs && theirs.fixed) return `${nameOf(id)} is staying with ${theirs.name}.`;
+  const f = friendship(id), chance = f >= 75 ? 1 : f >= 40 ? 0.85 : f >= 10 ? 0.45 : f >= 0 ? 0.15 : 0;
+  if (makeRng(save.season.seed + save.day * 53 + id.length * 7 + (save.invitesTried || 0))() >= chance) { save.invitesTried = (save.invitesTried || 0) + 1; return `${nameOf(id)} turned the invite down.`; }
+  if (theirs) { theirs.ids = theirs.ids.filter(x => x !== id); if (theirs.ids.length < 2 && !theirs.fixed) save.teams = teamsList().filter(x => x !== theirs); }
+  t.ids.push(id); if (t.ids.length === TEAM_ROOM) scene('teamRoomOpen', { team: t.id });
+  return `${nameOf(id)} joined ${t.name}!`;
+}
+function teamRanks() {
+  const B = save.season.B;
+  return teamsList().map(t => { const m = t.ids.filter(id => B[id]); return { ...t, m, elo: m.reduce((n, id) => n + B[id].elo, 0) / (m.length || 1) }; })
+    .filter(t => t.m.length >= TEAM_ROOM).sort((a, b) => b.elo - a.elo);
+}
+
+// ---------- friendship (story-mode-design.md): -100 to 100. Stranger < 10, Acquaintance 10+, Friend 40+, Best Friend 75+.
+// Teammate +1 a week; Tag Team together +3 (+5 if you win); a title for your team +3; trade +4; losing to them -2;
+// on opposite teams -1 on every interaction; leaving a team -25 with every former teammate.
+const FR_LEVELS = [[75, 'Best Friend'], [40, 'Friend'], [10, 'Acquaintance'], [-Infinity, 'Stranger']];
+const frLevel = id => FR_LEVELS.find(([n]) => friendship(id) >= n)[1];
+function befriend(id, n, flat = false) {
+  if (id === 'you' || !save.season.B[id]) return;
+  save.friends = save.friends || {};
+  const before = frLevel(id), d = n - (!flat && oppositeTeams(id) ? 1 : 0);
+  save.friends[id] = Math.max(-100, Math.min(100, (save.friends[id] || 0) + d));
+  const after = frLevel(id);
+  if (after !== before && d > 0) { msg('ISA', `${nameOf(id)} is now your ${after === 'Best Friend' ? 'best friend' : after.toLowerCase()}.`); if (after === 'Best Friend') scene('bestFriend', { id }); }
+}
+// ---------- rivals (Billy): whoever you face most, and evenly: at least 5 of your last 30 matches, winning 40-60% of those
+function noteMatch(id, r) {
+  const before = rivals().map(x => x.id);
+  save.recent = [...(save.recent || []), { id, r }].slice(-30);
+  for (const x of rivals()) if (!before.includes(x.id)) { msg('ISA', `Rival registered: ${nameOf(x.id)}. You have met ${x.n} times recently, ${x.w}-${x.n - x.w - x.d}${x.d ? `-${x.d}` : ''}.`); scene('newRival', { id: x.id }); }
+}
+function rivals() {
+  const c = {}; (save.recent || []).forEach(m => { const x = c[m.id] = c[m.id] || { id: m.id, n: 0, w: 0, d: 0 }; x.n++; if (m.r === 'w') x.w++; if (m.r === 'd') x.d++; });
+  return Object.values(c).filter(x => x.n >= 5 && x.w / x.n >= 0.4 && x.w / x.n <= 0.6).sort((a, b) => b.n - a.n);
+}
+const isRival = id => rivals().some(x => x.id === id);
+
+// ---------- trades: a brawler you meet may offer one of their cards or Bakugan for one of yours that isn't in your deck.
+// Their item comes from Interspace stock up to one league above yours. A trade is +4 friendship (+3 if you're on opposite teams).
+function tradeOffer(id) {
+  const rng = makeRng(save.season.seed + save.day * 97 + save.slot * 13 + id.split('').reduce((n, c) => n + c.charCodeAt(0), 0));
+  if (rng() > (friendship(id) >= 40 ? 0.3 : 0.15) || (save.tradesDone || {})[`${save.day}-${save.slot}-${id}`]) return null;
+  ensureColl(); STOCK = STOCK || stock(cat);
+  const y = save.you, d = y.deck, L = leagueNum(), inDeck = new Set([...Object.values(d.gates), ...Object.values(d.abilities), ...Object.values(d.extra || {}).flat()].map(x => x && x.id));
+  const deckToys = new Set(d.toys.map(t => tkey(t.id, t.attr)));
+  const mySpare = [...y.coll.cards.filter(c => !inDeck.has(c)).map(c => ({ kind: 'card', id: c, name: (cat.cards.find(x => x.id === c) || {}).name })),
+    ...Object.keys(y.coll.toys).filter(k => !deckToys.has(k)).map(k => { const [tid, attr] = k.split(':'); return { kind: 'toy', id: tid, attr, name: `${(cat.toys.find(x => x.id === tid) || {}).name} (${cap(attr)})` }; })];
+  if (!mySpare.length) return null;
+  const theirs = [...STOCK.gates, ...STOCK.abilities].filter(x => x.tier >= L - 1 && !y.coll.cards.includes(x.c.id)).map(x => ({ kind: 'card', id: x.c.id, name: x.c.name }))
+    .concat(STOCK.toys.filter(x => x.tier >= L - 1).flatMap(x => Object.keys(x.t.attributes).filter(a => !y.coll.toys[tkey(x.t.id, a)]).map(a => ({ kind: 'toy', id: x.t.id, attr: a, name: `${x.t.name} (${cap(a)})` }))));
+  if (!theirs.length) return null;
+  return { give: rng.pick(mySpare), get: rng.pick(theirs), key: `${save.day}-${save.slot}-${id}` };
+}
+function doTrade(id) {
+  const o = tradeOffer(id); if (!o) return; const y = save.you;
+  if (o.give.kind === 'card') y.coll.cards = y.coll.cards.filter(c => c !== o.give.id); else delete y.coll.toys[tkey(o.give.id, o.give.attr)];
+  if (o.get.kind === 'card') y.coll.cards.push(o.get.id); else y.coll.toys[tkey(o.get.id, o.get.attr)] = {};
+  save.tradesDone = { ...(save.tradesDone || {}), [o.key]: true };
+  befriend(id, 4);
+  msg('ISA', `Trade with ${nameOf(id)}: your ${o.give.name} for their ${o.get.name}.`);
+}
+
+// ---------- PLACEHOLDER scenes (written later, see claude/story-scripts.md). Each key is a hook already called in the right spot;
+// add a script as SCENES[key] = data => lines('Who', [...]). Keys: login, firstNewcomer, midseasonCall, eventStart, eventWin, promotion,
+// seasonEnd, newRival, bestFriend, teamInvite, teamRoomOpen.
+const SCENES = {};
+function scene(key, data = {}) { const f = SCENES[key]; if (f) try { f(data); } catch {} }
+
 // ---------- Shop sales (Billy, Nov 20): the schedule lives in js/storyshop.js (the store screen uses it too)
 const saleSchedule = () => salesFor(save.season);
 const salesOn = (day = save.day) => salesOnDay(save.season, day);
@@ -85,7 +213,7 @@ function earn(id, n) {
   if (id === 'you') return;   // you spend your own BP in the Shop
   for (let c = upCost(id); b.wallet >= c && b.up < MAX_UP && b.up - b.startUp < UPS_PER_SEASON; c = upCost(id)) { b.wallet -= c; b.up++; }
 }
-// sides: [[idA], [idB]]; winner 0/1/null; stats: { id: { beaten, gates, dealt } }; league: true for a league match
+// sides: [[ids], [ids], ...] (2 to 4 sides); winner = side index or null; stats: { id: { beaten, gates, dealt } }; league: true for a league match
 function record(sides, winner, stats, { league = false } = {}) {
   const B = save.season.B, out = {};
   sides.forEach((g, i) => g.forEach(id => {
@@ -94,25 +222,34 @@ function record(sides, winner, stats, { league = false } = {}) {
     B[id].rec[k]++; out[id] = bp; earn(id, bp);
     if (league) { B[id].lg[k]++; B[id].lg.pts += k === 'w' ? 3 : k === 'd' ? 1 : 0; B[id].lg.bp += bp; }
   }));
-  if (sides.length === 2) {   // Elo
-    const avg = g => g.reduce((n, id) => n + B[id].elo, 0) / g.length, ea = 1 / (1 + 10 ** ((avg(sides[1]) - avg(sides[0])) / 400));
-    const sa = winner === null ? 0.5 : winner === 0 ? 1 : 0, d = 32 * (sa - ea);
-    sides[0].forEach(id => { B[id].elo += d; }); sides[1].forEach(id => { B[id].elo -= d; });
+  // Elo: team average; a Battle Royale counts as the winner beating each of the others (half weight)
+  const avg = g => g.reduce((n, id) => n + B[id].elo, 0) / g.length;
+  const pairs = sides.length === 2 ? [[0, 1]] : winner === null ? [] : sides.map((_, i) => i).filter(i => i !== winner).map(i => [winner, i]);
+  const delta = sides.map(() => 0);
+  for (const [a, b] of pairs) {
+    const ea = 1 / (1 + 10 ** ((avg(sides[b]) - avg(sides[a])) / 400)), sa = winner === null ? 0.5 : winner === a ? 1 : 0, k = sides.length > 2 ? 16 : 32;
+    delta[a] += k * (sa - ea); delta[b] -= k * (sa - ea);
   }
+  sides.forEach((g, i) => g.forEach(id => { B[id].elo += delta[i]; }));
   return out;
 }
 // a computer-only match, played by the simulator
-function simMatch(a, b, { arena = null, league = false } = {}, rng) {
-  const ent = [a, b].map(id => ({ name: nameOf(id), level: save.season.B[id].level, player: buildPlayer(cat, teamOf(id), { name: nameOf(id), owner: id, nv: true }) }));
-  const r = playMatch(ent, { nv: true, rng, arena });
-  const w = r.winner === 'draw' ? null : r.winner;
-  record([[a], [b]], w, { [a]: r.stats[0], [b]: r.stats[1] }, { league });
+function simMatch(a, b, { arena = null, league = false } = {}, rng) { return simSides([[a], [b]], { arena, league }, rng); }
+// sides: [[ids]...]; rules 'nv' / 'classic'; arena: null, an attribute, or 'random'. Returns the winning side index or null.
+function simSides(sides, { arena = null, league = false, rules = 'nv' } = {}, rng) {
+  const flat = sides.flat(), teams = sides.flatMap((g, i) => g.map(() => i));
+  const field = arena === 'random' ? rng.pick(ATTRS6) : arena;
+  const ent = flat.map(id => ({ name: nameOf(id), level: save.season.B[id].level, player: buildPlayer(cat, teamOf(id), { name: nameOf(id), owner: id, nv: rules === 'nv' }) }));
+  const r = playMatch(ent, { nv: rules === 'nv', teams: sides.length > 2 || flat.length > 2 ? teams : null, rng, arena: field });
+  const order = [...new Set(teams)], w = r.winner === 'draw' ? null : order.indexOf(r.winner);
+  record(sides, w, Object.fromEntries(flat.map((id, i) => [id, r.stats[i]])), { league });
   return w;
 }
 
 // ---------- the calendar
 const week = d => Math.floor(d / 7) + 1;
-const roundOn = d => LEAGUE_DAYS.indexOf(d);
+const leagueDays = () => save.season.leagueDays || LEAGUE_DAYS;
+const roundOn = d => leagueDays().indexOf(d);
 const leagueOf = id => save.season.leagues.findIndex(l => l.includes(id));
 function myFixture(d) {
   const r = roundOn(d); if (r < 0) return null;
@@ -130,38 +267,166 @@ function closeDay() {
     const key = `L${li}R${r}:${a}-${b}`; if (save.season.done[key]) return;
     simMatch(a, b, { league: true }, rng); save.season.done[key] = true;
   }));
-  for (const e of save.season.events) if (e.day === d && !save.season.eventsDone.includes(e.name)) runEvent(e, rng);
+  for (const e of save.season.events) if (e.day === d && !save.season.eventsDone.includes(e.name)) runEvent(e);
 }
-function runEvent(e, rng) {   // a quick knockout among the event's field (you aren't entered yet in this stage)
-  const B = save.season.B, ids = Object.keys(B).filter(id => id !== 'you');
-  const byBP = l => [...l].sort((a, b) => B[b].bp - B[a].bp || B[b].elo - B[a].elo);
-  let field = e.invite || e.entry === 'royal' ? byBP(ids).slice(0, 16) : rng.shuffle(ids.filter(id => leagueOf(id) > 0)).slice(0, 16);
-  if (e.entry === 'royal') field = [...(e.hosts || []), ...byBP(ids.filter(id => !(e.hosts || []).includes(id) && leagueOf(id) > 0))].slice(0, 16);
-  let alive = byBP(field);
-  while (alive.length > 1) {
-    const next = [];
-    for (let i = 0; i < alive.length / 2; i++) {
-      const a = alive[i], b = alive[alive.length - 1 - i];
-      const ar = e.arena === 'random' ? rng.pick(ATTRS6) : e.arena || null;
-      const w = simMatch(a, b, { arena: ar }, rng); next.push(w === 1 ? b : a);
-    }
-    alive = next;
+// ---------- events (Billy, Nov 20): you enter and play your own matches; everyone else's are simulated.
+// Formats: knockout (16), groups (4 groups of 4, round robin, top 2 into a knockout of 8), royale (Battle Royale groups of 4, winners to a
+// final of 4), tag (Tag Team pairs in a knockout). A draw in a knockout is replayed once, then the higher rating goes through.
+// The live event is kept in save.event so it survives going to battle.html and back.
+const eventToday = () => save.season.events.find(e => e.day === save.day && !save.season.eventsDone.includes(e.name));
+const byBPList = l => { const B = save.season.B; return [...l].sort((a, b) => B[b].bp - B[a].bp || B[b].elo - B[a].elo); };
+const tablePts = id => { const b = save.season.B[id]; return b.lg.pts * 1e6 + b.lg.bp; };
+// invites to the Major, Masters and Finale (as js/season.js): League 1, this season's event winners, Open finalists outside League 1,
+// the top 2 of the other league tables, Open semifinalists, then Season Ranking (BP)
+function invites(size) {
+  const S = save.season, out = [], add = id => { if (S.B[id] && !out.includes(id) && out.length < size) out.push(id); }, op = S.openPlace || {};
+  S.leagues[0].forEach(add);
+  Object.values(S.results || {}).forEach(r => r.winner.forEach(add));
+  Object.entries(op).filter(([, p]) => p <= 2).sort((a, b) => a[1] - b[1]).forEach(([id]) => add(id));
+  for (let rank = 0; rank < 2; rank++) S.leagues.slice(1).forEach(lg => { const top = [...lg].sort((a, b) => tablePts(b) - tablePts(a))[rank]; if (top) add(top); });
+  Object.entries(op).filter(([, p]) => p === 3).forEach(([id]) => add(id));
+  byBPList(Object.keys(S.B)).forEach(add);
+  return out;
+}
+// who's in the event (you included when eligible); opts.withYou: you chose to enter
+function eventField(e, rng, withYou) {
+  const S = save.season, all = Object.keys(S.B), comp = all.filter(id => id !== 'you');
+  let field;
+  if (e.entry === 'royal') { const vex = (e.hosts || []).filter(id => S.B[id]); field = [...vex, ...byBPList(all.filter(id => !vex.includes(id) && leagueOf(id) > 0))].slice(0, e.size); }
+  else if (e.invite) field = invites(e.size);
+  else if (e.format === 'tag') field = rng.shuffle(comp.filter(id => leagueOf(id) > 0)).slice(0, e.size);   // Tag Team Opens are always full
+  else field = rng.shuffle(comp.filter(id => rng() < ([0, 0.85, 0.95, 0.95][Math.min(3, leagueOf(id))] ?? 0.9))).slice(0, e.size);
+  field = field.filter(id => id !== 'you');
+  if (withYou) { if (field.length >= e.size) field = byBPList(field).slice(0, e.size - 1); field.push('you'); }
+  else if (field.length < e.size && !e.invite && e.entry !== 'royal') field = field.concat(rng.shuffle(comp.filter(id => !field.includes(id) && leagueOf(id) > 0))).slice(0, e.size);
+  if (e.format === 'tag' && field.length % 2) field = field.slice(0, -1);
+  return field;
+}
+// can you enter? 'open' (you choose), 'invited', 'royal', or null
+function eligibility(e) {
+  if (e.entry === 'royal') {   // the Vexos plus the best by Season Ranking outside League 1
+    const hosts = (e.hosts || []).filter(id => save.season.B[id]), rank = byBPList(Object.keys(save.season.B).filter(id => leagueOf(id) > 0 && !hosts.includes(id))).indexOf('you');
+    return rank >= 0 && rank < e.size - hosts.length ? 'royal' : null;
   }
-  const win = alive[0]; B[win].titles.push(e.name); earn(win, BP.event[e.tier] || 0);
-  save.season.eventsDone.push(e.name);
-  msg('ISA', `${e.name} result. Winner: ${nameOf(win)}.`);
+  if (e.invite) return invites(e.size).includes('you') ? 'invited' : null;
+  return leagueOf('you') === 0 ? null : 'open';   // Opens are for Leagues 2 and below
 }
+// tag pairs: canon pairs first, your partner, then the rest drawn
+const TAG_PAIRS = [['runo', 'julie'], ['nv_dan', 'nv_shun'], ['spectra', 'gus'], ['mylene', 'shadow'], ['volt', 'lync'], ['mira', 'ace'],
+  ['nv_marucho', 'baron'], ['klaus', 'chanlee'], ['julio', 'komba'], ['akira', 'shuji'], ['jenny', 'jewls']];
+function tagSides(ids, rng, partner) {
+  const left = new Set(ids), out = [];
+  if (left.has('you')) { const pt = partner && left.has(partner) ? partner : rng.pick([...left].filter(id => id !== 'you')); out.push(['you', pt]); left.delete('you'); left.delete(pt); }
+  for (const [a, b] of TAG_PAIRS) if (left.has(a) && left.has(b)) { out.push([a, b]); left.delete(a); left.delete(b); }
+  const rest = rng.shuffle([...left]); for (let i = 0; i + 1 < rest.length; i += 2) out.push([rest[i], rest[i + 1]]);
+  return out;
+}
+const sideElo = g => g.reduce((n, id) => n + save.season.B[id].elo, 0) / g.length;
+const sideBP = g => g.reduce((n, id) => n + save.season.B[id].bp, 0);
+const seedSides = sides => [...sides].sort((a, b) => sideBP(b) - sideBP(a) || sideElo(b) - sideElo(a));
+// a knockout round: 1st vs last, 2nd vs 2nd last, ...
+const koPairs = sides => { const out = []; for (let i = 0; i < sides.length / 2; i++) out.push([sides[i], sides[sides.length - 1 - i]]); return out; };
+// start an event (with or without you)
+function startEvent(e, withYou, partner = null) {
+  const rng = makeRng(save.season.seed + e.day * 104723), field = eventField(e, rng, withYou);
+  if (withYou && partner && !field.includes(partner)) field.splice(field.findIndex(id => id !== 'you'), 1, partner);   // your Tag Team partner comes with you
+  const sides = seedSides(e.format === 'tag' ? tagSides(field, rng, partner) : field.map(id => [id]));
+  const ev = { name: e.name, tier: e.tier, format: e.format, rules: e.rules || 'nv', arena: e.arena || null, prize: e.prize || null, seed: save.season.seed + e.day * 7841,
+    sides, you: withYou, matches: [], placed: [], log: [], done: false };
+  if (e.format === 'groups') {
+    const groups = [[], [], [], []]; sides.forEach((sd, i) => groups[Math.floor(i / 4) % 2 ? 3 - (i % 4) : i % 4].push(sd));   // snake seeding
+    ev.phase = 'groups'; ev.groups = groups.map(g => ({ sides: g, pts: g.map(() => 0) }));
+    ev.matches = ev.groups.flatMap((g, gi) => rounds(g.sides.map((_, i) => i)).flat().map(([a, b]) => ({ group: gi, sides: [g.sides[a], g.sides[b]], gi: [a, b] })));
+  } else if (e.format === 'royale') {
+    ev.phase = 'groups'; ev.matches = []; for (let i = 0; i < sides.length; i += 4) ev.matches.push({ sides: sides.slice(i, i + 4), royale: true });
+  } else { ev.phase = 'ko'; ev.matches = koPairs(sides).map(pr => ({ sides: pr })); }
+  if (withYou) scene('eventStart', { event: e.name });   // PLACEHOLDER scene hook
+  return ev;
+}
+const hasYou = m => m.sides.some(sd => sd.includes('you'));
+const bestSide = m => m.sides.map((sd, i) => [sideElo(sd), i]).sort((a, b) => b[0] - a[0])[0][1];
+const mustWin = (ev, m) => ev.phase !== 'groups' || !!m.royale;   // knockouts and Battle Royales need a winner
+const fieldFor = (ev, m) => ev.arena === 'random' ? makeRng(ev.seed + ev.matches.indexOf(m) * 17).pick(ATTRS6) : ev.arena;
+// play every computer match up to your next one (or to the end). Returns your next match, or null when the event is over.
+function advanceEvent(ev) {
+  const rng = makeRng(ev.seed + ev.log.length * 31);
+  for (;;) {
+    const m = ev.matches.find(x => x.winner === undefined);
+    if (!m) { if (!nextPhase(ev)) return finishEvent(ev); continue; }
+    if (ev.you && hasYou(m)) return m;
+    let w = simSides(m.sides, { rules: ev.rules, arena: fieldFor(ev, m) }, rng);
+    if (w === null && mustWin(ev, m)) { w = simSides(m.sides, { rules: ev.rules, arena: fieldFor(ev, m) }, rng); if (w === null) w = bestSide(m); }
+    settle(ev, m, w);
+  }
+}
+function settle(ev, m, w) {
+  m.winner = w;
+  ev.log.push(`${m.sides.map(sd => sd.map(nameOf).join(' & ')).join(' vs ')}: ${w === null ? 'draw' : m.sides[w].map(nameOf).join(' & ') + ' won'}`);
+  if (m.group !== undefined) { const g = ev.groups[m.group]; if (w === null) { g.pts[m.gi[0]]++; g.pts[m.gi[1]]++; } else g.pts[m.gi[w]] += 3; }
+  if (ev.phase === 'ko' || m.royale) (m.sides.filter((_, i) => i !== w)).forEach(sd => ev.placed.unshift(sd));
+}
+function nextPhase(ev) {
+  const winners = ev.matches.filter(m => m.winner !== undefined && m.winner !== null).map(m => m.sides[m.winner]);
+  if (ev.phase === 'groups' && ev.format === 'groups') {
+    const q = ev.groups.flatMap(g => g.sides.map((sd, i) => ({ sd, p: g.pts[i] })).sort((a, b) => b.p - a.p || sideElo(b.sd) - sideElo(a.sd)).slice(0, 2).map(x => x.sd));
+    ev.groups.forEach(g => g.sides.forEach(sd => { if (!q.includes(sd)) ev.placed.unshift(sd); }));
+    ev.phase = 'ko'; ev.done1 = [...(ev.done1 || []), ...ev.matches]; ev.matches = koPairs([q[0], q[2], q[4], q[6], q[5], q[7], q[1], q[3]]).map(pr => ({ sides: pr }));   // group winners meet another group's runner-up
+    return true;
+  }
+  if (ev.phase === 'groups' && ev.format === 'royale') {
+    ev.phase = 'final'; ev.done1 = [...(ev.done1 || []), ...ev.matches]; ev.matches = [{ sides: winners, royale: true }]; return true;
+  }
+  if (ev.phase === 'ko' && winners.length > 1) { ev.done1 = [...(ev.done1 || []), ...ev.matches]; ev.matches = koPairs(winners).map(pr => ({ sides: pr })); return true; }
+  ev.champion = winners[0] || ev.matches[0].sides[0];
+  return false;
+}
+function finishEvent(ev) {
+  const S = save.season, B = S.B, champ = ev.champion, order = [champ, ...ev.placed.filter(sd => sd !== champ)];
+  champ.forEach(id => { B[id].titles.push(ev.name); earn(id, BP.event[ev.tier] || 0); });
+  if (ev.tier === 'Open') order.slice(0, 4).forEach((sd, i) => sd.forEach(id => { const p = i === 0 ? 1 : i === 1 ? 2 : 3; S.openPlace = S.openPlace || {}; if (!S.openPlace[id] || S.openPlace[id] > p) S.openPlace[id] = p; }));
+  let prize = null;
+  if (ev.prize) {   // a random Bakugan of the field's attribute, in the G range of the league the event is aimed at (Billy)
+    const rng = makeRng(ev.seed + 99), [lo, hi] = PRIZE_BAND[ev.prize.league] || PRIZE_BAND[3], attr = ev.prize.attr || (ATTRS6.includes(ev.arena) ? ev.arena : rng.pick(ATTRS6));
+    const pool = cat.toys.filter(t => t.game === 'bb' && t.baseG >= lo && t.baseG <= hi && (!t.attributes || t.attributes[attr]));
+    if (pool.length) { const t = rng.pick(pool); prize = { id: t.id, name: t.name, attr }; }
+    if (prize && champ.includes('you')) { ensureColl(); save.you.coll.toys[tkey(prize.id, attr)] = {}; }
+  }
+  S.results = S.results || {}; S.results[ev.name] = { winner: champ, runnerUp: order[1] || [], prize };
+  S.eventsDone.push(ev.name);
+  const yourPlace = ev.you ? order.findIndex(sd => sd.includes('you')) + 1 : 0;
+  msg('ISA', `${ev.name} result. Winner: ${champ.map(nameOf).join(' & ')}.${prize ? ` Prize: ${prize.name} (${cap(prize.attr)}).` : ''}${ev.you ? ` Your finish: ${yourPlace === 1 ? 'winner' : yourPlace === 2 ? 'runner-up' : yourPlace <= 4 ? 'semifinal' : 'out in the early rounds'}.` : ''}`);
+  // a title for you or a teammate: +3 friendship with your teammates (Billy)
+  const mine = myTeam();
+  if (mine && champ.some(id => mine.ids.includes(id))) mine.ids.filter(id => id !== 'you').forEach(id => befriend(id, 3));
+  if (champ.includes('you')) scene('eventWin', { event: ev.name, prize });   // PLACEHOLDER scene hook
+  ev.done = true; ev.order = order;
+  return null;
+}
+// a whole event without you (end of the day, or you skipped it)
+function runEvent(e) { const ev = startEvent(e, false); advanceEvent(ev); }
 function nextSlot() {
   save.slot++;
   if (save.slot > 2) { closeDay(); save.day++; save.slot = 0; dayStart(); }
   store();
 }
 function dayStart() {
-  const f = myFixture(save.day);
-  if (save.day >= DAYS) { msg('ISA', 'The regular season is complete. Final standings are posted.'); return; }
+  const f = myFixture(save.day), rng = makeRng(save.season.seed + save.day * 4513);
+  if (save.day >= DAYS) { msg('ISA', 'The regular season is complete. Final standings and promotions are posted.'); scene('seasonEnd'); return; }
+  if (save.day % 7 === 0 && save.day > 0) {   // weekly: teammates +1, computer teams form, team invites
+    const t = myTeam(); if (t) t.ids.filter(id => id !== 'you').forEach(id => befriend(id, 1, true));
+    formTeams(rng); teamInvites(rng);
+  }
+  if (save.day === 42 && !save.seen.midseason) {   // midseason: a call from the top League 1 brawler (PLACEHOLDER scene)
+    save.seen.midseason = true;
+    const top = [...save.season.leagues[0]].sort((a, b) => tablePts(b) - tablePts(a))[0];
+    msg(nameOf(top), 'Incoming call. (Midseason call scene coming soon.)'); scene('midseasonCall', { from: top });
+  }
   if (f && !f.played) msg('ISA', `League match today: ${nameOf('you')} vs ${nameOf(f.opp)}, round ${f.round}. Neutral Arena.`);
-  const ev = save.season.events.find(e => e.day === save.day);
-  if (ev) msg('ISA', `${ev.name} takes place today.`);
+  const ev = eventToday();
+  if (ev) {
+    const el = eligibility(ev);
+    msg('ISA', `${ev.name} takes place today.${el === 'invited' ? ' You have an invitation.' : el === 'royal' ? ' Your Season Ranking qualifies you.' : el === 'open' ? ' Entry is open to you.' : ''}`);
+  }
 }
 function rest() {
   if (mandatoryToday()) return say('ISA', 'You have a league match today. Please play it first.');
@@ -188,13 +453,18 @@ const CHALLENGE = { best: 'Hey, there you are! Up for a match? I\'ve been testin
   acq: 'You free? I could use a match.', cold: 'You\'re up next on my list. Let\'s get it over with.' };
 
 // ---------- battles (battle.html), and their results coming back
-function launch(opp, { key, arena = 'arena', league = false }) {
-  const B = save.season.B, b = B[opp];
-  save.pending = { key, opp, league, arena };
+// sides: [[ids]...] with your side first; kind: 'free' | 'league' | 'event'
+function launch(opp, { key, arena = 'arena', league = false }) { launchSides([['you'], [opp]], { key, arena, kind: league ? 'league' : 'free' }); }
+function launchSides(sides, { key, arena = 'arena', kind = 'free', rules = 'nv' }) {
+  const B = save.season.B;
+  // battle.html seats Tag Team as [0,1,0,1] and Battle Royale as [0,1,2,3]
+  const order = sides.length === 2 && sides[0].length === 2 ? [sides[0][0], sides[1][0], sides[0][1], sides[1][1]] : sides.flat();
+  const teams = sides.length === 2 && sides[0].length === 2 ? [0, 1, 0, 1] : order.map((_, i) => i);
+  save.pending = { key, kind, sides, order, teams };
   store();
-  const match = { mode: 'single', rules: 'nv', arena, story: { key }, players: [
-    { id: 'you', name: save.you.name, team: teamOf('you') },
-    { id: opp, name: nameOf(opp), team: teamOf(opp), ai: b.level, level: b.level }] };
+  const match = { mode: order.length > 2 ? 'multi' : 'single', rules, arena: arena || 'arena', story: { key }, teams: order.length > 2 ? teams : undefined,
+    players: order.map(id => id === 'you' ? { id: 'you', name: save.you.name, team: teamOf('you') }
+      : { id, name: nameOf(id), team: teamOf(id), ai: B[id].level, level: B[id].level }) };
   try { sessionStorage.setItem('marbles-match', JSON.stringify(match)); } catch {}
   location.href = 'battle.html';
 }
@@ -202,42 +472,59 @@ function takeResult() {
   let res = null; try { res = JSON.parse(sessionStorage.getItem('marbles-story-result') || 'null'); } catch {}
   if (!res || !save.pending || res.key !== save.pending.key) return;
   sessionStorage.removeItem('marbles-story-result');
-  const { opp, league, key } = save.pending, w = res.winner === 'draw' ? null : res.winner;
-  const st = { you: res.players[0], [opp]: res.players[1] };
-  const bp = record([['you'], [opp]], w, st, { league });
-  if (league) save.season.done[key] = true;
-  save.friends = save.friends || {};
-  if (w === 1) save.friends[opp] = (save.friends[opp] || 0) - 2;   // losing to someone cools things a little
+  const { kind, key, sides, order, teams } = save.pending;
+  const w = res.winner === 'draw' ? null : res.winner;   // winning team number = side index (your side is team 0)
+  const st = Object.fromEntries(order.map((id, i) => [id, res.players[i] || {}]));
+  const bp = record(sides, w, st, { league: kind === 'league' });
+  if (kind === 'league') save.season.done[key] = true;
+  // friendship and rivals (Billy): losing to someone -2; opposite teams -1 on every interaction; Tag Team partners +3 (+5 if you win)
+  const foes = sides.slice(1).flat(), partner = sides[0].find(id => id !== 'you');
+  foes.forEach(id => befriend(id, w !== null && w !== 0 && sides[w].includes(id) ? -2 : 0));
+  if (partner) befriend(partner, w === 0 ? 5 : 3);
+  if (sides.length === 2 && sides[1].length === 1) noteMatch(sides[1][0], w === 0 ? 'w' : w === null ? 'd' : 'l');
   const result = w === null ? 'Draw' : w === 0 ? 'Win' : 'Loss';
-  msg('ISA', `${league ? 'League match' : 'Free match'} vs ${nameOf(opp)}: ${result}. ${bp.you} BP.`);
-  if (league && w === 0 && !save.seen.firstLeagueWin) { save.seen.firstLeagueWin = true; save.queue = [...(save.queue || []), 'firstLeagueWin']; }
+  const vs = sides.slice(1).map(sd => sd.map(nameOf).join(' & ')).join(', ');
+  msg('ISA', `${kind === 'league' ? 'League match' : kind === 'event' ? save.event.name : 'Free match'} vs ${vs}: ${result}. ${bp.you} BP.`);
+  if (kind === 'league' && w === 0 && !save.seen.firstLeagueWin) { save.seen.firstLeagueWin = true; save.queue = [...(save.queue || []), 'firstLeagueWin']; }
   save.pending = null;
+  if (kind === 'event') {   // back into the event: a knockout draw is replayed
+    const ev = save.event, m = ev.matches.find(x => x.winner === undefined && hasYou(x));
+    if (m) { if (w === null && mustWin(ev, m) && !m.replay) { m.replay = true; } else settle(ev, m, w === null && mustWin(ev, m) ? bestSide(m) : w); }
+    store(); return;
+  }
   nextSlot();
 }
 
 // ---------- screens
 function header() {
   const b = save.season.B.you, li = leagueOf('you');
-  return `<div class="hdr"><div><b>Season 2</b> · Week ${Math.min(13, week(save.day))} · Day ${save.day + 1} · ${SLOTS[save.slot]}</div>
+  return `<div class="hdr"><div><b>Season ${save.seasonNo || 2}</b> · Week ${Math.min(13, week(save.day))} · Day ${save.day + 1} · ${SLOTS[save.slot]}</div>
     <div>${save.season.names[li]} · ${b.wallet} BP</div></div>`;
 }
 function render(view = save.view || 'commons') {
   save.view = view;
   const f = mandatoryToday();
   let body = '';
-  if (save.day >= DAYS) view = save.view = 'standings';
+  if (save.day >= DAYS && view !== 'seasonEnd') view = save.view = 'seasonEnd';
+  if (save.event && !save.event.done && view !== 'event') view = save.view = 'event';
   if (view === 'commons') {
     const line = f ? `League match today against ${nameOf(f.opp)}. Arena 1 is reserved for you.`
       : `${SLOTS[save.slot]} slot. Tap a building to go there.`;
     body = `<div class="isa"><div class="isaname">ISA</div><div>${line}</div></div>
       ${f ? `<button class="big" id="playLeague">Play league match: vs ${nameOf(f.opp)}</button>` : ''}
-      <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button></div>`;
+      ${eventCall()}
+      <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button><button data-go="teams">Teams</button><button data-go="brawlers">Brawlers</button></div>`;
   } else if (view === 'shop') {
     body = shopView();
   } else if (view.startsWith('arena')) {
     body = `<h2>${PLACES.find(p => p[0] === view)[1]}</h2>` + who(view) + back();
   } else if (view === 'standings') body = standings() + back();
   else if (view === 'calendar') body = calendar() + back();
+  else if (view === 'event') body = eventView();
+  else if (view === 'teams') body = teamsView() + back();
+  else if (view === 'brawlers') body = brawlersView() + back();
+  else if (view === 'teamroom') body = PLACE_VIEWS.teamroom() + back();
+  else if (view === 'seasonEnd') body = seasonEndView();
   else if (view === 'messages') body = `<h2>Messages</h2>` + (save.messages.map(m => `<div class="msg"><span>Day ${m.day + 1} · ${m.from}</span>${m.text}</div>`).join('') || '<p>No messages.</p>') + back();
   else if (view === 'inventory') {
     ensureColl(); const y = save.you, t = y.deck, up = save.season.B.you.up;
@@ -265,15 +552,11 @@ function render(view = save.view || 'commons') {
     save.you.deck.trap = { id: x.id, name: x.name, attrs: x.attrs }; store(); render('inventory'); });
   if ($('playLeague')) $('playLeague').onclick = () => launch(f.opp, { key: f.key, league: true });
   if (view === 'shop') shopWire();
+  wireExtras(view);
   if ($('buy')) $('buy').onclick = () => { const b = save.season.B.you, c = boostCost(); if (b.wallet >= c && b.up - b.startUp < UPS_PER_SEASON) { b.wallet -= c; b.up++; msg('ISA', `G-Power boost purchased. Your Bakugan are now +${b.up}.`); store(); render('shop'); } };
   store();
 }
 // ---------- the floating boards: short versions on the map, full versions in a popup
-function teamRanks() {
-  const B = save.season.B;
-  return TEAMS.map(t => { const m = t.ids.filter(id => B[id]); return { ...t, m, elo: m.reduce((n, id) => n + B[id].elo, 0) / (m.length || 1) }; })
-    .filter(t => t.m.length >= 3).sort((a, b) => b.elo - a.elo);
-}
 function eloRanks() { const B = save.season.B; return Object.keys(B).sort((a, b) => B[b].elo - B[a].elo); }
 function newsItems() {
   const out = [], next = save.season.events.filter(e => e.day >= save.day).sort((a, b) => a.day - b.day)[0];
@@ -419,8 +702,10 @@ function who(place) {
   const ids = presence()[place] || [];
   if (!ids.length) return `<p class="note">Nobody's here right now.</p>`;
   return ids.map(id => { const b = save.season.B[id];
-    return `<div class="card"><div><b>${nameOf(id)}</b> · ${save.season.names[leagueOf(id)]} · ${b.rec.w}-${b.rec.l}</div>
-      <div class="say">“${CHALLENGE[tone(id)]}”</div><button data-challenge="${id}">Challenge</button></div>`; }).join('');
+    const o = tradeOffer(id), t = teamWith(id);
+    return `<div class="card"><div><b>${nameOf(id)}</b>${isRival(id) ? ' <span class="lock">Rival</span>' : ''} · ${save.season.names[leagueOf(id)]} · ${b.rec.w}-${b.rec.l}${t ? ` · ${t.name}` : ''} · ${frLevel(id)}</div>
+      <div class="say">“${CHALLENGE[tone(id)]}”</div><button data-challenge="${id}">Challenge</button>
+      ${o ? `<div class="note">Trade offer: their <b>${o.get.name}</b> for your <b>${o.give.name}</b>.</div><button data-trade="${id}">Trade</button>` : ''}</div>`; }).join('');
 }
 function challenge(id) {
   const rng = makeRng(save.season.seed + save.day * 13 + save.slot), arena = rng() < 0.6 ? 'field_' + mainAttr(id) : 'arena';
@@ -446,6 +731,134 @@ function calendar() {
     rows.push(`<div class="wk ${week(save.day) === w ? 'now' : ''}"><b>Week ${w}</b>${[...lr, ...ev].map(t => `<div>${t}</div>`).join('') || '<div class="note">Open week</div>'}</div>`);
   }
   return `<h2>Calendar</h2>` + rows.join('');
+}
+
+// ---------- event screens
+function eventCall() {
+  const e = eventToday(); if (!e || save.event) return '';
+  const el = eligibility(e); if (!el) return `<p class="note">${e.name} is today. You aren't in the field this time.</p>`;
+  return `<button class="big" id="enterEvent">${el === 'open' ? 'Enter' : 'Accept invitation:'} ${e.name}</button>`;
+}
+function enterEvent() {
+  const e = eventToday(); if (!e) return;
+  const go = partner => { save.event = startEvent(e, true, partner); store(); render('event'); };
+  if (e.format !== 'tag') return go(null);
+  // Tag Team: pick a partner. Teammates and friends say yes; otherwise ISA draws one for you.
+  const t = myTeam(), cands = Object.keys(save.season.B).filter(id => id !== 'you' && leagueOf(id) > 0 && ((t && t.ids.includes(id)) || friendship(id) >= 10))
+    .sort((a, b) => friendship(b) - friendship(a)).slice(0, 5);
+  say('ISA', 'Tag Team event. Choose your partner.', [...cands.map(id => [`${nameOf(id)} (${frLevel(id)})`, () => go(id)]), ['Let ISA draw one', () => go(null)]]);
+}
+function eventView() {
+  const ev = save.event; if (!ev) return back();
+  const m = ev.done ? null : advanceEvent(ev);
+  store();
+  const phase = ev.done ? 'Final results' : ev.phase === 'groups' ? (ev.format === 'royale' ? 'Battle Royale groups' : 'Group stage') : ev.phase === 'final' ? 'Final' : 'Knockout';
+  let h = `<h2>${ev.name}</h2><p class="note">${ev.rules === 'classic' ? 'Classic rules' : 'New Vestroia rules'}${ev.arena === 'random' ? ' · random field each match' : ev.arena ? ` · ${cap(ev.arena)} Field` : ''} · ${phase}</p>`;
+  if (ev.groups && ev.phase === 'groups') h += ev.groups.map((g, i) => `<div class="card"><b>Group ${'ABCD'[i]}</b>${g.sides.map((sd, k) => ({ sd, p: g.pts[k] })).sort((a, b) => b.p - a.p)
+    .map(x => `<div class="${x.sd.includes('you') ? 'me' : ''}">${x.sd.map(nameOf).join(' & ')} · ${x.p} pts</div>`).join('')}</div>`).join('');
+  if (m) {
+    const foes = m.sides.filter(sd => !sd.includes('you')).map(sd => sd.map(nameOf).join(' & ')).join(', ');
+    h += `<button class="big" id="playEvent">${m.replay ? 'Replay (draw): ' : 'Play your match: '}vs ${foes}</button>`;
+  } else if (ev.done) {
+    const place = ev.order.findIndex(sd => sd.includes('you')) + 1, r = save.season.results[ev.name];
+    h += `<div class="card"><b>Winner: ${r.winner.map(nameOf).join(' & ')}</b>${r.prize ? `<div>Prize: ${r.prize.name} (${cap(r.prize.attr)})${r.winner.includes('you') ? ' — added to your collection' : ''}</div>` : ''}
+      <div>Your finish: ${place === 1 ? 'Winner!' : place === 2 ? 'Runner-up' : place <= 4 ? 'Semifinal' : place <= 8 ? 'Quarterfinal' : 'Early rounds'}</div></div>
+      <button class="big" id="endEvent">Continue</button>`;
+  }
+  h += `<h3>Results</h3>` + [...ev.log].reverse().slice(0, 14).map(l => `<div class="msg">${l}</div>`).join('');
+  return h;
+}
+function playEvent() {
+  const ev = save.event, m = ev.matches.find(x => x.winner === undefined && hasYou(x)); if (!m) return;
+  const sides = [m.sides.find(sd => sd.includes('you')), ...m.sides.filter(sd => !sd.includes('you'))];
+  const f = fieldFor(ev, m), n = (ev.done1 || []).length + ev.matches.indexOf(m);
+  launchSides(sides, { key: `E${save.day}-${n}-${m.replay ? 'r' : ''}`, arena: f ? 'field_' + f : 'arena', kind: 'event', rules: ev.rules });
+}
+function endEvent() { save.event = null; save.slot = 2; nextSlot(); render('commons'); }
+
+// ---------- teams, brawlers
+function teamsView() {
+  const t = myTeam(), offers = (save.offers || []).filter(o => o.type === 'team' && teamsList().some(x => x.id === o.team));
+  let h = `<h2>Teams</h2>`;
+  if (t) {
+    h += `<div class="card"><b>${t.name}</b> · ${t.ids.length}/${TEAM_MAX}${t.fixed ? '' : ''}<div>${t.ids.map(id => `${nameOf(id)}${id === 'you' ? '' : ` (${frLevel(id)})`}`).join(', ')}</div>
+      ${t.ids.length >= TEAM_ROOM ? `<button data-go="teamroom">Team room</button>` : `<p class="note">A team room opens at ${TEAM_ROOM} members.</p>`}
+      ${t.ids.length < TEAM_MAX ? `<p class="note">Invite a brawler from the Brawlers screen.</p>` : ''}<button id="leaveTeam">Leave team</button></div>`;
+  } else {
+    h += `<p class="note">You're not on a team. Teams don't change battles: they're who you hang out with, your Tag Team partners and the Team Rankings.</p>
+      <button class="big" id="createTeam">Create a team</button>`;
+    h += offers.map(o => { const x = teamsList().find(q => q.id === o.team);
+      return `<div class="card"><b>Invite: ${x.name}</b><div>${x.ids.map(nameOf).join(', ')}</div><button data-join="${x.id}">Join</button><button data-decline="${x.id}">Decline</button></div>`; }).join('');
+  }
+  h += `<h3>Team Rankings</h3>` + teamRanks().map((x, i) => `<div class="${x.ids.includes('you') ? 'me' : ''}">${i + 1}. ${x.name} · ${Math.round(x.elo)} · ${x.m.length} members</div>`).join('');
+  return h;
+}
+function brawlersView() {
+  const B = save.season.B, t = myTeam(), riv = rivals();
+  const ids = Object.keys(B).filter(id => id !== 'you').sort((a, b) => friendship(b) - friendship(a) || B[b].elo - B[a].elo);
+  return `<h2>Brawlers</h2>${riv.length ? `<p>Rival${riv.length > 1 ? 's' : ''}: <b>${riv.map(x => `${nameOf(x.id)} (${x.w}-${x.n - x.w - x.d}${x.d ? '-' + x.d : ''})`).join(', ')}</b></p>` : '<p class="note">No rival yet: face someone at least 5 times in your last 30 matches with a 40-60% win rate.</p>'}
+    <table><tr><th>Brawler</th><th>League</th><th>Team</th><th>Friendship</th><th></th></tr>` +
+    ids.map(id => { const tm = teamWith(id), can = t && !t.ids.includes(id) && t.ids.length < TEAM_MAX && !(tm && tm.fixed);
+      return `<tr><td>${nameOf(id)}${isRival(id) ? ' <span class="lock">Rival</span>' : ''}</td><td>${leagueNum(id)}</td><td>${tm ? tm.name : '—'}</td><td>${frLevel(id)} (${friendship(id)})</td><td>${can ? `<button data-invite="${id}">Invite</button>` : ''}</td></tr>`; }).join('') + '</table>';
+}
+// ---------- PLACEHOLDER places: rooms not built yet. Each returns the HTML for its screen until the real (3D) room exists.
+// login: the corridor you arrive through each day (not shown yet). teamroom: the round room with the pod chairs (3+ members).
+const PLACE_VIEWS = {
+  login: () => '',
+  teamroom: () => { const t = myTeam(); if (!t) return '<p>No team.</p>';
+    return `<h2>${t.name} · Team room</h2><p class="note">(The 3D team room is coming. For now, here's who's around.)</p>` +
+      t.ids.filter(id => id !== 'you').map(id => `<div class="card"><b>${nameOf(id)}</b> · ${frLevel(id)}<div class="say">“${CHALLENGE[tone(id)]}”</div><button data-challenge="${id}">Challenge</button></div>`).join(''); },
+};
+function wireExtras(view) {
+  const m = $('main');
+  if ($('enterEvent')) $('enterEvent').onclick = enterEvent;
+  if ($('playEvent')) $('playEvent').onclick = playEvent;
+  if ($('endEvent')) $('endEvent').onclick = endEvent;
+  if ($('createTeam')) $('createTeam').onclick = () => { const n = (prompt('Team name?', `${save.you.name}'s team`) || '').trim(); if (n) { createTeam(n.slice(0, 20)); store(); render('teams'); } };
+  if ($('leaveTeam')) $('leaveTeam').onclick = () => { if (confirm('Leave your team? Every teammate loses 25 friendship with you.')) { leaveTeam(); store(); render('teams'); } };
+  if ($('nextSeason')) $('nextSeason').onclick = () => { nextSeason(); store(); render('commons'); };
+  m.querySelectorAll('[data-join]').forEach(b => b.onclick = () => { joinTeam(b.dataset.join); store(); render('teams'); });
+  m.querySelectorAll('[data-decline]').forEach(b => b.onclick = () => { save.offers = save.offers.filter(o => o.team !== b.dataset.decline); store(); render('teams'); });
+  m.querySelectorAll('[data-invite]').forEach(b => b.onclick = () => { const r = inviteToTeam(b.dataset.invite); msg('ISA', r); store(); render('brawlers'); say('ISA', r); });
+  m.querySelectorAll('[data-trade]').forEach(b => b.onclick = () => { doTrade(b.dataset.trade); store(); render(view); });
+}
+
+// ---------- end of season: promotion, then the next season
+function finalTables() { const B = save.season.B; return save.season.leagues.map(lg => [...lg].sort((a, b) => B[b].lg.pts - B[a].lg.pts || B[b].lg.bp - B[a].lg.bp)); }
+function promotedLeagues() {
+  const t = finalTables();
+  if (t.length === 6) return promoteSeason2(t);   // Season 2: top 4 of League 2, top 8 of League 3, top 4 of each League 4 division go up
+  const nl = t.map(x => [...x]);   // from Season 3: top 2 up, bottom 2 down
+  for (let i = 0; i + 1 < nl.length; i++) { const up = t[i + 1].slice(0, 2), down = t[i].slice(-2); nl[i] = nl[i].filter(id => !down.includes(id)).concat(up); nl[i + 1] = nl[i + 1].filter(id => !up.includes(id)).concat(down); }
+  return nl;
+}
+function seasonEndView() {
+  const S = save.season, before = leagueNum(), nl = promotedLeagues(), after = nl.findIndex(l => l.includes('you')) + 1;
+  const n = save.seasonNo || 2, reset = (n + 1 - 1) % 4 === 0;
+  const lg = finalTables()[leagueOf('you')], pos = lg.indexOf('you') + 1;
+  const moved = after < before ? `Promoted to League ${after}!` : after > before ? `Relegated to League ${after}.` : `You stay in League ${after}.`;
+  return `<h2>Season ${n} complete</h2><div class="card"><b>${S.names[leagueOf('you')]}: ${pos}${['th', 'st', 'nd', 'rd'][pos % 10 > 3 || [11, 12, 13].includes(pos % 100) ? 0 : pos % 10]} place</b>
+    <div>${moved}</div><div>Titles this season: ${S.B.you.titles.join(', ') || 'none'}</div><div>Record: ${S.B.you.rec.w}-${S.B.you.rec.l}-${S.B.you.rec.d} · Elo ${Math.round(S.B.you.elo)}</div></div>
+    ${reset ? `<p class="note">A new year starts with Season ${n + 1}: every brawler's upgrades reset to zero.</p>` : ''}
+    <button class="big" id="nextSeason">Start Season ${n + 1}</button>` + standings();
+}
+function nextSeason() {
+  const S = save.season, n = (save.seasonNo || 2) + 1, nl = promotedLeagues(), reset = (n - 1) % 4 === 0;
+  const before = leagueNum(), after = nl.findIndex(l => l.includes('you')) + 1;
+  save.history = [...(save.history || []), { season: n - 1, league: before, place: finalTables()[leagueOf('you')].indexOf('you') + 1, titles: S.B.you.titles, rec: S.B.you.rec, elo: Math.round(S.B.you.elo) }];
+  scene('promotion', { from: before, to: after });   // PLACEHOLDER scene hook
+  const seed = (S.seed * 31 + n * 7919) & 0x7fffffff, rng = makeRng(seed), B = {};
+  for (const [id, b] of Object.entries(S.B)) {
+    const up = reset ? 0 : b.up;
+    B[id] = { id, name: b.name, level: b.level, up, startUp: up, elo: b.elo, bp: 0, wallet: b.wallet, rec: { w: 0, l: 0, d: 0 }, lg: { w: 0, l: 0, d: 0, pts: 0, bp: 0 }, titles: [],
+      career: { w: ((b.career || {}).w || 0) + b.rec.w, l: ((b.career || {}).l || 0) + b.rec.l, d: ((b.career || {}).d || 0) + b.rec.d, titles: [...((b.career || {}).titles || []), ...b.titles.map(t => `S${n - 1} ${t}`)] } };
+  }
+  const days = [0, 2, 4, 6, 8, 10, 11, 1, 3, 5, 7].map(w => w * 7 + 2).sort((a, b) => a - b);   // 11 rounds for leagues of 12
+  save.season = { seed, B, leagues: nl, names: ['League 1', 'League 2', 'League 3', 'League 4'], events: season2Events(rng).map(e => ({ ...e, day: e.week * 7 })),
+    fixtures: nl.map(rounds), leagueDays: days, done: {}, eventsDone: [] };
+  save.seasonNo = n; save.day = 0; save.slot = 0; save.view = 'commons'; save.seen.midseason = false;
+  msg('ISA', `Season ${n} begins. You are in League ${after}.${reset ? ' Upgrades have been reset for everyone.' : ''}`);
+  dayStart();
 }
 
 // ---------- dialogue box (ISA over the intercom, brawlers in person)
@@ -495,9 +908,9 @@ function placement() {
   say('ISA', 'Each day has three slots: Morning, Afternoon and Evening. Brawlers are in the arenas and the Shop at different times. You may challenge anyone you find.');
   say('ISA', 'Free matches earn BP and count on your career record. League matches and events are fixed. I will remind you before each one.');
   say('ISA', `If you would like to skip ahead, choose Rest. I will wake you before your next fixed match. Welcome to The Commons, ${save.you.name}.`, [['Enter The Commons', () => {
-    const first = LEAGUE_DAYS.map(myFixture).find(Boolean);
-    if (first) msg('ISA', `Your first league match: vs ${nameOf(first.opp)} on day ${LEAGUE_DAYS[first.round - 1] + 1}.`);
-    msg('ISA', 'Open I starts this week. Results will be posted in your messages.');
+    const first = leagueDays().map(myFixture).find(Boolean);
+    if (first) msg('ISA', `Your first league match: vs ${nameOf(first.opp)} on day ${leagueDays()[first.round - 1] + 1}.`);
+    msg('ISA', 'Open I is this week. On the day, you can enter it from The Commons.');
     dayStart(); store(); render('commons');
   }]]);
 }

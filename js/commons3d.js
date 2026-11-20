@@ -361,6 +361,7 @@ export function mountCommons(host, opts) {
   const v = new THREE.Vector3();
   function frame() {
     if (!alive) return;
+    if (host.hidden || !host.isConnected) { requestAnimationFrame(frame); return; }   // not on screen: don't draw
     const t = (performance.now() - t0) / 1000;
     fx.ring.rotation.x = Math.PI / 2 + Math.sin(t * 0.7) * 0.25; fx.ring.rotation.z = t * 0.6; fx.core.rotation.y = t; fx.core.position.y = 9 + Math.sin(t * 1.5) * 0.4;
     for (const b of boards) {   // face the camera, bob gently
