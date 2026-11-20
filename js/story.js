@@ -12,6 +12,8 @@ import { PRIZE_BAND } from './season.js';
 import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
 import { mountCommons } from './commons3d.js';
+import { playLogin } from './login3d.js';
+import { mountTeamRoom } from './teamroom3d.js';
 import { stock, trapAttrCap, priceTrap, salesFor, salesOnDay, discountOn, saleText } from './storyshop.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 
@@ -549,8 +551,10 @@ function render(view = save.view || 'commons') {
       <p class="note">Collection: ${Object.keys(y.coll.toys).length} Bakugan, ${y.coll.cards.length} cards, ${y.coll.traps.length} Traps.</p>` + back();
   }
   { const mh = $('map'); if (mh && mh.parentNode === $('main')) document.body.appendChild(mh); }   // keep the 3D map when the page is redrawn
+  if (room3d) { room3d.dispose(); room3d = null; }
   $('main').innerHTML = header() + body;
   showMap(view === 'commons', f);
+  if (view === 'teamroom' && $('room3d')) mountRoom();
   $('main').querySelectorAll('[data-go]').forEach(b => b.onclick = () => render(b.dataset.go));
   $('main').querySelectorAll('[data-back]').forEach(b => b.onclick = () => render('commons'));
   $('main').querySelectorAll('[data-challenge]').forEach(b => b.onclick = () => challenge(b.dataset.challenge));
@@ -677,6 +681,7 @@ function showMap(on, f) {
   const yaw = map?.yaw; if (map) map.dispose();
   const counts = f ? {} : Object.fromEntries(Object.entries(presence()).map(([k, v]) => [k, v.length]));
   if (save.messages.length) counts.messages = Math.min(save.messages.length, 99);
+  { const t = myTeam(); if (t && t.ids.length >= TEAM_ROOM) counts.teamroom = t.ids.length; }   // your team room: how many members
   map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(),
     onPick: k => { if (k.startsWith('board:')) return boardPopup(k.slice(6)); if (k === 'shop' && !f) { ensureColl(); store(); location.href = 'room.html?story=1'; return; } if (k === 'inventory' && !f) { ensureColl(); store(); location.href = 'room.html?story=1&to=room'; return; } if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
   mapKey = key;
@@ -808,13 +813,25 @@ function brawlersView() {
     ids.map(id => { const tm = teamWith(id), can = t && !t.ids.includes(id) && t.ids.length < TEAM_MAX && !(tm && tm.fixed);
       return `<tr><td>${nameOf(id)}${isRival(id) ? ' <span class="lock">Rival</span>' : ''}</td><td>${leagueNum(id)}</td><td>${tm ? tm.name : '—'}</td><td>${frLevel(id)} (${friendship(id)})</td><td>${can ? `<button data-invite="${id}">Invite</button>` : ''}</td></tr>`; }).join('') + '</table>';
 }
+// the 3D team room (js/teamroom3d.js): a pod per member, the wall screen shows the team's rank
+let room3d = null;
+function mountRoom() {
+  const t = myTeam(), ranks = teamRanks(), k = ranks.findIndex(r => r.name === t.name), me = ranks[k];
+  const ids = ['you', ...t.ids.filter(id => id !== 'you')];
+  room3d = mountTeamRoom($('room3d'), { name: t.name,
+    screen: [t.name, k >= 0 ? `Team Ranking: #${k + 1} of ${ranks.length}` : 'Team Ranking: —', `${t.ids.length} members · Avg Elo ${me ? Math.round(me.elo) : '—'}`, `Season ${save.seasonNo || 2} · Day ${save.day + 1}`],
+    members: ids.map(id => ({ id, name: id === 'you' ? save.you.name : nameOf(id), sub: id === 'you' ? 'You' : frLevel(id), you: id === 'you' })),
+    onPick: id => { if (id === 'you') return; const c = $('mate-' + id); if (!c) return; c.scrollIntoView({ behavior: 'smooth', block: 'center' }); c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 1200); } });
+}
 // ---------- PLACEHOLDER places: rooms not built yet. Each returns the HTML for its screen until the real (3D) room exists.
 // login: the corridor you arrive through each day (not shown yet). teamroom: the round room with the pod chairs (3+ members).
 const PLACE_VIEWS = {
-  login: () => '',
-  teamroom: () => { const t = myTeam(); if (!t) return '<p>No team.</p>';
-    return `<h2>${t.name} · Team room</h2><p class="note">(The 3D team room is coming. For now, here's who's around.)</p>` +
-      t.ids.filter(id => id !== 'you').map(id => `<div class="card"><b>${nameOf(id)}</b> · ${frLevel(id)}<div class="say">“${CHALLENGE[tone(id)]}”</div><button data-challenge="${id}">Challenge</button></div>`).join(''); },
+  login: () => '',   // built: js/login3d.js plays when Story mode opens (see the bottom of this file)
+  teamroom: () => { const t = myTeam();
+    if (!t) return `<h2>Team Rooms</h2><p>You're not on a team yet. Join or create one on the Teams screen, and your team gets a room at ${TEAM_ROOM} members.</p><button class="big" data-go="teams">Teams</button>`;
+    if (t.ids.length < TEAM_ROOM) return `<h2>Team Rooms</h2><p>${t.name}'s room opens at ${TEAM_ROOM} members. You have ${t.ids.length}. Invite brawlers from the Brawlers screen.</p><button class="big" data-go="teams">Teams</button> <button class="big" data-go="brawlers">Brawlers</button>`;
+    return `<h2>${t.name} · Team room</h2><div id="room3d" class="room3d"></div><p class="note">Tap a pod to talk to a teammate. Drag to look around.</p>` +
+      t.ids.filter(id => id !== 'you').map(id => `<div class="card" id="mate-${id}"><b>${nameOf(id)}</b> · ${frLevel(id)}<div class="say">“${CHALLENGE[tone(id)]}”</div><button data-challenge="${id}">Challenge</button></div>`).join(''); },
 };
 function wireExtras(view) {
   const m = $('main');
@@ -938,4 +955,8 @@ async function start() {
   save.queue = []; store();
 }
 $('newgame').onclick = () => { if (confirm('Start a new story? This erases your current one.')) { localStorage.removeItem(KEY); location.reload(); } };
-start();
+// The login corridor plays each time you open Story mode from the menu (not when you come back from a battle or the Shop).
+// It stays up at least 4 seconds, or until the page has finished loading.
+let loginDone = null;
+try { if (!sessionStorage.getItem('marbles-story-in')) { sessionStorage.setItem('marbles-story-in', '1'); const ready = new Promise(r => { loginDone = r; }); playLogin({ ready }); } } catch {}
+start().catch(e => console.error(e)).finally(() => loginDone && loginDone());

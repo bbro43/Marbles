@@ -21,6 +21,7 @@ export const LANDMARKS = [
   { key: 'calendar', label: 'Event Hall', ang: 90, dist: 40, kind: 'hall', color: 0xe8d24a },
   { key: 'messages', label: 'Mail', ang: -90, dist: 40, kind: 'kiosk', color: 0x5ad1c8 },
   { key: 'inventory', label: 'My Room', ang: -22, dist: 84, kind: 'dorm', color: 0xe07aa8 },
+  { key: 'teamroom', label: 'Team Rooms', ang: 22, dist: 84, kind: 'teams', color: 0x39b6ff },
 ];
 
 const rad = d => d * Math.PI / 180;
@@ -154,6 +155,17 @@ const BUILD = {
     dish.position.y = 16.5; dish.rotation.x = Math.PI * 0.75; g.add(dish);
     door(g, 2.4, 6.4);
     const box1 = box(1.4, 2.2, 1, mat(c)); box1.position.set(4, 0, 7.4); g.add(box1);   // mailbox
+    return g;
+  },
+  teams(c) {   // Team Rooms: a round white hall with a glass band, a colored dome and a floating ring
+    const g = new THREE.Group();
+    g.add(cyl(9.5, 0.6, mat(0xd8dee8), 40));
+    const body = roundBlock(8.5, 9, { style: 'office', wall: 0xf6f9fc, glass: 0x9fd2f2 }); body.position.y = 0.6; g.add(body);
+    const band = cyl(8.7, 0.8, mat(c, { emissive: c, emissiveIntensity: 0.35 }), 40); band.position.y = 9.6; g.add(band);
+    const top = dome(8.4, mat(0xffffff), 40); top.scale.y = 0.45; top.position.y = 10.4; g.add(top);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(5, 0.35, 10, 48), mat(c, { emissive: c, emissiveIntensity: 0.8 })); ring.rotation.x = Math.PI / 2; ring.position.y = 17; g.add(ring);
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, pod = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 10), mat(0xffffff)); pod.position.set(Math.sin(a) * 5, 17, Math.cos(a) * 5); g.add(pod); }
+    door(g, 3, 8.7, 3.2);
     return g;
   },
   dorm(c) {
