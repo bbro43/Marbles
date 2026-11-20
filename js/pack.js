@@ -41,6 +41,16 @@ export class Pack {
     if (!find('pack.json')) throw new Error('This zip is not an asset pack (no pack.json).');
     p.info = await mergedJson(p.zips, 'pack.json');
     p.catalog = await mergedJson(p.zips, 'catalog.json');
+        // pictures named toys/<id>/thumb-<attribute>.png fill in each Bakugan's thumbs automatically
+    for (const t of p.catalog.toys || []) {
+      if (t.thumbs) continue;
+      const th = {};
+      for (const a of ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus']) {
+        const f = `toys/${t.id}/thumb-${a}.png`;
+        if (find(f)) th[a] = f;
+      }
+      if (Object.keys(th).length) t.thumbs = th;
+    }
     p.zip = { file: find };   // old callers use pack.zip.file(path)
     p.urls = new Map();
     return p;
