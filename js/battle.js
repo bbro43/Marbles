@@ -26,6 +26,7 @@ const FRICTION = 260;     // units/s^2
 //   speed   -> the hardest it can be thrown
 //   defense -> how well it holds its ground when crashed into (knockouts)
 //   magnet  -> how well it grabs a Gate card it's rolling over
+//   control -> aim help: nudges a throw that's slightly off onto a card, or into a foe for a knockout
 // Every toy is 3/3/3 until per-Bakugan base stats are added.
 const STAT_MIN = 1, STAT_MAX = 5, STAT_AVG = 3;
 const lv = (st, k) => Math.min(STAT_MAX, Math.max(STAT_MIN, st[k] ?? STAT_AVG));
@@ -412,7 +413,7 @@ function showPicker() {
   const p = state.turn, pl = state.players[p];
   $('picker').innerHTML = pl.unused.map(t => {
     const toy = pl.toys[t];
-    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')}</span></span></button>`;
+    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')} · Ctl ${lv(toy.stats || {}, 'control')}</span></span></button>`;
   }).join('');
   fillPics($('picker'));
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));
@@ -601,9 +602,56 @@ renderer.domElement.addEventListener('pointerup', e => {
   throwToy(right.multiplyScalar(sx * FLICK).addScaledVector(fwd, -sy * FLICK));
 });
 
+// ---------- Control: aim help (Billy, Nov 20)
+// Control 1 is the player's own throw. Each point above 1 nudges a throw that's slightly off:
+//   onto a Gate card: up to 0.5 cm per point (2 cm at Control 5), when the ball would stop within CARD_MARGIN of a card;
+//   into an opponent's standing Bakugan (knockout): up to 0.25 cm per point (1 cm at 5), when it would pass within KO_MARGIN.
+const CARD_HELP = 0.5 * CM, KO_HELP = 0.25 * CM, CARD_MARGIN = 2 * CM, KO_MARGIN = 1.5 * CM;
+function stopDistance(v) {   // how far a straight roll goes before stopping (same slowdown as stepPhysics, without Magnet)
+  let sp = v, d = 0; const dt = 1 / 120;
+  while (sp >= 3) { sp = Math.max(0, sp - (sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION) * dt); d += sp * dt; }
+  return d;
+}
+function speedFor(dist, v0) {   // speed that rolls about `dist`
+  let v = v0; for (let i = 0; i < 4; i++) { const d = stopDistance(v); if (d < 1) break; v *= Math.sqrt(dist / d); } return v;
+}
+function aimAssist(p, t, from, vel) {
+  const c = lv(statsOf(p, t), 'control'); if (c <= 1 || vel.length() < 1) return vel;
+  const v = vel.length(), dir = vel.clone().normalize(), D = stopDistance(v), contact = 2 * RADIUS;
+  // 1) knockout: the closest opponent it would just miss
+  let best = null;
+  for (const f of state.field) for (const x of f.toys) {
+    if (sameTeam(x.p, p) || isInvulnerable(x)) continue;
+    const q = toysMesh[x.p][x.t].holder.position, rel = new THREE.Vector3(q.x - from.x, 0, q.z - from.z), a = rel.dot(dir);
+    if (a <= 0 || a > D + contact) continue;
+    const off = rel.clone().addScaledVector(dir, -a), perp = off.length();
+    if (perp <= contact) return vel;                                       // already on target
+    if (perp - contact <= KO_MARGIN && (!best || perp < best.perp)) best = { a, off, perp };
+  }
+  if (best) {
+    const move = Math.min(KO_HELP * (c - 1), best.perp - contact * 0.5);
+    const aimPt = dir.clone().multiplyScalar(best.a).addScaledVector(best.off.normalize(), move);
+    return aimPt.setLength(v);
+  }
+  // 2) Gate card: it would stop just off a card
+  const P = from.clone().addScaledVector(dir, D);
+  if (fieldIndexAt(P) !== null) return vel;
+  let card = null;
+  for (const f of state.field) {
+    const cc = cellCenter(f.cell), gap = Math.hypot(Math.max(0, Math.abs(P.x - cc.x) - GATE_W / 2), Math.max(0, Math.abs(P.z - cc.z) - GATE_D / 2));
+    if (gap <= CARD_MARGIN && (!card || gap < card.gap)) card = { cc, gap };
+  }
+  if (!card) return vel;
+  const to = new THREE.Vector3(card.cc.x - P.x, 0, card.cc.z - P.z), P2 = P.clone().addScaledVector(to.normalize(), Math.min(CARD_HELP * (c - 1), Math.hypot(card.cc.x - P.x, card.cc.z - P.z)));
+  const nd = new THREE.Vector3(P2.x - from.x, 0, P2.z - from.z);
+  return nd.setLength(speedFor(nd.length(), v));
+}
+
 function throwToy(vel) {
   if (busy || selected === null) return;
   const top = maxSpeed(statsOf(state.turn, selected));
+  if (vel.length() > top) vel.setLength(top);
+  vel = aimAssist(state.turn, selected, toysMesh[state.turn][selected].holder.position, vel);
   if (vel.length() > top) vel.setLength(top);
   busy = true; $('picker').classList.add('off');
   if (armed !== null) { const card = state.players[state.turn].abilityHand[armed]; R.playBeforeThrow(state, armed, selected); armed = null; flash(card.name); }
@@ -1284,7 +1332,7 @@ async function start() {
   // story mode: each of your Bakugan carries its own upgrades (G-Power boosts and stat upgrades bought in the Shop)
   players.forEach((pl, p) => { const tm = picked && picked[p] && picked[p].team; if (!tm || !tm.toys) return;
     pl.toys.forEach((t, i) => { const x = tm.toys[i] || {}; if (x.up) t.g = Math.min(600, t.g + x.up * UPGRADE_G);
-      if (x.st) t.stats = { ...t.stats, ...Object.fromEntries(['speed', 'defense', 'magnet'].map(k => [k, Math.min(5, ((t.stats || {})[k] ?? 3) + (x.st[k] || 0))])) }; }); });
+      if (x.st) t.stats = { ...t.stats, ...Object.fromEntries(['speed', 'defense', 'magnet', 'control'].map(k => [k, Math.min(5, ((t.stats || {})[k] ?? 3) + (x.st[k] || 0))])) }; }); });
   // your Bakugan's upgrades from the Shop (G-Power and levels)
   players.forEach((pl, p) => {
     const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;
@@ -1332,6 +1380,8 @@ window.MARBLES = {
     const to = cellCenter(state.field[fieldIdx].cell); const d = new THREE.Vector3(to.x - from.x, 0, to.z - from.z);
     const dist = d.length() + overshoot; throwToy(d.setLength(Math.sqrt(2 * FRICTION * dist) * 0.97));
   },
+  cardCenter: i => { const c = cellCenter(state.field[i].cell); return [c.x, c.z]; },
+  throwToPoint: (x, z) => { const from = toysMesh[state.turn][selected].holder.position, d = new THREE.Vector3(x - from.x, 0, z - from.z); throwToy(d.setLength(speedFor(d.length(), 200))); },
   select, get busy() { return busy; },
   // tap a choice in the bottom bar (Gate card index, or -1 = Skip) / tap a spot on the mat
   get choosing() { return pickWait ? 'pick' : spotTap ? 'spot' : gateResolve ? 'gate' : null; },

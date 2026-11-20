@@ -21,7 +21,7 @@ export function makeRng(seed) {
 export function buildPlayer(cat, team, { name, owner = null, nv = false } = {}) {
   const toyBy = new Map(cat.toys.map(t => [t.id, t])), cardBy = new Map(cat.cards.map(c => [c.id, c]));
   const toys = team.toys.map(x => { const t = makeToy(toyBy.get(x.id), x.attr, owner); t.g = Math.min(600, t.g + ((team.upgrades || 0) + (x.up || 0)) * UPGRADE_G);
-    if (x.st) t.stats = Object.fromEntries(['speed', 'defense', 'magnet'].map(k => [k, Math.min(5, ((t.stats || {})[k] ?? 3) + (x.st[k] || 0))]));   // your stat upgrades
+    if (x.st) t.stats = Object.fromEntries(['speed', 'defense', 'magnet', 'control'].map(k => [k, Math.min(5, ((t.stats || {})[k] ?? 3) + (x.st[k] || 0))]));   // your stat upgrades
     return t; });
   const abilities = [...AB_COLORS.map(c => cardBy.get(team.abilities[c].id)),
     ...(nv ? AB_COLORS.flatMap(c => ((team.extra || {})[c] || []).map(x => cardBy.get(x.id || x))) : [])].filter(Boolean);
@@ -125,7 +125,7 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
     const pl = plan(p); if (!pl) break;
     const toy = s.players[p].toys[pl.t];
     // the throw: lands as aimed, on a touching card, or misses
-    const hit = Math.min(0.97, HIT[lvl(p)] + 0.03 * (lv(toy, 'magnet') - 3) - 0.02 * dist(p, s.field[pl.k].cell));
+    const hit = Math.min(0.97, HIT[lvl(p)] + 0.03 * (lv(toy, 'magnet') - 3) + 0.02 * (lv(toy, 'control') - 2) - 0.02 * dist(p, s.field[pl.k].cell));   // Control: aim help
     let k = pl.k;
     if (rng() > hit) {
       const near = s.field.map((f, i) => i).filter(i => i !== pl.k && Math.abs(s.field[i].cell[0] - s.field[pl.k].cell[0]) + Math.abs(s.field[i].cell[1] - s.field[pl.k].cell[1]) === 1);
@@ -135,7 +135,7 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
     if (k !== null) {
       const f = s.field[k], foe = f.toys.find(x => !same(x.p, p));
       if (foe) {
-        const o = s.players[foe.p].toys[foe.t], chance = Math.max(0.02, Math.min(0.25, 0.06 + 0.04 * (lv(toy, 'speed') - lv(o, 'defense'))));
+        const o = s.players[foe.p].toys[foe.t], chance = Math.max(0.02, Math.min(0.25, 0.06 + 0.04 * (lv(toy, 'speed') - lv(o, 'defense')) + 0.01 * (lv(toy, 'control') - 2)));
         if (rng() < chance) { count(R.knockOff(s, [{ p: foe.p, t: foe.t, card: f.card }], pl.t)); if (s.winner !== null) break; k = s.field.indexOf(f); if (k < 0) k = null; }
       }
     }

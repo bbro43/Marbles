@@ -17,9 +17,10 @@ export { isCoded } from './abilities.js';
 export const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
 export const WIN_GATES = 3;
 // New Vestroia rules (newMatch(..., { nv: true })): no Gate card wins. Each player has a Life Gauge of START_LIFE;
-// losing a battle costs the difference in G-Power, a knockout costs the difference (at least KO_MIN). 0 Life loses.
+// losing a battle costs the difference in G-Power. A knockout costs (attacker's Speed - defender's Defense) x KO_PER (Billy, Nov 20),
+// at least KO_MIN. 0 Life loses.
 // Gate cards are used up after a battle and come back when you run out; Bakugan come back right after their battle.
-export const START_LIFE = 500, KO_MIN = 100;
+export const START_LIFE = 500, KO_MIN = 100, KO_PER = 50;
 
 // Grid of card spots that fit on the mat (columns c, rows r), and each player's throwing corner as [sx, sz].
 export const DEFAULT_GRID = { cMin: -3, cMax: 2, rMin: -2, rMax: 1 };
@@ -228,8 +229,9 @@ export function knockOff(s, knocked, by = null) {
     ev.push({ type: 'knockedOff', p: k.p, t: k.t, card: k.card });
     if (!sameTeam(s, k.p, s.turn) && s.nv) {
       // New Vestroia: the knocked-off Bakugan's owner takes damage; the Bakugan goes back to their hand
-      const atk = by === null ? 0 : s.players[s.turn].toys[by].g, def = s.players[k.p].toys[k.t].g;
-      ev.push(...damage(s, k.p, Math.max(KO_MIN, atk - def), 'knockout'));
+      const sv = (t, key) => ((t && t.stats) || {})[key] ?? 3;
+      const atk = by === null ? 0 : sv(s.players[s.turn].toys[by], 'speed'), def = sv(s.players[k.p].toys[k.t], 'defense');
+      ev.push(...damage(s, k.p, Math.max(KO_MIN, (atk - def) * KO_PER), 'knockout'));
       backToHand(s, k.p, k.t);
       if (s.winner !== null) break;
     } else if (!sameTeam(s, k.p, s.turn)) {

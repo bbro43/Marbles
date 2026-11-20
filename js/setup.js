@@ -1,6 +1,7 @@
 // Team setup before a match: each player picks 3 toys (and their attributes), 1 Gold, 1 Silver and
 // 1 Copper Gate card, and 1 Red, 1 Blue and 1 Green Ability card. Then who goes first.
 // Each player slot remembers its last team on this device.
+import { baseStats, controlOf } from './control.js';
 import { isCoded } from './abilities.js';
 
 const ATTR_COLOR = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d', clear: '#cfd8dc' };
@@ -83,7 +84,7 @@ function saveTeam(i, t) { try { localStorage.setItem('marbles-team-' + i, JSON.s
 
 // owner: the character using it; some partners have that character's own colors (t.special[owner][attr], e.g. Spectra's Helios)
 export function makeToy(t, attr, owner = null) {
-  return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: { speed: 3, defense: 3, magnet: 3, ...(t.stats || {}) },
+  return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: baseStats(t),
     model: t.model, attrTexture: (owner && t.special?.[owner]?.[attr]) || t.attributes[attr] };
 }
 const rand = n => Math.floor(Math.random() * n);
@@ -211,7 +212,7 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
         if (!x) return `<div class="slot empty">Pick a Bakugan below</div>`;
         const d = toyById.get(x.id);
         return `<div class="slot" style="--c:${ATTR_COLOR[x.attr]}"><button class="x" data-rm="${k}">✕</button><img class="tpic" src="${thumb(d, x.attr)}" alt=""><b>${esc(d.name)}</b>
-          <small>${d.baseG ?? 250}G · Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')}</small>
+          <small>${d.baseG ?? 250}G · Spd ${lv(d.stats, 'speed')} · Def ${lv(d.stats, 'defense')} · Mag ${lv(d.stats, 'magnet')} · Ctl ${controlOf(d)}</small>
           <div class="dots">${Object.keys(d.attributes).map(a => `<span class="dot ${a === x.attr ? 'on' : ''}" title="${cap(a)}" data-k="${k}" data-attr="${a}" style="background:${ATTR_COLOR[a]}"></span>`).join('')}</div></div>`;
       }).join('');
       const q = search.trim().toLowerCase();

@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
+import { controlOf } from './control.js';
 
 const $ = id => document.getElementById(id);
 const ATTR_COLOR = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d' };
@@ -109,8 +110,8 @@ const origAttr = d => Object.keys(d.attributes || {}).find(a => isOriginal(d, a)
 
 function setStats(d, attr) {
   const st = d.stats || {};
-  for (const [k, id] of [['speed', 'Spd'], ['defense', 'Def'], ['magnet', 'Mag']]) {
-    const v = st[k];
+  for (const [k, id] of [['speed', 'Spd'], ['defense', 'Def'], ['magnet', 'Mag'], ['control', 'Ctl']]) {
+    const v = k === 'control' && d.stats ? controlOf(d) : st[k];
     $('s' + id).textContent = v ?? '–';
     $('m' + id).style.width = v ? (v / 5 * 100) + '%' : '0';
   }
@@ -147,7 +148,7 @@ function renderList() {
   $('list').innerHTML = shown.map(d => {
     const a = d === sel ? selAttr : (tab !== 'all' && d.attributes?.[tab] ? tab : origAttr(d));
     const th = d.thumbs?.[a];
-    const st = d.stats ? `Spd ${d.stats.speed} · Def ${d.stats.defense} · Mag ${d.stats.magnet}` : d.trap ? 'Trap' : '';
+    const st = d.stats ? `Spd ${d.stats.speed} · Def ${d.stats.defense} · Mag ${d.stats.magnet} · Ctl ${controlOf(d)}` : d.trap ? 'Trap' : '';
     const g = d.trap ? '0G' : d.baseG ? d.baseG + 'G' : MAXUS_G[d.name] ? MAXUS_G[d.name] + 'G' : '';
     return `<button class="it ${d === sel ? 'on' : ''}" data-id="${d.id}" style="--c:${ATTR_COLOR[a] || '#888'}">
       ${th ? `<img data-src="${th}" alt="">` : '<span class="ph"></span>'}<div><b>${esc(d.name)}</b><span>${st}</span></div><span class="g">${g}</span></button>`;

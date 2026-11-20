@@ -1,3 +1,4 @@
+import { baseStats, STATS } from './control.js';
 // Saved players: 6 slots like the DS. Each has a name, a look (js/avatar.js), a face picture, a deck and statistics.
 // Kept on this device (localStorage), saved every time something changes.
 const KEY = 'marbles-profiles';
@@ -76,7 +77,7 @@ export function ensureShop(p) {
 export const levelOf = u => 1 + Object.values((u && u.st) || {}).reduce((a, b) => a + b, 0);
 // a Bakugan's G and stats with its upgrades
 export function upgraded(t, attr, owned) {
-  const u = owned && owned.toys[key(t.id, attr)] || { g: 0, st: {} }, base = t.stats || {};
-  const st = {}; for (const k of ['speed', 'defense', 'magnet']) st[k] = Math.min(STAT_CAP, (base[k] || 3) + ((u.st || {})[k] || 0));
+  const u = owned && owned.toys[key(t.id, attr)] || { g: 0, st: {} }, base = baseStats(t);
+  const st = {}; for (const k of STATS) st[k] = Math.min(STAT_CAP, (base[k] || 3) + ((u.st || {})[k] || 0));
   return { g: Math.min(G_CAP, (t.baseG || 250) + (u.g || 0) * G_STEP), stats: st, level: levelOf(u) };
 }

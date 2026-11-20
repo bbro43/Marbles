@@ -533,7 +533,7 @@ function statTop(title, kind, picUrl, st, g, level, extra = '') {
       <span style="position:absolute;left:4px;font:italic 900 7px/22px system-ui;color:#fffa">${kind} ››</span>${esc(title)}</div>
     ${picUrl ? `<img src="${picUrl}" style="left:14px;top:34px;width:96px;height:96px;image-rendering:auto" alt="">` : ''}
     ${level ? `<div class="txt" style="left:30px;top:136px;font-size:12px">LV ${level}</div>` : ''}
-    ${st ? `<div style="position:absolute;left:126px;top:32px;width:118px;background:#2a0b1fcc;padding:6px;border-radius:3px">${bar5('SPEED', st.speed)}${bar5('DEFENSE', st.defense)}${bar5('MAGNET', st.magnet)}</div>` : ''}
+    ${st ? `<div style="position:absolute;left:126px;top:32px;width:118px;background:#2a0b1fcc;padding:6px;border-radius:3px">${bar5('SPEED', st.speed)}${bar5('DEFENSE', st.defense)}${bar5('MAGNET', st.magnet)}${bar5('CONTROL', st.control)}</div>` : ''}
     ${g ? `<div class="txt" style="left:0;right:0;top:160px;text-align:center;font:900 15px system-ui;color:#ffcf3a">${g} GP</div>` : ''}${extra}`;
 }
 let listTab = 0, listTop = 0, listSel = 0;
@@ -616,13 +616,13 @@ function upgrade(sel = 0) {
   statTop(x.t.name, 'UPGRADE', null, up.stats, up.g, up.level);
   if ((x.t.thumbs || {})[x.attr]) pack.url(x.t.thumbs[x.attr]).then(url => { const im = document.createElement('img'); im.src = url; im.style.cssText = 'left:14px;top:34px;width:96px;height:96px'; $('topUI').append(im); });
   const statBtn = (k, i) => { const max = up.stats[k] >= P.STAT_CAP;
-    return `<div class="pill tap ${max || lvMax ? 'off' : ''}" data-st="${k}" style="left:${8 + i * 82}px;top:118px;width:76px;height:30px;line-height:13px">${cap(k)} ${up.stats[k]}${max ? '<br>MAX' : lvMax ? '' : '<br>+1'}</div>`; };
+    return `<div class="pill tap ${max || lvMax ? 'off' : ''}" data-st="${k}" style="left:${6 + i * 61}px;top:118px;width:57px;height:30px;line-height:13px;font-size:9px">${cap(k)} ${up.stats[k]}${max ? '<br>MAX' : lvMax ? '' : '<br>+1'}</div>`; };
   $('bot').innerHTML = img('list_bot', 0, 0) +
     mine.map((m, i) => `<img src="" data-src="${(m.t.thumbs || {})[m.attr] || ''}" class="tap" data-pick="${i}" style="left:${6 + (i % 9) * 27}px;top:${20 + Math.floor(i / 9) * 27}px;width:24px;height:24px;${i === sel ? 'outline:2px solid #4cc3ff' : 'opacity:.75'}" alt="">`).join('') +
     `<div class="pill tap ${gMax ? 'off' : ''}" id="uG" style="left:8px;top:86px;width:240px">${up.g >= P.G_CAP ? 'G-Power is at 600G (max)' : gMax ? '2 G-Power boosts this season (max)' : `G-Power +10G  (${up.g}G → ${up.g + 10}G) — ${gCost} BP`}</div>` +
-    `<div class="txt" style="left:8px;top:104px;font-size:9px">${lvMax ? `Stats fully upgraded (${P.LEVEL_UPS} of ${P.LEVEL_UPS})` : `Stat upgrade ${up.level} of ${P.LEVEL_UPS} — ${lvCost} BP, pick one:`}</div>` + ['speed', 'defense', 'magnet'].map(statBtn).join('') +
+    `<div class="txt" style="left:8px;top:104px;font-size:9px">${lvMax ? `Stats fully upgraded (${P.LEVEL_UPS} of ${P.LEVEL_UPS})` : `Stat upgrade ${up.level} of ${P.LEVEL_UPS} — ${lvCost} BP, pick one:`}</div>` + ['speed', 'defense', 'magnet', 'control'].map(statBtn).join('') +
     bpBar(p.bp, 60, 166);
-  bar(STORY && off ? `Sale: ${off}% off upgrades today! Pick a Bakugan, then raise its G-Power or a stat.` : 'Pick a Bakugan, then raise its G-Power or one of its stats (5 stat upgrades each).');
+  bar(STORY && off ? `Sale: ${off}% off upgrades today! Pick a Bakugan, then raise its G-Power or a stat.` : 'Pick a Bakugan, then raise its G-Power or a stat: Speed, Defense, Magnet or Control (5 stat upgrades each).');
   $('bot').querySelectorAll('img[data-src]').forEach(async im => { if (im.dataset.src) im.src = await pack.url(im.dataset.src); });
   $('bot').querySelectorAll('[data-pick]').forEach(b => b.onclick = () => upgrade(+b.dataset.pick));
   const spend = (cost, fn) => { if (p.bp < cost) { bar(`You need ${cost - p.bp} more BP.`); return; } upd(q => { q.bp -= cost; q.owned.toys[x.k] = q.owned.toys[x.k] || { g: 0, st: {} }; fn(q.owned.toys[x.k]); }); upgrade(sel); };
