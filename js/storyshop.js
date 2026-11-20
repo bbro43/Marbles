@@ -3,6 +3,7 @@
 // League numbers: 1 is the top league, 4 the bottom.
 import { toyPrice, trapPrice } from './profiles.js';
 import { isCoded } from './abilities.js';
+import { makeRng } from './sim.js';
 
 // Bakugan sold in Interspace: the first game's store Bakugan plus the synthetics, minus brawlers' own partners.
 const NOT_SOLD = new Set(['Juggernoid', 'Centipoid', 'Siege', 'Vladitor', 'Battle Ax Vladitor']);
@@ -41,3 +42,32 @@ export function stock(cat) {
   const traps = (cat.traps || []).map(t => ({ t }));
   return { toys, gates, abilities, traps };
 }
+
+// ---------- sales (Billy, Nov 20)
+// Mid-season sale: week 7, 25% off everything. Small sales the rest of the season: two a week, each 5% or 10% off one group
+// for 3 days (one Ability card color, one Gate card color, Bakugan of one attribute, or upgrades). Seeded once per season and saved.
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const SALE_GROUPS = [...['red', 'blue', 'green'].map(c => ({ kind: 'ability', which: c, label: `${cap(c)} Ability cards` })),
+  ...['gold', 'silver', 'copper'].map(c => ({ kind: 'gate', which: c, label: `${cap(c)} Gate cards` })),
+  ...['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'].map(a => ({ kind: 'bakugan', which: a, label: `${cap(a)} Bakugan` })),
+  { kind: 'upgrades', which: null, label: 'G-Power boosts' }];
+export function salesFor(season) {
+  if (season.sales) return season.sales;
+  const r = makeRng(season.seed + 104729), out = [{ kind: 'all', which: null, label: 'everything', pct: 25, from: 42, to: 48, mid: true }];
+  for (let w = 0; w < 13; w++) {
+    if (w === 6) continue;   // the mid-season sale week
+    for (const start of [w * 7 + Math.floor(r() * 2), w * 7 + 3 + Math.floor(r() * 2)]) {
+      const g = SALE_GROUPS[Math.floor(r() * SALE_GROUPS.length)];
+      out.push({ ...g, pct: r() < 0.5 ? 5 : 10, from: start, to: start + 2 });
+    }
+  }
+  return (season.sales = out);
+}
+export const salesOnDay = (season, day) => salesFor(season).filter(x => day >= x.from && day <= x.to);
+// item: { kind: 'upgrades' } / { kind: 'ability', color } / { kind: 'gate', color } / { kind: 'bakugan', attr } / { kind: 'trap' }
+export const discountOn = (season, day, item) => salesOnDay(season, day).reduce((m, x) =>
+  x.kind === 'all' || (x.kind === item.kind && (x.which === null || x.which === (item.color || item.attr))) ? Math.max(m, x.pct) : m, 0);
+export const saleText = x => x.mid ? `MID-SEASON SALE: ${x.pct}% off everything` : `${x.pct}% off ${x.label}`;
+export const tierOf = (kind, x) => kind === 'bakugan' ? tierOfToy(x) : x.type === 'gate' ? tierOfGate(x) : tierOfAbility(x);
+export const priceOf = (kind, x) => kind === 'bakugan' ? priceToy(x) : x.type === 'gate' ? priceGate(x) : priceAbility(x);
+export const isSoldToy = t => t.baseG && (t.psShop || SYNTHETIC.has(t.name)) && !NOT_SOLD.has(t.name);

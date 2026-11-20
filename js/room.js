@@ -7,6 +7,7 @@ import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 import { STARTERS } from './aiteams.js';
 import { isCoded } from './abilities.js';
+import { tierOf, priceOf, isSoldToy, trapAttrCap, discountOn, salesOnDay, saleText } from './storyshop.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -103,9 +104,40 @@ async function faceShot() {
 
 // ---- screens
 let screen = 'room', roomSel = 3, slot = null;
-const prof = () => { const d = P.load(); const p = d.active !== null ? d.slots[d.active] : null; if (p && (p.bp === undefined || !p.owned)) { P.ensureShop(p); P.save(d); } return p; };
+const prof = () => { if (STORY) return storyProf(); const d = P.load(); const p = d.active !== null ? d.slots[d.active] : null; if (p && (p.bp === undefined || !p.owned)) { P.ensureShop(p); P.save(d); } return p; };
 const act = () => P.load().active;
-function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade, trapShop })[s](...a); }
+// ---------- Story mode store (Billy, Nov 20): room.html?story=1 opens this store for story mode, with your story BP,
+// your story collection, league locks and the season's sales. The clerk is our own character (not from the show).
+const STORY = new URLSearchParams(location.search).has('story');
+const SKEY = 'marbles-story';
+const sLoad = () => { try { return JSON.parse(localStorage.getItem(SKEY) || 'null'); } catch { return null; } };
+const sSave = s => { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch {} };
+const sLeague = s => Math.min(4, s.season.leagues.findIndex(l => l.includes('you')) + 1);
+function storyProf() {
+  const s = sLoad(), y = s.you, w = s.season.B.you;
+  return { bp: w.wallet, owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {} }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
+}
+// apply a purchase: to the active profile, or (story mode) to the story save
+function upd(fn) {
+  if (!STORY) return P.update(act(), fn);
+  const s = sLoad(), q = storyProf(); fn(q);
+  s.season.B.you.wallet = q.bp;
+  for (const k of Object.keys(q.owned.toys)) s.you.coll.toys[k] ||= {};
+  s.you.coll.cards = [...new Set([...s.you.coll.cards, ...q.owned.cards])];
+  for (const t of q.owned.traps) if (!s.you.coll.traps.some(x => x.uid === t.uid)) {
+    const T = (pack.catalog.traps || []).find(x => x.id === t.id) || {};
+    const tr = { uid: t.uid, id: t.id, name: T.name || t.id, attrs: t.attrs, color: t.color };
+    s.you.coll.traps.push(tr); if (!s.you.deck.trap) s.you.deck.trap = { id: tr.id, name: tr.name, attrs: tr.attrs };
+  }
+  sSave(s);
+}
+// story prices: tier price, less today's sale; null = locked for your league
+function sPrice(kind, x, item) {
+  const s = sLoad(), base = priceOf(kind, x), off = discountOn(s.season, s.day, item);
+  return { price: Math.round(base * (100 - off) / 100), full: base, off, lock: tierOf(kind, x) < sLeague(s) ? tierOf(kind, x) : 0 };
+}
+const CLERK = { name: 'Nell', look: { hair: [12, 7], cap: [-1, 0], glasses: [-1, 0], eye: [6, 3], eyeblow: [6, 7], facial: [0, 0], top: [3, 4], down: [8, 1], shoes: [1, 2], skin: 1, band: 'aquos' } };
+function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade, trapShop, storyBoost })[s](...a); }
 
 // My Room: the DS carousel
 const ROOM = [['info', 'INFO', 'You can check your statistics on the computer.'], ['save', 'SAVE', 'Switch players or start a new one (up to 6).'],
@@ -390,7 +422,8 @@ function stats() {
   loadRoom();
   await Promise.all([...new Set([...Object.values(M.files), ...M.chars.map(c => c.face)])].map(async f => { try { urls.set(f, await pack.url(f)); } catch {} }));
   const q = new URLSearchParams(location.search).get('go');
-  go(q && ['save', 'closet', 'deck', 'info'].includes(q) && prof() ? q : prof() ? 'room' : 'save');
+  if (STORY && sLoad()) { const s = sLoad(); if (!s.you.coll) { location.href = 'story.html'; return; } go('shop'); }
+  else go(q && ['save', 'closet', 'deck', 'info'].includes(q) && prof() ? q : prof() ? 'room' : 'save');
   window.ROOM = { go, get screen() { return screen; }, prof };
 })();
 
@@ -429,7 +462,7 @@ let shop3d = null, alice = null, shopSel = 0;
 async function loadShop() {
   if (shop3d) return;
   const L = new GLTFLoader();
-  const [s, a] = await Promise.all([L.loadAsync(await pack.url(M.files.shop3d)), L.loadAsync(await pack.url(M.files.alice3d))]);
+  const [s, a] = await Promise.all([L.loadAsync(await pack.url(M.files.shop3d)), STORY ? buildAvatar(CLERK.look, p => pack.url(p)).then(g => ({ scene: g })) : L.loadAsync(await pack.url(M.files.alice3d))]);
   shop3d = s.scene; shop3d.scale.setScalar(0.0028); shop3d.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   alice = a.scene; alice.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   alice.updateMatrixWorld(true);
@@ -461,7 +494,8 @@ const SHOP = [['bakugan', 'BAKUGAN', 'Hi there! Pick a Bakugan to buy.'], ['card
   ['trap', 'TRAP', 'Traps! Pick its color and its attributes. More attributes cost more.']];
 async function shop() {
   const p = prof(); await loadShop(); shopTop(true);
-  $('topUI').innerHTML = `<div class="bubble"><b>Alice</b>${SHOP[shopSel][2]}</div>`;
+  const sale = STORY ? salesOnDay(sLoad().season, sLoad().day).map(saleText).join(' · ') : '';
+  $('topUI').innerHTML = `<div class="bubble"><b>${STORY ? CLERK.name : 'Alice'}</b>${STORY && shopSel === 0 && sLeague(sLoad()) > 1 ? 'Welcome! Stronger stock unlocks as you move up the leagues.' : SHOP[shopSel][2]}${sale ? `<br><span style="color:#c0262e;font-weight:900">${sale}</span>` : ''}</div>`;
   const n = SHOP.length, L = (shopSel + n - 1) % n, R = (shopSel + 1) % n;
   $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 22) +
     `<img src="${art('shop_' + (SHOP[L][0] === 'trap' ? 'bakugan' : SHOP[L][0]))}" class="tap" id="sL" style="left:2px;top:66px" alt="">` +
@@ -471,8 +505,8 @@ async function shop() {
   bar('Select the type of item you want to buy.');
   $('sL').onclick = () => { shopSel = L; shop(); };
   $('sR').onclick = () => { shopSel = R; shop(); };
-  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; go(k === 'upgrade' ? 'upgrade' : k === 'trap' ? 'trapShop' : 'shopList', k); };
-  backBtn(() => { shopTop(false); go('room'); });
+  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; go(k === 'upgrade' ? (STORY ? 'storyBoost' : 'upgrade') : k === 'trap' ? 'trapShop' : 'shopList', k); };
+  backBtn(() => { if (STORY) { location.href = 'story.html'; return; } shopTop(false); go('room'); });
 }
 const bpBar = (bp, x, y) => `<div style="position:absolute;left:${x}px;top:${y}px;width:96px;height:14px;border-radius:7px;background:linear-gradient(90deg,#0a3b7a,#06204a);border:2px solid #39b8ff;
   font:900 9px/10px system-ui;padding:0 6px;display:flex;justify-content:space-between"><span style="color:#8fe3ff">BP</span><span>${bp}</span></div>`;
@@ -496,10 +530,14 @@ function shopList(kind, confirmItem = null) {
   if (kind === 'bakugan') {
     const a = ATTRS[listTab];
     items = cat.toys.filter(t => t.baseG && t.attributes && t.attributes[a]).sort((x, y) => x.baseG - y.baseG)
-      .map(t => ({ id: t.id, name: t.name, attr: a, price: P.toyPrice(t), g: t.baseG, owned: !!p.owned.toys[P.key(t.id, a)], t, pic: (t.thumbs || {})[a] }));
+      .filter(t => !STORY || isSoldToy(t))
+      .map(t => ({ id: t.id, name: t.name, attr: a, price: P.toyPrice(t), g: t.baseG, owned: !!p.owned.toys[P.key(t.id, a)], t, pic: (t.thumbs || {})[a],
+        ...(STORY ? sPrice('bakugan', t, { kind: 'bakugan', attr: a }) : {}) }));
   } else {
     const c = CARD_TABS[listTab];
-    items = cat.cards.filter(x => x.color === c && (x.type === 'gate' ? x.bonus : isCoded(x))).map(x => ({ id: x.id, name: x.name, price: P.cardPrice(x), owned: p.owned.cards.includes(x.id), c: x, pic: x.art }));
+    items = cat.cards.filter(x => x.color === c && (x.type === 'gate' ? x.bonus : isCoded(x))).map(x => ({ id: x.id, name: x.name, price: P.cardPrice(x), owned: p.owned.cards.includes(x.id), c: x, pic: x.art,
+      ...(STORY ? sPrice('card', x, { kind: x.type === 'gate' ? 'gate' : 'ability', color: x.color }) : {}) }));
+    if (STORY) items.sort((a, b) => !!a.lock - !!b.lock || a.full - b.full);
   }
   listSel = Math.min(listSel, Math.max(0, items.length - 1));
   const it = items[listSel];
@@ -518,7 +556,7 @@ function shopList(kind, confirmItem = null) {
       <span class="pic" data-src="${x.pic || ''}" style="position:absolute;left:2px;top:1px;width:24px;height:24px"></span>
       <div style="position:absolute;left:32px;top:2px;font:800 10px/12px system-ui">${esc(x.name)}</div>
       ${x.g ? `<div style="position:absolute;right:4px;top:2px;font:800 9px/12px system-ui">GP ${x.g}</div>` : ''}
-      <div style="position:absolute;right:4px;bottom:1px;font:800 9px/11px system-ui;color:${x.owned ? '#8fe3ff' : p.bp >= x.price ? '#ff6b6b' : '#888'}">${x.owned ? 'OWNED' : 'BP ' + x.price}</div></div>`;
+      <div style="position:absolute;right:4px;bottom:1px;font:800 9px/11px system-ui;color:${x.owned ? '#8fe3ff' : x.lock ? '#ffcf3a' : p.bp >= x.price ? '#ff6b6b' : '#888'}">${x.owned ? 'OWNED' : x.lock ? `LEAGUE ${x.lock}+` : (x.off ? `<s style="color:#aaa;font-weight:600">${x.full}</s> ` : '') + 'BP ' + x.price}</div></div>`;
   }).join('');
   $('bot').innerHTML = img('list_bot', 0, 0) + tabs + rows +
     `<div class="pill tap" id="lUp" style="left:2px;top:60px;width:20px">▲</div><div class="pill tap" id="lDn" style="left:2px;top:128px;width:20px">▼</div>` +
@@ -534,6 +572,7 @@ function shopList(kind, confirmItem = null) {
     if (k !== listSel) { listSel = k; return shopList(kind); }
     const x = items[k];
     if (x.owned) { bar(kind === 'bakugan' ? 'You already have this Bakugan in this attribute.' : 'You already have this card.'); return; }
+    if (x.lock) { bar(`This one unlocks in League ${x.lock}. Win your way up!`); return; }
     if (p.bp < x.price) { bar(`You need ${x.price - p.bp} more BP. Win battles as You to earn BP.`); return; }
     shopList(kind, x);
   });
@@ -542,9 +581,9 @@ function shopList(kind, confirmItem = null) {
   if (confirmItem) {
     $('cNo').onclick = () => shopList(kind);
     $('cYes').onclick = () => {
-      P.update(act(), q => { P.ensureShop(q); if (q.bp < confirmItem.price) return; q.bp -= confirmItem.price;
+      upd(q => { P.ensureShop(q); if (q.bp < confirmItem.price) return; q.bp -= confirmItem.price;
         if (kind === 'bakugan') q.owned.toys[P.key(confirmItem.id, confirmItem.attr)] = { g: 0, st: {} }; else q.owned.cards.push(confirmItem.id); });
-      shopList(kind); bar(`Thanks! ${confirmItem.name} is yours. Put it in your deck from My Room > Deck.`);
+      shopList(kind); bar(`Thanks! ${confirmItem.name} is yours. Put it in your deck from My Room${STORY ? ' in The Commons' : ' > Deck'}.`);
     };
   }
   backBtn(() => go('shop'));
@@ -575,6 +614,21 @@ function upgrade(sel = 0) {
   backBtn(() => go('shop'));
 }
 
+// story mode: G-Power boost (+10G to every Bakugan you own, 2 a season), priced like story.js
+function storyBoost() {
+  const s = sLoad(), w = s.season.B.you, cat = pack.catalog, MAXS = 2;
+  const full = s.you.deck.toys.reduce((n, x) => { const d = cat.toys.find(y => y.id === x.id); return n + P.gPrice(w.up, Math.min(P.G_CAP, (d ? d.baseG : 250) + w.up * 10)); }, 0);
+  const off = discountOn(s.season, s.day, { kind: 'upgrades' }), cost = Math.round(full * (100 - off) / 100), left = MAXS - (w.up - (w.startUp || 0));
+  statTop('G-Power boost', 'UPGRADE', null, null, null, null,
+    `<div style="position:absolute;left:14px;right:14px;top:34px;background:#2a0b1fcc;padding:8px;border-radius:3px;font:600 10px/14px system-ui">+10G to every Bakugan you own.<br>Your Bakugan are +${w.up} now.<br>Boosts left this season: ${left}.
+      <div style="margin-top:8px;color:#ffcf3a;font:900 13px system-ui">${off ? `<s style="color:#aaa;font-size:10px">${full}</s> ` : ''}${cost} BP</div></div>`);
+  $('bot').innerHTML = img('list_bot', 0, 0) + `<div class="pill gold tap ${w.wallet >= cost && left > 0 ? '' : 'off'}" id="bBuy" style="left:60px;top:80px;width:136px">Buy boost</div>` + bpBar(w.wallet, 60, 166);
+  bar(left > 0 ? 'Boosts raise every Bakugan you own by 10G.' : 'No boosts left this season.');
+  $('bBuy').onclick = () => { const t = sLoad(), b = t.season.B.you; if (b.wallet < cost || left <= 0) { bar(left <= 0 ? 'No boosts left this season.' : `You need ${cost - b.wallet} more BP.`); return; }
+    b.wallet -= cost; b.up++; sSave(t); storyBoost(); bar(`Done! Your Bakugan are now +${b.up}.`); };
+  backBtn(() => go('shop'));
+}
+
 // ---------- Traps: pick the Trap, its color, and 2 or more attributes. One Trap goes in your deck.
 let trapPick = { i: 0, color: null, attrs: [] };
 function trapShop() {
@@ -583,14 +637,18 @@ function trapShop() {
   const slots = P.TRAP_SLOTS[T.name] || 0;            // 0 = any number from 2
   if (slots === 6) trapPick.attrs = [...ATTRS];
   if (slots && trapPick.attrs.length > slots) trapPick.attrs = trapPick.attrs.slice(-slots);
-  const need = slots || 2, n = trapPick.attrs.length, ready = slots ? n === slots : n >= 2;
-  const price = P.trapPrice(Math.max(need, n)), mine = (p.owned.traps || []);
+  // story mode: your league caps how many attributes a Trap can cover (League 4: 1 ... League 1: all 6)
+  const sCap = STORY ? trapAttrCap(sLeague(sLoad())) : 6, lockedT = STORY && slots > sCap;
+  if (STORY && !slots && trapPick.attrs.length > sCap) trapPick.attrs = trapPick.attrs.slice(-sCap);
+  const need = slots || (STORY ? 1 : 2), n = trapPick.attrs.length, ready = !lockedT && (slots ? n === slots : n >= need);
+  const sOff = STORY ? discountOn(sLoad().season, sLoad().day, { kind: 'trap' }) : 0;
+  const price = Math.round(P.trapPrice(Math.max(need, n)) * (100 - sOff) / 100), mine = (p.owned.traps || []);
   shopTop(false); top3d(false, 'linear-gradient(115deg,#5a0b1e 0%,#b0122a 45%,#5a0b2e 100%)');
   $('topUI').innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:22px;background:linear-gradient(#b0122a,#6b0d22);border-bottom:1px solid #fff5;font:900 11px/22px system-ui;text-align:center">
       <span style="position:absolute;left:4px;font:italic 900 7px/22px system-ui;color:#fffa">TRAP ››</span>${esc(T.name)}</div>
     <div style="position:absolute;left:126px;top:30px;width:120px;background:#2a0b1fcc;padding:6px;border-radius:3px;font:600 8.5px/12px system-ui">
       0G of its own. Once per game, add it to a battle like an Ability card: it gets the Gate card's bonus for <b>each</b> of its attributes.${T.maxus ? `<div style="margin-top:4px;color:#9fd4ff">A piece of Maxus ${T.maxus === 'sp00_01' ? 'Dragonoid' : 'Helios'}.</div>` : ''}
-      <div style="margin-top:6px;color:#9fd4ff">${slots === 6 ? 'Has all 6 attributes' : slots === 1 ? 'Has 1 attribute' : slots ? `Has exactly ${slots} attributes` : 'Pick 2 or more attributes'}</div>
+      <div style="margin-top:6px;color:#9fd4ff">${lockedT ? `<b style="color:#ffcf3a">Unlocks in League ${slots <= 1 ? 4 : slots <= 2 ? 3 : slots <= 3 ? 2 : 1}</b>` : slots === 6 ? 'Has all 6 attributes' : slots === 1 ? 'Has 1 attribute' : slots ? `Has exactly ${slots} attributes` : STORY ? `Pick up to ${sCap} attribute${sCap > 1 ? 's' : ''} (your league)` : 'Pick 2 or more attributes'}</div>
       <div style="margin-top:2px;color:#ffd0c8">${n ? trapPick.attrs.map(cap).join(', ') : ''}</div>
       <div style="margin-top:4px;color:#ffcf3a;font-weight:900">${price} BP</div></div>
     <div class="txt" style="left:8px;top:168px;font-size:9px">You own ${mine.length} Trap${mine.length === 1 ? '' : 's'}</div>`;
@@ -609,12 +667,14 @@ function trapShop() {
   $('tPrev').onclick = () => { trapPick = { i: (trapPick.i + traps.length - 1) % traps.length, color: null, attrs: trapPick.attrs }; trapShop(); };
   $('tNext').onclick = () => { trapPick = { i: (trapPick.i + 1) % traps.length, color: null, attrs: trapPick.attrs }; trapShop(); };
   $('bot').querySelectorAll('[data-col]').forEach(b => b.onclick = () => { trapPick.color = b.dataset.col; trapShop(); });
-  $('bot').querySelectorAll('[data-ta]').forEach(b => b.onclick = () => { if (slots === 6) return; const a = b.dataset.ta, k = trapPick.attrs.indexOf(a); if (k >= 0) trapPick.attrs.splice(k, 1); else trapPick.attrs.push(a); trapShop(); });
+  $('bot').querySelectorAll('[data-ta]').forEach(b => b.onclick = () => { if (slots === 6) return; const a = b.dataset.ta, k = trapPick.attrs.indexOf(a);
+    if (k >= 0) trapPick.attrs.splice(k, 1); else if (!STORY || slots || trapPick.attrs.length < sCap) trapPick.attrs.push(a); else bar(`In your league a Trap can cover ${sCap} attribute${sCap > 1 ? 's' : ''}.`); trapShop(); });
   $('tBuy').onclick = () => {
-    if (!ready) { bar(slots ? `${T.name} has exactly ${slots} attributes.` : 'A Trap needs 2 or more attributes.'); return; }
+    if (lockedT) { bar(`${T.name} unlocks in a higher league.`); return; }
+    if (!ready) { bar(slots ? `${T.name} has exactly ${slots} attributes.` : `A Trap needs ${need} or more attributes.`); return; }
     if (p.bp < price) { bar(`You need ${price - p.bp} more BP.`); return; }
     const uid = 't' + Date.now().toString(36), attrs = ATTRS.filter(a => trapPick.attrs.includes(a));
-    P.update(act(), q => { P.ensureShop(q); q.owned.traps = q.owned.traps || []; q.bp -= price; q.owned.traps.push({ uid, id: T.id, color, attrs });
+    upd(q => { P.ensureShop(q); q.owned.traps = q.owned.traps || []; q.bp -= price; q.owned.traps.push({ uid, id: T.id, color, attrs });
       const dd = q.deckNV || (q.deck && { ...q.deck }); if (dd && !dd.trap) { dd.trap = uid; q.deckNV = dd; } });
     trapPick.attrs = []; trapShop(); bar(`Thanks! ${T.name} (${attrs.map(cap).join(', ')}) is yours. Choose your Trap in My Room > Deck > New Vestroia deck.`);
   };

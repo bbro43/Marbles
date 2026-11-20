@@ -9,7 +9,7 @@ import { setupSeason2, LEAGUE_NAMES } from './season2.js';
 import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
 import { mountCommons } from './commons3d.js';
-import { stock, trapAttrCap, priceTrap } from './storyshop.js';
+import { stock, trapAttrCap, priceTrap, salesFor, salesOnDay, discountOn, saleText } from './storyshop.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 
 const $ = id => document.getElementById(id);
@@ -69,33 +69,10 @@ const TEAMS = [
   { name: 'Resistance', ids: ['ace', 'mira', 'baron'] },
   { name: "Masquerade's team", ids: ['masquerade', 'klaus', 'chanlee', 'julio', 'komba', 'billy'] },
 ];
-// ---------- Shop sales (Billy, Nov 20)
-// Mid-season sale: week 7, 25% off everything (cards, Bakugan, upgrades).
-// Small sales the rest of the season: two a week, each 5% or 10% off one group for 3 days:
-// one Ability card color, one Gate card color, Bakugan of one attribute, or upgrades. Seeded, so the schedule is fixed per save.
-const SALE_GROUPS = [...['red', 'blue', 'green'].map(c => ({ kind: 'ability', which: c, label: `${cap(c)} Ability cards` })),
-  ...['gold', 'silver', 'copper'].map(c => ({ kind: 'gate', which: c, label: `${cap(c)} Gate cards` })),
-  ...['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'].map(a => ({ kind: 'bakugan', which: a, label: `${cap(a)} Bakugan` })),
-  { kind: 'upgrades', which: null, label: 'G-Power boosts' }];
-const MID_SALE = { from: 42, to: 48, pct: 25 };
-function saleSchedule() {
-  if (save.season.sales) return save.season.sales;
-  const r = makeRng(save.season.seed + 104729), out = [{ kind: 'all', which: null, label: 'everything', pct: MID_SALE.pct, from: MID_SALE.from, to: MID_SALE.to, mid: true }];
-  for (let w = 0; w < 13; w++) {
-    if (w === 6) continue;   // the mid-season sale week
-    for (const start of [w * 7 + Math.floor(r() * 2), w * 7 + 3 + Math.floor(r() * 2)]) {
-      const g = SALE_GROUPS[Math.floor(r() * SALE_GROUPS.length)];
-      out.push({ ...g, pct: r() < 0.5 ? 5 : 10, from: start, to: start + 2 });
-    }
-  }
-  return (save.season.sales = out);
-}
-const salesOn = (day = save.day) => saleSchedule().filter(x => day >= x.from && day <= x.to);
-// best discount for an item: { kind: 'upgrades' } / { kind: 'ability', color } / { kind: 'gate', color } / { kind: 'bakugan', attr }
-function discount(item, day = save.day) {
-  return salesOn(day).reduce((m, x) => x.kind === 'all' || (x.kind === item.kind && (x.which === null || x.which === (item.color || item.attr))) ? Math.max(m, x.pct) : m, 0);
-}
-const saleText = x => x.mid ? `MID-SEASON SALE: ${x.pct}% off everything` : `${x.pct}% off ${x.label}`;
+// ---------- Shop sales (Billy, Nov 20): the schedule lives in js/storyshop.js (the store screen uses it too)
+const saleSchedule = () => salesFor(save.season);
+const salesOn = (day = save.day) => salesOnDay(save.season, day);
+const discount = (item, day = save.day) => discountOn(save.season, day, item);
 const boostCost = () => Math.round(upCost('you') * (100 - discount({ kind: 'upgrades' })) / 100);
 
 // ---------- results: records, BP, Elo, league table, upgrades
@@ -411,7 +388,7 @@ function showMap(on, f) {
   const counts = f ? {} : Object.fromEntries(Object.entries(presence()).map(([k, v]) => [k, v.length]));
   if (save.messages.length) counts.messages = Math.min(save.messages.length, 99);
   map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(),
-    onPick: k => { if (k.startsWith('board:')) return boardPopup(k.slice(6)); if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
+    onPick: k => { if (k.startsWith('board:')) return boardPopup(k.slice(6)); if (k === 'shop' && !f) { ensureColl(); store(); location.href = 'room.html?story=1'; return; } if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
   mapKey = key;
 }
 // deck editor (the same one as My Room in the main game), limited to what you own
