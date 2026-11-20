@@ -67,18 +67,32 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 104;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 105;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
+// a pack split into parts may carry a catalog.json / pack.json in each part: merge them into one
+async function mergedJson(zips, name) {
+  const out = {};
+  for (const z of zips) {
+    const f = z.file(name); if (!f) continue;
+    const j = JSON.parse(await f.async('string'));
+    for (const [k, v] of Object.entries(j)) {
+      if (Array.isArray(v) && Array.isArray(out[k])) out[k] = out[k].concat(v);
+      else if (v && typeof v === 'object' && !Array.isArray(v) && out[k] && typeof out[k] === 'object') out[k] = { ...out[k], ...v };
+      else if (!(k in out)) out[k] = v;
+    }
+  }
+  return out;
+}
 async function openPack(blob) {
   // one zip, or the pack split into parts (marbles-pack-1.zip + marbles-pack-2.zip): look files up in each
   const zips = await Promise.all([].concat(blob).map(b => JSZip.loadAsync(b)));
   const zip = { file: n => zips.map(z => z.file(n)).find(Boolean) };
   const infoFile = zip.file('pack.json');
   if (!infoFile) throw new Error('This zip is not an asset pack (no pack.json).');
-  Pack.zip = zip; Pack.info = JSON.parse(await infoFile.async('string'));
-  Pack.cat = JSON.parse(await zip.file('catalog.json').async('string'));
+  Pack.zip = zip; Pack.info = await mergedJson(zips, 'pack.json');
+  Pack.cat = await mergedJson(zips, 'catalog.json');
   Pack.urls.forEach(u => URL.revokeObjectURL(u)); Pack.urls.clear();
   const files = Object.values((Pack.cat.menu || {}).files || {}).concat((Pack.cat.menu?.chars || []).map(c => c.face));
   await Promise.all([...new Set(files)].map(async f => { const z = zip.file(f); if (z) Pack.urls.set(f, URL.createObjectURL(await z.async('blob'))); }));

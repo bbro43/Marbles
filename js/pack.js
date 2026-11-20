@@ -19,13 +19,28 @@ export async function idbPut(key, val) {
 
 // The pack can be one zip or split across several (pack 0.49+: marbles-pack-1.zip = toys, traps, cards;
 // marbles-pack-2.zip = everything else, including catalog.json and pack.json). Files are looked up in each zip in turn.
+// a pack split into parts may carry a catalog.json / pack.json in each part: merge them into one
+export async function mergedJson(zips, name) {
+  const out = {};
+  for (const z of zips) {
+    const f = z.file(name); if (!f) continue;
+    const j = JSON.parse(await f.async('string'));
+    for (const [k, v] of Object.entries(j)) {
+      if (Array.isArray(v) && Array.isArray(out[k])) out[k] = out[k].concat(v);
+      else if (v && typeof v === 'object' && !Array.isArray(v) && out[k] && typeof out[k] === 'object') out[k] = { ...out[k], ...v };
+      else if (!(k in out)) out[k] = v;
+    }
+  }
+  return out;
+}
 export class Pack {
   static async open(blobs) {
     const p = new Pack();
     p.zips = await Promise.all([].concat(blobs).map(b => window.JSZip.loadAsync(b)));
     const find = n => p.zips.map(z => z.file(n)).find(Boolean);
-    p.info = JSON.parse(await find('pack.json').async('string'));
-    p.catalog = JSON.parse(await find('catalog.json').async('string'));
+    if (!find('pack.json')) throw new Error('This zip is not an asset pack (no pack.json).');
+    p.info = await mergedJson(p.zips, 'pack.json');
+    p.catalog = await mergedJson(p.zips, 'catalog.json');
     p.zip = { file: find };   // old callers use pack.zip.file(path)
     p.urls = new Map();
     return p;
