@@ -115,13 +115,27 @@ const sSave = s => { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catc
 const sLeague = s => Math.min(4, s.season.leagues.findIndex(l => l.includes('you')) + 1);
 function storyProf() {
   const s = sLoad(), y = s.you, w = s.season.B.you;
-  return { bp: w.wallet, owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {} }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
+  return { name: y.name || 'You', look: y.look || DEFAULT_LOOK, deck: sDeckIds(y), deckNV: sDeckIds(y), bp: w.wallet, owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {} }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
+}
+// story decks store { id, name } objects; My Room's deck screen uses plain ids (and a Trap's uid)
+function sDeckIds(y) {
+  const d = y.deck; if (!d) return null;
+  const id = x => x && (x.id || x), tr = d.trap && (y.coll.traps || []).find(t => t.id === d.trap.id && (t.attrs || []).join() === (d.trap.attrs || []).join());
+  return { toys: d.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_COLORS.map(c => [c, id(d.gates[c])])),
+    abilities: Object.fromEntries(AB_COLORS.map(c => [c, id(d.abilities[c])])), extra: Object.fromEntries(AB_COLORS.map(c => [c, ((d.extra || {})[c] || []).map(id)])), trap: tr ? tr.uid : null };
+}
+function sDeckFromIds(d, s) {
+  const card = i => { const c = pack.catalog.cards.find(x => x.id === i); return c ? { id: c.id, name: c.name } : null; };
+  const tr = d.trap && s.you.coll.traps.find(t => t.uid === d.trap);
+  return { toys: d.toys.map(x => ({ id: x.id, attr: x.attr, name: (pack.catalog.toys.find(t => t.id === x.id) || {}).name })),
+    gates: Object.fromEntries(GATE_COLORS.map(c => [c, card(d.gates[c])])), abilities: Object.fromEntries(AB_COLORS.map(c => [c, card(d.abilities[c])])),
+    extra: Object.fromEntries(AB_COLORS.map(c => [c, ((d.extra || {})[c] || []).map(card).filter(Boolean)])), trap: tr ? { id: tr.id, name: tr.name, attrs: tr.attrs } : null };
 }
 // apply a purchase: to the active profile, or (story mode) to the story save
 function upd(fn) {
   if (!STORY) return P.update(act(), fn);
   const s = sLoad(), q = storyProf(); fn(q);
-  s.season.B.you.wallet = q.bp;
+    s.season.B.you.wallet = q.bp; const nd = q.deckNV || q.deck; if (nd && nd.toys && nd.toys.length === 3) s.you.deck = sDeckFromIds(nd, s);
   for (const k of Object.keys(q.owned.toys)) s.you.coll.toys[k] ||= {};
   s.you.coll.cards = [...new Set([...s.you.coll.cards, ...q.owned.cards])];
   for (const t of q.owned.traps) if (!s.you.coll.traps.some(x => x.uid === t.uid)) {
@@ -142,13 +156,13 @@ function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.vi
 // My Room: the DS carousel
 const ROOM = [['info', 'INFO', 'You can check your statistics on the computer.'], ['save', 'SAVE', 'Switch players or start a new one (up to 6).'],
   ['deck', 'DECK', 'View and edit your deck.'], ['closet', 'CLOSET', 'Change your look and your name.'], ['shop', 'SHOP', 'Spend your BP on Bakugan, cards and upgrades.'],
-  ['collection', 'BAKUGAN', 'Look through every Bakugan — models, stats and colors.']];
+  ['collection', 'BAKUGAN', 'Look through every Bakugan — models, stats and colors.']]; if (STORY) { ROOM.splice(0, ROOM.length, ...ROOM.filter(x => ['deck', 'closet', 'shop'].includes(x[0]))); roomSel = 1; }
 function room() {
   const p = prof();
   if (!p) return go('save');
   if (!p.deck && !Object.keys(p.owned.toys).length) return go('starter');
   top3d(true); setView('full'); showAvatar(p.look);
-  $('topUI').innerHTML = `<div class="bubble"><b>${esc(p.name)}</b>${roomSel === 3 ? 'I should change my look.' : roomSel === 2 ? 'I should reorganize my deck.' : roomSel === 1 ? 'I should save my progress.' : 'What should I do?'}</div>`;
+  $('topUI').innerHTML = `<div class="bubble"><b>${esc(p.name)}</b>${({ closet: 'I should change my look.', deck: 'I should reorganize my deck.', save: 'I should save my progress.' })[ROOM[roomSel][0]] || 'What should I do?'}</div>`;
   const n = ROOM.length, L = (roomSel + n - 1) % n, R = (roomSel + 1) % n;
   $('bot').innerHTML = img('room_bot', 0, 0) +
     `<img src="${art(ROOM[L][0] === 'shop' ? 'shop_bakugan' : 'room_' + ROOM[L][0])}" class="tap" id="rL" style="left:2px;top:56px" alt="">` +
@@ -160,7 +174,7 @@ function room() {
   $('rL').onclick = () => { roomSel = L; go('room'); };
   $('rR').onclick = () => { roomSel = R; go('room'); };
   $('rC').onclick = () => { const k = ROOM[roomSel][0]; if (k === 'collection') location.href = 'viewer.html'; else go(k); };
-  backBtn(() => { location.href = './'; });
+  backBtn(() => { location.href = STORY ? 'story.html' : './'; });
 }
 
 // Closet: the character creator
@@ -228,9 +242,9 @@ function closet(start) {
     const c = +b.dataset.color; look[editPart][1] = c; if (editPart === 'hair') look.eyeblow[1] = c;
     go('closet');
   });
-  if ($('cName')) $('cName').onclick = () => askName(name).then(n => { if (n) { closetName = n; if (p && !isNew) P.update(P.load().active, q => { q.name = n; }); } go('closet'); });
+  if ($('cName')) $('cName').onclick = () => askName(name).then(n => { if (n) { closetName = n; if (STORY) { const s = sLoad(); s.you.name = n; sSave(s); } else if (p && !isNew) P.update(P.load().active, q => { q.name = n; }); } go('closet'); });
   if ($('cDone')) $('cDone').onclick = async () => {
-    await building;
+    await building; if (STORY) { const s = sLoad(); s.you.look = look; sSave(s); look = null; editCat = editPart = null; return go('room'); }
     const face = await faceShot();
     const d = P.load();
     const fresh = isNew;
@@ -260,7 +274,7 @@ let deckMode = 'classic';
 const deckKey = () => deckMode === 'nv' ? 'deckNV' : 'deck';
 const deckOf = p => deckMode === 'nv' ? (p.deckNV || (p.deck && { ...p.deck })) : p.deck;
 function deck() {
-  const p = prof(); if (!p) return go('save');
+  if (STORY) deckMode = 'nv'; const p = prof(); if (!p) return go('save');
   top3d(false, `url(${art('arena_top')}) 0 0 / 256px 192px`);
   const nv = deckMode === 'nv', cat = pack.catalog, d = deckOf(p), toyBy = new Map(cat.toys.map(t => [t.id, t])), cardBy = new Map(cat.cards.map(c => [c.id, c]));
   let total = 0, pics = '';
@@ -290,7 +304,7 @@ function deck() {
     $('ds').style.visibility = 'hidden';
     const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned, nv);
     $('ds').style.visibility = '';
-    if (r.deck) P.update(act(), q => { q[deckKey()] = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, extra: nv ? r.deck.extra || {} : {}, trap: nv ? (deckOf(q) || {}).trap || null : null }; });
+    if (r.deck) upd(q => { q[deckKey()] = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, extra: nv ? r.deck.extra || {} : {}, trap: nv ? (deckOf(q) || {}).trap || null : null }; });
     go('deck');
   };
   $('dEdit').onclick = () => edit();
@@ -299,9 +313,9 @@ function deck() {
     const list = p.owned.traps || [];
     if (!list.length) { bar('You have no Traps yet. Buy one in the Shop.'); return; }
     const ids = [null, ...list.map(t => t.uid)], cur = ids.indexOf((d || {}).trap || null);
-    P.update(act(), q => { const dd = deckOf(q); if (dd) { dd.trap = ids[(cur + 1) % ids.length]; q.deckNV = dd; } }); go('deck');
+    upd(q => { const dd = deckOf(q); if (dd) { dd.trap = ids[(cur + 1) % ids.length]; q.deckNV = dd; } }); go('deck');
   };
-  $('dReset').onclick = () => { P.update(act(), q => { q[deckKey()] = null; }); go('deck'); };
+  $('dReset').onclick = () => { upd(q => { q[deckKey()] = null; }); go('deck'); };
   backBtn(() => go('room'));
 }
 
@@ -422,7 +436,7 @@ function stats() {
   loadRoom();
   await Promise.all([...new Set([...Object.values(M.files), ...M.chars.map(c => c.face)])].map(async f => { try { urls.set(f, await pack.url(f)); } catch {} }));
   const q = new URLSearchParams(location.search).get('go');
-  if (STORY && sLoad()) { const s = sLoad(); if (!s.you.coll) { location.href = 'story.html'; return; } go('shop'); }
+  if (STORY && sLoad()) { const s = sLoad(); if (!s.you.coll) { location.href = 'story.html'; return; } go(new URLSearchParams(location.search).get('to') === 'room' ? 'room' : 'shop'); }
   else go(q && ['save', 'closet', 'deck', 'info'].includes(q) && prof() ? q : prof() ? 'room' : 'save');
   window.ROOM = { go, get screen() { return screen; }, prof };
 })();
