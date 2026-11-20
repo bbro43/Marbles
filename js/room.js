@@ -136,7 +136,7 @@ function sPrice(kind, x, item) {
   const s = sLoad(), base = priceOf(kind, x), off = discountOn(s.season, s.day, item);
   return { price: Math.round(base * (100 - off) / 100), full: base, off, lock: tierOf(kind, x) < sLeague(s) ? tierOf(kind, x) : 0 };
 }
-const CLERK = { name: 'Nell', look: { hair: [12, 7], cap: [-1, 0], glasses: [-1, 0], eye: [6, 3], eyeblow: [6, 7], facial: [0, 0], top: [3, 4], down: [8, 1], shoes: [1, 2], skin: 1, band: 'aquos' } };
+const CLERK = { name: 'Alice', look: { hair: [12, 7], cap: [-1, 0], glasses: [-1, 0], eye: [6, 3], eyeblow: [6, 7], facial: [0, 0], top: [3, 4], down: [8, 1], shoes: [1, 2], skin: 1, band: 'aquos' } };
 function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade, trapShop, storyBoost })[s](...a); }
 
 // My Room: the DS carousel
@@ -462,7 +462,7 @@ let shop3d = null, alice = null, shopSel = 0;
 async function loadShop() {
   if (shop3d) return;
   const L = new GLTFLoader();
-  const [s, a] = await Promise.all([L.loadAsync(await pack.url(M.files.shop3d)), STORY ? buildAvatar(CLERK.look, p => pack.url(p)).then(g => ({ scene: g })) : L.loadAsync(await pack.url(M.files.alice3d))]);
+  const [s, a] = await Promise.all([L.loadAsync(await pack.url(M.files.shop3d)), STORY ? L.loadAsync(await pack.url(M.files.alice3d)) : L.loadAsync(await pack.url(M.files.alice3d))]);
   shop3d = s.scene; shop3d.scale.setScalar(0.0028); shop3d.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   alice = a.scene; alice.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   alice.updateMatrixWorld(true);
