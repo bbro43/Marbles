@@ -606,6 +606,8 @@ renderer.domElement.addEventListener('pointerup', e => {
 // Control 1 is the player's own throw. Each point above 1 nudges a throw that's slightly off:
 //   onto a Gate card: up to 0.5 cm per point (2 cm at Control 5), when the ball would stop within CARD_MARGIN of a card;
 //   into an opponent's standing Bakugan (knockout): up to 0.25 cm per point (1 cm at 5), when it would pass within KO_MARGIN.
+// The throw leaves the way it was flicked and curves onto the corrected line while it rolls (see steer() in stepPhysics).
+// Hitting a rail or another Bakugan ends the curve.
 const CARD_HELP = 0.5 * CM, KO_HELP = 0.25 * CM, CARD_MARGIN = 2 * CM, KO_MARGIN = 1.5 * CM;
 function stopDistance(v) {   // how far a straight roll goes before stopping (same slowdown as stepPhysics, without Magnet)
   let sp = v, d = 0; const dt = 1 / 120;
@@ -615,8 +617,10 @@ function stopDistance(v) {   // how far a straight roll goes before stopping (sa
 function speedFor(dist, v0) {   // speed that rolls about `dist`
   let v = v0; for (let i = 0; i < 4; i++) { const d = stopDistance(v); if (d < 1) break; v *= Math.sqrt(dist / d); } return v;
 }
+// returns { vel, steer }: vel = launch velocity (flicked direction), steer = the point the roll curves toward (or none)
 function aimAssist(p, t, from, vel) {
-  const c = lv(statsOf(p, t), 'control'); if (c <= 1 || vel.length() < 1) return vel;
+  const none = { vel, steer: null };
+  const c = lv(statsOf(p, t), 'control'); if (c <= 1 || vel.length() < 1) return none;
   const v = vel.length(), dir = vel.clone().normalize(), D = stopDistance(v), contact = 2 * RADIUS;
   // 1) knockout: the closest opponent it would just miss
   let best = null;
@@ -625,38 +629,48 @@ function aimAssist(p, t, from, vel) {
     const q = toysMesh[x.p][x.t].holder.position, rel = new THREE.Vector3(q.x - from.x, 0, q.z - from.z), a = rel.dot(dir);
     if (a <= 0 || a > D + contact) continue;
     const off = rel.clone().addScaledVector(dir, -a), perp = off.length();
-    if (perp <= contact) return vel;                                       // already on target
+    if (perp <= contact) return none;                                      // already on target
     if (perp - contact <= KO_MARGIN && (!best || perp < best.perp)) best = { a, off, perp };
   }
   if (best) {
     const move = Math.min(KO_HELP * (c - 1), best.perp - contact * 0.5);
     const aimPt = dir.clone().multiplyScalar(best.a).addScaledVector(best.off.normalize(), move);
-    return aimPt.setLength(v);
+    return { vel, steer: { target: from.clone().add(aimPt).setY(from.y), ko: true } };
   }
   // 2) Gate card: it would stop just off a card
   const P = from.clone().addScaledVector(dir, D);
-  if (fieldIndexAt(P) !== null) return vel;
+  if (fieldIndexAt(P) !== null) return none;
   let card = null;
   for (const f of state.field) {
     const cc = cellCenter(f.cell), gap = Math.hypot(Math.max(0, Math.abs(P.x - cc.x) - GATE_W / 2), Math.max(0, Math.abs(P.z - cc.z) - GATE_D / 2));
     if (gap <= CARD_MARGIN && (!card || gap < card.gap)) card = { cc, gap };
   }
-  if (!card) return vel;
+  if (!card) return none;
   const to = new THREE.Vector3(card.cc.x - P.x, 0, card.cc.z - P.z), P2 = P.clone().addScaledVector(to.normalize(), Math.min(CARD_HELP * (c - 1), Math.hypot(card.cc.x - P.x, card.cc.z - P.z)));
-  const nd = new THREE.Vector3(P2.x - from.x, 0, P2.z - from.z);
-  return nd.setLength(speedFor(nd.length(), v));
+  const nd = new THREE.Vector3(P2.x - from.x, 0, P2.z - from.z), L = nd.length(), ang = nd.angleTo(dir);
+  const arc = ang > 1e-4 ? L * ang / Math.sin(ang) : L;                   // a curve to it is a bit longer than straight
+  return { vel: dir.clone().multiplyScalar(speedFor(arc, v)), steer: { target: P2.setY(from.y), ko: false } };
+}
+// bend the rolling ball along a smooth arc toward its steer point (turn rate = 2 x heading error / distance = a circle)
+function steer(ball, dt) {
+  const s = ball.steer, sp = ball.vel.length(); if (!s || sp < 1) return;
+  const tx = s.target.x - ball.pos.x, tz = s.target.z - ball.pos.z, dist = Math.hypot(tx, tz);
+  if (dist < 0.3 * CM || tx * ball.vel.x + tz * ball.vel.z <= 0) { ball.steer = null; return; }
+  const err = Math.atan2(ball.vel.z * tx - ball.vel.x * tz, ball.vel.x * tx + ball.vel.z * tz);   // signed angle, velocity -> target
+  const turn = Math.max(-Math.abs(err), Math.min(Math.abs(err), 2 * err * sp * dt / dist));
+  ball.vel.applyAxisAngle(new THREE.Vector3(0, 1, 0), turn);
 }
 
 function throwToy(vel) {
   if (busy || selected === null) return;
   const top = maxSpeed(statsOf(state.turn, selected));
   if (vel.length() > top) vel.setLength(top);
-  vel = aimAssist(state.turn, selected, toysMesh[state.turn][selected].holder.position, vel);
-  if (vel.length() > top) vel.setLength(top);
+  const aim = aimAssist(state.turn, selected, toysMesh[state.turn][selected].holder.position, vel);
+  vel = aim.vel; if (vel.length() > top) vel.setLength(top);
   busy = true; $('picker').classList.add('off');
   if (armed !== null) { const card = state.players[state.turn].abilityHand[armed]; R.playBeforeThrow(state, armed, selected); armed = null; flash(card.name); }
   const tm = toysMesh[state.turn][selected];
-  const ball = { tm, pos: tm.holder.position.clone(), vel, p: state.turn, t: selected, kind: 'ball' };
+  const ball = { tm, pos: tm.holder.position.clone(), vel, p: state.turn, t: selected, kind: 'ball', steer: aim.steer };
   const stands = state.field.flatMap(f => f.toys.map(x => {
     const stm = toysMesh[x.p][x.t];
     return { tm: stm, pos: stm.holder.position.clone(), vel: new THREE.Vector3(), p: x.p, t: x.t, kind: 'stand', card: f.card, moved: false };
@@ -1174,14 +1188,15 @@ function gameOver() {
 const lim = MAT - RADIUS;
 function bounceRails(b, r) {
   const L = MAT - r;
-  if (Math.abs(b.pos.x) > L) { b.pos.x = Math.sign(b.pos.x) * L; b.vel.x *= -0.6; }
-  if (Math.abs(b.pos.z) > L) { b.pos.z = Math.sign(b.pos.z) * L; b.vel.z *= -0.6; }
+  if (Math.abs(b.pos.x) > L) { b.pos.x = Math.sign(b.pos.x) * L; b.vel.x *= -0.6; b.steer = null; }
+  if (Math.abs(b.pos.z) > L) { b.pos.z = Math.sign(b.pos.z) * L; b.vel.z *= -0.6; b.steer = null; }
 }
 function stepPhysics(dt) {
   const { ball, stands } = roll;
   // 1) the thrown ball rolls
   if (!ball.done) {
     const { tm, pos, vel } = ball;
+    steer(ball, dt);
     const sp = vel.length();
     let decel = sp < SETTLE_SPEED ? FRICTION * 0.8 + sp * 1.2 : FRICTION;
     // Magnet: over a Gate card and slowing down -> brakes harder and drifts toward the card's center.
@@ -1218,7 +1233,7 @@ function stepPhysics(dt) {
     const ra = a.kind === 'ball' ? RADIUS : STAND_R, rc = c.kind === 'ball' ? RADIUS : STAND_R;
     const n = new THREE.Vector3(c.pos.x - a.pos.x, 0, c.pos.z - a.pos.z); const d = n.length();
     if (d === 0 || d >= ra + rc) continue;
-    n.divideScalar(d);
+    n.divideScalar(d); a.steer = null; c.steer = null;   // a hit ends any Control curve
     // who is doing the hitting: the one moving harder toward the other
     const va = a.vel.dot(n), vc = -c.vel.dot(n);
     const m = va >= vc ? a : c, t = m === a ? c : a, nn = m === a ? n : n.clone().negate();
