@@ -55,12 +55,34 @@ const TEAMS = [
   { name: 'Resistance', ids: ['ace', 'mira', 'baron'] },
   { name: "Masquerade's team", ids: ['masquerade', 'klaus', 'chanlee', 'julio', 'komba', 'billy'] },
 ];
-// Flash sales: some days the Shop marks G-Power boosts down (seeded, so everyone sees the same sale that day)
-function flashSale(day = save.day) {
-  const r = makeRng(save.season.seed + day * 104729)();
-  return r < 0.18 ? 40 : r < 0.4 ? 25 : 0;   // percent off
+// ---------- Shop sales (Billy, Nov 20)
+// Mid-season sale: week 7, 25% off everything (cards, Bakugan, upgrades).
+// Small sales the rest of the season: two a week, each 5% or 10% off one group for 3 days:
+// one Ability card color, one Gate card color, Bakugan of one attribute, or upgrades. Seeded, so the schedule is fixed per save.
+const SALE_GROUPS = [...['red', 'blue', 'green'].map(c => ({ kind: 'ability', which: c, label: `${cap(c)} Ability cards` })),
+  ...['gold', 'silver', 'copper'].map(c => ({ kind: 'gate', which: c, label: `${cap(c)} Gate cards` })),
+  ...['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'].map(a => ({ kind: 'bakugan', which: a, label: `${cap(a)} Bakugan` })),
+  { kind: 'upgrades', which: null, label: 'G-Power boosts' }];
+const MID_SALE = { from: 42, to: 48, pct: 25 };
+function saleSchedule() {
+  if (save.season.sales) return save.season.sales;
+  const r = makeRng(save.season.seed + 104729), out = [{ kind: 'all', which: null, label: 'everything', pct: MID_SALE.pct, from: MID_SALE.from, to: MID_SALE.to, mid: true }];
+  for (let w = 0; w < 13; w++) {
+    if (w === 6) continue;   // the mid-season sale week
+    for (const start of [w * 7 + Math.floor(r() * 2), w * 7 + 3 + Math.floor(r() * 2)]) {
+      const g = SALE_GROUPS[Math.floor(r() * SALE_GROUPS.length)];
+      out.push({ ...g, pct: r() < 0.5 ? 5 : 10, from: start, to: start + 2 });
+    }
+  }
+  return (save.season.sales = out);
 }
-const boostCost = () => Math.round(upCost('you') * (100 - flashSale()) / 100);
+const salesOn = (day = save.day) => saleSchedule().filter(x => day >= x.from && day <= x.to);
+// best discount for an item: { kind: 'upgrades' } / { kind: 'ability', color } / { kind: 'gate', color } / { kind: 'bakugan', attr }
+function discount(item, day = save.day) {
+  return salesOn(day).reduce((m, x) => x.kind === 'all' || (x.kind === item.kind && (x.which === null || x.which === (item.color || item.attr))) ? Math.max(m, x.pct) : m, 0);
+}
+const saleText = x => x.mid ? `MID-SEASON SALE: ${x.pct}% off everything` : `${x.pct}% off ${x.label}`;
+const boostCost = () => Math.round(upCost('you') * (100 - discount({ kind: 'upgrades' })) / 100);
 
 // ---------- results: records, BP, Elo, league table, upgrades
 function upCost(id) {
@@ -221,8 +243,8 @@ function render(view = save.view || 'commons') {
       <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button></div>`;
   }
   } else if (view === 'shop') {
-    const c = boostCost(), sale = flashSale(), b = save.season.B.you, left = UPS_PER_SEASON - (b.up - b.startUp);
-    body = `<h2>The Shop</h2>${sale ? `<p class="sale">FLASH SALE today: ${sale}% off G-Power boosts!</p>` : ''}<p>G-Power boost: +10G to all three of your Bakugan.</p>
+    const c = boostCost(), sale = discount({ kind: 'upgrades' }), b = save.season.B.you, left = UPS_PER_SEASON - (b.up - b.startUp);
+    body = `<h2>The Shop</h2>${salesOn().map(x => `<p class="sale">On sale: ${saleText(x)}${x.to > save.day ? ` (until day ${x.to + 1})` : ' (last day)'}</p>`).join('')}<p>G-Power boost: +10G to all three of your Bakugan.</p>
       <p>Cost: <b>${c} BP</b>${sale ? ` <s>${upCost('you')}</s>` : ''}. You have ${b.wallet} BP. Boosts left this season: ${left}.</p>
       <button class="big" id="buy" ${b.wallet < c || left <= 0 ? 'disabled' : ''}>Buy boost</button>` + who('shop') + back();
   } else if (view.startsWith('arena')) {
@@ -255,9 +277,10 @@ function teamRanks() {
 }
 function eloRanks() { const B = save.season.B; return Object.keys(B).sort((a, b) => B[b].elo - B[a].elo); }
 function newsItems() {
-  const out = [], sale = flashSale(), next = save.season.events.filter(e => e.day >= save.day).sort((a, b) => a.day - b.day)[0];
-  if (sale) out.push({ text: `FLASH SALE: ${sale}% off G-Power boosts today`, hot: true });
-  if (flashSale(save.day + 1)) out.push({ text: `Tomorrow: ${flashSale(save.day + 1)}% off boosts at The Shop` });
+  const out = [], next = save.season.events.filter(e => e.day >= save.day).sort((a, b) => a.day - b.day)[0];
+  for (const x of salesOn()) out.push({ text: `Sale: ${saleText(x)}`, hot: true });
+  const soon = saleSchedule().filter(x => x.from > save.day && x.from <= save.day + 3);
+  for (const x of soon.slice(0, 2)) out.push({ text: `${x.from - save.day === 1 ? 'Tomorrow' : `In ${x.from - save.day} days`}: ${saleText(x)}` });
   if (next) out.push({ text: next.day === save.day ? `Today: ${next.name}` : `${next.name} in ${next.day - save.day} day${next.day - save.day > 1 ? 's' : ''}` });
   for (const name of [...save.season.eventsDone].reverse().slice(0, 2)) { const w = (save.season.B && Object.values(save.season.B).find(b => b.titles.includes(name))); if (w) out.push({ text: `${w.name} won the ${name}` }); }
   const top = eloRanks()[0]; out.push({ text: `No. 1 in Interspace: ${nameOf(top)}` });
