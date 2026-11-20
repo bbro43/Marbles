@@ -454,7 +454,7 @@ function select(t) {
   tm.holder.rotation.set(0, Math.atan2(-DIR[p].x, -DIR[p].z), 0);    // facing the center
   tm.obj.quaternion.identity();
   tm.holder.visible = true;
-  if (!isAI(p)) say(`${state.players[p].name}: swipe up to throw ${state.players[p].toys[t].name}`);
+  if (!isAI(p)) say(aimOn ? `${state.players[p].name}: aim ${state.players[p].toys[t].name}, then press Throw (or swipe up)` : `${state.players[p].name}: swipe up to throw ${state.players[p].toys[t].name}`);
 }
 const isStanding = (p, t) => state.field.some(f => f.toys.some(x => x.p === p && x.t === t));
 
@@ -601,6 +601,37 @@ renderer.domElement.addEventListener('pointerup', e => {
   const fwd = DIR[state.turn].clone().negate(), right = new THREE.Vector3(-fwd.z, 0, fwd.x);
   throwToy(right.multiplyScalar(sx * FLICK).addScaledVector(fwd, -sy * FLICK));
 });
+
+// ---------- Aim mode (Billy, Nov 20): set direction and power with sliders, an arrow on the mat shows the throw, then press Throw.
+// The flick still works too. Power: Low / Medium / Powerful thirds of the slider, 25%..100% of this Bakugan's top speed.
+let aimOn = false; try { aimOn = localStorage.getItem('marbles-aim') === '1'; } catch {}
+// a thick arrow lying on the mat: shaft + head, pointing along +z from its start
+const aimArrow = new THREE.Group(), aimMat = new THREE.MeshBasicMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.85, depthTest: false });
+const aimShaft = new THREE.Mesh(new THREE.BoxGeometry(0.9 * CM, 0.2, 1), aimMat), aimHead = new THREE.Mesh(new THREE.ConeGeometry(1.4 * CM, 2.6 * CM, 3), aimMat);
+aimHead.rotation.x = Math.PI / 2; aimArrow.add(aimShaft, aimHead); aimArrow.renderOrder = 5; aimShaft.renderOrder = 5; aimHead.renderOrder = 5;
+aimArrow.visible = false; scene.add(aimArrow);
+const AIM_ZONE_COLOR = [0x4caf50, 0xffd54a, 0xef5350];
+function aimVel() {
+  const fwd = DIR[state.turn].clone().negate(), right = new THREE.Vector3(-fwd.z, 0, fwd.x), a = +$('aimDir').value * Math.PI / 180;
+  const pw = +$('aimPow').value / 100, top = maxSpeed(statsOf(state.turn, selected));
+  return fwd.multiplyScalar(Math.cos(a)).addScaledVector(right, Math.sin(a)).multiplyScalar(top * (0.25 + 0.75 * pw));
+}
+const aimReady = () => aimOn && state && !busy && selected !== null && state.winner === null && !isAI(state.turn) && !spotTap && !pickWait && !gateResolve
+  && $('ask').hidden && $('apanel').hidden && $('battle').hidden && $('over').hidden && $('loading').hidden;
+function aimFrame() {
+  const ok = aimReady(); $('aim').hidden = !ok; $('aim').style.display = ok ? '' : 'none'; aimArrow.visible = ok; $('aimbtn').classList.toggle('on', aimOn);
+  if (!ok) return;
+  const v = aimVel(), from = toysMesh[state.turn][selected].holder.position, len = Math.max(4 * CM, stopDistance(v.length()));
+  const z = Math.min(2, Math.floor(+$('aimPow').value / 34));
+  const shaft = Math.max(0.5 * CM, len - 2.6 * CM);
+  aimArrow.position.set(from.x, 1, from.z); aimArrow.rotation.set(0, Math.atan2(v.x, v.z), 0);
+  aimShaft.scale.z = shaft; aimShaft.position.z = RADIUS + shaft / 2; aimHead.position.z = RADIUS + shaft + 1.3 * CM; aimMat.color.setHex(AIM_ZONE_COLOR[z]);
+  const m = $('msg'); $('aim').style.top = (m.offsetTop + Math.max(18, m.offsetHeight) + 6) + 'px';
+  document.querySelectorAll('#aim .zl span').forEach(s => s.classList.toggle('on', +s.dataset.z === z));
+  $('aimPow').style.setProperty('--pc', '#' + AIM_ZONE_COLOR[z].toString(16).padStart(6, '0'));
+}
+$('aimbtn').onclick = () => { aimOn = !aimOn; try { localStorage.setItem('marbles-aim', aimOn ? '1' : '0'); } catch {} };
+$('aimGo').onclick = () => { if (aimReady()) throwToy(aimVel()); };
 
 // ---------- Control: aim help (Billy, Nov 20)
 // Control 1 is the player's own throw. Each point above 1 nudges a throw that's slightly off:
@@ -1272,6 +1303,7 @@ renderer.setAnimationLoop(() => {
   camera.lookAt(camTarget);
   hideOccluders();
   if (roll) stepPhysics(dt);
+  aimFrame();
   for (const tm of [...toysMesh.flat(), ...trapMeshes.map(x => x.tm)]) {
     if (tm.anim) {
       const k = Math.min(1, (performance.now() - tm.anim.t0) / tm.anim.ms);
