@@ -1,0 +1,38 @@
+<!doctype html><html><body style="margin:0;background:#222">
+<script src="../vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "../vendor/three/build/three.module.js",
+  "three/addons/": "../vendor/three/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Pack } from '../js/pack.js';
+const pack = await Pack.fromDevice();
+const url = p => pack.url(p), loader = new GLTFLoader();
+const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(160, 160); document.body.appendChild(r.domElement);
+const out = {};
+const yaw = +(new URLSearchParams(location.search).get('yaw') || 0.55);
+for (let i = 0; i < 16; i++) {
+  const sc = new THREE.Scene();
+  sc.add(new THREE.AmbientLight(0xffffff, 1.1)); const dl = new THREE.DirectionalLight(0xffffff, 2.2); dl.position.set(-1, 2, 2); sc.add(dl);
+  const g = new THREE.Group();
+  const head = (await loader.loadAsync(await url('creator/models/head_00/head_00.glb'))).scene;
+  head.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.material = new THREE.MeshBasicMaterial({ color: 0xffffff }); } });
+  const hair = (await loader.loadAsync(await url(`creator/models/hair_${String(i).padStart(2, '0')}/hair_${String(i).padStart(2, '0')}.glb`))).scene;
+  hair.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.material = new THREE.MeshLambertMaterial({ color: 0x2fd8dc, side: THREE.DoubleSide }); } });
+  g.add(head, hair); sc.add(g);
+  // frame the hair's box
+  g.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(hair, true), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
+  const R = Math.max(s.x, s.y, s.z) * 0.62;
+  const cam = new THREE.OrthographicCamera(-R, R, R, -R, 0.001, 100);
+  cam.position.set(c.x + Math.sin(yaw) * 10, c.y + 1.2, c.z + Math.cos(yaw) * 10); cam.lookAt(c.x, c.y - R * 0.12, c.z);
+  // the head below the hair shows as the white face; fit a little lower so the chin shows
+  cam.position.y -= R * 0.18; cam.lookAt(c.x, c.y - R * 0.3, c.z);
+  r.render(sc, cam); out[i] = r.domElement.toDataURL('image/png');
+}
+window.ICONS = out; document.title = 'done';
+</script></body></html>
