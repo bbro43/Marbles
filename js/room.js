@@ -519,7 +519,7 @@ async function shop() {
   bar('Select the type of item you want to buy.');
   $('sL').onclick = () => { shopSel = L; shop(); };
   $('sR').onclick = () => { shopSel = R; shop(); };
-  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; go(k === 'upgrade' ? 'upgrade' : k === 'trap' ? 'trapShop' : 'shopList', k); };
+  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; k === 'upgrade' ? go('upgrade') : go(k === 'trap' ? 'trapShop' : 'shopList', k); };
   backBtn(() => { if (STORY) { location.href = 'story.html'; return; } shopTop(false); go('room'); });
 }
 const bpBar = (bp, x, y) => `<div style="position:absolute;left:${x}px;top:${y}px;width:96px;height:14px;border-radius:7px;background:linear-gradient(90deg,#0a3b7a,#06204a);border:2px solid #39b8ff;
@@ -527,13 +527,13 @@ const bpBar = (bp, x, y) => `<div style="position:absolute;left:${x}px;top:${y}p
 // stat panel for the top screen (like the DS shop): name, picture, Speed / Defense / Magnet, G-Power
 function statTop(title, kind, picUrl, st, g, level, extra = '') {
   shopTop(false); top3d(false, 'linear-gradient(115deg,#5a0b1e 0%,#b0122a 45%,#5a0b2e 100%)');
-  const bar5 = (k, v) => `<div style="margin:0 0 5px"><div style="display:flex;justify-content:space-between;font:900 9px/11px system-ui;color:#9fd4ff"><span>${k}</span><b style="color:#fff">${v}</b></div>
-    <div style="height:6px;background:#5c1426;border:1px solid #120610"><i style="display:block;height:100%;width:${v * 20}%;background:linear-gradient(#ffe0b0,#f59a3c)"></i></div></div>`;
+  const bar5 = (k, v) => `<div style="margin:0 0 5px"><div style="display:flex;justify-content:space-between;font:900 9px/11px system-ui;color:#9fd4ff"><span>${k}</span><b style="color:#fff" data-n="${k}">${v}</b></div>
+    <div style="height:6px;background:#5c1426;border:1px solid #120610"><i data-k="${k}" style="display:block;height:100%;width:${v * 20}%;background:linear-gradient(#ffe0b0,#f59a3c)"></i></div></div>`;
   $('topUI').innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:22px;background:linear-gradient(#b0122a,#6b0d22);border-bottom:1px solid #fff5;font:900 11px/22px system-ui;text-align:center">
       <span style="position:absolute;left:4px;font:italic 900 7px/22px system-ui;color:#fffa">${kind} ››</span>${esc(title)}</div>
     ${picUrl ? `<img src="${picUrl}" style="left:14px;top:34px;width:96px;height:96px;image-rendering:auto" alt="">` : ''}
     ${level ? `<div class="txt" style="left:30px;top:136px;font-size:12px">LV ${level}</div>` : ''}
-    ${st ? `<div style="position:absolute;left:126px;top:32px;width:118px;background:#2a0b1fcc;padding:6px;border-radius:3px">${bar5('SPEED', st.speed)}${bar5('DEFENSE', st.defense)}${bar5('MAGNET', st.magnet)}${bar5('CONTROL', st.control)}</div>` : ''}
+    ${st ? `<div style="position:absolute;left:126px;top:32px;width:118px;background:#2a0b1fcc;padding:6px;border-radius:3px">${bar5('SPEED', st.speed)}${bar5('DEFENSE', st.defense)}${bar5('CONTROL', st.control)}${bar5('MAGNET', st.magnet)}</div>` : ''}
     ${g ? `<div class="txt" style="left:0;right:0;top:160px;text-align:center;font:900 15px system-ui;color:#ffcf3a">${g} GP</div>` : ''}${extra}`;
 }
 let listTab = 0, listTop = 0, listSel = 0;
@@ -602,33 +602,90 @@ function shopList(kind, confirmItem = null) {
   }
   backBtn(() => go('shop'));
 }
-// Upgrade: G-Power (+10G) and Level (+1 Speed, Defense or Magnet)
-function upgrade(sel = 0) {
+// Upgrade (DS style, Billy Nov 20): 1) pick a Bakugan from your inventory, 2) confirm the cost (Yes / No),
+// 3) pick a stat (a maxed stat is greyed out), 4) the stat meter fills to its new value. G-Power has its own button + confirm.
+// Caps: 5 stat upgrades per Bakugan, no stat above 5; story mode: 2 G-Power boosts per Bakugan per season.
+let upSel = 0, upTop = 0;
+const UP_STATS = ['speed', 'defense', 'control', 'magnet'];   // DS order
+function upgrade(stage = 'list', ask = null, grow = null) {
+  if (typeof stage !== 'string' || !['list', 'stats'].includes(stage)) stage = 'list';
   const p = prof(), toyBy = new Map(pack.catalog.toys.map(t => [t.id, t]));
   const mine = Object.keys(p.owned.toys).map(k => { const [id, attr] = k.split(':'); return { k, id, attr, t: toyBy.get(id) }; }).filter(x => x.t);
-  if (!mine.length) { bar('You have no Bakugan yet.'); return go('shop'); }
-  sel = Math.min(sel, mine.length - 1);
-  const x = mine[sel], u = p.owned.toys[x.k], up = P.upgraded(x.t, x.attr, p.owned), gN = u.g || 0;
-  // caps (Billy, Nov 20): 5 stat upgrades per Bakugan (none above 5); story mode: 2 G-Power boosts per Bakugan per season
-  const sv = STORY ? sLoad() : null, sNo = sv ? (sv.seasonNo || 2) : 0, gSeason = STORY ? ((u.gs || {})[sNo] || 0) : 0;
+  if (!mine.length) { go('shop'); bar('You have no Bakugan yet.'); return; }
+  upSel = Math.max(0, Math.min(upSel, mine.length - 1)); upTop = Math.max(0, Math.min(upTop, upSel, mine.length - 3));
+  const sv = STORY ? sLoad() : null, sNo = sv ? (sv.seasonNo || 2) : 0;
   const off = STORY ? discountOn(sv.season, sv.day, { kind: 'upgrades' }) : 0, sale = c => Math.round(c * (100 - off) / 100);
-  const gCost = sale(P.gPrice(gN, up.g)), lvCost = sale(P.levelPrice(up.level)), gMax = up.g >= P.G_CAP || (STORY && gSeason >= 2), lvMax = up.level - 1 >= P.LEVEL_UPS;
-  statTop(x.t.name, 'UPGRADE', null, up.stats, up.g, up.level);
+  const info = m => { const u = p.owned.toys[m.k] || {}, up = P.upgraded(m.t, m.attr, p.owned);
+    const statsLeft = up.level - 1 < P.LEVEL_UPS && UP_STATS.some(k => up.stats[k] < P.STAT_CAP);
+    const gLeft = up.g < P.G_CAP && !(STORY && ((u.gs || {})[sNo] || 0) >= 2);
+    return { u, up, statsLeft, gLeft, lvCost: sale(P.levelPrice(up.level)), gCost: sale(P.gPrice(u.g || 0, up.g)) }; };
+  const x = mine[upSel], X = info(x);
+  // top screen: the selected Bakugan's stats (a just-bought stat grows from its old value)
+  statTop(x.t.name, 'UPGRADE', null, grow ? { ...X.up.stats, [grow]: X.up.stats[grow] - 1 } : X.up.stats, X.up.g, X.up.level);
+  if (grow) setTimeout(() => { const b = $('topUI').querySelector(`[data-k="${grow.toUpperCase()}"]`), n = $('topUI').querySelector(`[data-n="${grow.toUpperCase()}"]`);
+    if (b) { b.style.transition = 'width .7s ease-out'; b.style.width = X.up.stats[grow] * 20 + '%'; } if (n) n.textContent = X.up.stats[grow]; }, 60);
   if ((x.t.thumbs || {})[x.attr]) pack.url(x.t.thumbs[x.attr]).then(url => { const im = document.createElement('img'); im.src = url; im.style.cssText = 'left:14px;top:34px;width:96px;height:96px'; $('topUI').append(im); });
-  const statBtn = (k, i) => { const max = up.stats[k] >= P.STAT_CAP;
-    return `<div class="pill tap ${max || lvMax ? 'off' : ''}" data-st="${k}" style="left:${6 + i * 61}px;top:118px;width:57px;height:30px;line-height:13px;font-size:9px">${cap(k)} ${up.stats[k]}${max ? '<br>MAX' : lvMax ? '' : '<br>+1'}</div>`; };
-  $('bot').innerHTML = img('list_bot', 0, 0) +
-    mine.map((m, i) => `<img src="" data-src="${(m.t.thumbs || {})[m.attr] || ''}" class="tap" data-pick="${i}" style="left:${6 + (i % 9) * 27}px;top:${20 + Math.floor(i / 9) * 27}px;width:24px;height:24px;${i === sel ? 'outline:2px solid #4cc3ff' : 'opacity:.75'}" alt="">`).join('') +
-    `<div class="pill tap ${gMax ? 'off' : ''}" id="uG" style="left:8px;top:86px;width:240px">${up.g >= P.G_CAP ? 'G-Power is at 600G (max)' : gMax ? '2 G-Power boosts this season (max)' : `G-Power +10G  (${up.g}G → ${up.g + 10}G) — ${gCost} BP`}</div>` +
-    `<div class="txt" style="left:8px;top:104px;font-size:9px">${lvMax ? `Stats fully upgraded (${P.LEVEL_UPS} of ${P.LEVEL_UPS})` : `Stat upgrade ${up.level} of ${P.LEVEL_UPS} — ${lvCost} BP, pick one:`}</div>` + ['speed', 'defense', 'magnet', 'control'].map(statBtn).join('') +
-    bpBar(p.bp, 60, 166);
-  bar(STORY && off ? `Sale: ${off}% off upgrades today! Pick a Bakugan, then raise its G-Power or a stat.` : 'Pick a Bakugan, then raise its G-Power or a stat: Speed, Defense, Magnet or Control (5 stat upgrades each).');
-  $('bot').querySelectorAll('img[data-src]').forEach(async im => { if (im.dataset.src) im.src = await pack.url(im.dataset.src); });
-  $('bot').querySelectorAll('[data-pick]').forEach(b => b.onclick = () => upgrade(+b.dataset.pick));
-  const spend = (cost, fn) => { if (p.bp < cost) { bar(`You need ${cost - p.bp} more BP.`); return; } upd(q => { q.bp -= cost; q.owned.toys[x.k] = q.owned.toys[x.k] || { g: 0, st: {} }; fn(q.owned.toys[x.k]); }); upgrade(sel); };
-  $('uG').onclick = () => { if (!gMax) spend(gCost, t => { t.g = (t.g || 0) + 1; if (STORY) { t.gs = t.gs || {}; t.gs[sNo] = (t.gs[sNo] || 0) + 1; } }); };
-  $('bot').querySelectorAll('[data-st]').forEach(b => b.onclick = () => { const k = b.dataset.st; if (up.stats[k] >= P.STAT_CAP || lvMax) return; spend(lvCost, t => { t.st = t.st || {}; t.st[k] = (t.st[k] || 0) + 1; }); });
-  backBtn(() => go('shop'));
+  const pic = m => `<span class="pic" data-src="${(m.t.thumbs || {})[m.attr] || ''}" style="position:absolute;left:2px;top:1px;width:24px;height:24px"></span>`;
+  // a DS-style "Available Points / Points / Point Balance" box
+  const confirmBox = a => `<div class="box" style="left:20px;top:22px;width:216px;height:124px;z-index:30;background:#3d5a8cf5;border:2px solid #cfd8e6;border-radius:3px;font:700 10px/16px system-ui">
+      <div style="position:absolute;left:0;right:0;top:4px;text-align:center;font-size:9px;color:#dfe8f5">${esc(a.what)}</div>
+      <div style="position:absolute;left:16px;right:16px;top:24px;display:flex;justify-content:space-between"><span>Available Points</span><span>${p.bp}</span></div>
+      <div style="position:absolute;left:16px;right:16px;top:42px;display:flex;justify-content:space-between"><span>Points</span><span>${a.cost}</span></div>
+      <div style="position:absolute;left:12px;right:12px;top:62px;border-top:2px solid #fff"></div>
+      <div style="position:absolute;left:16px;right:16px;top:68px;display:flex;justify-content:space-between"><span>Point Balance</span><span>${p.bp - a.cost}</span></div>
+      <div class="pill gold tap" id="cYes" style="left:22px;top:96px;width:76px">Yes</div><div class="pill tap" id="cNo" style="left:118px;top:96px;width:76px">No</div></div>`;
+  let html = img('list_bot', 0, 0);
+  if (stage === 'list') {
+    html += mine.slice(upTop, upTop + 3).map((m, i) => { const k = upTop + i, sel = k === upSel, I = info(m);
+      return `<div class="tap" data-row="${k}" style="position:absolute;left:26px;top:${22 + i * 34}px;width:200px;height:30px;background:${sel ? '#7a1020' : '#3a0c12'};border:2px solid ${sel ? '#4cc3ff' : '#c0262e'};border-radius:2px">
+        ${pic(m)}<div style="position:absolute;left:32px;top:2px;font:800 10px/12px system-ui">${esc(m.t.name)}</div>
+        <div style="position:absolute;left:32px;bottom:1px;font:800 9px/11px system-ui">LV ${I.up.level}</div>
+        <div style="position:absolute;right:4px;top:2px;font:800 9px/12px system-ui">GP ${I.up.g}</div>
+        <div style="position:absolute;right:4px;bottom:1px;font:800 9px/11px system-ui;color:${I.statsLeft ? (p.bp >= I.lvCost ? '#ff6b6b' : '#888') : '#8fe3ff'}">${I.statsLeft ? `BP ${I.lvCost}` : 'STATS MAX'}</div></div>`; }).join('') +
+      `<div class="pill tap" id="lUp" style="left:2px;top:22px;width:20px">▲</div><div class="pill tap" id="lDn" style="left:2px;top:90px;width:20px">▼</div>` +
+      `<div class="pill tap ${X.gLeft ? '' : 'off'}" id="uG" style="left:26px;top:128px;width:200px">${X.up.g >= P.G_CAP ? 'G-Power is at 600G (max)' : !X.gLeft ? '2 G-Power boosts this season (max)' : `G-Power +10G — ${X.gCost} BP`}</div>` +
+      bpBar(p.bp, 60, 166) + `<div class="txt" style="left:166px;top:168px;font-size:9px">${upSel + 1} / ${mine.length}</div>`;
+  } else {   // stats: DS-style big buttons, a maxed stat greyed out
+    html += `<div style="position:absolute;left:8px;top:24px;width:58px;height:58px;background:#9aa7b4;border:2px solid #dfe6ee;border-radius:3px">${pic(x).replace('left:2px;top:1px;width:24px;height:24px', 'left:5px;top:5px;width:48px;height:48px')}</div>
+      <div class="txt" style="left:12px;top:88px;font-size:12px">LV ${X.up.level}</div>` +
+      UP_STATS.map((k, i) => { const max = X.up.stats[k] >= P.STAT_CAP;
+        return `<div class="pill tap ${max ? 'off' : 'gold'}" data-st="${k}" style="left:80px;top:${22 + i * 30}px;width:166px;height:24px;line-height:24px;font:italic 900 12px/24px system-ui;${max ? 'filter:grayscale(1);opacity:.45' : ''}">${k.toUpperCase()} ${max ? 'MAX' : 'UP'}</div>`; }).join('') +
+      bpBar(p.bp, 60, 166);
+  }
+  if (ask) html += confirmBox(ask);
+  $('bot').innerHTML = html;
+  $('bot').querySelectorAll('.pic[data-src]').forEach(async e => { if (e.dataset.src) { const big = e.style.width === '48px'; e.innerHTML = `<img src="${await pack.url(e.dataset.src)}" style="position:static;width:${big ? 48 : 24}px;height:${big ? 48 : 24}px;object-fit:contain" alt="">`; } });
+  const buy = (cost, fn) => { upd(q => { if (q.bp < cost) return; q.bp -= cost; q.owned.toys[x.k] = q.owned.toys[x.k] || { g: 0, st: {} }; fn(q.owned.toys[x.k]); }); };
+  if (ask) {
+    $('cNo').onclick = () => upgrade('list');
+    $('cYes').onclick = () => { if (p.bp < ask.cost) { upgrade('list'); bar(`You need ${ask.cost - p.bp} more BP.`); return; }
+      if (ask.kind === 'stat') { upgrade('stats'); bar(`Pick a stat to raise for ${x.t.name}.`); }
+      else { buy(ask.cost, t => { t.g = (t.g || 0) + 1; if (STORY) { t.gs = t.gs || {}; t.gs[sNo] = (t.gs[sNo] || 0) + 1; } }); upgrade('list'); bar(`${x.t.name} is now ${Math.min(P.G_CAP, X.up.g + 10)}G!`); } };
+    backBtn(() => upgrade('list'));
+    if (!grow) bar(ask.kind === 'stat' ? `Upgrade ${x.t.name}'s stats for ${ask.cost} BP?` : `Raise ${x.t.name}'s G-Power for ${ask.cost} BP?`);
+    return;
+  }
+  if (stage === 'list') {
+    $('bot').querySelectorAll('[data-row]').forEach(b => b.onclick = () => {
+      const k = +b.dataset.row;
+      if (k !== upSel) { upSel = k; return upgrade('list'); }
+      if (!X.statsLeft) { bar(X.up.level - 1 >= P.LEVEL_UPS ? `${x.t.name} has used all ${P.LEVEL_UPS} stat upgrades.` : `${x.t.name}'s stats are all maxed.`); return; }
+      if (p.bp < X.lvCost) { bar(`You need ${X.lvCost - p.bp} more BP.`); return; }
+      upgrade('list', { kind: 'stat', cost: X.lvCost, what: `Stat upgrade ${X.up.level} of ${P.LEVEL_UPS}${off ? ` (${off}% off)` : ''}` });
+    });
+    $('lUp').onclick = () => { upSel = Math.max(0, upSel - 1); upgrade('list'); };
+    $('lDn').onclick = () => { upSel = Math.min(mine.length - 1, upSel + 1); if (upSel > upTop + 2) upTop = upSel - 2; upgrade('list'); };
+    $('uG').onclick = () => { if (!X.gLeft) return; if (p.bp < X.gCost) { bar(`You need ${X.gCost - p.bp} more BP.`); return; }
+      upgrade('list', { kind: 'g', cost: X.gCost, what: `G-Power +10G (${X.up.g}G → ${X.up.g + 10}G)` }); };
+    if (!grow) bar(off ? `Sale: ${off}% off upgrades today! Select a Bakugan you want to upgrade.` : 'Select a Bakugan you want to upgrade. Tap it again to upgrade.');
+    backBtn(() => go('shop'));
+  } else {
+    $('bot').querySelectorAll('[data-st]').forEach(b => b.onclick = () => { const k = b.dataset.st; if (X.up.stats[k] >= P.STAT_CAP) return;
+      if (p.bp < X.lvCost) { upgrade('list'); bar(`You need ${X.lvCost - p.bp} more BP.`); return; }
+      buy(X.lvCost, t => { t.st = t.st || {}; t.st[k] = (t.st[k] || 0) + 1; });
+      upgrade('list', null, k); bar(`${x.t.name}'s ${cap(k)} is now ${X.up.stats[k] + 1}!`); });
+    backBtn(() => upgrade('list'));
+  }
 }
 
 // story mode: G-Power boost (+10G to every Bakugan you own, 2 a season), priced like story.js
