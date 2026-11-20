@@ -115,7 +115,7 @@ const sSave = s => { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catc
 const sLeague = s => Math.min(4, s.season.leagues.findIndex(l => l.includes('you')) + 1);
 function storyProf() {
   const s = sLoad(), y = s.you, w = s.season.B.you;
-  return { name: y.name || 'You', look: y.look || DEFAULT_LOOK, deck: sDeckIds(y), deckNV: sDeckIds(y), bp: w.wallet, owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {} }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
+  return { name: y.name || 'You', look: y.look || DEFAULT_LOOK, deck: sDeckIds(y), deckNV: sDeckIds(y), bp: w.wallet, owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {}, ...JSON.parse(JSON.stringify(y.coll.toys[k] || {})) }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
 }
 // story decks store { id, name } objects; My Room's deck screen uses plain ids (and a Trap's uid)
 function sDeckIds(y) {
@@ -136,7 +136,7 @@ function upd(fn) {
   if (!STORY) return P.update(act(), fn);
   const s = sLoad(), q = storyProf(); fn(q);
     s.season.B.you.wallet = q.bp; const nd = q.deckNV || q.deck; if (nd && nd.toys && nd.toys.length === 3) s.you.deck = sDeckFromIds(nd, s);
-  for (const k of Object.keys(q.owned.toys)) s.you.coll.toys[k] ||= {};
+  for (const k of Object.keys(q.owned.toys)) s.you.coll.toys[k] = q.owned.toys[k];   // each Bakugan's own upgrades (G-Power and stats) live here
   s.you.coll.cards = [...new Set([...s.you.coll.cards, ...q.owned.cards])];
   for (const t of q.owned.traps) if (!s.you.coll.traps.some(x => x.uid === t.uid)) {
     const T = (pack.catalog.traps || []).find(x => x.id === t.id) || {};
@@ -519,7 +519,7 @@ async function shop() {
   bar('Select the type of item you want to buy.');
   $('sL').onclick = () => { shopSel = L; shop(); };
   $('sR').onclick = () => { shopSel = R; shop(); };
-  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; go(k === 'upgrade' ? (STORY ? 'storyBoost' : 'upgrade') : k === 'trap' ? 'trapShop' : 'shopList', k); };
+  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; go(k === 'upgrade' ? 'upgrade' : k === 'trap' ? 'trapShop' : 'shopList', k); };
   backBtn(() => { if (STORY) { location.href = 'story.html'; return; } shopTop(false); go('room'); });
 }
 const bpBar = (bp, x, y) => `<div style="position:absolute;left:${x}px;top:${y}px;width:96px;height:14px;border-radius:7px;background:linear-gradient(90deg,#0a3b7a,#06204a);border:2px solid #39b8ff;
@@ -609,22 +609,25 @@ function upgrade(sel = 0) {
   if (!mine.length) { bar('You have no Bakugan yet.'); return go('shop'); }
   sel = Math.min(sel, mine.length - 1);
   const x = mine[sel], u = p.owned.toys[x.k], up = P.upgraded(x.t, x.attr, p.owned), gN = u.g || 0;
-  const gCost = P.gPrice(gN, up.g), lvCost = P.levelPrice(up.level), gMax = up.g >= P.G_CAP;
+  // caps (Billy, Nov 20): 5 stat upgrades per Bakugan (none above 5); story mode: 2 G-Power boosts per Bakugan per season
+  const sv = STORY ? sLoad() : null, sNo = sv ? (sv.seasonNo || 2) : 0, gSeason = STORY ? ((u.gs || {})[sNo] || 0) : 0;
+  const off = STORY ? discountOn(sv.season, sv.day, { kind: 'upgrades' }) : 0, sale = c => Math.round(c * (100 - off) / 100);
+  const gCost = sale(P.gPrice(gN, up.g)), lvCost = sale(P.levelPrice(up.level)), gMax = up.g >= P.G_CAP || (STORY && gSeason >= 2), lvMax = up.level - 1 >= P.LEVEL_UPS;
   statTop(x.t.name, 'UPGRADE', null, up.stats, up.g, up.level);
   if ((x.t.thumbs || {})[x.attr]) pack.url(x.t.thumbs[x.attr]).then(url => { const im = document.createElement('img'); im.src = url; im.style.cssText = 'left:14px;top:34px;width:96px;height:96px'; $('topUI').append(im); });
   const statBtn = (k, i) => { const max = up.stats[k] >= P.STAT_CAP;
-    return `<div class="pill tap ${max ? 'off' : ''}" data-st="${k}" style="left:${8 + i * 82}px;top:118px;width:76px;height:30px;line-height:13px">${cap(k)} ${up.stats[k]}${max ? '<br>MAX' : '<br>+1'}</div>`; };
+    return `<div class="pill tap ${max || lvMax ? 'off' : ''}" data-st="${k}" style="left:${8 + i * 82}px;top:118px;width:76px;height:30px;line-height:13px">${cap(k)} ${up.stats[k]}${max ? '<br>MAX' : lvMax ? '' : '<br>+1'}</div>`; };
   $('bot').innerHTML = img('list_bot', 0, 0) +
     mine.map((m, i) => `<img src="" data-src="${(m.t.thumbs || {})[m.attr] || ''}" class="tap" data-pick="${i}" style="left:${6 + (i % 9) * 27}px;top:${20 + Math.floor(i / 9) * 27}px;width:24px;height:24px;${i === sel ? 'outline:2px solid #4cc3ff' : 'opacity:.75'}" alt="">`).join('') +
-    `<div class="pill tap ${gMax ? 'off' : ''}" id="uG" style="left:8px;top:86px;width:240px">${gMax ? 'G-Power is at 600G (max)' : `G-Power +10G  (${up.g}G → ${up.g + 10}G) — ${gCost} BP`}</div>` +
-    `<div class="txt" style="left:8px;top:104px;font-size:9px">Level up — ${lvCost} BP, pick a stat:</div>` + ['speed', 'defense', 'magnet'].map(statBtn).join('') +
+    `<div class="pill tap ${gMax ? 'off' : ''}" id="uG" style="left:8px;top:86px;width:240px">${up.g >= P.G_CAP ? 'G-Power is at 600G (max)' : gMax ? '2 G-Power boosts this season (max)' : `G-Power +10G  (${up.g}G → ${up.g + 10}G) — ${gCost} BP`}</div>` +
+    `<div class="txt" style="left:8px;top:104px;font-size:9px">${lvMax ? `Stats fully upgraded (${P.LEVEL_UPS} of ${P.LEVEL_UPS})` : `Stat upgrade ${up.level} of ${P.LEVEL_UPS} — ${lvCost} BP, pick one:`}</div>` + ['speed', 'defense', 'magnet'].map(statBtn).join('') +
     bpBar(p.bp, 60, 166);
-  bar('Raise G-Power, or level up to raise Speed, Defense or Magnet.');
+  bar(STORY && off ? `Sale: ${off}% off upgrades today! Pick a Bakugan, then raise its G-Power or a stat.` : 'Pick a Bakugan, then raise its G-Power or one of its stats (5 stat upgrades each).');
   $('bot').querySelectorAll('img[data-src]').forEach(async im => { if (im.dataset.src) im.src = await pack.url(im.dataset.src); });
   $('bot').querySelectorAll('[data-pick]').forEach(b => b.onclick = () => upgrade(+b.dataset.pick));
-  const spend = (cost, fn) => { if (p.bp < cost) { bar(`You need ${cost - p.bp} more BP.`); return; } P.update(act(), q => { q.bp -= cost; fn(q.owned.toys[x.k]); }); upgrade(sel); };
-  $('uG').onclick = () => { if (!gMax) spend(gCost, t => { t.g = (t.g || 0) + 1; }); };
-  $('bot').querySelectorAll('[data-st]').forEach(b => b.onclick = () => { const k = b.dataset.st; if (up.stats[k] >= P.STAT_CAP) return; spend(lvCost, t => { t.st = t.st || {}; t.st[k] = (t.st[k] || 0) + 1; }); });
+  const spend = (cost, fn) => { if (p.bp < cost) { bar(`You need ${cost - p.bp} more BP.`); return; } upd(q => { q.bp -= cost; q.owned.toys[x.k] = q.owned.toys[x.k] || { g: 0, st: {} }; fn(q.owned.toys[x.k]); }); upgrade(sel); };
+  $('uG').onclick = () => { if (!gMax) spend(gCost, t => { t.g = (t.g || 0) + 1; if (STORY) { t.gs = t.gs || {}; t.gs[sNo] = (t.gs[sNo] || 0) + 1; } }); };
+  $('bot').querySelectorAll('[data-st]').forEach(b => b.onclick = () => { const k = b.dataset.st; if (up.stats[k] >= P.STAT_CAP || lvMax) return; spend(lvCost, t => { t.st = t.st || {}; t.st[k] = (t.st[k] || 0) + 1; }); });
   backBtn(() => go('shop'));
 }
 

@@ -34,7 +34,7 @@ export function record(slot, { opponent, won, gates = 0, knockouts = 0, level = 
 // ---------- Shop: BP, what you own, upgrades
 export const START_BP = 500;
 export const BP_WIN = { easy: 100, normal: 200, hard: 400 }, BP_LOSS = 25;
-export const G_STEP = 10, G_CAP = 600, STAT_CAP = 5;
+export const G_STEP = 10, G_CAP = 600, STAT_CAP = 5, LEVEL_UPS = 5;   // Billy, Nov 20: 5 stat upgrades per Bakugan, no stat above 5
 // prices (BP), close to the DS shop: a 190G Bakugan is 1,100, a 200G one 1,200
 export const toyPrice = t => Math.max(800, Math.round((t.baseG || 250) * 6 / 100) * 100);
 export const CARD_PRICE = { gold: 250, silver: 200, copper: 150, red: 300, blue: 300, green: 300 };

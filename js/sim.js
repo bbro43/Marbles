@@ -20,7 +20,9 @@ export function makeRng(seed) {
 // a player for R.newMatch from a team in js/aiteams.js (AI_TEAMS[id][level] or INTERSPACE[id][level])
 export function buildPlayer(cat, team, { name, owner = null, nv = false } = {}) {
   const toyBy = new Map(cat.toys.map(t => [t.id, t])), cardBy = new Map(cat.cards.map(c => [c.id, c]));
-  const toys = team.toys.map(x => { const t = makeToy(toyBy.get(x.id), x.attr, owner); t.g = Math.min(600, t.g + (team.upgrades || 0) * UPGRADE_G); return t; });
+  const toys = team.toys.map(x => { const t = makeToy(toyBy.get(x.id), x.attr, owner); t.g = Math.min(600, t.g + ((team.upgrades || 0) + (x.up || 0)) * UPGRADE_G);
+    if (x.st) t.stats = Object.fromEntries(['speed', 'defense', 'magnet'].map(k => [k, Math.min(5, ((t.stats || {})[k] ?? 3) + (x.st[k] || 0))]));   // your stat upgrades
+    return t; });
   const abilities = [...AB_COLORS.map(c => cardBy.get(team.abilities[c].id)),
     ...(nv ? AB_COLORS.flatMap(c => ((team.extra || {})[c] || []).map(x => cardBy.get(x.id || x))) : [])].filter(Boolean);
   const pl = { name, toys, gates: GATE_COLORS.map(c => cardBy.get(team.gates[c].id)), abilities };

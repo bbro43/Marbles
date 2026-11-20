@@ -1281,6 +1281,10 @@ async function start() {
   const { players, first } = await setupTeams(cat, pack, picked, null, null, NV);
   // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap
   players.forEach((pl, p) => { const up = picked && picked[p].team ? picked[p].team.upgrades : 0; if (up) pl.toys.forEach(t => { t.g = Math.min(600, t.g + up * UPGRADE_G); }); });
+  // story mode: each of your Bakugan carries its own upgrades (G-Power boosts and stat upgrades bought in the Shop)
+  players.forEach((pl, p) => { const tm = picked && picked[p] && picked[p].team; if (!tm || !tm.toys) return;
+    pl.toys.forEach((t, i) => { const x = tm.toys[i] || {}; if (x.up) t.g = Math.min(600, t.g + x.up * UPGRADE_G);
+      if (x.st) t.stats = { ...t.stats, ...Object.fromEntries(['speed', 'defense', 'magnet'].map(k => [k, Math.min(5, ((t.stats || {})[k] ?? 3) + (x.st[k] || 0))])) }; }); });
   // your Bakugan's upgrades from the Shop (G-Power and levels)
   players.forEach((pl, p) => {
     const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;

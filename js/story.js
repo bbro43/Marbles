@@ -34,7 +34,10 @@ const teamDef = id => id === 'you' ? null : AI_TEAMS[id] || INTERSPACE[id];
 const nameOf = id => id === 'you' ? save.you.name : NAME[id] || (INTERSPACE[id] || {}).name || cap(id);
 function teamOf(id) {   // the deck for this brawler right now (level cards + this season's upgrades)
   const b = save.season.B[id];
-  if (id === 'you') { ensureColl(); return { ...save.you.deck, upgrades: b.up }; }
+  if (id === 'you') {   // each of your Bakugan has its own upgrades (bought in the Shop): G-Power boosts and stat upgrades
+    ensureColl(); migrateUps();
+    return { ...save.you.deck, upgrades: 0, toys: save.you.deck.toys.map(x => { const u = save.you.coll.toys[tkey(x.id, x.attr)] || {}; return { ...x, up: u.g || 0, st: u.st || {} }; }) };
+  }
   return { ...teamDef(id)[b.level], upgrades: b.up };
 }
 const mainAttr = id => (teamOf(id).toys[0] || {}).attr || 'pyrus';
@@ -56,11 +59,17 @@ function newSeason(s1, name, attr) {
 // ---------- your collection and deck (start: your starter set; grows with Shop buys and prizes)
 const tkey = (id, attr) => `${id}:${attr}`;
 function ensureColl() {
-  const y = save.you; if (y.coll && y.deck) return;
+  const y = save.you; if (y.coll && y.deck) { if (save.season && save.season.B && save.season.B.you) migrateUps(); return; }
   const st = STARTERS[y.attr];
   y.deck = JSON.parse(JSON.stringify({ toys: st.toys, gates: st.gates, abilities: st.abilities, extra: st.extra || {}, trap: null }));
   y.coll = { toys: Object.fromEntries(st.toys.map(t => [tkey(t.id, t.attr), {}])),
     cards: [...new Set([...Object.values(st.gates), ...Object.values(st.abilities), ...Object.values(st.extra || {}).flat()].map(c => c.id))], traps: [] };
+}
+// before Nov 20, boosts were bought for the whole team (B.you.up); move them onto each Bakugan you own, once
+function migrateUps() {
+  const b = save.season.B.you; if (!b.up || save.you.upsMoved) return;
+  for (const k of Object.keys(save.you.coll.toys)) { const u = save.you.coll.toys[k] = save.you.coll.toys[k] || {}; u.g = (u.g || 0) + b.up; }
+  b.up = 0; b.startUp = 0; save.you.upsMoved = true;
 }
 // League 1 is the top. League 4 covers all three divisions.
 const leagueNum = (id = 'you') => Math.min(4, leagueOf(id) + 1);
@@ -527,10 +536,10 @@ function render(view = save.view || 'commons') {
   else if (view === 'seasonEnd') body = seasonEndView();
   else if (view === 'messages') body = `<h2>Messages</h2>` + (save.messages.map(m => `<div class="msg"><span>Day ${m.day + 1} · ${m.from}</span>${m.text}</div>`).join('') || '<p>No messages.</p>') + back();
   else if (view === 'inventory') {
-    ensureColl(); const y = save.you, t = y.deck, up = save.season.B.you.up;
+    ensureColl(); const y = save.you, t = y.deck;
     const nm = id => (cat.cards.find(c => c.id === id) || {}).name || '?';
     body = `<h2>My Room</h2><h3>Deck</h3>` +
-      t.toys.map(x => { const d = cat.toys.find(q => q.id === x.id) || {}; const g = Math.min(G_CAP, (d.baseG || 0) + up * 10);
+      t.toys.map(x => { const d = cat.toys.find(q => q.id === x.id) || {}; const g = Math.min(G_CAP, (d.baseG || 0) + ((y.coll.toys[tkey(x.id, x.attr)] || {}).g || 0) * 10);
         return `<button class="row ${y.partner === x.id ? 'on' : ''}" data-partner="${x.id}"><span class="dot" style="background:${ATTR_COLOR[x.attr]}"></span>${d.name} · ${g}G${y.partner === x.id ? ' · Partner' : ''}</button>`; }).join('') +
       `<p class="note">Tap a Bakugan to name it your partner (just your favorite; it doesn't change how it battles).</p>
       <p>Gate cards: ${GATE_COLORS.map(c => nm((t.gates[c] || {}).id)).join(', ')}</p>
@@ -609,9 +618,7 @@ function shopView() {
     salesOn().map(x => `<p class="sale">On sale: ${saleText(x)}${x.to > save.day ? ` (until day ${x.to + 1})` : ' (last day)'}</p>`).join('') +
     `<div class="tabs">${tabs.map(([k, n]) => `<button class="${shopTab === k ? 'on' : ''}" data-stab="${k}">${n}</button>`).join('')}</div>`;
   if (shopTab === 'boost') {
-    const c = boostCost(), full = upCost('you'), left = UPS_PER_SEASON - (b.up - b.startUp);
-    h += `<p>G-Power boost: +10G to every Bakugan you own.</p><p>Cost: ${priceTag(full, { kind: 'upgrades' })}. Boosts left this season: ${left}.</p>
-      <button class="big" id="buy" ${b.wallet < c || left <= 0 ? 'disabled' : ''}>Buy boost</button>`;
+    h += `<p>Upgrades are now bought one Bakugan at a time: G-Power (2 boosts per Bakugan each season) and up to 5 stat upgrades (Speed, Defense, Magnet). Use the Upgrade counter in the Shop.</p>`;
   } else if (shopTab === 'bakugan') {
     h += `<div class="tabs">${ATTRS6.map(a => `<button class="${shopAttr === a ? 'on' : ''}" data-sattr="${a}" style="border-color:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>` +
       STOCK.toys.filter(x => x.t.attributes[shopAttr]).map(x => {
@@ -856,6 +863,7 @@ function nextSeason() {
   const days = [0, 2, 4, 6, 8, 10, 11, 1, 3, 5, 7].map(w => w * 7 + 2).sort((a, b) => a - b);   // 11 rounds for leagues of 12
   save.season = { seed, B, leagues: nl, names: ['League 1', 'League 2', 'League 3', 'League 4'], events: season2Events(rng).map(e => ({ ...e, day: e.week * 7 })),
     fixtures: nl.map(rounds), leagueDays: days, done: {}, eventsDone: [] };
+  if (reset) for (const k of Object.keys(save.you.coll.toys)) save.you.coll.toys[k] = {};   // the yearly reset clears your Bakugan's upgrades too
   save.seasonNo = n; save.day = 0; save.slot = 0; save.view = 'commons'; save.seen.midseason = false;
   msg('ISA', `Season ${n} begins. You are in League ${after}.${reset ? ' Upgrades have been reset for everyone.' : ''}`);
   dayStart();
@@ -923,6 +931,7 @@ async function start() {
   save = load();
   const s1 = await (await fetch('data/season1.json')).json();
   if (!save) { $('main').innerHTML = '<div class="hdr"><b>Bakugan Interspace</b></div>'; opening(s1); return; }
+  if (save.season && save.you) { ensureColl(); migrateUps(); store(); }
   takeResult();
   render(save.view === 'shop' || (save.view || '').startsWith('arena') ? 'commons' : save.view);
   for (const q of save.queue || []) if (q === 'firstLeagueWin') { say('ISA', `First league win recorded. Three points to ${save.you.name}.`); say('ISA', `Your name is now on the ${save.season.names[leagueOf('you')]} table.`); }
