@@ -67,12 +67,14 @@ async function idbPut(key, val) { const d = await db(); return new Promise((res,
 async function idbGet(key) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(STORE); const q = t.objectStore(STORE).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
 
 const $ = id => document.getElementById(id);
-const APP_BUILD = 103;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 104;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
 async function openPack(blob) {
-  const zip = await JSZip.loadAsync(blob);
+  // one zip, or the pack split into parts (marbles-pack-1.zip + marbles-pack-2.zip): look files up in each
+  const zips = await Promise.all([].concat(blob).map(b => JSZip.loadAsync(b)));
+  const zip = { file: n => zips.map(z => z.file(n)).find(Boolean) };
   const infoFile = zip.file('pack.json');
   if (!infoFile) throw new Error('This zip is not an asset pack (no pack.json).');
   Pack.zip = zip; Pack.info = JSON.parse(await infoFile.async('string'));
@@ -289,10 +291,14 @@ async function checkUpdate(manual) {
   if (Pack.info && Pack.info.version === remote.version) { packMsg = manual ? 'Up to date (v' + remote.version + ').' : 'Ready.'; if (manual) render(); return; }
   packMsg = 'Downloading pack v' + remote.version + '…'; render();
   try {
-    const r = await fetch('pack/marbles-pack.zip?v=' + encodeURIComponent(remote.version), { cache: 'no-store' });
-    if (!r.ok) throw new Error('Download failed (' + r.status + ').');
-    const blob = await r.blob();
-    await openPack(blob); await idbPut('pack', blob);
+    // the pack comes in parts (version.json lists them); older sites had one marbles-pack.zip
+    const parts = remote.files || ['marbles-pack.zip'];
+    const blobs = await Promise.all(parts.map(async f => {
+      const r = await fetch('pack/' + f + '?v=' + encodeURIComponent(remote.version), { cache: 'no-store' });
+      if (!r.ok) throw new Error('Download failed (' + r.status + ').');
+      return r.blob();
+    }));
+    await openPack(blobs); await idbPut('pack', blobs);
     packMsg = 'Updated to v' + remote.version + '.';
     if (screen === 'options' && hasArt() && !manual) screen = 'title';
   } catch (err) { packMsg = err.message; }
