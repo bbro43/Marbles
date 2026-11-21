@@ -17,6 +17,28 @@ export const PARTS = {
   shoes:   { styles: 4, colors: 6, label: 'Shoes' },
 };
 export const SKIN_TONES = 5;
+// race (Billy, Nov 20): 'human' or 'vestal'. Vestals have hazed eyes: no pupil, the iris glows milky toward the center.
+// Any eye style and color can be hazed; it's done here on the eye texture, so the pack needs no extra pictures.
+export const RACES = ['human', 'vestal'];
+function hazeEye(img) {
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), p = d.data, W = c.width, H = c.height;
+  const lum = i => p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11, spread = i => Math.max(p[i], p[i + 1], p[i + 2]) - Math.min(p[i], p[i + 1], p[i + 2]);
+  const pts = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (p[i + 3] && !(lum(i) > 190 && spread(i) < 60)) pts.push([x, y, i]); }   // not the skin
+  if (!pts.length) return c;
+  const cx = pts.reduce((a, q) => a + q[0], 0) / pts.length, cy = pts.reduce((a, q) => a + q[1], 0) / pts.length;
+  const R = Math.max(...pts.map(q => Math.hypot(q[0] - cx, q[1] - cy))) || 1;
+  const sat = [...pts].sort((a, b) => spread(b[2]) - spread(a[2])).slice(0, Math.max(4, pts.length / 6 | 0));
+  const ir = [0, 1, 2].map(k => sat.reduce((a, q) => a + p[q[2] + k], 0) / sat.length);   // the iris color
+  for (const [x, y, i] of pts) {
+    const dd = Math.hypot(x - cx, y - cy) / R; if (dd > 0.78 || lum(i) > 200) continue;   // keep the outline ring and the highlight
+    const mix = 0.12 + 0.45 * Math.max(0, 1 - dd / 0.78);
+    for (let k = 0; k < 3; k++) p[i + k] = Math.round(ir[k] + (255 - ir[k]) * mix);
+  }
+  g.putImageData(d, 0, 0); return c;
+}
 // the gauntlet's color is an attribute: textures gauntlet_<attribute> (made in scripts/menuart.py)
 export const BAND = { pyrus: 0, aquos: 1, subterra: 2, haos: 3, darkus: 4, ventus: 5 };
 // a starting look (Liam-like: brown hair, black top, blue jeans)
@@ -27,6 +49,7 @@ export function randomLook() {
   const r = n => Math.floor(Math.random() * n), L = { skin: r(SKIN_TONES) };
   for (const [k, p] of Object.entries(PARTS)) L[k] = [p.optional && Math.random() < 0.6 ? -1 : r(p.styles), r(p.colors)];
   L.eyeblow[1] = L.hair[1];
+  L.race = Math.random() < 0.2 ? 'vestal' : 'human';
   L.band = Object.keys(BAND)[r(6)];
   return L;
 }
@@ -65,9 +88,13 @@ function variantFor(texName, L) {
 export async function buildAvatar(L, url) {
   const loader = new GLTFLoader(), texLoader = new THREE.TextureLoader(), group = new THREE.Group();
   const texCache = new Map();
+  const vestal = L.race === 'vestal';
   const tex = async name => {
     if (!texCache.has(name)) texCache.set(name, (async () => {
-      const t = await texLoader.loadAsync(await url(`creator/textures/${name}.png`));
+      const src = await url(`creator/textures/${name}.png`);
+      let t;
+      if (vestal && /^eye_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(hazeEye(im)); }   // hazed Vestal eyes
+      else t = await texLoader.loadAsync(src);
       t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t;
     })().catch(() => { console.warn('no texture', name); return null; }));
     return texCache.get(name);

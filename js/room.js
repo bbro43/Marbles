@@ -228,6 +228,11 @@ function closet(start) {
       const sw = (M.swatch || {})[k === 'eye' ? 'eye' : k] || [];
       for (let c = 0; c < def.colors; c++) right(`<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="left:${142 + c * 18}px;top:152px;background:${sw[c] || '#888'}"></div>`);
     }
+    if (k === 'eye') {   // race: Human or Vestal (hazed eyes)
+      const r = look.race || 'human';
+      right(`<div class="txt" style="left:142px;top:120px;font-size:8px">Race</div>` +
+        [['human', 'Human'], ['vestal', 'Vestal']].map(([v, t], i) => `<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:${166 + i * 42}px;top:118px;width:40px;height:18px;line-height:18px;font-size:9px">${t}</div>`).join(''));
+    }
   }
   $('bot').innerHTML = h;
   $('bot').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => {
@@ -236,6 +241,7 @@ function closet(start) {
   });
   $('bot').querySelectorAll('[data-part]').forEach(b => b.onclick = () => { editPart = b.dataset.part; go('closet'); });
   $('bot').querySelectorAll('[data-band]').forEach(b => b.onclick = () => { look.band = b.dataset.band; go('closet'); });
+  $('bot').querySelectorAll('[data-race]').forEach(b => b.onclick = () => { look.race = b.dataset.race; go('closet'); bar(look.race === 'vestal' ? 'Vestal: hazed eyes.' : 'Human eyes.'); });
   $('bot').querySelectorAll('[data-style]').forEach(b => b.onclick = () => {
     const v = +b.dataset.style; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
     if (editPart === 'eye') look.eyeblow[0] = v;
