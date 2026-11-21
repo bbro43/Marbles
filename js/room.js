@@ -1,6 +1,7 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
 import * as THREE from 'three';
 import { Pack } from './pack.js';
+import { swatches, XCOLORS } from './clothes.js';
 import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, EXTRA_HAIR, RACES, RACE_LABEL, RACE_OPT, GUN_HAIR, opt } from './avatar.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
@@ -16,7 +17,9 @@ let pack, M, urls = new Map();
 // menu art from the pack; a few pictures live in the app instead (img/creator: the girl hair icons, styles 10-15, rendered
 // from their models by tools/hairicons.html in the DS icon style). The pack's own copy wins if it has one.
 const APP_ART = new Set(['part_hair10', 'part_hair11', 'part_hair12', 'part_hair13', 'part_hair14', 'part_hair15', 'part_bottom8', 'part_bottom9']);
-const art = k => urls.get(M.files[k]) || (APP_ART.has(k) ? `img/creator/${k}.png` : '');
+// our own icons for the new clothes (js/clothes.js, made with tools/clothicons.html): these win over the pack's (it has an unused part_shoes4)
+const APP_OWN = new Set(['part_top8', 'part_top9', 'part_top10', 'part_top11', 'part_bottom10', 'part_bottom11', 'part_shoes4', 'part_gloves1', 'part_gloves2']);
+const art = k => APP_OWN.has(k) ? `img/creator/${k}.png` : k === 'part_gloves0' ? art('part_glasses0') : urls.get(M.files[k]) || (APP_ART.has(k) ? `img/creator/${k}.png` : '');
 const img = (k, x, y, cls = '', extra = '') => art(k) ? `<img src="${art(k)}" style="left:${x}px;top:${y}px" class="${cls}" ${extra} alt="">` : '';
 
 // ---- the two screens, scaled to the phone
@@ -181,10 +184,10 @@ function room() {
 }
 
 // Closet: the character creator
-const CAT = { Head: ['race', 'hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top', 'band'], 'Lower body': ['down', 'shoes'] };
-const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: 'top', down: 'bottom', shoes: 'shoes', skin: 'skin' };
-const LABEL = { race: 'Race', band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
-const VIEW_OF = { race: 'head', band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
+const CAT = { Head: ['race', 'hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top', 'gloves', 'band'], 'Lower body': ['down', 'shoes'] };
+const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: 'top', down: 'bottom', shoes: 'shoes', skin: 'skin', gloves: 'gloves' };
+const LABEL = { race: 'Race', band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes', gloves: 'Gloves' };
+const VIEW_OF = { race: 'head', band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower', gloves: 'upper' };
 let look = null, editCat = null, editPart = null, isNew = false;
 const HAIR_MORE = ['#ff8ada', '#67acff', '#45f7da', '#bd6dff', '#ff2e45', '#7ef767'];   // hair colors 6-11 (the bright Vestal ones): the pack's swatch list stops at 6
 // a Gundalian can't keep a hair style that covers the forehead band: switch to the nearest one that doesn't
@@ -192,6 +195,7 @@ function fixHair() { if (look.race !== 'gundalian' || GUN_HAIR.includes(look.hai
 function closet(start) {
   const p = prof();
   if (start) { look = start.look; isNew = !!start.isNew; } else if (!look) look = JSON.parse(JSON.stringify(p ? p.look : DEFAULT_LOOK));
+  if (!look.gloves) look.gloves = [-1, 0];   // looks saved before gloves
   top3d(true); setView(editPart ? VIEW_OF[editPart] : editCat === 'Head' ? 'head' : editCat === 'Upper body' ? 'upper' : editCat === 'Lower body' ? 'lower' : 'full');
   showAvatar(look);
   const name = (p && !isNew) ? p.name : (start && start.name) || closetName;
@@ -247,6 +251,7 @@ function closet(start) {
     if (k !== 'skin') {
       let sw = (M.swatch || {})[k === 'eye' ? 'eye' : k] || [];
       if (k === 'hair') { sw = [...sw]; while (sw.length < 12) sw.push(HAIR_MORE[sw.length - 6] || '#888'); sw.push(...EXTRA_HAIR); }
+      sw = swatches(k === 'down' ? 'down' : k, look[k][0]) || (k === 'gloves' ? XCOLORS.gloves : sw);   // a new clothes style has its own colors
       // the colors in one row that scrolls sideways when there are more than fit
       right(`<div class="swrow" style="position:absolute;left:138px;top:149px;width:112px;height:17px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none">` +
         [...Array(def.colors)].map((_, c) => `<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="position:relative;display:inline-block;margin:3px 3px 0;background:${sw[c] || '#888'}"></div>`).join('') + `</div>`);

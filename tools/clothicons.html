@@ -1,0 +1,49 @@
+<!doctype html><html><body style="margin:0;background:#222">
+<!-- Icons for the new clothes (js/clothes.js): each piece drawn in cyan like the pack's icons. Saves nothing: the test script
+     reads window.ICONS (key -> PNG data URL, 160x160, transparent) and puts each in the pack's icon frame. -->
+<script src="../vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/build/three.module.js", "three/addons/": "../vendor/three/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { Pack } from '../js/pack.js';
+import { buildAvatar, DEFAULT_LOOK } from '../js/avatar.js';
+const pack = await Pack.fromDevice(), url = p => pack.url(p);
+const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(160, 160); document.body.appendChild(r.domElement);
+const CYAN = 0x2fd8dc, PALE = 0x9ff0f2;
+// key, the look's change, which part (index in the avatar's parts: 1 top, 2 pants, 3 shoes), and what to frame
+const SPECS = [
+  ['part_top8', { top: [8, 0] }, 1, 'top'], ['part_top9', { top: [9, 0] }, 1, 'top'], ['part_top10', { top: [10, 0] }, 1, 'top'], ['part_top11', { top: [11, 0] }, 1, 'top'],
+  ['part_bottom10', { down: [10, 0] }, 2, 'down'], ['part_bottom11', { down: [11, 0] }, 2, 'down'], ['part_shoes4', { shoes: [4, 0] }, 3, 'shoes'],
+  ['part_gloves1', { gloves: [0, 0] }, 1, 'glove'], ['part_gloves2', { gloves: [1, 0] }, 1, 'glove'],
+];
+const out = {};
+for (const [key, change, part, frame] of SPECS) {
+  const look = JSON.parse(JSON.stringify({ ...DEFAULT_LOOK, ...change }));
+  const av = await buildAvatar(look, url), grp = av.children[0];
+  grp.children.forEach((sc, i) => sc.visible = i === part || (frame === 'top' && i === 2 && look.top[0] === 8));   // the coat's tails are on the pants
+  const want = [];
+  grp.children[part].traverse(o => { if (!o.isMesh) return; o.frustumCulled = false;
+    const nm = o.material.map?.name || '', added = !nm || o.userData.xvest || o.userData.glove;
+    let col = CYAN;
+    if (frame === 'glove') { if (!(/^xglove|^band/.test(nm) || o.userData.glove)) { o.visible = false; return; } }
+    else if (look.top[0] === 9 && part === 1 && !o.userData.xvest && /^xtop/.test(nm)) col = PALE;   // the shirt under the vest
+    else if (/^skin|^gauntlet/.test(nm) || /gauntlet/.test(nm)) { o.visible = false; return; }
+    o.material = new THREE.MeshLambertMaterial({ color: col, side: THREE.DoubleSide, skinning: true }); want.push(o); });
+  if (look.top[0] === 8 && part === 1) grp.children[2].traverse(o => { if (!o.isMesh) return; const nm = o.material.map?.name || '';
+    if (/^x?down/.test(nm) || /^skin/.test(nm)) o.visible = false; else { o.material = new THREE.MeshLambertMaterial({ color: CYAN, side: THREE.DoubleSide }); want.push(o); } });
+  const sc = new THREE.Scene(); sc.add(new THREE.AmbientLight(0xffffff, 1.1)); const dl = new THREE.DirectionalLight(0xffffff, 2.2); dl.position.set(-1, 2, 2); sc.add(dl); sc.add(av);
+  av.updateMatrixWorld(true); av.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
+  const box = new THREE.Box3(); for (const o of want) if (o.visible) box.expandByObject(o, true);
+  if (frame === 'glove') {   // one hand: frame its bone
+    let hb = null; grp.children[part].traverse(o => { if (o.isBone && o.name === 'Bip01_L_Hand') hb = o; });
+    const hp = hb.getWorldPosition(new THREE.Vector3()); box.set(hp.clone().addScalar(-0.04), hp.clone().addScalar(0.04)); box.min.y -= 0.03; box.max.y -= 0.03;
+  }
+  const c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3()), R = Math.max(s.x, s.y, s.z) * 0.56;
+  const cam = new THREE.OrthographicCamera(-R, R, R, -R, 0.001, 100), yw = 0.5;
+  cam.position.set(c.x + Math.sin(yw) * 10, c.y + 2, c.z + Math.cos(yw) * 10); cam.lookAt(c);
+  r.render(sc, cam); out[key] = r.domElement.toDataURL('image/png');
+}
+window.ICONS = out; document.title = 'done';
+</script></body></html>

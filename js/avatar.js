@@ -2,6 +2,7 @@
 // Each part is its own model on the same skeleton in its rest pose, so loading them together assembles the body.
 // Colors are texture swaps: a material whose texture is e.g. "hair_00_00" gets "hair_03_02" (style 3, color 2).
 import * as THREE from 'three';
+import { XTOP, XDOWN, XSHOES, baseModel, xVariant, xSource, tintCloth, addClothes, longSkirt } from './clothes.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // what you can change, how many styles and colors each has (from pack/creator/catalog.json)
@@ -12,9 +13,10 @@ export const PARTS = {
   eye:     { styles: 6, colors: 12, label: 'Eyes' },   // 6-11: same colors with a tinted pupil instead of black, for Vestals (scripts/vestaleyes.py)
   eyeblow: { styles: 8, colors: 22, label: 'Eyebrows' },   // 6-7 are softer (scripts/softbrows.py)
   facial:  { styles: 6, colors: 5, label: 'Face' },
-  top:     { styles: 8, colors: 6, label: 'Top' },
-  down:    { styles: 10, colors: 6, label: 'Pants' },   // 8-9 are skirts (scripts/girlskirt.mjs)
-  shoes:   { styles: 4, colors: 6, label: 'Shoes' },
+  top:     { styles: 12, colors: 6, label: 'Top' },     // 8-11 are our own (js/clothes.js)
+  down:    { styles: 12, colors: 6, label: 'Pants' },   // 8-9 are skirts (scripts/girlskirt.mjs)
+  shoes:   { styles: 5, colors: 6, label: 'Shoes' },
+  gloves:  { styles: 2, colors: 6, label: 'Gloves', optional: true },   // our own (js/clothes.js); none = they follow the top
 };
 export const SKIN_TONES = 5;
 // more hair colors (Billy, Nov 21): colors 12+ are made here by tinting the blond texture (color 02), so the pack needs nothing new.
@@ -241,7 +243,7 @@ function hazeEye(img) {
 // the gauntlet's color is an attribute: textures gauntlet_<attribute> (made in scripts/menuart.py)
 export const BAND = { pyrus: 0, aquos: 1, subterra: 2, haos: 3, darkus: 4, ventus: 5 };
 // a starting look (Liam-like: brown hair, black top, blue jeans)
-export const DEFAULT_LOOK = { hair: [0, 0], cap: [-1, 0], glasses: [-1, 0], eye: [0, 0], eyeblow: [0, 0], facial: [0, 0],
+export const DEFAULT_LOOK = { hair: [0, 0], cap: [-1, 0], glasses: [-1, 0], gloves: [-1, 0], eye: [0, 0], eyeblow: [0, 0], facial: [0, 0],
   top: [1, 1], down: [0, 2], shoes: [0, 1], skin: 0, band: 'pyrus' };
 const two = n => String(n).padStart(2, '0');
 export function randomLook() {
@@ -257,13 +259,14 @@ export function randomLook() {
 // the hair style to build: a Gundalian never gets one that covers the forehead band (the nearest allowed one instead)
 const hairOf = L => { const h = L.hair[0]; return L.race === 'gundalian' && !GUN_HAIR.includes(h) ? GUN_HAIR.reduce((a, b) => Math.abs(b - h) < Math.abs(a - h) ? b : a) : h; };
 function models(L) {
-  const m = ['head_00', 'top_' + two(L.top[0]), 'down_' + two(L.down[0]), 'shoes_' + two(L.shoes[0])];
+  const m = ['head_00', baseModel('top', L.top[0]), baseModel('down', L.down[0]), baseModel('shoes', L.shoes[0])];
   m.push(L.cap[0] >= 0 ? 'cap_' + two(L.cap[0]) : 'hair_' + two(hairOf(L)));      // a hat comes with the hair under it
   if (L.glasses[0] >= 0) m.push('glasses_' + two(L.glasses[0]));
   return m;
 }
 // the texture a material should use, given the texture it was built with
 function variantFor(texName, L) {
+  const x = xVariant(texName, L); if (x) return x;   // the new clothes (js/clothes.js)
   if (texName === 'gauntlet') return L.band && L.band !== 'pyrus' ? `gauntlet_${L.band}` : null;   // the gauntlet's attribute color
   const m = /^([a-z]+)_(\d\d)_(\d\d)$/.exec(texName || ''); if (!m) return null;
   const kind = m[1], s = m[2];
@@ -295,16 +298,19 @@ export async function buildAvatar(L, url) {
       let t = null;
       const xh = /^(hair|caphair|eyeblow)_(\d\d)_(\d\d)$/.exec(name), extra = xh && +xh[3] >= EXTRA0;
       // an extra hair color: tint the blond texture (Neathian eyebrows are blanked whatever the color)
-      const src = await url(`creator/textures/${extra ? `${xh[1]}_${xh[2]}_02` : name}.png`);
+      const xs = xSource(name);   // a new clothes texture: a pack texture recolored
+      const src = await url(`creator/textures/${xs ? xs.src : extra ? `${xh[1]}_${xh[2]}_02` : name}.png`);
+      if (xs) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintCloth(im, xs.color)); } else
       if (extra && !(L.race === 'neathian' && xh[1] === 'eyeblow')) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintHair(im, EXTRA_HAIR[+xh[3] - EXTRA0] || '#888')); }
       else if (raced && /^(eye|eyeblow|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L); if (c) t = new THREE.CanvasTexture(c); }
       if (!t) t = await texLoader.loadAsync(src);
-      t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t;
+      t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; if (!t.name) t.name = name; return t;
     })().catch(() => { console.warn('no texture', name); return null; }));
     return texCache.get(name);
   };
   const scenes = await Promise.all(models(L).map(async m => { const sc = (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene;
-    if (/^down_0[89]$/.test(m)) cinchSkirt(sc); return sc; }));
+    if (/^down_0[89]$/.test(m)) { if (XDOWN[L.down[0]]?.add === 'long') longSkirt(sc); else cinchSkirt(sc); } return sc; }));
+  { const ms = models(L), at = k => scenes[ms.findIndex(n => n.startsWith(k + '_'))]; addClothes(L, { top: at('top'), down: at('down'), shoes: at('shoes') }); }
   if (L.race === 'gundalian') foreheadPlate(scenes[models(L).indexOf('head_00')], scenes.find((_, i) => /^(hair|cap)_/.test(models(L)[i])));
   const jobs = [];
   for (const sc of scenes) {
@@ -314,7 +320,7 @@ export async function buildAvatar(L, url) {
       const mats = Array.isArray(o.material) ? o.material : [o.material];
       for (const mat of mats) {
         const old = mat.map; if (!old) continue;
-        const want = variantFor(old.name, L) || old.name; if (want === old.name && !(raced && /^(eye|eyeblow|facial|skin)_/.test(old.name))) continue;
+        const want = o.userData.xvest || variantFor(old.name, L) || old.name; if (want === old.name && !(raced && /^(eye|eyeblow|facial|skin)_/.test(old.name))) continue;
         jobs.push(tex(want).then(t => { if (t) { t.wrapS = old.wrapS; t.wrapT = old.wrapT; mat.map = t; mat.needsUpdate = true; } }));
       }
     });
