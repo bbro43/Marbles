@@ -124,10 +124,10 @@ function legAt(down, y, side, tol = 0.02) {   // the pants are low-poly: widen t
 export function addClothes(L, parts) {
   const T = XTOP[L.top[0]], D = XDOWN[L.down[0]], S = XSHOES[L.shoes[0]];
   const top = parts.top && partMesh(parts.top), down = parts.down && partMesh(parts.down), shoes = parts.shoes && partMesh(parts.shoes);
+  const W = waistOf(parts.top);   // the top's own width at its hem: the skirts and the coat's belt start there, flush
   if (T && top) {
-    cinchTop(parts.top);
     const color = T.add === 'vest' ? XCOLORS.top9[L.top[1]] : XCOLORS['top' + L.top[0]][L.top[1]];
-    if (T.add === 'coat' && down) { tuckPants(down); coatTails(down, color); }
+    if (T.add === 'coat' && down) { Object.assign(COAT, { rx0: W.rx, rz0: W.rz, z: W.z }); tuckPants(down); coatTails(down, color); }
     if (T.add === 'vest') vest(parts.top, L);
     if (T.add === 'collar') collar(top, color);
     if (T.add === 'puff') puffs(top, color);
@@ -135,22 +135,22 @@ export function addClothes(L, parts) {
   if (D && down) {
     const color = XCOLORS['down' + L.down[0]][L.down[1]];
     if (D.add === 'cargo') pockets(down, color);
-    if (D.add === 'long') { longSkirt(parts.down); waistband(down, shade(color, 0.7)); }
+    if (D.add === 'long') { longSkirt(parts.down, W); waistband(down, shade(color, 0.8), W); }
   }
   if (S && down) boots(shoes, down, XCOLORS['shoes' + L.shoes[0]][L.shoes[1]]);
   if (L.gloves && L.gloves[0] === 1 && top) fullGloves(top, XCOLORS.gloves[L.gloves[1]]);
 }
 
-// a narrower waist on the new tops: the body pulled in toward the bottom (the arms are left alone)
-function cinchTop(sc) {
-  const v = new THREE.Vector3();
+// the top's size at its bottom edge (an oval round the waist): x half-width, z half-depth and middle
+function waistOf(sc) {
+  const out = { rx: 0.056, rz: 0.046, z: 0 }; if (!sc) return out;
+  const v = new THREE.Vector3(); let x = 0, z0 = 9, z1 = -9, n = 0;
+  sc.updateMatrixWorld(true);
   sc.traverse(o => { if (!o.isSkinnedMesh) return; const P = o.geometry.attributes.position;
-    for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (v.y > WAIST.y1 || Math.abs(v.x) > 0.1) continue;
-      const t = clamp((WAIST.y1 - v.y) / (WAIST.y1 - WAIST.y0), 0, 1), e = t * t * (3 - 2 * t), kx = 1 - WAIST.x * e, kz = 1 - WAIST.z * e;
-      P.setXYZ(i, v.x * kx, v.y, v.z * kz); }
-    P.needsUpdate = true; o.geometry.computeVertexNormals(); });
+    for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (v.y > 0.5 || v.y < 0.455 || Math.abs(v.x) > 0.1) continue; x = Math.max(x, Math.abs(v.x)); z0 = Math.min(z0, v.z); z1 = Math.max(z1, v.z); n++; } });
+  if (n) { out.rx = x; out.rz = (z1 - z0) / 2; out.z = (z1 + z0) / 2; }
+  return out;
 }
-const WAIST = { y0: 0.48, y1: 0.585, x: 0.2, z: 0.1 };
 // pull the pants' top (and the belt and pouches on it) in under the coat's belt
 function tuckPants(down) {
   const P = down.geometry.attributes.position, v = new THREE.Vector3();
@@ -171,10 +171,10 @@ function coatTails(down, color) {
   (u, t) => t > COAT.vent && Math.abs(th(u) - Math.PI) < 0.07);   // a vent at the back
   addPiece(down, geo, color);
   // a belt round the waist where the tails start
-  const belt = ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * (COAT.rx0 + 0.003), lerp(COAT.y0 + 0.012, COAT.y0 - 0.006, t), COAT.z + Math.cos(a) * (COAT.rz0 + 0.003)]; }, () => [[pel, 1]]);
+  const belt = ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * (COAT.rx0 + 0.0015), lerp(COAT.y0 + 0.006, COAT.y0 - 0.008, t), COAT.z + Math.cos(a) * (COAT.rz0 + 0.0015)]; }, () => [[pel, 1]]);
   addPiece(down, belt, shade(color, 0.6), { hem: false });
 }
-const COAT = { gap: 0.3, y0: 0.478, y1: 0.22, rx0: 0.054, rx1: 0.09, rz0: 0.043, rz1: 0.07, z: -0.004, vent: 0.45 };
+const COAT = { gap: 0.3, y0: 0.472, y1: 0.22, rx0: 0.054, rx1: 0.09, rz0: 0.043, rz1: 0.07, z: -0.004, vent: 0.45 };
 // the vest: the shirt's body, a little bigger, minus a V down the front, in the vest color
 function vest(topScene, L) {
   let body = null;   // the body piece: the mesh whose texture is the top's (top_..), the most faces
@@ -238,7 +238,7 @@ function pockets(down, color) {
 }
 const POCKET = { y: 0.32, h: 0.06, w: 0.05, d: 0.01, turn: 0.55 };
 // the long skirt: skirt 9's skirt reshaped down to the ankles (same ring layout as cinchSkirt in avatar.js)
-export function longSkirt(root) {
+export function longSkirt(root, W = { rx: 0.05, rz: 0.045, z: 0.004 }) {
   const NU = 48, NV = 5;
   root.traverse(o => {
     if (!o.isMesh) return;
@@ -249,16 +249,17 @@ export function longSkirt(root) {
     }
     for (let j = 0; j <= NV; j++) for (let i = 0; i <= NU; i++) {
       const t = j / NV, th = i / NU * 2 * Math.PI, fold = 1 + 0.05 * t * Math.abs(Math.sin(10 * th));
-      const rx = lerp(0.047, LONG.rx, Math.pow(t, 0.65)) * fold, rz = lerp(0.042, LONG.rz, Math.pow(t, 0.65)) * fold;
-      P.setXYZ(j * (NU + 1) + i, Math.sin(th) * rx, lerp(0.478, LONG.y, t), 0.004 + Math.cos(th) * rz);
+      const rx = lerp(W.rx, LONG.rx, Math.pow(t, 0.65)) * fold, rz = lerp(W.rz, LONG.rz, Math.pow(t, 0.65)) * fold;   // starts at the top's own width: no ledge
+      P.setXYZ(j * (NU + 1) + i, Math.sin(th) * rx, lerp(0.472, LONG.y, t), lerp(W.z, 0.004, t) + Math.cos(th) * rz);
     }
     P.needsUpdate = true; o.geometry.computeVertexNormals(); o.geometry.computeBoundingSphere();
   });
 }
 const LONG = { y: 0.06, rx: 0.115, rz: 0.1 };
-function waistband(down, color) {
+// a thin band at the waist, flush with the top
+function waistband(down, color, W) {
   const pel = boneIx(down, 'Bip01_Pelvis');
-  addPiece(down, ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * 0.05, lerp(0.49, 0.468, t), 0.004 + Math.cos(a) * 0.045]; }, () => [[pel, 1]]), color, { hem: false });
+  addPiece(down, ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * (W.rx + 0.0015), lerp(0.478, 0.466, t), W.z + Math.cos(a) * (W.rz + 0.0015)]; }, () => [[pel, 1]]), color, { hem: false });
 }
 // boot shafts: from the shoe up to below the knee, round each lower leg
 function boots(shoes, down, color) {
