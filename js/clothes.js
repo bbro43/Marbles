@@ -6,7 +6,7 @@
 //           11 Puffed-sleeve top   top 2 + rounded puffs at the shoulders
 //   Bottoms 10 Cargo pants         pants 0 + pockets on the sides of the thighs
 //           11 Long skirt          skirt 9 reshaped to the ankles (with a top in the same color it reads as a dress)
-//   Shoes    4 Tall boots          shoes 0 + boot shafts up to the knees
+//   Shoes    4 Tall boots          shoes 0, and the legs below the knees in the boot color with a cuff at the top
 //   Gloves   a new part: fingerless or full gloves in their own color (none = they follow the top, as before)
 import * as THREE from 'three';
 
@@ -136,7 +136,7 @@ export function addClothes(L, parts) {
     if (D.add === 'cargo') pockets(down, color);
     if (D.add === 'long') { longSkirt(parts.down); waistband(down, shade(color, 0.7)); }
   }
-  if (S && shoes && down) boots(shoes, down, XCOLORS['shoes' + L.shoes[0]][L.shoes[1]]);
+  if (S && down) boots(shoes, down, XCOLORS['shoes' + L.shoes[0]][L.shoes[1]]);
   if (L.gloves && L.gloves[0] === 1 && top) fullGloves(top, XCOLORS.gloves[L.gloves[1]]);
 }
 
@@ -153,7 +153,7 @@ function coatTails(down, color) {
   const belt = ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * (COAT.rx0 + 0.003), lerp(COAT.y0 + 0.012, COAT.y0 - 0.006, t), COAT.z + Math.cos(a) * (COAT.rz0 + 0.003)]; }, () => [[pel, 1]]);
   addPiece(down, belt, shade(color, 0.6), { hem: false });
 }
-const COAT = { gap: 0.3, y0: 0.478, y1: 0.22, rx0: 0.066, rx1: 0.094, rz0: 0.05, rz1: 0.072, z: -0.004, vent: 0.45 };
+const COAT = { gap: 0.3, y0: 0.478, y1: 0.22, rx0: 0.06, rx1: 0.09, rz0: 0.046, rz1: 0.07, z: -0.004, vent: 0.45 };
 // the vest: the shirt's body, a little bigger, minus a V down the front, in the vest color
 function vest(topScene, L) {
   let body = null;   // the body piece: the mesh whose texture is the top's (top_..), the most faces
@@ -228,7 +228,7 @@ export function longSkirt(root) {
     }
     for (let j = 0; j <= NV; j++) for (let i = 0; i <= NU; i++) {
       const t = j / NV, th = i / NU * 2 * Math.PI, fold = 1 + 0.05 * t * Math.abs(Math.sin(10 * th));
-      const rx = lerp(0.056, LONG.rx, Math.pow(t, 0.55)) * fold, rz = lerp(0.05, LONG.rz, Math.pow(t, 0.55)) * fold;
+      const rx = lerp(0.051, LONG.rx, Math.pow(t, 0.6)) * fold, rz = lerp(0.045, LONG.rz, Math.pow(t, 0.6)) * fold;
       P.setXYZ(j * (NU + 1) + i, Math.sin(th) * rx, lerp(0.478, LONG.y, t), 0.004 + Math.cos(th) * rz);
     }
     P.needsUpdate = true; o.geometry.computeVertexNormals(); o.geometry.computeBoundingSphere();
@@ -237,28 +237,44 @@ export function longSkirt(root) {
 const LONG = { y: 0.06, rx: 0.115, rz: 0.1 };
 function waistband(down, color) {
   const pel = boneIx(down, 'Bip01_Pelvis');
-  addPiece(down, ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * 0.059, lerp(0.49, 0.468, t), 0.004 + Math.cos(a) * 0.053]; }, () => [[pel, 1]]), color, { hem: false });
+  addPiece(down, ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * 0.054, lerp(0.488, 0.468, t), 0.004 + Math.cos(a) * 0.048]; }, () => [[pel, 1]]), color, { hem: false });
 }
 // boot shafts: from the shoe up to below the knee, round each lower leg
 function boots(shoes, down, color) {
   // the legs' middles, measured before the pants are tucked in
   const mids = {}; for (const side of [1, -1]) { const lo = legAt(down, BOOT.y0 + 0.02, side), hi = legAt(down, BOOT.y1 - 0.02, side); if (lo && hi) mids[side] = { lo, hi }; }
   const at = (m, y) => { const t = clamp((y - BOOT.y0) / (BOOT.y1 - BOOT.y0), 0, 1); return { x: lerp(m.lo.x, m.hi.x, t), z: lerp(m.lo.z, m.hi.z, t), r: lerp(BOOT.r0, BOOT.r1, t) }; };
-  // tuck the pants into the boots: below the boot tops, nothing sticks out past the boot
+  // slim the legs below the knee into a boot shape
   const P = down.geometry.attributes.position, v = new THREE.Vector3();
   for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (v.y > BOOT.y1 + 0.005) continue; const m = mids[Math.sign(v.x) || 1]; if (!m) continue;
-    const c = at(m, v.y), dx = v.x - c.x, dz = v.z - c.z, d = Math.hypot(dx, dz), max = c.r - 0.003; if (d > max) P.setXYZ(i, c.x + dx / d * max, v.y, c.z + dz / d * max); }
+    const c = at(m, v.y), dx = v.x - c.x, dz = v.z - c.z, d = Math.hypot(dx, dz), max = c.r; if (d > max) P.setXYZ(i, c.x + dx / d * max, v.y, c.z + dz / d * max); }
   P.needsUpdate = true; down.geometry.computeVertexNormals();
+  // the boot: the legs' own faces below the knee, in the boot color (the pants' texture recolored, so the shading matches)
+  const g = down.geometry.clone(), idx = g.index.array, keep = [], G = g.attributes.position, N = g.attributes.normal;
+  for (let f = 0; f < idx.length; f += 3) { const cy = (G.getY(idx[f]) + G.getY(idx[f + 1]) + G.getY(idx[f + 2])) / 3; if (cy < BOOT.y1) keep.push(idx[f], idx[f + 1], idx[f + 2]); }
+  for (let i = 0; i < G.count; i++) G.setXYZ(i, G.getX(i) + N.getX(i) * 0.0012, G.getY(i), G.getZ(i) + N.getZ(i) * 0.0012);
+  g.setIndex(keep);
+  const img = down.material.map?.image, map = img ? new THREE.CanvasTexture(recolorAll(img, color)) : null;
+  if (map) { map.colorSpace = THREE.SRGBColorSpace; map.magFilter = THREE.NearestFilter; map.flipY = down.material.map.flipY; map.wrapS = down.material.map.wrapS; map.wrapT = down.material.map.wrapT; }
+  const boot = addPiece(down, g, color, { map }); boot.userData.keepMap = true;
+  // a cuff at the top of each boot
   for (const side of [1, -1]) {
-    const calf = boneIx(shoes, side > 0 ? 'Bip01_L_Calf' : 'Bip01_R_Calf'), m = mids[side]; if (!m || calf < 0) continue;
-    const geo = ringGeo(18, 4, (u, t) => { const a = u * 2 * Math.PI, y = lerp(BOOT.y0, BOOT.y1, t), c = at(m, y); return [c.x + Math.sin(a) * c.r, y, c.z + Math.cos(a) * c.r]; }, () => [[calf, 1]]);
-    addPiece(shoes, geo, color);
-    // a turned-down cuff at the top
-    const cuff = ringGeo(18, 1, (u, t) => { const a = u * 2 * Math.PI, y = lerp(BOOT.y1 + 0.004, BOOT.y1 - BOOT.cuff, t), c = at(m, BOOT.y1), r = c.r + 0.004; return [c.x + Math.sin(a) * r, y, c.z + Math.cos(a) * r]; }, () => [[calf, 1]]);
-    addPiece(shoes, cuff, shade(color, 0.7), { hem: false });
+    const calf = boneIx(down, side > 0 ? 'Bip01_L_Calf' : 'Bip01_R_Calf'), m = mids[side]; if (!m || calf < 0) continue;
+    const cuff = ringGeo(18, 1, (u, t) => { const a = u * 2 * Math.PI, y = lerp(BOOT.y1 + 0.006, BOOT.y1 - BOOT.cuff, t), c = at(m, BOOT.y1), r = c.r + 0.004; return [c.x + Math.sin(a) * r, y, c.z + Math.cos(a) * r]; }, () => [[calf, 1]]);
+    addPiece(down, cuff, shade(color, 0.75), { hem: false });
   }
 }
-const BOOT = { y0: 0.035, y1: 0.25, r0: 0.029, r1: 0.035, cuff: 0.022 };
+// the whole texture in one color, keeping its light and shade
+function recolorAll(img, color) {
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), p = d.data, to = hex(color); let n = 0, m = 0;
+  for (let i = 0; i < p.length; i += 4) if (p[i + 3] > 100) { n++; m += p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11; }
+  m = n ? m / n : 128;
+  for (let i = 0; i < p.length; i += 4) { const k = 0.55 + 0.45 * (p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11) / m; for (let j = 0; j < 3; j++) p[i + j] = Math.min(255, Math.round(to[j] * k)); }
+  g.putImageData(d, 0, 0); return c;
+}
+const BOOT = { y0: 0.035, y1: 0.245, r0: 0.026, r1: 0.032, cuff: 0.02 };
 // full gloves: the hands' fingers covered too (fingerless gloves are the band piece in the glove color)
 function fullGloves(top, color) {
   top.parent.traverse(o => {
