@@ -15,7 +15,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 let pack, M, urls = new Map();
 // menu art from the pack; a few pictures live in the app instead (img/creator: the girl hair icons, styles 10-15, rendered
 // from their models by tools/hairicons.html in the DS icon style). The pack's own copy wins if it has one.
-const APP_ART = new Set(['part_hair10', 'part_hair11', 'part_hair12', 'part_hair13', 'part_hair14', 'part_hair15']);
+const APP_ART = new Set(['part_hair10', 'part_hair11', 'part_hair12', 'part_hair13', 'part_hair14', 'part_hair15', 'part_bottom8', 'part_bottom9']);
 const art = k => urls.get(M.files[k]) || (APP_ART.has(k) ? `img/creator/${k}.png` : '');
 const img = (k, x, y, cls = '', extra = '') => art(k) ? `<img src="${art(k)}" style="left:${x}px;top:${y}px" class="${cls}" ${extra} alt="">` : '';
 

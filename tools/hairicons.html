@@ -10,10 +10,26 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from '../js/pack.js';
+import { cinchSkirt } from '../js/avatar.js';
 const pack = await Pack.fromDevice();
 const url = p => pack.url(p), loader = new GLTFLoader();
 const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(160, 160); document.body.appendChild(r.domElement);
 const out = {};
+const Q = new URLSearchParams(location.search);
+if (Q.get('part') === 'down') {   // bottoms icons (skirts 8-9): skirt cyan, leggings darker cyan, bare legs white
+  for (const i of (Q.get('styles') || '8,9').split(',').map(Number)) {
+    const sc = new THREE.Scene(); sc.add(new THREE.AmbientLight(0xffffff, 1.1)); const dl = new THREE.DirectionalLight(0xffffff, 2.2); dl.position.set(-1, 2, 2); sc.add(dl);
+    const m = (await loader.loadAsync(await url(`creator/models/down_${String(i).padStart(2, '0')}/down_${String(i).padStart(2, '0')}.glb`))).scene; cinchSkirt(m);
+    m.traverse(o => { if (!o.isMesh) return; o.frustumCulled = false; const skirt = o.geometry.attributes.position.count === 294;
+      o.material = skirt ? new THREE.MeshLambertMaterial({ color: 0x2fd8dc, side: THREE.DoubleSide }) : i === 9 ? new THREE.MeshBasicMaterial({ color: 0xffffff }) : new THREE.MeshLambertMaterial({ color: 0x23b4bc }); });
+    sc.add(m); m.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(m, true), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3()), R = Math.max(s.x, s.y, s.z) * 0.55;
+    const cam = new THREE.OrthographicCamera(-R, R, R, -R, 0.001, 100); const yw = 0.5;
+    cam.position.set(c.x + Math.sin(yw) * 10, c.y + 2, c.z + Math.cos(yw) * 10); cam.lookAt(c);
+    r.render(sc, cam); out[i] = r.domElement.toDataURL('image/png');
+  }
+  window.ICONS = out; document.title = 'done'; throw new Error('done');
+}
 const yaw = +(new URLSearchParams(location.search).get('yaw') || 0.55);
 for (let i = 0; i < 16; i++) {
   const sc = new THREE.Scene();

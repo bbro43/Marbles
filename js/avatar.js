@@ -20,6 +20,22 @@ export const SKIN_TONES = 5;
 // race (Billy, Nov 20): 'human' or 'vestal'. Vestals have hazed eyes: no pupil, the iris glows milky toward the center.
 // Any eye style and color can be hazed; it's done here on the eye texture, so the pack needs no extra pictures.
 export const RACES = ['human', 'vestal'];
+// The skirts (down_08 / down_09, our own parts from scripts/girlskirt.mjs) came out too wide at the top. Reshape them here as they
+// load (Billy, Nov 21): the top sits on the body's waist, then a gentle A-line to the hem. Same ring layout as girlskirt.mjs.
+export function cinchSkirt(root) {
+  const NU = 48, NV = 5, lerp = (a, b, t) => a + (b - a) * t;
+  root.traverse(o => {
+    if (!o.isMesh || o.geometry.attributes.position.count !== (NU + 1) * (NV + 1)) return;   // the skirt piece (the legs have 196 points)
+    const P = o.geometry.attributes.position;
+    for (let j = 0; j <= NV; j++) for (let i = 0; i <= NU; i++) {
+      const t = j / NV, th = i / NU * 2 * Math.PI, pleat = 1 + 0.06 * t * t * Math.abs(Math.sin(12 * th));   // pleats open toward the hem
+      const rx = lerp(0.054, 0.083, Math.pow(t, 0.9)) * pleat, rz = lerp(0.042, 0.066, Math.pow(t, 0.9)) * pleat;
+      const y = lerp(0.478, 0.355, t) + (j === NV ? 0.004 * Math.sin(12 * th) : 0);
+      P.setXYZ(j * (NU + 1) + i, Math.sin(th) * rx, y, 0.004 + Math.cos(th) * rz);
+    }
+    P.needsUpdate = true; o.geometry.computeVertexNormals(); o.geometry.computeBoundingSphere();
+  });
+}
 function hazeEye(img) {
   const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
   const g = c.getContext('2d'); g.drawImage(img, 0, 0);
@@ -99,7 +115,8 @@ export async function buildAvatar(L, url) {
     })().catch(() => { console.warn('no texture', name); return null; }));
     return texCache.get(name);
   };
-  const scenes = await Promise.all(models(L).map(async m => (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene));
+  const scenes = await Promise.all(models(L).map(async m => { const sc = (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene;
+    if (/^down_0[89]$/.test(m)) cinchSkirt(sc); return sc; }));
   const jobs = [];
   for (const sc of scenes) {
     sc.traverse(o => {
