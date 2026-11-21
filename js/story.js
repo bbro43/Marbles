@@ -122,7 +122,7 @@ function teamInvites(rng) {
 function addOffer(o) { save.offers = (save.offers || []).filter(x => !(x.type === o.type && x.team === o.team)); save.offers.push({ ...o, day: save.day }); }
 function joinTeam(tid) {
   const t = teamsList().find(x => x.id === tid); if (!t || t.ids.length >= TEAM_MAX || myTeam()) return false;
-  t.ids.push('you'); save.offers = (save.offers || []).filter(x => x.team !== tid);
+  t.ids.push('you'); save.offers = (save.offers || []).filter(x => x.team !== tid); bondTeam(t);
   msg('ISA', `You joined ${t.name}.`); if (t.ids.length >= TEAM_ROOM) scene('teamRoomOpen', { team: t.id, joined: t.ids.length > TEAM_ROOM });
   return true;
 }
@@ -144,7 +144,7 @@ function inviteToTeam(id) {
   const f = friendship(id), chance = f >= 75 ? 1 : f >= 40 ? 0.85 : f >= 10 ? 0.45 : f >= 0 ? 0.15 : 0;
   if (makeRng(save.season.seed + save.day * 53 + id.length * 7 + (save.invitesTried || 0))() >= chance) { save.invitesTried = (save.invitesTried || 0) + 1; return `${nameOf(id)} turned the invite down.`; }
   if (theirs) { theirs.ids = theirs.ids.filter(x => x !== id); if (theirs.ids.length < 2 && !theirs.fixed) save.teams = teamsList().filter(x => x !== theirs); }
-  t.ids.push(id); if (t.ids.length === TEAM_ROOM) scene('teamRoomOpen', { team: t.id });
+  t.ids.push(id); bond(id); if (t.ids.length === TEAM_ROOM) scene('teamRoomOpen', { team: t.id });
   return `${nameOf(id)} joined ${t.name}!`;
 }
 function teamRanks() {
@@ -158,6 +158,14 @@ function teamRanks() {
 // on opposite teams -1 on every interaction; leaving a team -25 with every former teammate.
 const FR_LEVELS = [[75, 'Best Friend'], [40, 'Friend'], [10, 'Acquaintance'], [-Infinity, 'Stranger']];
 const frLevel = id => FR_LEVELS.find(([n]) => friendship(id) >= n)[1];
+// teammates (Billy, Nov 20): joining the same team gives a small friendship boost (+10), and teammates are never Strangers
+const TEAM_BOND = 10, TEAM_MIN = 12;
+function bond(id, boost = true) {
+  if (id === 'you' || !save.season.B[id]) return;
+  save.friends = save.friends || {}; const f = save.friends[id] || 0;
+  save.friends[id] = Math.min(100, Math.max(boost ? f + TEAM_BOND : f, TEAM_MIN));
+}
+const bondTeam = (t, boost = true) => t && t.ids.includes('you') && t.ids.forEach(id => bond(id, boost));
 function befriend(id, n, flat = false) {
   if (id === 'you' || !save.season.B[id]) return;
   save.friends = save.friends || {};
@@ -1086,7 +1094,7 @@ async function start() {
   if (loginCtl) { avatarSent = true; loginCtl.setAvatar(buildAvatar((save && save.you && save.you.look) || DEFAULT_LOOK, p => pack.url(p)).catch(() => null)); }   // you, in your login pod
   const s1 = await (await fetch('data/season1.json')).json();
   if (!save) { $('main').innerHTML = '<div class="hdr"><b>Bakugan Interspace</b></div>'; opening(s1); return; }
-  if (save.season && save.you) { ensureColl(); migrateUps(); store(); }
+  if (save.season && save.you) { ensureColl(); migrateUps(); bondTeam(myTeam(), false); store(); }   // older saves: teammates at least Acquaintances
   takeResult();
   if (save.after && save.after.kind === 'newcomer') {   // back from the practice match with your first newcomer
     const a = save.after; delete save.after; store();
