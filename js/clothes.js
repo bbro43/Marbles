@@ -77,33 +77,35 @@ export const swatches = (kind, s) => XCOLORS[kind + s] || null;
 
 // --- added pieces
 // a plain cloth texture: the color, darker toward the bottom (v=1) and the sides (u=0 and 1), with a darker band at the hem
-function clothTex(color, hem = true) {
+function clothTex(color, hem = true, gathers = 0) {
   const W = 32, H = 32, c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d'), d = g.createImageData(W, H), to = hex(color);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const u = x / (W - 1), v = y / (H - 1), k = (0.92 + 0.12 * Math.sin(u * Math.PI)) * (1 - 0.18 * v) * (hem && v > 0.9 ? 0.75 : 1);
+    const u = x / (W - 1), v = y / (H - 1), fold = gathers ? 0.85 + 0.15 * Math.abs(Math.sin(u * Math.PI * gathers)) : 0.92 + 0.12 * Math.sin(u * Math.PI);
+    const k = 1.1 * fold * (1 - 0.14 * v) * (hem && v > 0.9 ? 0.72 : 1);   // 1.1: matches the recolored pack textures' brightness
     const i = (y * W + x) * 4; for (let j = 0; j < 3; j++) d.data[i + j] = Math.min(255, Math.round(to[j] * k)); d.data[i + 3] = 255;
   }
   g.putImageData(d, 0, 0);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t;
 }
+const shade = (color, k) => '#' + hex(color).map(v => Math.min(255, Math.round(v * k)).toString(16).padStart(2, '0')).join('');
 // the part's skinned mesh (the biggest), its skeleton, and a bone's index by name
 function partMesh(sc) { let best = null; sc.traverse(o => { if (o.isSkinnedMesh && (!best || o.geometry.attributes.position.count > best.geometry.attributes.position.count)) best = o; }); return best; }
 const boneIx = (mesh, name) => mesh.skeleton.bones.findIndex(b => b.name === name);
 // a skinned piece on a part's skeleton: pos (in the part's model space), uv, joints and weights, faces
 function addPiece(host, geo, color, opts = {}) {
-  const mat = host.material.clone(); mat.map = opts.map || clothTex(color, opts.hem !== false); mat.side = THREE.DoubleSide; mat.vertexColors = false; mat.color?.set(0xffffff); mat.needsUpdate = true;
+  const mat = host.material.clone(); mat.map = opts.map || clothTex(color, opts.hem !== false, opts.gathers || 0); mat.side = THREE.DoubleSide; mat.vertexColors = false; mat.color?.set(0xffffff); mat.needsUpdate = true;
   const m = new THREE.SkinnedMesh(geo, mat); m.frustumCulled = false;
   host.parent.add(m); m.position.copy(host.position); m.quaternion.copy(host.quaternion); m.scale.copy(host.scale);
   m.bind(host.skeleton, host.bindMatrix); return m;
 }
-function ringGeo(nu, nv, at, joints) {   // at(i/nu, j/nv) -> [x, y, z]; joints(i, j, x) -> [[bone, weight] x up to 4]
+function ringGeo(nu, nv, at, joints, skip) {   // skip(u, t): leave out that quad   // at(i/nu, j/nv) -> [x, y, z]; joints(i, j, x) -> [[bone, weight] x up to 4]
   const P = [], U = [], J = [], W = [], I = [];
   for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) {
     const p = at(i / nu, j / nv); P.push(...p); U.push(i / nu, j / nv);
     const jw = joints(i / nu, j / nv, p).concat([[0, 0], [0, 0], [0, 0], [0, 0]]).slice(0, 4); J.push(...jw.map(q => q[0])); W.push(...jw.map(q => q[1]));
   }
-  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const a = j * (nu + 1) + i, b = a + 1, c = a + nu + 1, d = c + 1; I.push(a, c, b, b, c, d); }
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { if (skip && skip((i + 0.5) / nu, (j + 0.5) / nv)) continue; const a = j * (nu + 1) + i, b = a + 1, c = a + nu + 1, d = c + 1; I.push(a, c, b, b, c, d); }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
   g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(J, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(W, 4));
@@ -111,10 +113,10 @@ function ringGeo(nu, nv, at, joints) {   // at(i/nu, j/nv) -> [x, y, z]; joints(
 }
 const lerp = (a, b, t) => a + (b - a) * t, clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 // the legs: from the pants model, the middle and size of each leg at a height (+x is the left leg)
-function legAt(down, y, side) {
+function legAt(down, y, side, tol = 0.02) {   // the pants are low-poly: widen the search until some points are found
   const P = down.geometry.attributes.position, v = new THREE.Vector3(); let n = 0, sx = 0, sz = 0, r = 0; const pts = [];
-  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (Math.abs(v.y - y) < 0.02 && Math.sign(v.x) === side && Math.abs(v.x) > 0.004) { pts.push(v.clone()); sx += v.x; sz += v.z; n++; } }
-  if (!n) return null; const cx = sx / n, cz = sz / n; for (const q of pts) r = Math.max(r, Math.hypot(q.x - cx, q.z - cz));
+  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (Math.abs(v.y - y) < tol && Math.sign(v.x) === side && Math.abs(v.x) > 0.004) { pts.push(v.clone()); sx += v.x; sz += v.z; n++; } }
+  if (n < 4) return tol < 0.08 ? legAt(down, y, side, tol + 0.02) : null; const cx = sx / n, cz = sz / n; for (const q of pts) r = Math.max(r, Math.hypot(q.x - cx, q.z - cz));
   return { x: cx, z: cz, r };
 }
 
@@ -132,7 +134,7 @@ export function addClothes(L, parts) {
   if (D && down) {
     const color = XCOLORS['down' + L.down[0]][L.down[1]];
     if (D.add === 'cargo') pockets(down, color);
-    if (D.add === 'long') longSkirt(parts.down);
+    if (D.add === 'long') { longSkirt(parts.down); waistband(down, shade(color, 0.7)); }
   }
   if (S && shoes && down) boots(shoes, down, XCOLORS['shoes' + L.shoes[0]][L.shoes[1]]);
   if (L.gloves && L.gloves[0] === 1 && top) fullGloves(top, XCOLORS.gloves[L.gloves[1]]);
@@ -141,12 +143,17 @@ export function addClothes(L, parts) {
 // coat tails: from the waist to the knees, open at the front, flaring out. They follow the thighs like the skirts.
 function coatTails(down, color) {
   const pel = boneIx(down, 'Bip01_Pelvis'), lt = boneIx(down, 'Bip01_L_Thigh'), rt = boneIx(down, 'Bip01_R_Thigh'), gap = COAT.gap;
-  const geo = ringGeo(40, 6, (u, t) => { const th = gap + u * (2 * Math.PI - 2 * gap), rx = lerp(COAT.rx0, COAT.rx1, t), rz = lerp(COAT.rz0, COAT.rz1, t);
-    return [Math.sin(th) * rx, lerp(COAT.y0, COAT.y1, t), COAT.z + Math.cos(th) * rz]; },
-  (u, t, p) => { const leg = 0.6 * t, left = clamp(0.5 + p[0] / 0.06, 0, 1); return [[pel, 1 - leg], [lt, leg * left], [rt, leg * (1 - left)]]; });
+  const th = u => gap + u * (2 * Math.PI - 2 * gap);
+  const geo = ringGeo(48, 8, (u, t) => { const a = th(u), rx = lerp(COAT.rx0, COAT.rx1, t ** 0.8), rz = lerp(COAT.rz0, COAT.rz1, t ** 0.8);
+    return [Math.sin(a) * rx, lerp(COAT.y0, COAT.y1, t), COAT.z + Math.cos(a) * rz]; },
+  (u, t, p) => { const leg = 0.7 * t, left = clamp(0.5 + p[0] / 0.05, 0, 1); return [[pel, 1 - leg], [lt, leg * left], [rt, leg * (1 - left)]]; },
+  (u, t) => t > COAT.vent && Math.abs(th(u) - Math.PI) < 0.07);   // a vent at the back
   addPiece(down, geo, color);
+  // a belt round the waist where the tails start
+  const belt = ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * (COAT.rx0 + 0.003), lerp(COAT.y0 + 0.012, COAT.y0 - 0.006, t), COAT.z + Math.cos(a) * (COAT.rz0 + 0.003)]; }, () => [[pel, 1]]);
+  addPiece(down, belt, shade(color, 0.6), { hem: false });
 }
-const COAT = { gap: 0.32, y0: 0.49, y1: 0.24, rx0: 0.07, rx1: 0.1, rz0: 0.055, rz1: 0.08, z: -0.004 };
+const COAT = { gap: 0.3, y0: 0.478, y1: 0.22, rx0: 0.066, rx1: 0.094, rz0: 0.05, rz1: 0.072, z: -0.004, vent: 0.45 };
 // the vest: the shirt's body, a little bigger, minus a V down the front, in the vest color
 function vest(topScene, L) {
   let body = null;   // the body piece: the mesh whose texture is the top's (top_..), the most faces
@@ -171,37 +178,44 @@ const VEST = { out: 0.004, v0: 0.004, yLow: 0.5, vk: 0.22, arm: 0.1 };
 // a tall collar standing up round the neck, open at the front
 function collar(top, color) {
   const sp = boneIx(top, 'Bip01_Spine'), gap = COLLAR.gap;
-  const geo = ringGeo(28, 3, (u, t) => { const th = gap + u * (2 * Math.PI - 2 * gap), rx = lerp(COLLAR.rx0, COLLAR.rx1, t), rz = lerp(COLLAR.rz0, COLLAR.rz1, t);
-    return [Math.sin(th) * rx, lerp(COLLAR.y0, COLLAR.y1, t), COLLAR.z + Math.cos(th) * rz]; }, () => [[sp, 1]]);
-  addPiece(top, geo, color, { hem: false });
+  const ring = (r0, r1, k) => ringGeo(32, 3, (u, t) => { const th = gap + u * (2 * Math.PI - 2 * gap), f = 1 + 0.5 * Math.sin(u * Math.PI) ** 4 * 0;
+      const rx = lerp(COLLAR.rx0, COLLAR.rx1, t) + r0, rz = lerp(COLLAR.rz0, COLLAR.rz1, t) + r0, y = lerp(COLLAR.y0, COLLAR.y1 - 0.012 * Math.cos(u * 2 * Math.PI) ** 2 * 0 , t) - (1 - Math.sin(u * Math.PI)) * COLLAR.dip * t;
+      return [Math.sin(th) * rx, y, COLLAR.z + Math.cos(th) * rz]; }, () => [[sp, 1]]);
+  addPiece(top, ring(0.0015, 0, 0), color, { hem: false });                // outside
+  addPiece(top, ring(-0.0015, 0, 0), shade(color, 0.62), { hem: false });  // the lining
 }
-const COLLAR = { gap: 0.6, y0: 0.63, y1: 0.69, rx0: 0.05, rx1: 0.06, rz0: 0.042, rz1: 0.052, z: -0.004 };
+const COLLAR = { gap: 0.55, y0: 0.63, y1: 0.685, rx0: 0.05, rx1: 0.062, rz0: 0.042, rz1: 0.054, z: -0.004, dip: 0.022 };
 // rounded puffs at the shoulders, round the top of each arm
 function puffs(top, color) {
   for (const side of [1, -1]) {
     const ua = boneIx(top, side > 0 ? 'Bip01_L_UpperArm' : 'Bip01_R_UpperArm');
     const geo = ringGeo(16, 10, (u, t) => { const a = u * 2 * Math.PI, b = t * Math.PI;
       return [side * (PUFF.x + Math.cos(b) * PUFF.rx), PUFF.y + Math.sin(b) * Math.cos(a) * PUFF.r, PUFF.z + Math.sin(b) * Math.sin(a) * PUFF.r]; }, () => [[ua, 1]]);
-    addPiece(top, geo, color, { hem: false });
+    addPiece(top, geo, color, { hem: false, gathers: 6 });
   }
 }
-const PUFF = { x: 0.15, y: 0.612, z: 0.006, rx: 0.035, r: 0.033 };
+const PUFF = { x: 0.142, y: 0.613, z: 0.005, rx: 0.03, r: 0.024 };
 // cargo pockets: a box on the outside of each thigh
 function pockets(down, color) {
-  for (const side of [1, -1]) {
-    const th = boneIx(down, side > 0 ? 'Bip01_L_Thigh' : 'Bip01_R_Thigh'), leg = legAt(down, POCKET.y, side); if (!leg) continue;
-    const x0 = leg.x + side * (leg.r - 0.004), x1 = x0 + side * POCKET.d, z0 = leg.z - POCKET.w / 2, z1 = leg.z + POCKET.w / 2, y0 = POCKET.y - POCKET.h / 2, y1 = POCKET.y + POCKET.h / 2;
-    const C = [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0], [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]];
-    const F = [[1, 2, 6, 5], [2, 3, 7, 6], [0, 1, 5, 4], [0, 3, 2, 1], [4, 5, 6, 7]];   // outside, top, bottom, back, front
-    const P = [], U = [], J = [], W = [], I = [];
-    F.forEach((f, k) => { const b = P.length / 3; f.forEach((ci, q) => { P.push(...C[ci]); U.push(q === 1 || q === 2 ? 1 : 0, q >= 2 ? 0.2 : 0.8); J.push(th, 0, 0, 0); W.push(1, 0, 0, 0); }); I.push(b, b + 1, b + 2, b, b + 2, b + 3); });
+  const box = (C, th, col) => {
+    const F = [[1, 2, 6, 5], [2, 3, 7, 6], [0, 1, 5, 4], [0, 3, 2, 1], [4, 5, 6, 7]], P = [], U = [], J = [], W = [], I = [];
+    F.forEach(f => { const b = P.length / 3; f.forEach((ci, q) => { P.push(...C[ci]); U.push(q === 1 || q === 2 ? 1 : 0, q >= 2 ? 0.2 : 0.8); J.push(th, 0, 0, 0); W.push(1, 0, 0, 0); }); I.push(b, b + 1, b + 2, b, b + 2, b + 3); });
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
     g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(J, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(W, 4)); g.setIndex(I); g.computeVertexNormals();
-    const c = hex(color).map(v => Math.round(v * 0.8)), dark = '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
-    addPiece(down, g, dark, { hem: false });
+    addPiece(down, g, col, { hem: false });
+  };
+  for (const side of [1, -1]) {
+    const th = boneIx(down, side > 0 ? 'Bip01_L_Thigh' : 'Bip01_R_Thigh'), leg = legAt(down, POCKET.y, side); if (!leg) continue;
+    // on the outside of the thigh, turned a little toward the front
+    const a = POCKET.turn, ox = Math.cos(a) * side, oz = Math.sin(a), tx = -Math.sin(a) * side, tz = Math.cos(a);   // out, and across
+    const at = (o, w, y) => [leg.x + ox * (leg.r + o) + tx * w, y, leg.z + oz * (leg.r + o) + tz * w];
+    const cube = (o0, o1, w, y0, y1) => [at(o0, -w, y0), at(o1, -w, y0), at(o1, -w, y1), at(o0, -w, y1), at(o0, w, y0), at(o1, w, y0), at(o1, w, y1), at(o0, w, y1)];
+    const y0 = POCKET.y - POCKET.h / 2, y1 = POCKET.y + POCKET.h / 2;
+    box(cube(-0.004, POCKET.d, POCKET.w / 2, y0, y1), th, shade(color, 0.85));                          // the pocket
+    box(cube(-0.004, POCKET.d + 0.003, POCKET.w / 2 + 0.002, y1 - 0.016, y1 + 0.002), th, shade(color, 0.68));   // its flap
   }
 }
-const POCKET = { y: 0.33, h: 0.055, w: 0.045, d: 0.012 };
+const POCKET = { y: 0.32, h: 0.06, w: 0.05, d: 0.01, turn: 0.55 };
 // the long skirt: skirt 9's skirt reshaped down to the ankles (same ring layout as cinchSkirt in avatar.js)
 export function longSkirt(root) {
   const NU = 48, NV = 5;
@@ -221,6 +235,10 @@ export function longSkirt(root) {
   });
 }
 const LONG = { y: 0.06, rx: 0.115, rz: 0.1 };
+function waistband(down, color) {
+  const pel = boneIx(down, 'Bip01_Pelvis');
+  addPiece(down, ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * 0.059, lerp(0.49, 0.468, t), 0.004 + Math.cos(a) * 0.053]; }, () => [[pel, 1]]), color, { hem: false });
+}
 // boot shafts: from the shoe up to below the knee, round each lower leg
 function boots(shoes, down, color) {
   // the legs' middles, measured before the pants are tucked in
@@ -235,9 +253,12 @@ function boots(shoes, down, color) {
     const calf = boneIx(shoes, side > 0 ? 'Bip01_L_Calf' : 'Bip01_R_Calf'), m = mids[side]; if (!m || calf < 0) continue;
     const geo = ringGeo(18, 4, (u, t) => { const a = u * 2 * Math.PI, y = lerp(BOOT.y0, BOOT.y1, t), c = at(m, y); return [c.x + Math.sin(a) * c.r, y, c.z + Math.cos(a) * c.r]; }, () => [[calf, 1]]);
     addPiece(shoes, geo, color);
+    // a turned-down cuff at the top
+    const cuff = ringGeo(18, 1, (u, t) => { const a = u * 2 * Math.PI, y = lerp(BOOT.y1 + 0.004, BOOT.y1 - BOOT.cuff, t), c = at(m, BOOT.y1), r = c.r + 0.004; return [c.x + Math.sin(a) * r, y, c.z + Math.cos(a) * r]; }, () => [[calf, 1]]);
+    addPiece(shoes, cuff, shade(color, 0.7), { hem: false });
   }
 }
-const BOOT = { y0: 0.035, y1: 0.25, r0: 0.03, r1: 0.036 };
+const BOOT = { y0: 0.035, y1: 0.25, r0: 0.029, r1: 0.035, cuff: 0.022 };
 // full gloves: the hands' fingers covered too (fingerless gloves are the band piece in the glove color)
 function fullGloves(top, color) {
   top.parent.traverse(o => {

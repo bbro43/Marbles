@@ -35,7 +35,7 @@ for (const [name, extra] of looks) {
   const a = await buildAvatar(L, p => pack.url(p)); sc.add(a); idle(a, 0.3);
   const yaw = +(Q.get('yaw') || 0.35);
   const cam = full ? new THREE.PerspectiveCamera(30, W / H, 0.01, 10) : new THREE.PerspectiveCamera(22, W / H, 0.01, 10);
-  if (full) { cam.position.set(Math.sin(yaw) * 2.2, 0.55, Math.cos(yaw) * 2.2); cam.lookAt(0, 0.5, 0); }
+  if (full) { const fd = +(Q.get('fd') || 2.2), fy = +(Q.get('fy') || 0.5); cam.position.set(Math.sin(yaw) * fd, fy + 0.05, Math.cos(yaw) * fd); cam.lookAt(0, fy, 0); }
   else { const D = +(Q.get('d') || 0.62); cam.position.set(Math.sin(yaw) * D, 0.9, Math.cos(yaw) * D); cam.lookAt(0, 0.885, 0); }
   r.render(sc, cam);
 }
