@@ -35,7 +35,7 @@ const GUN_MARK = hex('#777087');
 // The Gundalian plate is always the gold band, coming to a point toward the nose, over the hair (hair styles that would
 // cover it can't be picked: GUN_HAIR).
 const PLATE_GOLD = '#A99A49';
-export const RACE_OPT = { marks: ['under', 'around'], neye: ['blue', 'tint'] };
+export const RACE_OPT = { neye: ['blue', 'tint'] };   // Gundalian marks always go all the way round the eye
 export const opt = (L, k) => L[k] || RACE_OPT[k][0];
 // recolor the skin in a texture: skin-like pixels (near the texture's own skin tone) take the new color, keeping their light and shade
 function reskin(c, to, reach = 75) {
@@ -145,9 +145,9 @@ function raceTexture(name, img, L) {
   if (/^eye_/.test(name)) { if (r === 'vestal') return hazeEye(img); if (r === 'neathian') return neathianEye(img, opt(L, 'neye') === 'tint'); if (to) return reskin(toCanvas(img), to); return null; }
   if (/^eyeblow_/.test(name)) { if (r !== 'neathian') return null; const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; return c; }   // Neathians have no eyebrows (Billy, Nov 21)
   if (!to) return null;
-  if (/^facial_/.test(name)) { const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c, opt(L, 'marks') === 'around') : neathianFace(c); }
+  if (/^facial_/.test(name)) { const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c, true) : neathianFace(c); }
   // the skin sheet is all skin, so it takes a wider reach (the ear is pinker than the face)
-  if (/^skin_/.test(name)) { const c = reskin(toCanvas(img), to, 140); return r === 'gundalian' ? (opt(L, 'marks') === 'around' ? gundalianChin(gundalianNeck(c)) : gundalianNeck(c)) : c; }
+  if (/^skin_/.test(name)) { const c = reskin(toCanvas(img), to, 140); return r === 'gundalian' ? gundalianChin(gundalianNeck(c)) : c; }
   return null;
 }
 // the head model's skull: the Head bone, and the skull as a sphere (the model's box also holds the neck)
@@ -168,7 +168,8 @@ function foreheadPlate(head, hair) {
   // how far out the band sits in each direction: just outside the hair there (so it lies on top), never closer than PLATE.out
   // the band is an oval seen from above: tight on the forehead, and out to the hair's widest at the sides and back, so it lies
   // over the hair all the way round without following every lock
-  let ax = PLATE.out, ab = PLATE.out; const v3 = new THREE.Vector3(), y0 = Math.cos(PLATE.bot * Math.PI) - 0.3, y1 = Math.cos(PLATE.top * Math.PI) + 0.1, mid = Math.sin((PLATE.top + PLATE.bot) / 2 * Math.PI);
+  const ss = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  let ax = PLATE.out, ab = PLATE.out; const v3 = new THREE.Vector3(), y0 = Math.cos((PLATE.bot + PLATE.drop) * Math.PI) - 0.1, y1 = Math.cos(PLATE.top * Math.PI) + 0.1, mid = Math.sin((PLATE.top + PLATE.bot) / 2 * Math.PI);
   if (hair) { hair.updateMatrixWorld(true); hair.traverse(o => { if (!o.isMesh) return; const pos = o.geometry.attributes.position;
     for (let i = 0; i < pos.count; i++) { v3.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
       const dx = (v3.x - c.x) / sz[0], dy = (v3.y - cy) / sz[1], dz = (v3.z - c.z) / sz[2]; if (dy < y0 || dy > y1) continue;
@@ -176,8 +177,9 @@ function foreheadPlate(head, hair) {
   const geo = new THREE.SphereGeometry(1, WS, HS), pos = geo.attributes.position;
   for (let iy = 0; iy <= HS; iy++) for (let ix = 0; ix <= WS; ix++) {
     const u = ix / WS, v = iy / HS, phi = P0 + u * PL, off = Math.abs(phi - Math.PI / 2) / (PL / 2);   // off: 0 at the front, 1 at the ends
-    const bot = (PLATE.bot + PLATE.peak * Math.max(0, 1 - off / PLATE.peakW) ** 1.3) * Math.PI;
-    const top = (PLATE.top + PLATE.thin * Math.max(0, off - 0.3) / 0.7) * Math.PI, th = top + v * (bot - top);   // narrows toward the back, like a tiara
+    // the back ends curve down toward the ears and narrow to a point
+    const d = ss(PLATE.bend, 1, off), drop = PLATE.drop * d * d, w = (PLATE.bot - PLATE.top) * (1 - 0.4 * d);
+    const top = (PLATE.top + drop) * Math.PI, bot = (PLATE.top + drop + w + PLATE.peak * Math.max(0, 1 - off / PLATE.peakW) ** 1.3) * Math.PI, th = top + v * (bot - top);
     const sp = Math.sin(phi), az = sp > 0 ? PLATE.out : ab;
     pos.setXYZ(iy * (WS + 1) + ix, -Math.cos(phi) * Math.sin(th) * ax, Math.cos(th) * PLATE.out, sp * Math.sin(th) * az);
   }
@@ -186,7 +188,7 @@ function foreheadPlate(head, hair) {
   plate.scale.set(...sz); plate.position.set(c.x, cy, c.z);
   plate.updateMatrixWorld(true); bone.attach(plate);
 }
-const PLATE = { top: 0.22, bot: 0.36, peak: 0.14, peakW: 0.22, out: 1.08, wrap: 1.5, thin: 0.05 };   // wrap: how far round the head (2 = all the way), past the ears   // tuned with test renders
+const PLATE = { top: 0.27, bot: 0.34, peak: 0.15, peakW: 0.22, out: 1.08, wrap: 1.45, bend: 0.55, drop: 0.2 };   // wrap: how far round the head (2 = all the way), past the ears   // tuned with test renders
 // hair styles a Gundalian can have: the others hang over the forehead and would hide the plate
 export const GUN_HAIR = [2, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15];   // 0, 1, 3, 5 and 8 have bangs over the forehead
 // The skirts (down_08 / down_09, our own parts from scripts/girlskirt.mjs) came out too wide at the top. Reshape them here as they

@@ -215,14 +215,14 @@ function closet(start) {
       : r === 'vestal' ? 'Vestal: hazed eyes.' : 'Race');
     right(`<div class="pill" style="left:138px;top:20px;width:112px">Race</div><div class="box" style="left:136px;top:40px;width:116px;height:128px"></div>`);
     RACES.forEach((v, i) => right(`<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:${141 + (i % 2) * 55}px;top:${44 + Math.floor(i / 2) * 20}px;width:52px;height:17px;line-height:17px;font-size:8.5px">${RACE_LABEL[v]}</div>`));
-    const ROWS = { gundalian: [['marks', 'Marks', { under: 'Under', around: 'Around' }]],
+    const ROWS = { gundalian: [],
       neathian: [['sex', 'Body', { m: 'Male', f: 'Female' }], ['neye', 'Eyes', { blue: 'Blue', tint: 'Color' }]] }[r] || [];
     ROWS.forEach(([k, label, names], row) => {
       const y = 88 + row * 22, vals = k === 'sex' ? ['m', 'f'] : RACE_OPT[k], cur = k === 'sex' ? (look.sex || 'm') : opt(look, k), w = Math.floor(80 / vals.length) - 2;
       right(`<div style="position:absolute;left:140px;top:${y + 3}px;width:26px;font:800 7.5px system-ui;color:#fff">${label}</div>`);
       vals.forEach((v, i) => right(`<div class="pill tap ${cur === v ? 'sel gold' : ''}" data-ropt="${k}" data-v="${v}" style="left:${167 + i * (w + 2)}px;top:${y}px;width:${w}px;height:17px;line-height:17px;font-size:7.5px;padding:0">${names[v]}</div>`));
     });
-    if (r === 'gundalian') right(`<div style="position:absolute;left:140px;top:${88 + 26}px;width:108px;font:700 7px/9px system-ui;color:#cfe">Gold forehead band. Hair that covers the forehead isn't available.</div>`);
+    if (r === 'gundalian') right(`<div style="position:absolute;left:140px;top:88px;width:108px;font:700 7px/9px system-ui;color:#cfe">Gold forehead band. Hair that covers the forehead isn't available.</div>`);
   } else if (editPart === 'band') {
     // the gauntlet: one color per attribute
     bar('Gauntlet');
