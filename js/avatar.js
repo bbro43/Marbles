@@ -173,22 +173,22 @@ function foreheadPlate(head, hair) {
   if (hair) { hair.updateMatrixWorld(true); hair.traverse(o => { if (!o.isMesh) return; const pos = o.geometry.attributes.position;
     for (let i = 0; i < pos.count; i++) { v3.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
       const dx = (v3.x - c.x) / sz[0], dy = (v3.y - cy) / sz[1], dz = (v3.z - c.z) / sz[2]; if (dy < y0 || dy > y1) continue;
-      ax = Math.max(ax, Math.abs(dx) / mid * 1.05 + 0.01); if (dz < 0) ab = Math.max(ab, -dz / mid * 1.08 + 0.01); } }); }
+      ax = Math.max(ax, Math.abs(dx) / mid * 1.0 + 0.01); if (dz < 0) ab = Math.max(ab, -dz / mid * 1.02 + 0.01); } }); }
   const geo = new THREE.SphereGeometry(1, WS, HS), pos = geo.attributes.position;
   for (let iy = 0; iy <= HS; iy++) for (let ix = 0; ix <= WS; ix++) {
     const u = ix / WS, v = iy / HS, phi = P0 + u * PL, off = Math.abs(phi - Math.PI / 2) / (PL / 2);   // off: 0 at the front, 1 at the ends
     // the back ends curve down toward the ears and narrow to a point
     const d = ss(PLATE.bend, 1, off), drop = PLATE.drop * d * d, w = (PLATE.bot - PLATE.top) * (1 - 0.4 * d);
     const top = (PLATE.top + drop) * Math.PI, bot = (PLATE.top + drop + w + PLATE.peak * Math.max(0, 1 - off / PLATE.peakW) ** 1.3) * Math.PI, th = top + v * (bot - top);
-    const sp = Math.sin(phi), az = sp > 0 ? PLATE.out : ab;
-    pos.setXYZ(iy * (WS + 1) + ix, -Math.cos(phi) * Math.sin(th) * ax, Math.cos(th) * PLATE.out, sp * Math.sin(th) * az);
+    const sp = Math.sin(phi), az = (sp > 0 ? PLATE.out : ab) * (1 - PLATE.tuck * d), axd = ax * (1 - PLATE.tuck * d);   // the curved-down ends tuck in against the head
+    pos.setXYZ(iy * (WS + 1) + ix, -Math.cos(phi) * Math.sin(th) * axd, Math.cos(th) * PLATE.out, sp * Math.sin(th) * az);
   }
   geo.computeVertexNormals();
   const plate = new THREE.Mesh(geo, mat);
   plate.scale.set(...sz); plate.position.set(c.x, cy, c.z);
   plate.updateMatrixWorld(true); bone.attach(plate);
 }
-const PLATE = { top: 0.27, bot: 0.34, peak: 0.15, peakW: 0.22, out: 1.08, wrap: 1.45, bend: 0.55, drop: 0.2 };   // wrap: how far round the head (2 = all the way), past the ears   // tuned with test renders
+const PLATE = { top: 0.27, bot: 0.34, peak: 0.15, peakW: 0.22, out: 1.03, wrap: 1.45, bend: 0.55, drop: 0.2, tuck: 0.1 };   // wrap: how far round the head (2 = all the way), past the ears   // tuned with test renders
 // hair styles a Gundalian can have: the others hang over the forehead and would hide the plate
 export const GUN_HAIR = [2, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15];   // 0, 1, 3, 5 and 8 have bangs over the forehead
 // The skirts (down_08 / down_09, our own parts from scripts/girlskirt.mjs) came out too wide at the top. Reshape them here as they
