@@ -38,7 +38,8 @@ export function baseModel(kind, s) {
 
 // --- textures: the base part's texture with its colored areas recolored (grays and whites, like trims, stay)
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-export function tintCloth(img, color) {
+export function tintCloth(img, color, all = false) {
+  if (all) return recolorAll(img, color);
   const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
   const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
   const d = g.getImageData(0, 0, c.width, c.height), p = d.data, to = hex(color);
@@ -65,7 +66,7 @@ export function xVariant(texName, L) {
 export function xSource(name) {
   const m = /^x([a-z]+)_(\d\d)_(\d\d)$/.exec(name); if (!m) return null;
   const [, kind, s, c] = m, si = +s, ci = +c;
-  if (kind === 'top') return { src: `top_${two(XTOP[si].base)}_00`, color: si === 9 ? SHIRT : XCOLORS['top' + si][ci] };
+  if (kind === 'top') return { src: `top_${two(XTOP[si].base)}_00`, color: si === 9 ? SHIRT : XCOLORS['top' + si][ci], all: si === 11 };   // 11: the sleeve's gray trim goes too, under the puff
   if (kind === 'vest') return { src: `top_${two(XTOP[si].base)}_00`, color: XCOLORS.top9[ci] };
   if (kind === 'band') return { src: 'band_00_00', color: XCOLORS['top' + si][ci] };
   if (kind === 'glove') return { src: 'band_00_00', color: XCOLORS.gloves[ci] };
@@ -215,7 +216,7 @@ function puffs(top, color) {
     addPiece(top, geo, color, { hem: false, gathers: 6 });
   }
 }
-const PUFF = { x: 0.142, y: 0.613, z: 0.005, rx: 0.03, r: 0.024 };
+const PUFF = { x: 0.15, y: 0.613, z: 0.005, rx: 0.034, r: 0.025 };   // reaches past the sleeve's end
 // cargo pockets: a box on the outside of each thigh
 function pockets(down, color) {
   const box = (C, th, col) => {

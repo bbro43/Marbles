@@ -300,7 +300,7 @@ export async function buildAvatar(L, url) {
       // an extra hair color: tint the blond texture (Neathian eyebrows are blanked whatever the color)
       const xs = xSource(name);   // a new clothes texture: a pack texture recolored
       const src = await url(`creator/textures/${xs ? xs.src : extra ? `${xh[1]}_${xh[2]}_02` : name}.png`);
-      if (xs) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintCloth(im, xs.color)); } else
+      if (xs) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintCloth(im, xs.color, xs.all)); } else
       if (extra && !(L.race === 'neathian' && xh[1] === 'eyeblow')) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintHair(im, EXTRA_HAIR[+xh[3] - EXTRA0] || '#888')); }
       else if (raced && /^(eye|eyeblow|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L); if (c) t = new THREE.CanvasTexture(c); }
       if (!t) t = await texLoader.loadAsync(src);
