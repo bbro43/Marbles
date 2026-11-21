@@ -159,24 +159,34 @@ function skull(head) {
   const rx = size.x / 2, rz = size.z / 2;
   return { bone, mesh, c, rx, rz, cy: box.max.y - rx * 0.95 };
 }
-// the Gundalian forehead plate: a gold band over the forehead, coming to a point toward the nose, fixed to the head bone so it
+// the Gundalian forehead plate: a gold band like a tiara, round the head past the ears (not all the way), coming to a point toward the nose, fixed to the head bone so it
 // moves with the head. It sits a little out from the skull so it lies over the hair.
-function foreheadPlate(head) {
+function foreheadPlate(head, hair) {
   const k = skull(head); if (!k) return; const { bone, c, rx, rz, cy } = k;
   const mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(PLATE_GOLD), side: THREE.DoubleSide });
-  const WS = 48, HS = 10, P0 = Math.PI / 2 - Math.PI * 0.3, PL = Math.PI * 0.6, T0 = PLATE.top * Math.PI;
+  const WS = 96, HS = 10, PL = Math.PI * PLATE.wrap, P0 = Math.PI / 2 - PL / 2, sz = [rx, rx, rz * 0.98];
+  // how far out the band sits in each direction: just outside the hair there (so it lies on top), never closer than PLATE.out
+  // the band is an oval seen from above: tight on the forehead, and out to the hair's widest at the sides and back, so it lies
+  // over the hair all the way round without following every lock
+  let ax = PLATE.out, ab = PLATE.out; const v3 = new THREE.Vector3(), y0 = Math.cos(PLATE.bot * Math.PI) - 0.3, y1 = Math.cos(PLATE.top * Math.PI) + 0.1, mid = Math.sin((PLATE.top + PLATE.bot) / 2 * Math.PI);
+  if (hair) { hair.updateMatrixWorld(true); hair.traverse(o => { if (!o.isMesh) return; const pos = o.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) { v3.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      const dx = (v3.x - c.x) / sz[0], dy = (v3.y - cy) / sz[1], dz = (v3.z - c.z) / sz[2]; if (dy < y0 || dy > y1) continue;
+      ax = Math.max(ax, Math.abs(dx) / mid * 1.05 + 0.01); if (dz < 0) ab = Math.max(ab, -dz / mid * 1.08 + 0.01); } }); }
   const geo = new THREE.SphereGeometry(1, WS, HS), pos = geo.attributes.position;
   for (let iy = 0; iy <= HS; iy++) for (let ix = 0; ix <= WS; ix++) {
     const u = ix / WS, v = iy / HS, phi = P0 + u * PL, off = Math.abs(phi - Math.PI / 2) / (PL / 2);   // off: 0 at the front, 1 at the ends
-    const bot = (PLATE.bot + PLATE.peak * Math.max(0, 1 - off / PLATE.peakW) ** 1.3) * Math.PI, th = T0 + v * (bot - T0);
-    pos.setXYZ(iy * (WS + 1) + ix, -Math.cos(phi) * Math.sin(th), Math.cos(th), Math.sin(phi) * Math.sin(th));
+    const bot = (PLATE.bot + PLATE.peak * Math.max(0, 1 - off / PLATE.peakW) ** 1.3) * Math.PI;
+    const top = (PLATE.top + PLATE.thin * Math.max(0, off - 0.3) / 0.7) * Math.PI, th = top + v * (bot - top);   // narrows toward the back, like a tiara
+    const sp = Math.sin(phi), az = sp > 0 ? PLATE.out : ab;
+    pos.setXYZ(iy * (WS + 1) + ix, -Math.cos(phi) * Math.sin(th) * ax, Math.cos(th) * PLATE.out, sp * Math.sin(th) * az);
   }
   geo.computeVertexNormals();
   const plate = new THREE.Mesh(geo, mat);
-  plate.scale.set(rx * PLATE.out, rx * PLATE.out, rz * (PLATE.out - 0.02)); plate.position.set(c.x, cy, c.z - rz * 0.02);
+  plate.scale.set(...sz); plate.position.set(c.x, cy, c.z);
   plate.updateMatrixWorld(true); bone.attach(plate);
 }
-const PLATE = { top: 0.22, bot: 0.36, peak: 0.14, peakW: 0.45, out: 1.12 };   // tuned with test renders
+const PLATE = { top: 0.22, bot: 0.36, peak: 0.14, peakW: 0.22, out: 1.08, wrap: 1.5, thin: 0.05 };   // wrap: how far round the head (2 = all the way), past the ears   // tuned with test renders
 // hair styles a Gundalian can have: the others hang over the forehead and would hide the plate
 export const GUN_HAIR = [2, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15];   // 0, 1, 3, 5 and 8 have bangs over the forehead
 // The skirts (down_08 / down_09, our own parts from scripts/girlskirt.mjs) came out too wide at the top. Reshape them here as they
@@ -277,7 +287,8 @@ export async function buildAvatar(L, url) {
     return texCache.get(name);
   };
   const scenes = await Promise.all(models(L).map(async m => { const sc = (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene;
-    if (/^down_0[89]$/.test(m)) cinchSkirt(sc); if (m === 'head_00' && L.race === 'gundalian') foreheadPlate(sc); return sc; }));
+    if (/^down_0[89]$/.test(m)) cinchSkirt(sc); return sc; }));
+  if (L.race === 'gundalian') foreheadPlate(scenes[models(L).indexOf('head_00')], scenes.find((_, i) => /^(hair|cap)_/.test(models(L)[i])));
   const jobs = [];
   for (const sc of scenes) {
     sc.traverse(o => {
