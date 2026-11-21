@@ -47,7 +47,8 @@ function reskin(c, to, reach = 75) {
   for (let i = 0; i < p.length; i += 4) {
     if (!p[i + 3]) continue;
     const dist = Math.hypot(p[i] - ref[0], p[i + 1] - ref[1], p[i + 2] - ref[2]); if (dist > reach) continue;   // eyes, lips, outlines stay
-    const k = lum(p[i], p[i + 1], p[i + 2]) / rl, w = dist < reach - 30 ? 1 : (reach - dist) / 30;
+    const k = 1 + (lum(p[i], p[i + 1], p[i + 2]) / rl - 1) * 0.25,   // mostly flat, so the face sheet and the skin sheet match (Billy, Nov 21)
+       w = dist < reach - 30 ? 1 : (reach - dist) / 30;
     for (let j = 0; j < 3; j++) p[i + j] = Math.round(p[i + j] * (1 - w) + Math.min(255, to[j] * k * (tl > 0 ? 1 : 1)) * w);
   }
   g.putImageData(d, 0, 0); return c;
