@@ -1,7 +1,7 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
 import * as THREE from 'three';
 import { Pack } from './pack.js';
-import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, RACES, RACE_LABEL, RACE_OPT, PLATE_COLOR, opt } from './avatar.js';
+import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, RACES, RACE_LABEL, RACE_OPT, GUN_HAIR, opt } from './avatar.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -186,6 +186,8 @@ const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: '
 const LABEL = { race: 'Race', band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
 const VIEW_OF = { race: 'head', band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
 let look = null, editCat = null, editPart = null, isNew = false;
+// a Gundalian can't keep a hair style that covers the forehead band: switch to the nearest one that doesn't
+function fixHair() { if (look.race !== 'gundalian' || GUN_HAIR.includes(look.hair[0])) return; const h = look.hair[0]; look.hair[0] = GUN_HAIR.reduce((a, b) => Math.abs(b - h) < Math.abs(a - h) ? b : a); }
 function closet(start) {
   const p = prof();
   if (start) { look = start.look; isNew = !!start.isNew; } else if (!look) look = JSON.parse(JSON.stringify(p ? p.look : DEFAULT_LOOK));
@@ -213,14 +215,14 @@ function closet(start) {
       : r === 'vestal' ? 'Vestal: hazed eyes.' : 'Race');
     right(`<div class="pill" style="left:138px;top:20px;width:112px">Race</div><div class="box" style="left:136px;top:40px;width:116px;height:128px"></div>`);
     RACES.forEach((v, i) => right(`<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:${141 + (i % 2) * 55}px;top:${44 + Math.floor(i / 2) * 20}px;width:52px;height:17px;line-height:17px;font-size:8.5px">${RACE_LABEL[v]}</div>`));
-    const ROWS = { gundalian: [['plate', 'Plate', { band: 'Band', horns: 'Horns', none: 'None' }], ['plateColor', 'Color'], ['marks', 'Marks', { under: 'Under', around: 'Around' }], ['ears', 'Ears', { pointed: 'Pointed', round: 'Round' }]],
-      neathian: [['sex', 'Body', { m: 'Male', f: 'Female' }], ['neye', 'Eyes', { blue: 'Blue', tint: 'Color', normal: 'Normal' }], ['ears', 'Ears', { pointed: 'Pointed', round: 'Round' }]] }[r] || [];
+    const ROWS = { gundalian: [['marks', 'Marks', { under: 'Under', around: 'Around' }]],
+      neathian: [['sex', 'Body', { m: 'Male', f: 'Female' }], ['neye', 'Eyes', { blue: 'Blue', tint: 'Color' }]] }[r] || [];
     ROWS.forEach(([k, label, names], row) => {
-      const y = 88 + row * 20, vals = k === 'sex' ? ['m', 'f'] : RACE_OPT[k], cur = k === 'sex' ? (look.sex || 'm') : opt(look, k);
+      const y = 88 + row * 22, vals = k === 'sex' ? ['m', 'f'] : RACE_OPT[k], cur = k === 'sex' ? (look.sex || 'm') : opt(look, k), w = Math.floor(80 / vals.length) - 2;
       right(`<div style="position:absolute;left:140px;top:${y + 3}px;width:26px;font:800 7.5px system-ui;color:#fff">${label}</div>`);
-      if (k === 'plateColor') vals.forEach((v, i) => right(`<div class="dot tap ${cur === v ? 'sel' : ''}" data-ropt="${k}" data-v="${v}" style="left:${168 + i * 20}px;top:${y + 1}px;background:${PLATE_COLOR[v]}"></div>`));
-      else { const w = Math.floor(80 / vals.length) - 2; vals.forEach((v, i) => right(`<div class="pill tap ${cur === v ? 'sel gold' : ''}" data-ropt="${k}" data-v="${v}" style="left:${167 + i * (w + 2)}px;top:${y}px;width:${w}px;height:17px;line-height:17px;font-size:7.5px;padding:0">${names[v]}</div>`)); }
+      vals.forEach((v, i) => right(`<div class="pill tap ${cur === v ? 'sel gold' : ''}" data-ropt="${k}" data-v="${v}" style="left:${167 + i * (w + 2)}px;top:${y}px;width:${w}px;height:17px;line-height:17px;font-size:7.5px;padding:0">${names[v]}</div>`));
     });
+    if (r === 'gundalian') right(`<div style="position:absolute;left:140px;top:${88 + 26}px;width:108px;font:700 7px/9px system-ui;color:#cfe">Gold forehead band. Hair that covers the forehead isn't available.</div>`);
   } else if (editPart === 'band') {
     // the gauntlet: one color per attribute
     bar('Gauntlet');
@@ -238,7 +240,8 @@ function closet(start) {
       const pic = art(`part_${ICON[k]}${k === 'skin' ? i : def.optional ? i : i}`);
       const cols = styles > 9 ? 4 : 3, sz = cols === 4 ? 27 : 36;
       if (k === 'skin') { right(`<div class="icon tap ${cur === v ? 'sel' : ''}" data-style="${v}" style="left:${140 + (i % 3) * 37}px;top:${44 + Math.floor(i / 3) * 37}px;background:${((M.swatch || {}).skin || [])[i] || '#ccc'};border:3px solid #c9ced4;box-shadow:inset 0 0 0 1px #0006"></div>`); continue; }
-      right(`<img src="${pic}" class="icon tap ${cur === v ? 'sel' : ''}" data-style="${v}" style="left:${140 + (i % cols) * (sz + 1)}px;top:${44 + Math.floor(i / cols) * (sz + 1)}px;width:${sz}px;height:${sz}px" alt="">`);
+      const off = k === 'hair' && look.race === 'gundalian' && !GUN_HAIR.includes(v);   // would hide the Gundalian band
+      right(`<img src="${pic}" class="icon tap ${cur === v ? 'sel' : ''} ${off ? 'off' : ''}" data-style="${v}" style="${off ? 'opacity:.25;filter:grayscale(1);' : ''}left:${140 + (i % cols) * (sz + 1)}px;top:${44 + Math.floor(i / cols) * (sz + 1)}px;width:${sz}px;height:${sz}px" alt="">`);
     }
     if (k !== 'skin') {
       const sw = (M.swatch || {})[k === 'eye' ? 'eye' : k] || [];
@@ -252,10 +255,10 @@ function closet(start) {
   });
   $('bot').querySelectorAll('[data-part]').forEach(b => b.onclick = () => { editPart = b.dataset.part; go('closet'); });
   $('bot').querySelectorAll('[data-band]').forEach(b => b.onclick = () => { look.band = b.dataset.band; go('closet'); });
-  $('bot').querySelectorAll('[data-race]').forEach(b => b.onclick = () => { look.race = b.dataset.race; if (look.race === 'neathian' && !look.sex) look.sex = 'm'; go('closet'); });
+  $('bot').querySelectorAll('[data-race]').forEach(b => b.onclick = () => { look.race = b.dataset.race; if (look.race === 'neathian' && !look.sex) look.sex = 'm'; fixHair(); go('closet'); });
   $('bot').querySelectorAll('[data-ropt]').forEach(b => b.onclick = () => { look[b.dataset.ropt] = b.dataset.v; go('closet'); });
   $('bot').querySelectorAll('[data-style]').forEach(b => b.onclick = () => {
-    const v = +b.dataset.style; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
+    const v = +b.dataset.style; if (b.classList.contains('off')) return; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
     if (editPart === 'eye') look.eyeblow[0] = v;
     go('closet');
   });

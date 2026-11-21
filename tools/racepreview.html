@@ -17,8 +17,11 @@ const SETS = {
   opts: [['Gundalian band', { race: 'gundalian', hair: [3, 1] }], ['Gundalian horns', { race: 'gundalian', hair: [1, 4], plate: 'horns', plateColor: 'silver', marks: 'around' }],
     ['Gundalian dark', { race: 'gundalian', hair: [10, 2], plate: 'horns', plateColor: 'dark', marks: 'around', ears: 'round' }],
     ['Neathian tint', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 4], eyeblow: [6, 7], neye: 'tint' }], ['Neathian normal', { race: 'neathian', sex: 'm', hair: [5, 9], eye: [0, 5], neye: 'normal' }]] };
+SETS.show = [['Gundalian', { race: 'gundalian', hair: [2, 1] }], ['Gundalian, Around', { race: 'gundalian', hair: [9, 4], marks: 'around' }], ['Gundalian, Around', { race: 'gundalian', hair: [13, 2], marks: 'around', eye: [1, 8] }], ['Neathian, Blue', { race: 'neathian', sex: 'm', hair: [6, 9] }], ['Neathian, Color', { race: 'neathian', sex: 'f', hair: [11, 3], eye: [1, 4], neye: 'tint' }]];
+SETS.hair = [...Array(16)].map((_, i) => ['hair ' + i, { race: 'gundalian', hair: [i, 1] }]);
+SETS.nea = [['blue m', { race: 'neathian', sex: 'm', hair: [5, 9] }], ['blue f', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 0] }], ['tint f', { race: 'neathian', sex: 'f', hair: [11, 3], eye: [1, 4], neye: 'tint' }], ['tint m', { race: 'neathian', sex: 'm', hair: [2, 2], eye: [0, 6], neye: 'tint' }]];
 const looks = SETS[Q.get('set')] || [['Human', { race: 'human' }], ['Vestal', { race: 'vestal', hair: [12, 8] }], ['Gundalian', { race: 'gundalian', hair: [3, 1] }], ['Neathian (m)', { race: 'neathian', sex: 'm', hair: [5, 9] }], ['Neathian (f)', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 0], eyeblow: [6, 7] }]];
-const W = full ? 200 : 240, H = full ? 420 : 260;
+const W = full ? 200 : +(Q.get('w') || 240), H = full ? 420 : +(Q.get('h') || 260);
 for (const [name, extra] of looks) {
   const L = { ...base, ...extra }; if (Q.get('hair')) L.hair = [+Q.get('hair'), L.hair[1]];
   const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setSize(W, H); r.setClearColor(0x9fb4c6); r.outputColorSpace = THREE.SRGBColorSpace;
