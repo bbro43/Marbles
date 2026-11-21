@@ -1,7 +1,7 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
 import * as THREE from 'three';
 import { Pack } from './pack.js';
-import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook } from './avatar.js';
+import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, RACES, RACE_LABEL } from './avatar.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -181,10 +181,10 @@ function room() {
 }
 
 // Closet: the character creator
-const CAT = { Head: ['hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top', 'band'], 'Lower body': ['down', 'shoes'] };
+const CAT = { Head: ['race', 'hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top', 'band'], 'Lower body': ['down', 'shoes'] };
 const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: 'top', down: 'bottom', shoes: 'shoes', skin: 'skin' };
-const LABEL = { band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
-const VIEW_OF = { band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
+const LABEL = { race: 'Race', band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
+const VIEW_OF = { race: 'head', band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
 let look = null, editCat = null, editPart = null, isNew = false;
 function closet(start) {
   const p = prof();
@@ -205,6 +205,15 @@ function closet(start) {
     bar(editCat);
     right(`<div class="pill" style="left:138px;top:22px;width:112px">${editCat}</div>`);
     CAT[editCat].forEach((k, i) => right(`<div class="pill tap" data-part="${k}" style="left:144px;top:${48 + i * 22}px;width:106px">${LABEL[k]}</div>`));
+  } else if (editPart === 'race') {
+    // race (Billy, Nov 21): Human, Vestal, Gundalian, Neathian. Neathian skin depends on male (blue) or female (pink).
+    const r = look.race || 'human';
+    bar(r === 'gundalian' ? 'Gundalian: gray skin, marks under the eyes and on the neck, a bone plate on the forehead.'
+      : r === 'neathian' ? 'Neathian: blue diamond eyes and an arc on the upper face. Skin: light blue (male) or light pink (female).'
+      : r === 'vestal' ? 'Vestal: hazed eyes.' : 'Race');
+    right(`<div class="pill" style="left:138px;top:20px;width:112px">Race</div><div class="box" style="left:136px;top:40px;width:116px;height:128px"></div>`);
+    RACES.forEach((v, i) => right(`<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:144px;top:${46 + i * 24}px;width:100px">${RACE_LABEL[v]}</div>`));
+    if (r === 'neathian') [['m', 'Male'], ['f', 'Female']].forEach(([v, t], i) => right(`<div class="pill tap ${(look.sex || 'm') === v ? 'sel gold' : ''}" data-sex="${v}" style="left:${144 + i * 52}px;top:146px;width:48px;height:18px;line-height:18px;font-size:9px">${t}</div>`));
   } else if (editPart === 'band') {
     // the gauntlet: one color per attribute
     bar('Gauntlet');
@@ -228,11 +237,6 @@ function closet(start) {
       const sw = (M.swatch || {})[k === 'eye' ? 'eye' : k] || [];
       for (let c = 0; c < def.colors; c++) right(`<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="left:${142 + c * 18}px;top:152px;background:${sw[c] || '#888'}"></div>`);
     }
-    if (k === 'eye') {   // race: Human or Vestal (hazed eyes)
-      const r = look.race || 'human';
-      right(`<div class="txt" style="left:142px;top:120px;font-size:8px">Race</div>` +
-        [['human', 'Human'], ['vestal', 'Vestal']].map(([v, t], i) => `<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:${166 + i * 42}px;top:118px;width:40px;height:18px;line-height:18px;font-size:9px">${t}</div>`).join(''));
-    }
   }
   $('bot').innerHTML = h;
   $('bot').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => {
@@ -241,7 +245,8 @@ function closet(start) {
   });
   $('bot').querySelectorAll('[data-part]').forEach(b => b.onclick = () => { editPart = b.dataset.part; go('closet'); });
   $('bot').querySelectorAll('[data-band]').forEach(b => b.onclick = () => { look.band = b.dataset.band; go('closet'); });
-  $('bot').querySelectorAll('[data-race]').forEach(b => b.onclick = () => { look.race = b.dataset.race; go('closet'); bar(look.race === 'vestal' ? 'Vestal: hazed eyes.' : 'Human eyes.'); });
+  $('bot').querySelectorAll('[data-race]').forEach(b => b.onclick = () => { look.race = b.dataset.race; if (look.race === 'neathian' && !look.sex) look.sex = 'm'; go('closet'); });
+  $('bot').querySelectorAll('[data-sex]').forEach(b => b.onclick = () => { look.sex = b.dataset.sex; go('closet'); });
   $('bot').querySelectorAll('[data-style]').forEach(b => b.onclick = () => {
     const v = +b.dataset.style; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
     if (editPart === 'eye') look.eyeblow[0] = v;

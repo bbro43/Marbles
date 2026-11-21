@@ -8980,7 +8980,7 @@ export const INTERSPACE = {
   }
  },
  "sophie": {
-  "name": "Sophie",
+  "name": "Selene",
   "species": "Vestal",
   "attrs": [
    "darkus",

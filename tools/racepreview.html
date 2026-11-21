@@ -1,0 +1,31 @@
+<!doctype html><html><body style="margin:0;background:#9fb4c6">
+<script src="../vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "../vendor/three/build/three.module.js",
+  "three/addons/": "../vendor/three/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { Pack } from '../js/pack.js';
+import { buildAvatar, idle } from '../js/avatar.js';
+const pack = await Pack.fromDevice();
+const Q = new URLSearchParams(location.search), full = Q.get('full') === '1';
+const base = { hair: [0, 2], cap: [-1, 0], glasses: [-1, 0], eye: [0, 3], eyeblow: [0, 2], facial: [0, 0], top: [1, 1], down: [0, 2], shoes: [0, 1], skin: 0, band: 'pyrus' };
+const looks = [['Human', { race: 'human' }], ['Vestal', { race: 'vestal', hair: [12, 8] }], ['Gundalian', { race: 'gundalian', hair: [3, 1] }], ['Neathian (m)', { race: 'neathian', sex: 'm', hair: [5, 9] }], ['Neathian (f)', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 0], eyeblow: [6, 7] }]];
+const W = full ? 200 : 240, H = full ? 420 : 260;
+for (const [name, extra] of looks) {
+  const L = { ...base, ...extra }; if (Q.get('hair')) L.hair = [+Q.get('hair'), L.hair[1]];
+  const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setSize(W, H); r.setClearColor(0x9fb4c6); r.outputColorSpace = THREE.SRGBColorSpace;
+  const d = document.createElement('div'); d.style.cssText = 'display:inline-block;margin:2px;text-align:center;font:700 12px system-ui'; d.append(r.domElement, Object.assign(document.createElement('div'), { textContent: name })); document.body.append(d);
+  const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 2.2)); const dl = new THREE.DirectionalLight(0xffffff, 1.2); dl.position.set(1, 2, 3); sc.add(dl);
+  const a = await buildAvatar(L, p => pack.url(p)); sc.add(a); idle(a, 0.3);
+  const yaw = +(Q.get('yaw') || 0.35);
+  const cam = full ? new THREE.PerspectiveCamera(30, W / H, 0.01, 10) : new THREE.PerspectiveCamera(22, W / H, 0.01, 10);
+  if (full) { cam.position.set(Math.sin(yaw) * 2.2, 0.55, Math.cos(yaw) * 2.2); cam.lookAt(0, 0.5, 0); }
+  else { cam.position.set(Math.sin(yaw) * 0.62, 0.9, Math.cos(yaw) * 0.62); cam.lookAt(0, 0.885, 0); }
+  r.render(sc, cam);
+}
+document.title = 'done';
+</script></body></html>

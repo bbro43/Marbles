@@ -143,7 +143,7 @@ const INTERSPACE = [
   ['maisie', 'Maisie', 'Vestal', ['pyrus', 'darkus', 'subterra'], 'Leefram'], ['richard', 'Richard', 'Human', ['pyrus', 'ventus', 'subterra'], 'Robotallion'],
   ['ryan', 'Ryan', 'Human', ['ventus', 'aquos', 'haos'], 'Foxbat'], ['sarah', 'Sarah', 'Human', ['ventus', 'aquos', 'subterra'], 'Ravenoid'],
   ['george', 'George', 'Human', ['darkus', 'aquos', 'subterra'], 'Klawgor'], ['ella', 'Ella', 'Vestal', ['pyrus', 'darkus'], 'Reaper'],
-  ['sophie', 'Sophie', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Scraper'], ['nico', 'Nico', 'Vestal', ['haos'], 'Fear Ripper'],
+  ['sophie', 'Selene', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Scraper'], ['nico', 'Nico', 'Vestal', ['haos'], 'Fear Ripper'],
   ['freya', 'Freya', 'Vestal', ['pyrus', 'aquos'], 'Monarus'], ['zoya', 'Zoya', 'Vestal', ['pyrus', 'subterra'], 'Hynoid'],
   ['xander', 'Xander', 'Vestal', ['ventus', 'aquos'], 'Spindle'], ['heather', 'Heather', 'Human', ['aquos', 'subterra'], 'Gargonoid'],
   ['brandon', 'Brandon', 'Human', ['pyrus'], 'Saurus'], ['rocco', 'Rocco', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Fencer'],
