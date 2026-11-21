@@ -3,7 +3,7 @@
 //   Tops     8 Long coat           top 4 + coat tails to the knees, open at the front
 //            9 Vest over shirt     top 2 in white + a vest over it, open at the front
 //           10 High-collar jacket  top 6 + a tall collar, open at the front
-//           11 Puffed-sleeve top   top 2 + rounded puffs at the shoulders
+//           11 Puffed-sleeve top   top 2 + full sleeves from the shoulder, gathered into a cuff above the elbow
 //   Bottoms 10 Cargo pants         pants 0 + pockets on the sides of the thighs
 //           11 Long skirt          skirt 9 reshaped to the ankles (with a top in the same color it reads as a dress)
 //   Shoes    4 Tall boots          shoes 0, and the legs below the knees in the boot color with a cuff at the top
@@ -207,16 +207,24 @@ function collar(top, color) {
   addPiece(top, ring(-0.0015, 0, 0), shade(color, 0.62), { hem: false });  // the lining
 }
 const COLLAR = { gap: 0.55, y0: 0.63, y1: 0.685, rx0: 0.05, rx1: 0.062, rz0: 0.042, rz1: 0.054, z: -0.004, dip: 0.022 };
-// rounded puffs at the shoulders, round the top of each arm
+// puffed sleeves: a long balloon from the shoulder seam to above the elbow, gathered into a cuff (Billy's mockup, Nov 21)
 function puffs(top, color) {
+  const pos = n => { const b = top.skeleton.bones.find(x => x.name === n); b.updateWorldMatrix(true, false); return new THREE.Vector3().setFromMatrixPosition(b.matrixWorld).applyMatrix4(new THREE.Matrix4().copy(top.matrixWorld).invert()); };
   for (const side of [1, -1]) {
-    const ua = boneIx(top, side > 0 ? 'Bip01_L_UpperArm' : 'Bip01_R_UpperArm');
-    const geo = ringGeo(16, 10, (u, t) => { const a = u * 2 * Math.PI, b = t * Math.PI;
-      return [side * (PUFF.x + Math.cos(b) * PUFF.rx), PUFF.y + Math.sin(b) * Math.cos(a) * PUFF.r, PUFF.z + Math.sin(b) * Math.sin(a) * PUFF.r]; }, () => [[ua, 1]]);
-    addPiece(top, geo, color, { hem: false, gathers: 6 });
+    const L = side > 0 ? 'L' : 'R', ua = boneIx(top, `Bip01_${L}_UpperArm`), sh = pos(`Bip01_${L}_UpperArm`), el = pos(`Bip01_${L}_Forearm`);
+    const axis = el.clone().sub(sh), len = axis.length(); axis.normalize();
+    const up = new THREE.Vector3(0, 1, 0), side1 = new THREE.Vector3().crossVectors(axis, up).normalize(), side2 = new THREE.Vector3().crossVectors(side1, axis).normalize();
+    // the sleeve's shape along the arm: t 0 at the shoulder seam (a little inside it), 1 at the cuff
+    const at = (u, t) => { const a = u * 2 * Math.PI, d = lerp(-PUFF.back, PUFF.end, t) * len, r = PUFF.r0 + (PUFF.rMax - PUFF.r0) * Math.sin(Math.min(1, t / PUFF.peakT) * Math.PI / 2) ** 1.2 - (PUFF.rMax - PUFF.rEnd) * Math.max(0, (t - PUFF.peakT) / (1 - PUFF.peakT)) ** 1.8;
+      const c = sh.clone().addScaledVector(axis, d).addScaledVector(up, PUFF.lift * (1 - t)); return c.addScaledVector(side1, Math.cos(a) * r).addScaledVector(side2, Math.sin(a) * r).toArray(); };
+    addPiece(top, ringGeo(20, 14, at, () => [[ua, 1]]), color, { hem: false, gathers: 5 });
+    // the cuff
+    const cuff = ringGeo(20, 1, (u, t) => { const a = u * 2 * Math.PI, d = (PUFF.end - 0.02 + t * PUFF.cuff) * len, r = PUFF.rEnd + 0.002, c = sh.clone().addScaledVector(axis, d);
+      return c.addScaledVector(side1, Math.cos(a) * r).addScaledVector(side2, Math.sin(a) * r).toArray(); }, () => [[ua, 1]]);
+    addPiece(top, cuff, shade(color, 0.85), { hem: false });
   }
 }
-const PUFF = { x: 0.15, y: 0.613, z: 0.005, rx: 0.034, r: 0.025 };   // reaches past the sleeve's end
+const PUFF = { back: 0.06, end: 0.8, r0: 0.03, rMax: 0.045, rEnd: 0.019, peakT: 0.5, lift: 0.004, cuff: 0.1 };
 // cargo pockets: a box on the outside of each thigh
 function pockets(down, color) {
   const box = (C, th, col) => {
