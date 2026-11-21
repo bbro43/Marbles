@@ -123,7 +123,7 @@ function addOffer(o) { save.offers = (save.offers || []).filter(x => !(x.type ==
 function joinTeam(tid) {
   const t = teamsList().find(x => x.id === tid); if (!t || t.ids.length >= TEAM_MAX || myTeam()) return false;
   t.ids.push('you'); save.offers = (save.offers || []).filter(x => x.team !== tid);
-  msg('ISA', `You joined ${t.name}.`); if (t.ids.length >= TEAM_ROOM) scene('teamRoomOpen', { team: t.id });
+  msg('ISA', `You joined ${t.name}.`); if (t.ids.length >= TEAM_ROOM) scene('teamRoomOpen', { team: t.id, joined: t.ids.length > TEAM_ROOM });
   return true;
 }
 function leaveTeam() {
@@ -277,13 +277,14 @@ const SCENES = {
       acq: `${t.name} is looking for one more. Your record's decent. Want to join?`, cold: `There's an opening on ${t.name}. The others suggested you. Your call.` }[tn];
     say(from, line);
     if (mine) say('ISA', `Joining ${t.name} means leaving ${mine.name}. Your former teammates will be notified.`);
-    say(from, 'So?', [['Join', () => { joinTeam(team); store(); render(save.view); }],
+    say(from, 'So?', [['Join', () => { if (myTeam()) leaveTeam(); if (t.ids.length < TEAM_MAX) { say('ISA', `You are now a member of ${t.name}.`); joinTeam(team); } store(); render(save.view); }],
       ['No thanks', () => { save.offers = (save.offers || []).filter(o => o.team !== team); store(); say(from, tn === 'best' || tn === 'friend' ? 'No worries. Offer stands.' : 'Okay.'); }]]);
   },
   // DRAFT: your team reaches 3 members
-  teamRoomOpen({ team }) {
+  teamRoomOpen({ team, joined }) {
     const t = teamsList().find(x => x.id === team); if (!t) return;
-    say('ISA', `${t.name} now has ${t.ids.length} members. Your team room is open.`);
+    if (joined) say('ISA', `As a member of ${t.name}, you now have access to its team room.`);   // joined a team that already had a room
+    else say('ISA', `${t.name} now has ${t.ids.length} members. Your team room is open.`);
     say('ISA', 'You will find it in the Team Rooms building in The Commons.');
   },
   // DRAFT: the daily greeting after the login corridor
@@ -991,9 +992,11 @@ function nextSeason() {
 //   say(who, text, [[label, fn], ...])     a line that ends with choices
 //   say(who, text, null, { call: true })   the speaker is on a call window (show characters, calls from far away)
 //   say(who, text, null, { input: { placeholder, ok, done(value) } })   ask for typed text (your name)
-let dq = [], typer = null;
+let dq = [], typer = null, answering = false;
 const TYPE_MS = 22;   // per letter
-function say(who, text, choices = null, opts = {}) { dq.push({ who, text, choices, ...opts }); if (dq.length === 1) showLine(); }
+function say(who, text, choices = null, opts = {}) { dq.push({ who, text, choices, ...opts }); if (dq.length === 1 && !answering) showLine(); }
+// a choice's answer plays right away, before anything else that was already waiting
+function answer(fn) { const rest = dq.slice(1); dq = []; answering = true; try { fn(); } finally { answering = false; } dq.push(...rest); showLine(); }
 const speakerName = who => (save && save.season && save.season.B && save.season.B[who]) ? nameOf(who) : who;
 function enterScene() { if ($('scene').hidden) { $('scene').hidden = false; document.body.classList.add('scene-on'); } }
 function exitScene() { $('scene').hidden = true; document.body.classList.remove('scene-on'); $('sceneStage').innerHTML = ''; }
@@ -1019,12 +1022,12 @@ function showLine() {
     const tail = D.querySelector('.tail');
     if (l.input) {
       tail.innerHTML = `<input id="nm" maxlength="14" placeholder="${l.input.placeholder || ''}"><div class="dch"><button id="nmok">${l.input.ok || 'OK'}</button></div>`;
-      $('nmok').onclick = e => { e.stopPropagation(); const v = ($('nm').value || '').trim(); dq.shift(); showLine(); l.input.done(v); };
+      $('nmok').onclick = e => { e.stopPropagation(); const v = ($('nm').value || '').trim(); answer(() => l.input.done(v)); };
       $('nm').onclick = e => e.stopPropagation(); D.onclick = null; return;
     }
     if (l.choices) {
       tail.innerHTML = `<div class="dch">${l.choices.map(([t], i) => `<button data-c="${i}">${t}</button>`).join('')}</div>`;
-      tail.querySelectorAll('[data-c]').forEach(b => b.onclick = e => { e.stopPropagation(); const fn = l.choices[+b.dataset.c][1]; dq.shift(); showLine(); fn(); });
+      tail.querySelectorAll('[data-c]').forEach(b => b.onclick = e => { e.stopPropagation(); answer(l.choices[+b.dataset.c][1]); });
       D.onclick = null; return;
     }
     tail.innerHTML = `<div class="dnext">▼</div>`;
