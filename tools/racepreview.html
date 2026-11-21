@@ -13,7 +13,11 @@ import { buildAvatar, idle } from '../js/avatar.js';
 const pack = await Pack.fromDevice();
 const Q = new URLSearchParams(location.search), full = Q.get('full') === '1';
 const base = { hair: [0, 2], cap: [-1, 0], glasses: [-1, 0], eye: [0, 3], eyeblow: [0, 2], facial: [0, 0], top: [1, 1], down: [0, 2], shoes: [0, 1], skin: 0, band: 'pyrus' };
-const looks = [['Human', { race: 'human' }], ['Vestal', { race: 'vestal', hair: [12, 8] }], ['Gundalian', { race: 'gundalian', hair: [3, 1] }], ['Neathian (m)', { race: 'neathian', sex: 'm', hair: [5, 9] }], ['Neathian (f)', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 0], eyeblow: [6, 7] }]];
+const SETS = {
+  opts: [['Gundalian band', { race: 'gundalian', hair: [3, 1] }], ['Gundalian horns', { race: 'gundalian', hair: [1, 4], plate: 'horns', plateColor: 'silver', marks: 'around' }],
+    ['Gundalian dark', { race: 'gundalian', hair: [10, 2], plate: 'horns', plateColor: 'dark', marks: 'around', ears: 'round' }],
+    ['Neathian tint', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 4], eyeblow: [6, 7], neye: 'tint' }], ['Neathian normal', { race: 'neathian', sex: 'm', hair: [5, 9], eye: [0, 5], neye: 'normal' }]] };
+const looks = SETS[Q.get('set')] || [['Human', { race: 'human' }], ['Vestal', { race: 'vestal', hair: [12, 8] }], ['Gundalian', { race: 'gundalian', hair: [3, 1] }], ['Neathian (m)', { race: 'neathian', sex: 'm', hair: [5, 9] }], ['Neathian (f)', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 0], eyeblow: [6, 7] }]];
 const W = full ? 200 : 240, H = full ? 420 : 260;
 for (const [name, extra] of looks) {
   const L = { ...base, ...extra }; if (Q.get('hair')) L.hair = [+Q.get('hair'), L.hair[1]];
@@ -24,7 +28,7 @@ for (const [name, extra] of looks) {
   const yaw = +(Q.get('yaw') || 0.35);
   const cam = full ? new THREE.PerspectiveCamera(30, W / H, 0.01, 10) : new THREE.PerspectiveCamera(22, W / H, 0.01, 10);
   if (full) { cam.position.set(Math.sin(yaw) * 2.2, 0.55, Math.cos(yaw) * 2.2); cam.lookAt(0, 0.5, 0); }
-  else { cam.position.set(Math.sin(yaw) * 0.62, 0.9, Math.cos(yaw) * 0.62); cam.lookAt(0, 0.885, 0); }
+  else { const D = +(Q.get('d') || 0.62); cam.position.set(Math.sin(yaw) * D, 0.9, Math.cos(yaw) * D); cam.lookAt(0, 0.885, 0); }
   r.render(sc, cam);
 }
 document.title = 'done';

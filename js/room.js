@@ -1,7 +1,7 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
 import * as THREE from 'three';
 import { Pack } from './pack.js';
-import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, RACES, RACE_LABEL } from './avatar.js';
+import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, RACES, RACE_LABEL, RACE_OPT, PLATE_COLOR, opt } from './avatar.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -206,14 +206,21 @@ function closet(start) {
     right(`<div class="pill" style="left:138px;top:22px;width:112px">${editCat}</div>`);
     CAT[editCat].forEach((k, i) => right(`<div class="pill tap" data-part="${k}" style="left:144px;top:${48 + i * 22}px;width:106px">${LABEL[k]}</div>`));
   } else if (editPart === 'race') {
-    // race (Billy, Nov 21): Human, Vestal, Gundalian, Neathian. Neathian skin depends on male (blue) or female (pink).
+    // race (Billy, Nov 21): Human, Vestal, Gundalian, Neathian, then that race's options (see RACE_OPT in avatar.js)
     const r = look.race || 'human';
-    bar(r === 'gundalian' ? 'Gundalian: gray skin, marks under the eyes and on the neck, a bone plate on the forehead.'
-      : r === 'neathian' ? 'Neathian: blue diamond eyes and an arc on the upper face. Skin: light blue (male) or light pink (female).'
+    bar(r === 'gundalian' ? 'Gundalian: gray skin, eye marks, neck marks and a forehead plate.'
+      : r === 'neathian' ? 'Neathian: diamond eyes and an arc on the upper face. Skin: light blue (male) or light pink (female).'
       : r === 'vestal' ? 'Vestal: hazed eyes.' : 'Race');
     right(`<div class="pill" style="left:138px;top:20px;width:112px">Race</div><div class="box" style="left:136px;top:40px;width:116px;height:128px"></div>`);
-    RACES.forEach((v, i) => right(`<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:144px;top:${46 + i * 24}px;width:100px">${RACE_LABEL[v]}</div>`));
-    if (r === 'neathian') [['m', 'Male'], ['f', 'Female']].forEach(([v, t], i) => right(`<div class="pill tap ${(look.sex || 'm') === v ? 'sel gold' : ''}" data-sex="${v}" style="left:${144 + i * 52}px;top:146px;width:48px;height:18px;line-height:18px;font-size:9px">${t}</div>`));
+    RACES.forEach((v, i) => right(`<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:${141 + (i % 2) * 55}px;top:${44 + Math.floor(i / 2) * 20}px;width:52px;height:17px;line-height:17px;font-size:8.5px">${RACE_LABEL[v]}</div>`));
+    const ROWS = { gundalian: [['plate', 'Plate', { band: 'Band', horns: 'Horns', none: 'None' }], ['plateColor', 'Color'], ['marks', 'Marks', { under: 'Under', around: 'Around' }], ['ears', 'Ears', { pointed: 'Pointed', round: 'Round' }]],
+      neathian: [['sex', 'Body', { m: 'Male', f: 'Female' }], ['neye', 'Eyes', { blue: 'Blue', tint: 'Color', normal: 'Normal' }], ['ears', 'Ears', { pointed: 'Pointed', round: 'Round' }]] }[r] || [];
+    ROWS.forEach(([k, label, names], row) => {
+      const y = 88 + row * 20, vals = k === 'sex' ? ['m', 'f'] : RACE_OPT[k], cur = k === 'sex' ? (look.sex || 'm') : opt(look, k);
+      right(`<div style="position:absolute;left:140px;top:${y + 3}px;width:26px;font:800 7.5px system-ui;color:#fff">${label}</div>`);
+      if (k === 'plateColor') vals.forEach((v, i) => right(`<div class="dot tap ${cur === v ? 'sel' : ''}" data-ropt="${k}" data-v="${v}" style="left:${168 + i * 20}px;top:${y + 1}px;background:${PLATE_COLOR[v]}"></div>`));
+      else { const w = Math.floor(80 / vals.length) - 2; vals.forEach((v, i) => right(`<div class="pill tap ${cur === v ? 'sel gold' : ''}" data-ropt="${k}" data-v="${v}" style="left:${167 + i * (w + 2)}px;top:${y}px;width:${w}px;height:17px;line-height:17px;font-size:7.5px;padding:0">${names[v]}</div>`)); }
+    });
   } else if (editPart === 'band') {
     // the gauntlet: one color per attribute
     bar('Gauntlet');
@@ -246,7 +253,7 @@ function closet(start) {
   $('bot').querySelectorAll('[data-part]').forEach(b => b.onclick = () => { editPart = b.dataset.part; go('closet'); });
   $('bot').querySelectorAll('[data-band]').forEach(b => b.onclick = () => { look.band = b.dataset.band; go('closet'); });
   $('bot').querySelectorAll('[data-race]').forEach(b => b.onclick = () => { look.race = b.dataset.race; if (look.race === 'neathian' && !look.sex) look.sex = 'm'; go('closet'); });
-  $('bot').querySelectorAll('[data-sex]').forEach(b => b.onclick = () => { look.sex = b.dataset.sex; go('closet'); });
+  $('bot').querySelectorAll('[data-ropt]').forEach(b => b.onclick = () => { look[b.dataset.ropt] = b.dataset.v; go('closet'); });
   $('bot').querySelectorAll('[data-style]').forEach(b => b.onclick = () => {
     const v = +b.dataset.style; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
     if (editPart === 'eye') look.eyeblow[0] = v;

@@ -29,6 +29,15 @@ export const RACE_LABEL = { human: 'Human', vestal: 'Vestal', gundalian: 'Gundal
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const SKIN_OF = L => L.race === 'gundalian' ? hex('#AFB9BB') : L.race === 'neathian' ? hex(L.sex === 'f' ? '#D2C3D9' : '#D4E4EF') : null;
 const GUN_MARK = hex('#777087');
+// race options (Billy, Nov 21), all in the look:
+//   plate      Gundalian forehead plate: 'band' (default), 'horns' (the band with two swept-back horns) or 'none'
+//   plateColor 'bone' (default), 'gold', 'silver' or 'dark'
+//   marks      Gundalian eye shadow: 'under' (default) or 'around' (all the way around each eye, plus a small chin mark)
+//   ears       Gundalian / Neathian: 'pointed' (default) or 'round'
+//   neye       Neathian eyes: 'blue' (blue diamonds, default), 'tint' (diamonds in the Face screen's eye color) or 'normal'
+export const PLATE_COLOR = { bone: '#e6dfcf', gold: '#d9a92a', silver: '#c3cad3', dark: '#4a4458' };
+export const RACE_OPT = { plate: ['band', 'horns', 'none'], plateColor: Object.keys(PLATE_COLOR), marks: ['under', 'around'], ears: ['pointed', 'round'], neye: ['blue', 'tint', 'normal'] };
+export const opt = (L, k) => L[k] || RACE_OPT[k][0];
 // recolor the skin in a texture: skin-like pixels (near the texture's own skin tone) take the new color, keeping their light and shade
 function reskin(c, to, reach = 75) {
   const g = c.getContext('2d'), d = g.getImageData(0, 0, c.width, c.height), p = d.data;
@@ -57,7 +66,16 @@ function eyeTiles(c, fn) {
   g.putImageData(d, 0, 0); return c;
 }
 // Gundalian: heavy grayish-blue shadow under (and a little around) each eye
-function gundalianFace(c) {
+function gundalianFace(c, around) {
+  if (around) return eyeTiles(c, ({ p, W, x0, y0, T, hole }) => {   // a ring all the way round the eye, heaviest at the outer corner
+    const cx = hole ? (hole.x0 + hole.x1) / 2 : x0 + T / 2, cy = hole ? (hole.y0 + hole.y1) / 2 : y0 + T * 0.45;
+    const rx = hole ? (hole.x1 - hole.x0) / 2 + T * 0.16 : T * 0.38, ry = hole ? (hole.y1 - hole.y0) / 2 + T * 0.17 : T * 0.3;
+    for (let y = y0; y < y0 + T; y++) for (let x = x0; x < x0 + T; x++) {
+      const i = (y * W + x) * 4; if (p[i + 3] < 200) continue;
+      const r = Math.hypot((x - cx) / rx, (y - cy) / ry); if (r >= 1) continue;
+      mix(p, i, GUN_MARK, 0.9 * Math.min(1, (1 - r) * 3.2));
+    }
+  });
   return eyeTiles(c, ({ p, W, x0, y0, T, hole }) => {
     const cx = hole ? (hole.x0 + hole.x1) / 2 : x0 + T / 2, cy = hole ? hole.y1 : y0 + T * 0.55, rx = hole ? (hole.x1 - hole.x0) / 2 + T * 0.12 : T * 0.35, ry = T * 0.22;
     for (let y = y0; y < y0 + T; y++) for (let x = x0; x < x0 + T; x++) {
@@ -80,15 +98,28 @@ function neathianFace(c) {
     }
   });
 }
-function neathianEye(img) {
+function neathianEye(img, tint) {
   const c = toCanvas(img), g = c.getContext('2d'), W = c.width, H = c.height;
+  let stops = ['#d8f3ff', '#5cc2f2', '#1f6fc0', '#123e7a'];
+  if (tint) {   // the eye picture's own color (its most colorful pixels), so the Face screen's color picker picks the diamond's color
+    const p = g.getImageData(0, 0, W, H).data; let n = 0; const a = [0, 0, 0];
+    for (let i = 0; i < p.length; i += 4) { const mx = Math.max(p[i], p[i + 1], p[i + 2]), mn = Math.min(p[i], p[i + 1], p[i + 2]); if (mx > 40 && (mx - mn) / mx > 0.3) { n++; a[0] += p[i]; a[1] += p[i + 1]; a[2] += p[i + 2]; } }
+    if (n) { const m = a.map(v => v / n), mx = Math.max(...m), f = k => `rgb(${m.map(v => Math.round(Math.min(255, v / mx * 255 * k))).join(',')})`, lt = `rgb(${m.map(v => Math.round(230 + 25 * v / mx)).join(',')})`;
+      stops = [lt, f(0.95), f(0.6), f(0.35)]; }
+  }
   const gr = g.createRadialGradient(W * 0.42, H * 0.38, W * 0.05, W / 2, H / 2, W * 0.62);
-  gr.addColorStop(0, '#d8f3ff'); gr.addColorStop(0.35, '#5cc2f2'); gr.addColorStop(0.8, '#1f6fc0'); gr.addColorStop(1, '#123e7a');
+  gr.addColorStop(0, stops[0]); gr.addColorStop(0.35, stops[1]); gr.addColorStop(0.8, stops[2]); gr.addColorStop(1, stops[3]);
   g.fillStyle = gr; g.fillRect(0, 0, W, H);
   g.fillStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.ellipse(W * 0.36, H * 0.3, W * 0.1, H * 0.07, -0.5, 0, Math.PI * 2); g.fill();   // shine
   return c;
 }
 // marks on the head's skin sheet (64x64: the side of the face, the ear and the neck, the face's middle at the left edge)
+function gundalianChin(c) {   // a small mark at the bottom middle of the chin (the face's middle is the sheet's left edge)
+  const g = c.getContext('2d'), S = c.width / 64; g.save(); g.scale(S, S);
+  g.fillStyle = 'rgb(119,112,135)'; g.beginPath(); g.moveTo(0, CHIN[0]); g.lineTo(CHIN[2], CHIN[1] - 1); g.lineTo(0, CHIN[1]); g.closePath(); g.fill();
+  g.restore(); return c;
+}
+const CHIN = [50, 55, 3];   // y top, y bottom, width (found with a test grid)
 function gundalianNeck(c) {
   const g = c.getContext('2d'), S = c.width / 64; g.save(); g.scale(S, S);
   g.strokeStyle = 'rgba(119,112,135,.85)'; g.lineCap = 'round';
@@ -109,25 +140,69 @@ function neathianArc(c, L) {
 // what a race does to one texture (null: nothing)
 function raceTexture(name, img, L) {
   const r = L.race || 'human', to = SKIN_OF(L);
-  if (/^eye_/.test(name)) { if (r === 'vestal') return hazeEye(img); if (r === 'neathian') return neathianEye(img); if (to) return reskin(toCanvas(img), to); return null; }
+  if (/^eye_/.test(name)) { if (r === 'vestal') return hazeEye(img); if (r === 'neathian') return opt(L, 'neye') === 'normal' ? reskin(toCanvas(img), to) : neathianEye(img, opt(L, 'neye') === 'tint'); if (to) return reskin(toCanvas(img), to); return null; }
   if (!to) return null;
-  if (/^facial_/.test(name)) { const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c) : neathianArc(neathianFace(c), L); }
+  if (/^facial_/.test(name)) { const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c, opt(L, 'marks') === 'around') : neathianArc(opt(L, 'neye') === 'normal' ? c : neathianFace(c), L); }
   // the skin sheet is all skin, so it takes a wider reach (the ear is pinker than the face)
-  if (/^skin_/.test(name)) { const c = reskin(toCanvas(img), to, 140); return r === 'gundalian' ? gundalianNeck(c) : c; }
+  if (/^skin_/.test(name)) { const c = reskin(toCanvas(img), to, 140); return r === 'gundalian' ? (opt(L, 'marks') === 'around' ? gundalianChin(gundalianNeck(c)) : gundalianNeck(c)) : c; }
   return null;
 }
-// the Gundalian forehead plate: a bony shell over the forehead, fixed to the head bone so it moves with the head
-function foreheadPlate(head) {
+// the head model's skull: the Head bone, and the skull as a sphere (the model's box also holds the neck)
+function skull(head) {
   head.updateMatrixWorld(true);
   let bone = null, mesh = null; head.traverse(o => { if (o.isBone && /Head$/.test(o.name)) bone = o; if (o.isSkinnedMesh && !mesh) mesh = o; });
-  if (!bone || !mesh) return;
+  if (!bone || !mesh) return null;
   const box = new THREE.Box3().setFromObject(mesh, true), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
-  const rx = size.x / 2, rz = size.z / 2, cy = box.max.y - rx * 0.95;                       // the skull's sphere (the box also holds the neck)
+  const rx = size.x / 2, rz = size.z / 2;
+  return { bone, mesh, c, rx, rz, cy: box.max.y - rx * 0.95 };
+}
+// a horn: a tube along a curve that narrows to a point
+function horn(pts, r0, mat) {
+  const curve = new THREE.CatmullRomCurve3(pts), TS = 16, RS = 10, geo = new THREE.TubeGeometry(curve, TS, 1, RS, false), pos = geo.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i <= TS; i++) { const t = i / TS, ctr = curve.getPointAt(t), r = r0 * (1 - t * 0.94);
+    for (let j = 0; j <= RS; j++) { const k = i * (RS + 1) + j; v.fromBufferAttribute(pos, k).sub(ctr).multiplyScalar(r).add(ctr); pos.setXYZ(k, v.x, v.y, v.z); } }
+  geo.computeVertexNormals(); return new THREE.Mesh(geo, mat);
+}
+// the Gundalian forehead plate: a bony shell over the forehead, fixed to the head bone so it moves with the head.
+// 'horns' adds two horns rising from its sides and sweeping back.
+function foreheadPlate(head, L) {
+  const style = opt(L, 'plate'); if (style === 'none') return;
+  const k = skull(head); if (!k) return; const { bone, c, rx, rz, cy } = k;
+  const mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(PLATE_COLOR[opt(L, 'plateColor')]), side: THREE.DoubleSide });
   const geo = new THREE.SphereGeometry(1, 40, 16, Math.PI / 2 - Math.PI * 0.3, Math.PI * 0.6, Math.PI * 0.24, Math.PI * 0.14);
-  const plate = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: 0xe6dfcf, side: THREE.DoubleSide }));
+  const plate = new THREE.Mesh(geo, mat);
   plate.scale.set(rx * 1.07, rx * 1.06, rz * 1.04); plate.position.set(c.x, cy, c.z - rz * 0.02);   // hugs the forehead
   plate.updateMatrixWorld(true); bone.attach(plate);
+  if (style !== 'horns') return;
+  for (const sx of [-1, 1]) {
+    const P = (x, y, z) => new THREE.Vector3(c.x + sx * x * rx, cy + y * rx, c.z + z * rz);
+    const h = horn([P(0.74, 0.5, 0.52), P(0.92, 0.72, 0.28), P(1.0, 1.02, -0.08), P(0.94, 1.3, -0.5)], rx * 0.16, mat);
+    h.updateMatrixWorld(true); bone.attach(h);
+  }
 }
+// pointed ears: a flat tip on top of each ear, in the skin color, fixed to the head bone. The ears are found as the head
+// model's points that stick out furthest to each side.
+function earTips(head, L) {
+  const k = skull(head); if (!k) return; const { bone, mesh, c, rx, cy } = k;
+  const pos = mesh.geometry.attributes.position, v = new THREE.Vector3(), col = SKIN_OF(L);
+  const mat = new THREE.MeshLambertMaterial({ color: new THREE.Color().setRGB(col[0] / 255, col[1] / 255, col[2] / 255, THREE.SRGBColorSpace) });
+  for (const sx of [-1, 1]) {
+    let best = null;
+    for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+      if (v.y < cy - rx * 0.6 || v.y > cy + rx * 0.3) continue; const out = (v.x - c.x) * sx; if (!best || out > best.out) best = { out, p: v.clone() }; }
+    if (!best) continue;
+    // the ear's top: the highest point near the outermost one
+    let top = best.p.clone();
+    for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+      if ((v.x - c.x) * sx > best.out - rx * 0.12 && Math.abs(v.z - best.p.z) < rx * 0.35 && v.y > top.y) top.copy(v); }
+    const geo = new THREE.ConeGeometry(rx * EAR.w, rx * EAR.h, 4, 1); geo.translate(0, rx * EAR.h / 2, 0); geo.scale(1, 1, 0.3);
+    const tip = new THREE.Mesh(geo, mat);
+    tip.position.copy(top).add(new THREE.Vector3(-sx * rx * EAR.in, -rx * EAR.down, -rx * EAR.back));
+    tip.rotation.set(-EAR.tiltBack, sx * 0.35, -sx * EAR.tiltOut, 'YXZ');
+    tip.updateMatrixWorld(true); bone.attach(tip);
+  }
+}
+const EAR = { w: 0.2, h: 0.46, in: 0.06, down: 0.14, back: 0.02, tiltOut: 0.75, tiltBack: 0.35 };   // tuned with test renders
 // The skirts (down_08 / down_09, our own parts from scripts/girlskirt.mjs) came out too wide at the top. Reshape them here as they
 // load (Billy, Nov 21): the top sits on the body's waist, then a gentle A-line to the hem. Same ring layout as girlskirt.mjs.
 export function cinchSkirt(root) {
@@ -224,7 +299,8 @@ export async function buildAvatar(L, url) {
     return texCache.get(name);
   };
   const scenes = await Promise.all(models(L).map(async m => { const sc = (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene;
-    if (/^down_0[89]$/.test(m)) cinchSkirt(sc); if (m === 'head_00' && L.race === 'gundalian') foreheadPlate(sc); return sc; }));
+    if (/^down_0[89]$/.test(m)) cinchSkirt(sc); if (m === 'head_00' && L.race === 'gundalian') foreheadPlate(sc, L);
+    if (m === 'head_00' && (L.race === 'gundalian' || L.race === 'neathian') && opt(L, 'ears') === 'pointed') earTips(sc, L); return sc; }));
   const jobs = [];
   for (const sc of scenes) {
     sc.traverse(o => {
