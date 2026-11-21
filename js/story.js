@@ -15,7 +15,7 @@ import { mountCommons } from './commons3d.js';
 import { playLogin } from './login3d.js';
 import { buildAvatar, DEFAULT_LOOK } from './avatar.js';
 import { mountTeamRoom } from './teamroom3d.js';
-import { stock, trapAttrCap, priceTrap, salesFor, salesOnDay, discountOn, saleText } from './storyshop.js';
+import { stock, trapAttrCap, priceTrap, salesFor, salesOnDay, discountOn, saleText, isSoldToy } from './storyshop.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 
 const $ = id => document.getElementById(id);
@@ -130,7 +130,7 @@ function leaveTeam() {
   const t = myTeam(); if (!t) return;
   t.ids = t.ids.filter(id => id !== 'you'); t.ids.forEach(id => befriend(id, -25, true));
   if (!t.ids.length || (t.mine && t.ids.length < 2)) save.teams = teamsList().filter(x => x !== t);
-  msg('ISA', `You left ${t.name}. Your former teammates took it personally.`);
+  msg('ISA', `You have left ${t.name}. Your former teammates have been notified.`); say('ISA', `You have left ${t.name}. Your former teammates have been notified.`);
 }
 function createTeam(name) {
   if (myTeam()) return;
@@ -177,7 +177,7 @@ function befriend(id, n, flat = false) {
 // ---------- rivals (Billy): whoever you face most, and evenly: at least 5 of your last 30 matches, winning 40-60% of those
 function noteMatch(id, r) {
   const before = rivals().map(x => x.id);
-  save.recent = [...(save.recent || []), { id, r }].slice(-30);
+  save.recent = [...(save.recent || []), { id, r }].slice(-40);   // rivals: 5+ of your last 40 matches (Billy, Nov 20)
   for (const x of rivals()) if (!before.includes(x.id)) { msg('ISA', `Rival registered: ${nameOf(x.id)}. You have met ${x.n} times recently, ${x.w}-${x.n - x.w - x.d}${x.d ? `-${x.d}` : ''}.`); scene('newRival', { id: x.id }); }
 }
 function rivals() {
@@ -196,11 +196,33 @@ function tradeOffer(id) {
   const deckToys = new Set(d.toys.map(t => tkey(t.id, t.attr)));
   const mySpare = [...y.coll.cards.filter(c => !inDeck.has(c)).map(c => ({ kind: 'card', id: c, name: (cat.cards.find(x => x.id === c) || {}).name })),
     ...Object.keys(y.coll.toys).filter(k => !deckToys.has(k)).map(k => { const [tid, attr] = k.split(':'); return { kind: 'toy', id: tid, attr, name: `${(cat.toys.find(x => x.id === tid) || {}).name} (${cap(attr)})` }; })];
-  if (!mySpare.length) return null;
+  const spare = mySpare.filter(x => !(x.kind === 'toy' && x.id === y.partner)), helps = spare.filter(x => improves(id, x));   // never your partner
+  if (!spare.length || (friendship(id) < 10 && !helps.length)) return null;   // Strangers only ask for something that makes their deck better
   const theirs = [...STOCK.gates, ...STOCK.abilities].filter(x => x.tier >= L - 1 && !y.coll.cards.includes(x.c.id)).map(x => ({ kind: 'card', id: x.c.id, name: x.c.name }))
     .concat(STOCK.toys.filter(x => x.tier >= L - 1).flatMap(x => Object.keys(x.t.attributes).filter(a => !y.coll.toys[tkey(x.t.id, a)]).map(a => ({ kind: 'toy', id: x.t.id, attr: a, name: `${x.t.name} (${cap(a)})` }))));
   if (!theirs.length) return null;
-  return { give: rng.pick(mySpare), get: rng.pick(theirs), key: `${save.day}-${save.slot}-${id}` };
+  return { give: rng.pick(helps.length ? helps : spare), get: rng.pick(theirs), key: `${save.day}-${save.slot}-${id}` };
+}
+// would this spare item of yours make their deck better? (Billy, Nov 20)
+//   a synthetic Bakugan stronger than their weakest Bakugan; a Gate card with a bigger bonus for their Bakugan than their card of
+//   that color; an Ability card of a higher shop tier than their card of that color
+function improves(id, x) {
+  const d = teamOf(id); if (!d || !d.toys) return false;
+  if (x.kind === 'toy') { const t = cat.toys.find(q => q.id === x.id); if (!t || !isSoldToy(t)) return false;   // Interspace's synthetic Bakugan (brawlers' partners aren't sold)
+    return (t.baseG || 0) > Math.min(...d.toys.map(q => (cat.toys.find(c => c.id === q.id) || {}).baseG || 0)); }
+  const c = cat.cards.find(q => q.id === x.id); if (!c) return false;
+  if (c.type === 'gate') { const fit = card => card && card.bonus ? d.toys.reduce((a, q) => a + (card.bonus[q.attr] || 0), 0) / d.toys.length : 0;
+    const mine = d.gates && d.gates[c.color]; return fit(c) > fit(mine && cat.cards.find(q => q.id === mine.id)); }
+  if (c.type === 'ability') { STOCK = STOCK || stock(cat); const tier = cid => (STOCK.abilities.find(a => a.c.id === cid) || {}).tier || 0;
+    const mine = d.abilities && d.abilities[c.color]; return tier(c.id) > tier(mine && mine.id); }
+  return false;
+}
+// the trade conversation (scripts: Trade offer)
+function tradeTalk(id) {
+  const o = tradeOffer(id); if (!o) return; const tn = tone(id);
+  say(id, tn === 'best' || tn === 'friend' ? `Hey, I've got a ${o.get.name} I'm not using. Want to swap for your ${o.give.name}?`
+    : tn === 'acq' ? `Want to trade? My ${o.get.name} for your ${o.give.name}.` : `Trade. ${o.get.name} for ${o.give.name}. Yes or no.`,
+    [['Trade', () => { doTrade(id); say('ISA', 'Trade complete.'); store(); render(save.view); }], ['No', () => {}]]);
 }
 function doTrade(id) {
   const o = tradeOffer(id); if (!o) return; const y = save.you;
@@ -510,11 +532,24 @@ function finishEvent(ev) {
   const mine = myTeam();
   if (mine && champ.some(id => mine.ids.includes(id))) mine.ids.filter(id => id !== 'you').forEach(id => befriend(id, 3));
   if (champ.includes('you')) scene('eventWin', { event: ev.name, prize });
+  else if (mine) { const mate = champ.find(id => mine.ids.includes(id));
+    if (mate) { msg('ISA', `${nameOf(mate)} of ${mine.name} has won ${ev.name}.`); save.mateNews = { id: mate, event: ev.name }; } }
   ev.done = true; ev.order = order;
   return null;
 }
 // a whole event without you (end of the day, or you skipped it)
 function runEvent(e) { const ev = startEvent(e, false); advanceEvent(ev); }
+// a teammate may leave your team: 2% a week, 5% if you aren't Friends, at most one a week (show teams never break up)
+function teammatesMoveOn(rng) {
+  const t = myTeam(); if (!t || t.fixed) return;
+  for (const id of t.ids.filter(x => x !== 'you')) {
+    if (rng() >= (friendship(id) >= 40 ? 0.02 : 0.05)) continue;
+    t.ids = t.ids.filter(x => x !== id);
+    msg('ISA', `${nameOf(id)} has left ${t.name}. ${t.name} now has ${t.ids.length} members.`);
+    if (t.ids.length === TEAM_ROOM - 1) msg('ISA', `${t.name} no longer has enough members for a team room. The room will reopen when the team has three members.`);
+    break;   // at most one a week
+  }
+}
 function nextSlot() {
   save.slot++;
   if (save.slot > 2) { closeDay(); save.day++; save.slot = 0; dayStart(); }
@@ -523,9 +558,15 @@ function nextSlot() {
 function dayStart() {
   const f = myFixture(save.day), rng = makeRng(save.season.seed + save.day * 4513);
   if (save.day >= DAYS) { msg('ISA', 'The regular season is complete. Final standings and promotions are posted.'); scene('seasonEnd'); return; }
+  if (save.day === 1 && (save.seasonNo || 2) === 2 && !save.seen.day1) {   // S2-06: the Day 1 summary
+    save.seen.day1 = true; const dl = save.dayLog && save.dayLog.day === 0 ? save.dayLog : { m: 0, bp: 0 };
+    const first = leagueDays().map(myFixture).find(Boolean), open1 = (save.season.events || []).find(e => e.name === 'Open I');
+    msg('ISA', `Day 1 summary. Matches: ${dl.m}. BP earned: ${dl.bp}.${first ? ` Your first league match is on day ${leagueDays()[first.round - 1] + 1}.` : ''}`);
+    if (open1) msg('ISA', `Open I starts this week. It is open to Leagues 2 to 4. Sign-up closes at the start of day ${open1.day + 1}.`);
+  }
   if (save.day % 7 === 0 && save.day > 0) {   // weekly: teammates +1, computer teams form, team invites
     const t = myTeam(); if (t) t.ids.filter(id => id !== 'you').forEach(id => befriend(id, 1, true));
-    formTeams(rng); teamInvites(rng);
+    formTeams(rng); teamInvites(rng); teammatesMoveOn(rng);
   }
   if (save.day === 42 && !save.seen.midseason) {   // midseason: a call from the top League 1 brawler (scene: S2-08)
     save.seen.midseason = true;
@@ -541,8 +582,9 @@ function dayStart() {
 }
 function rest() {
   if (mandatoryToday()) return say('ISA', 'You have a league match today. Please play it first.');
-  do { closeDay(); save.day++; save.slot = 0; } while (save.day < DAYS && !mandatoryToday() && !save.season.events.some(e => e.day === save.day));
-  dayStart(); store(); render();
+  // every day you sleep through still gets its daily updates (weekly team news, the midseason call, the Day 1 summary)
+  do { closeDay(); save.day++; save.slot = 0; dayStart(); } while (save.day < DAYS && !mandatoryToday() && !save.season.events.some(e => e.day === save.day));
+  store(); render();
 }
 function msg(from, text) { save.messages.unshift({ day: save.day, from, text }); save.messages = save.messages.slice(0, 80); }
 
@@ -592,7 +634,12 @@ function takeResult() {
   const foes = sides.slice(1).flat(), partner = sides[0].find(id => id !== 'you');
   foes.forEach(id => befriend(id, w !== null && w !== 0 && sides[w].includes(id) ? -2 : 0));
   if (partner) befriend(partner, w === 0 ? 5 : 3);
-  if (sides.length === 2 && sides[1].length === 1) noteMatch(sides[1][0], w === 0 ? 'w' : w === null ? 'd' : 'l');
+  if (sides.length === 2 && sides[1].length === 1) {
+    const opp = sides[1][0], wasRival = isRival(opp); noteMatch(opp, w === 0 ? 'w' : w === null ? 'd' : 'l');
+    if (wasRival && w !== null) save.queue = [...(save.queue || []), { rivalAfter: opp, won: w === 0 }];   // rival: after-match line
+  }
+  save.dayLog = save.dayLog && save.dayLog.day === save.day ? save.dayLog : { day: save.day, m: 0, bp: 0 };
+  save.dayLog.m++; save.dayLog.bp += bp.you || 0;
   const result = w === null ? 'Draw' : w === 0 ? 'Win' : 'Loss';
   const vs = sides.slice(1).map(sd => sd.map(nameOf).join(' & ')).join(', ');
   msg('ISA', `${kind === 'league' ? 'League match' : kind === 'event' ? save.event.name : 'Free match'} vs ${vs}: ${result}. ${bp.you} BP.`);
@@ -655,6 +702,12 @@ function render(view = save.view || 'commons') {
   $('main').innerHTML = header() + body;
   showMap(view === 'commons', f);
   if (view === 'teamroom' && $('room3d')) mountRoom();
+  if (save.mateNews && view !== 'commons' && (presence()[view] || []).includes(save.mateNews.id)) {   // a teammate's big result
+    const { id } = save.mateNews; delete save.mateNews; store();
+    if (friendship(id) >= 40) say(id, `Did you see? We did it! Okay, I did it. But it counts for the team.`);
+  }
+  if (view === 'commons' && lastView && lastView !== 'commons' && !dq.length) isaNotice();   // ISA: a random notice back in The Commons
+  lastView = view;
   if (view.startsWith('arena') && !save.seen.firstNewcomer && !mandatoryToday()) {   // S2-05: the first newcomer you meet
     const mine = save.season.leagues[leagueOf('you')].filter(id => NEWCOMERS.includes(id));
     const here = (presence()[view] || []).filter(id => mine.includes(id));
@@ -828,6 +881,7 @@ function who(place) {
 function challenge(id) {
   const rng = makeRng(save.season.seed + save.day * 13 + save.slot), arena = rng() < 0.6 ? 'field_' + mainAttr(id) : 'arena';
   const fieldName = arena === 'arena' ? 'the neutral Arena' : `the ${cap(mainAttr(id))} Field`;
+  say(id, isRival(id) ? `Our record's too close. Let's fix that.` : CHALLENGE[tone(id)]);
   say('ISA', `Challenge from ${nameOf(id)}. Arena: ${fieldName}. Free match: BP and your career record only.`, [
     ['Accept', () => launch(id, { key: `F${save.day}-${save.slot}-${id}`, arena })], ['Decline', () => closeDialog()]]);
 }
@@ -920,7 +974,27 @@ function brawlersView() {
       return `<tr><td>${nameOf(id)}${isRival(id) ? ' <span class="lock">Rival</span>' : ''}</td><td>${leagueNum(id)}</td><td>${tm ? tm.name : '—'}</td><td>${frLevel(id)} (${friendship(id)})</td><td>${can ? `<button data-invite="${id}">Invite</button>` : ''}</td></tr>`; }).join('') + '</table>';
 }
 // the 3D team room (js/teamroom3d.js): a pod per member, the wall screen shows the team's rank
-let room3d = null;
+let room3d = null, lastView = null;
+// ISA's random notices when you come back to The Commons (Billy, Nov 20): headlines, reminders, sales. At most one per time slot,
+// and only some of the time, so it doesn't nag.
+function isaNotice() {
+  const k = `${save.seasonNo || 2}-${save.day}-${save.slot}`; if (save.lastNotice === k) return;
+  const rng = makeRng(save.season.seed + save.day * 31 + save.slot * 7); if (rng() > 0.4) return;
+  save.lastNotice = k; store();
+  const S = save.season, lines = [], f = myFixture(save.day), next = (S.events || []).find(e => e.day > save.day && !S.eventsDone.includes(e.name));
+  const top1 = [...S.leagues[0]].sort((a, b) => tablePts(b) - tablePts(a))[0];
+  const last = Object.entries(S.results || {}).slice(-1)[0];
+  const sales = salesOn();
+  if (f && !f.played) lines.push(`Reminder: your league match against ${nameOf(f.opp)} is today.`);
+  if (next) lines.push(`${next.name} is in ${next.day - save.day} day${next.day - save.day === 1 ? '' : 's'}.`);
+  if (last) lines.push(`Latest result: ${last[0]} was won by ${last[1].winner.map(nameOf).join(' & ')}.`);
+  if (top1) lines.push(`${nameOf(top1)} leads League 1.`);
+  lines.push(`You are ${ordinal(divRank())} in ${divName()}.`);
+  if (sales && sales.length) lines.push(`The Shop has a sale today: ${saleText(sales[0])}.`);
+  const tm = myTeam(); if (tm && tm.ids.length >= TEAM_ROOM) lines.push(`${tm.name}'s team room is open if you need it.`);
+  lines.push('Please keep the plaza clear of Gate cards.', 'Arena 3 has been cleaned. Thank you for your patience.', 'Lost Bakugan can be collected at the Shop counter.');
+  say('ISA', rng.pick(lines));
+}
 function mountRoom() {
   const t = myTeam(), ranks = teamRanks(), k = ranks.findIndex(r => r.name === t.name), me = ranks[k];
   const ids = ['you', ...t.ids.filter(id => id !== 'you')];
@@ -950,7 +1024,7 @@ function wireExtras(view) {
   m.querySelectorAll('[data-join]').forEach(b => b.onclick = () => { joinTeam(b.dataset.join); store(); render('teams'); });
   m.querySelectorAll('[data-decline]').forEach(b => b.onclick = () => { save.offers = save.offers.filter(o => o.team !== b.dataset.decline); store(); render('teams'); });
   m.querySelectorAll('[data-invite]').forEach(b => b.onclick = () => { const r = inviteToTeam(b.dataset.invite); msg('ISA', r); store(); render('brawlers'); say('ISA', r); });
-  m.querySelectorAll('[data-trade]').forEach(b => b.onclick = () => { doTrade(b.dataset.trade); store(); render(view); });
+  m.querySelectorAll('[data-trade]').forEach(b => b.onclick = () => tradeTalk(b.dataset.trade));
 }
 
 // ---------- end of season: promotion, then the next season
@@ -977,6 +1051,8 @@ function nextSeason() {
   const before = leagueNum(), after = nl.findIndex(l => l.includes('you')) + 1;
   save.history = [...(save.history || []), { season: n - 1, league: before, place: finalTables()[leagueOf('you')].indexOf('you') + 1, titles: S.B.you.titles, rec: S.B.you.rec, elo: Math.round(S.B.you.elo) }];
   scene('promotion', { from: before, to: after, league: nl[after - 1] });
+  { const tm = myTeam(), li = id => nl.findIndex(l => l.includes(id)), was = id => S.leagues.findIndex(l => l.includes(id));   // teammates' promotions
+    if (tm) tm.ids.filter(id => id !== 'you' && li(id) >= 0 && was(id) >= 0 && li(id) + 1 < Math.min(4, was(id) + 1)).forEach(id => msg('ISA', `${nameOf(id)} of ${tm.name} has been promoted to League ${li(id) + 1}.`)); }
   const seed = (S.seed * 31 + n * 7919) & 0x7fffffff, rng = makeRng(seed), B = {};
   for (const [id, b] of Object.entries(S.B)) {
     const up = reset ? 0 : b.up;
@@ -1101,6 +1177,7 @@ async function start() {
     if (save.season.B.you.rec.w + save.season.B.you.rec.l > a.w + a.l) scene('newcomerAfter', { id: a.id, won: save.season.B.you.rec.w > a.w });
   }
   render(save.view === 'shop' || (save.view || '').startsWith('arena') ? 'commons' : save.view);
+  for (const q of save.queue || []) if (q && q.rivalAfter) say(q.rivalAfter, q.won ? `Fine. That one's yours. Next one's mine.` : `That evens it up. Same time tomorrow?`);
   for (const q of save.queue || []) if (q === 'firstLeagueWin') { say('ISA', `First league win recorded. Three points to ${save.you.name}.`); say('ISA', `Your name is now on the ${save.season.names[leagueOf('you')]} table.`); }
   save.queue = []; store();
 }
