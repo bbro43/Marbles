@@ -3,11 +3,11 @@
 // - Events (Opens, Royal Challenge, Field Open, Major, Masters, Finale): you enter and play your own matches; everything else is simulated.
 // - End of season: promotion (Season 2's special rule, then top 2 up / bottom 2 down), the next season, and the upgrade reset every 4 seasons.
 // - Social: teams (fixed show teams, computer teams that form, your own), friendship, rivals, trade offers.
-// - Scenes and places that aren't written/built yet have hooks: scene(key) and PLACE_VIEWS (search "PLACEHOLDER").
+// - Scenes: scene(key) plays a conversation from SCENES (claude/story-scripts.md). Models for scenes: still to build (search "MODELS GO HERE").
 import { Pack } from './pack.js';
 import { makeRng, playMatch, buildPlayer } from './sim.js';
 import { BP, MAX_UP, UPS_PER_SEASON, ATTRS6 } from './season.js';
-import { setupSeason2, LEAGUE_NAMES, season2Events, promoteSeason2, VEXOS } from './season2.js';
+import { setupSeason2, LEAGUE_NAMES, season2Events, promoteSeason2, VEXOS, NEWCOMERS } from './season2.js';
 import { PRIZE_BAND } from './season.js';
 import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
@@ -203,11 +203,101 @@ function doTrade(id) {
   msg('ISA', `Trade with ${nameOf(id)}: your ${o.give.name} for their ${o.get.name}.`);
 }
 
-// ---------- PLACEHOLDER scenes (written later, see claude/story-scripts.md). Each key is a hook already called in the right spot;
-// add a script as SCENES[key] = data => lines('Who', [...]). Keys: login, firstNewcomer, midseasonCall, eventStart, eventWin, promotion,
-// seasonEnd, newRival, bestFriend, teamInvite, teamRoomOpen.
-const SCENES = {};
-function scene(key, data = {}) { const f = SCENES[key]; if (f) try { f(data); } catch {} }
+// ---------- Scenes (claude/story-scripts.md). Each key is a hook already called at the right moment in the game.
+// A scene is just say() lines: say(who, text) for a line, a 3rd argument for choices, { call: true } for a call window.
+// Lines marked DRAFT are new (not in the scripts doc yet), written in the same voice for Billy to edit.
+const you = () => save.you.name;
+const divName = () => { const n = save.season.names[leagueOf('you')]; return n.includes('Division') ? 'Division ' + n.split('Division ')[1] : n; };   // spoken: "Division B" (or "League 2")
+const divRank = () => [...save.season.leagues[leagueOf('you')]].sort((a, b) => tablePts(b) - tablePts(a)).indexOf('you') + 1;
+const SCENES = {
+  // S2-05: the first newcomer you meet (first time you walk into an arena)
+  firstNewcomer({ id, arena }) {
+    say(id, `Oh, hey. You're new too, right? ${divName()}?`);
+    say(id, `I'm ${nameOf(id)}. Just got my synthetics this morning. Still figuring out which one I like.`);
+    say(id, `Want to try a practice match? Doesn't count for the league, but it beats standing around.`, [
+      ['Battle', () => { save.after = { kind: 'newcomer', id, w: save.season.B.you.rec.w, l: save.season.B.you.rec.l }; store();
+        launch(id, { key: `N${save.day}-${save.slot}-${id}`, arena: arena || 'arena' }); }],
+      ['Not now', () => say(id, `No problem. I'll be around. Everyone's going to be around, honestly.`)]]);
+  },
+  // S2-05, after the practice match
+  newcomerAfter({ id, won }) {
+    if (won) say(id, `Nice. Okay, I'm writing that down. You're on my list now.`);
+    else say(id, `Ha! First win of the season. Don't worry, I won't tell anyone. Probably.`);
+  },
+  // S2-08: the top of League 1 notices you (week 7, only if you're top 4 of your division)
+  midseasonCall({ from }) {
+    if (divRank() > 4) return;   // missable
+    say('ISA', `Incoming call for ${you()}. Caller: ${nameOf(from)}, League 1.`);
+    say(from, `So you're the one climbing ${divName()}. I saw your last match.`, null, { call: true });
+    say(from, `Keep it up and we'll meet in a Major soon.`, null, { call: true });
+    say('ISA', 'Call ended.');
+  },
+  // DRAFT: an event you entered is starting
+  eventStart({ event }) {
+    say('ISA', `${event} begins now. You are in the draw.`);
+    say('ISA', 'Your matches are played in order. I will call you to the arena for each one. Good luck.');
+  },
+  // DRAFT: you won an event
+  eventWin({ event, prize }) {
+    say('ISA', `${event} is complete. The winner is ${you()}.`);
+    say('ISA', `The title has been added to your record.${prize ? ` Your prize, ${prize.name || prize}, is in your inventory.` : ''}`);
+    say('ISA', 'Congratulations.');
+  },
+  // the promotion call: your highest-friendship brawler in the league you're moving up to
+  promotion({ from, to, league }) {
+    if (!(to < from)) return;
+    const caller = (league || []).filter(id => id !== 'you').sort((a, b) => friendship(b) - friendship(a))[0];
+    say('ISA', `Promotion confirmed. Next season you battle in League ${to}.`);
+    if (!caller) return;
+    say('ISA', `Incoming call for ${you()}. Caller: ${nameOf(caller)}.`);
+    const t = tone(caller);
+    say(caller, t === 'best' || t === 'friend' ? `You're coming up to our league! Finally. It was getting boring up here.` : `Saw you got promoted. See you in the league.`, null, { call: true });
+    say('ISA', 'Call ended.');
+  },
+  // DRAFT: the regular season is over
+  seasonEnd() {
+    say('ISA', 'The regular season is complete.');
+    say('ISA', `You finished ${ordinal(divRank())} in ${save.season.names[leagueOf('you')]}. Final standings and promotions are posted.`);
+  },
+  // rival line bank: on becoming rivals
+  newRival({ id }) {
+    const r = rivals().find(x => x.id === id), n = r ? r.n : 5;
+    say(id, `${you()}. That's ${n} times this month. I'm starting to think we keep ending up in the same arena on purpose.`);
+  },
+  // DRAFT: someone becomes your best friend
+  bestFriend({ id }) {
+    say(id, `Hey, ${you()}. I was thinking. You're the first person I look for when I log in.`);
+    say(id, `So... best friends? Good. That's settled. Now battle me.`);
+  },
+  // team invite, by friendship tone (only when you're not on a team; the Teams screen still lists the offer)
+  teamInvite({ team }) {
+    const t = teamsList().find(x => x.id === team); if (!t) return;
+    const from = t.ids.find(id => id !== 'you'), tn = tone(from), mine = myTeam();
+    const line = { best: `${t.name} has a spot open. Honestly, we've been saving it for you. Want in?`, friend: `We've got room on ${t.name}. You'd fit right in. Interested?`,
+      acq: `${t.name} is looking for one more. Your record's decent. Want to join?`, cold: `There's an opening on ${t.name}. The others suggested you. Your call.` }[tn];
+    say(from, line);
+    if (mine) say('ISA', `Joining ${t.name} means leaving ${mine.name}. Your former teammates will be notified.`);
+    say(from, 'So?', [['Join', () => { joinTeam(team); store(); render(save.view); }],
+      ['No thanks', () => { save.offers = (save.offers || []).filter(o => o.team !== team); store(); say(from, tn === 'best' || tn === 'friend' ? 'No worries. Offer stands.' : 'Okay.'); }]]);
+  },
+  // DRAFT: your team reaches 3 members
+  teamRoomOpen({ team }) {
+    const t = teamsList().find(x => x.id === team); if (!t) return;
+    say('ISA', `${t.name} now has ${t.ids.length} members. Your team room is open.`);
+    say('ISA', 'You will find it in the Team Rooms building in The Commons.');
+  },
+  // DRAFT: the daily greeting after the login corridor
+  login() {
+    const f = myFixture(save.day), ev = eventToday();
+    say('ISA', `Good ${['morning', 'afternoon', 'evening'][save.slot] || 'day'}, ${you()}. Today is day ${save.day + 1} of Season ${save.seasonNo || 2}.`);
+    if (f && !f.played) say('ISA', `You have a league match today against ${nameOf(f.opp)}.`);
+    else if (ev) say('ISA', `${ev.name} takes place today.`);
+    else say('ISA', 'Nothing fixed is on your schedule today.');
+  },
+};
+window.STORY_SCENE = (key, data) => scene(key, data);   // for testing: play any scene from the console
+const ordinal = n => n + (['th', 'st', 'nd', 'rd'][(n % 100 - 20) % 10] || ['th', 'st', 'nd', 'rd'][n % 100] || 'th');
+function scene(key, data = {}) { const f = SCENES[key]; if (f) try { f(data); } catch (e) { console.error('scene', key, e); } }
 
 // ---------- Shop sales (Billy, Nov 20): the schedule lives in js/storyshop.js (the store screen uses it too)
 const saleSchedule = () => salesFor(save.season);
@@ -352,7 +442,7 @@ function startEvent(e, withYou, partner = null) {
   } else if (e.format === 'royale') {
     ev.phase = 'groups'; ev.matches = []; for (let i = 0; i < sides.length; i += 4) ev.matches.push({ sides: sides.slice(i, i + 4), royale: true });
   } else { ev.phase = 'ko'; ev.matches = koPairs(sides).map(pr => ({ sides: pr })); }
-  if (withYou) scene('eventStart', { event: e.name });   // PLACEHOLDER scene hook
+  if (withYou) scene('eventStart', { event: e.name });
   return ev;
 }
 const hasYou = m => m.sides.some(sd => sd.includes('you'));
@@ -410,7 +500,7 @@ function finishEvent(ev) {
   // a title for you or a teammate: +3 friendship with your teammates (Billy)
   const mine = myTeam();
   if (mine && champ.some(id => mine.ids.includes(id))) mine.ids.filter(id => id !== 'you').forEach(id => befriend(id, 3));
-  if (champ.includes('you')) scene('eventWin', { event: ev.name, prize });   // PLACEHOLDER scene hook
+  if (champ.includes('you')) scene('eventWin', { event: ev.name, prize });
   ev.done = true; ev.order = order;
   return null;
 }
@@ -428,10 +518,10 @@ function dayStart() {
     const t = myTeam(); if (t) t.ids.filter(id => id !== 'you').forEach(id => befriend(id, 1, true));
     formTeams(rng); teamInvites(rng);
   }
-  if (save.day === 42 && !save.seen.midseason) {   // midseason: a call from the top League 1 brawler (PLACEHOLDER scene)
+  if (save.day === 42 && !save.seen.midseason) {   // midseason: a call from the top League 1 brawler (scene: S2-08)
     save.seen.midseason = true;
     const top = [...save.season.leagues[0]].sort((a, b) => tablePts(b) - tablePts(a))[0];
-    msg(nameOf(top), 'Incoming call. (Midseason call scene coming soon.)'); scene('midseasonCall', { from: top });
+    if (divRank() <= 4) msg(nameOf(top), `Called you: "Keep it up and we'll meet in a Major soon."`); scene('midseasonCall', { from: top });
   }
   if (f && !f.played) msg('ISA', `League match today: ${nameOf('you')} vs ${nameOf(f.opp)}, round ${f.round}. Neutral Arena.`);
   const ev = eventToday();
@@ -556,6 +646,12 @@ function render(view = save.view || 'commons') {
   $('main').innerHTML = header() + body;
   showMap(view === 'commons', f);
   if (view === 'teamroom' && $('room3d')) mountRoom();
+  if (view.startsWith('arena') && !save.seen.firstNewcomer && !mandatoryToday()) {   // S2-05: the first newcomer you meet
+    const mine = save.season.leagues[leagueOf('you')].filter(id => NEWCOMERS.includes(id));
+    const here = (presence()[view] || []).filter(id => mine.includes(id));
+    const id = here[0] || mine[makeRng(save.season.seed + 5).int(mine.length)];
+    if (id) { save.seen.firstNewcomer = id; store(); scene('firstNewcomer', { id, arena: 'arena' }); }
+  }
   $('main').querySelectorAll('[data-go]').forEach(b => b.onclick = () => render(b.dataset.go));
   $('main').querySelectorAll('[data-back]').forEach(b => b.onclick = () => render('commons'));
   $('main').querySelectorAll('[data-challenge]').forEach(b => b.onclick = () => challenge(b.dataset.challenge));
@@ -871,7 +967,7 @@ function nextSeason() {
   const S = save.season, n = (save.seasonNo || 2) + 1, nl = promotedLeagues(), reset = (n - 1) % 4 === 0;
   const before = leagueNum(), after = nl.findIndex(l => l.includes('you')) + 1;
   save.history = [...(save.history || []), { season: n - 1, league: before, place: finalTables()[leagueOf('you')].indexOf('you') + 1, titles: S.B.you.titles, rec: S.B.you.rec, elo: Math.round(S.B.you.elo) }];
-  scene('promotion', { from: before, to: after });   // PLACEHOLDER scene hook
+  scene('promotion', { from: before, to: after, league: nl[after - 1] });
   const seed = (S.seed * 31 + n * 7919) & 0x7fffffff, rng = makeRng(seed), B = {};
   for (const [id, b] of Object.entries(S.B)) {
     const up = reset ? 0 : b.up;
@@ -888,17 +984,56 @@ function nextSeason() {
 }
 
 // ---------- dialogue box (ISA over the intercom, brawlers in person)
-let dq = [];
-function say(who, text, choices = null) { dq.push({ who, text, choices }); if (dq.length === 1) showLine(); }
-function showLine() {
-  const l = dq[0]; if (!l) { $('dlg').hidden = true; return; }
-  $('dlg').hidden = false;
-  $('dlg').innerHTML = `<div class="dname ${l.who === 'ISA' ? 'isa2' : ''}">${l.who}</div><div class="dtext">${l.text}</div>` +
-    (l.choices ? `<div class="dch">${l.choices.map(([t], i) => `<button data-c="${i}">${t}</button>`).join('')}</div>` : `<div class="dnext">▼</div>`);
-  if (l.choices) $('dlg').querySelectorAll('[data-c]').forEach(b => b.onclick = e => { e.stopPropagation(); const fn = l.choices[+b.dataset.c][1]; dq.shift(); showLine(); fn(); });
-  else $('dlg').onclick = () => { dq.shift(); $('dlg').onclick = null; showLine(); };
+// ---------- Scene mode (Billy, Nov 20)
+// Every conversation plays as a scene: the picture behind freezes, the speakers stand on the stage (models: to build together),
+// and the text box at the bottom shows the speaker's name and types out the line. Tap to finish a line, tap again for the next.
+//   say(who, text)                         a line (who: 'ISA', a brawler id or a name)
+//   say(who, text, [[label, fn], ...])     a line that ends with choices
+//   say(who, text, null, { call: true })   the speaker is on a call window (show characters, calls from far away)
+//   say(who, text, null, { input: { placeholder, ok, done(value) } })   ask for typed text (your name)
+let dq = [], typer = null;
+const TYPE_MS = 22;   // per letter
+function say(who, text, choices = null, opts = {}) { dq.push({ who, text, choices, ...opts }); if (dq.length === 1) showLine(); }
+const speakerName = who => (save && save.season && save.season.B && save.season.B[who]) ? nameOf(who) : who;
+function enterScene() { if ($('scene').hidden) { $('scene').hidden = false; document.body.classList.add('scene-on'); } }
+function exitScene() { $('scene').hidden = true; document.body.classList.remove('scene-on'); $('sceneStage').innerHTML = ''; }
+// The stage. ISA is a glowing speaker panel; a call is a call window with the caller's attribute color.
+// MODELS GO HERE: for a brawler in person, stage() makes an empty .actor slot (data-id = who). We'll put their 3D model
+// (knee or waist up) into that slot together later.
+function stage(l) {
+  const st = $('sceneStage');
+  if (l.who === 'ISA') { st.innerHTML = `<div class="isaPanel talk"></div>`; return; }
+  if (l.call) { const a = save && save.season && save.season.B[l.who] ? mainAttr(l.who) : null;
+    st.innerHTML = `<div class="callWin" style="--cc:${ATTR_COLOR[a] || '#ffcf3a'}"><div class="bar">INCOMING CALL</div><div class="emb"></div><div class="nm">${speakerName(l.who)}</div></div>`; return; }
+  if (!st.querySelector(`.actor[data-id="${l.who}"]`)) st.innerHTML = `<div class="actor right" data-id="${l.who}"></div>`;   // MODEL SLOT (empty for now)
 }
-function closeDialog() { dq = []; $('dlg').hidden = true; }
+function showLine() {
+  clearInterval(typer); typer = null;
+  const l = dq[0]; if (!l) { exitScene(); return; }
+  enterScene(); stage(l);
+  const D = $('dlg'), cls = l.who === 'ISA' ? 'isa2' : l.call ? 'call' : '';
+  D.innerHTML = `<div class="dname ${cls}">${speakerName(l.who)}${l.call ? ' · call' : ''}</div><div class="dtext"></div><div class="tail"></div>`;
+  const T = D.querySelector('.dtext'); let n = 0;
+  const finish = () => {
+    clearInterval(typer); typer = null; T.textContent = l.text; const isa = $('sceneStage').querySelector('.isaPanel'); if (isa) isa.classList.remove('talk');
+    const tail = D.querySelector('.tail');
+    if (l.input) {
+      tail.innerHTML = `<input id="nm" maxlength="14" placeholder="${l.input.placeholder || ''}"><div class="dch"><button id="nmok">${l.input.ok || 'OK'}</button></div>`;
+      $('nmok').onclick = e => { e.stopPropagation(); const v = ($('nm').value || '').trim(); dq.shift(); showLine(); l.input.done(v); };
+      $('nm').onclick = e => e.stopPropagation(); D.onclick = null; return;
+    }
+    if (l.choices) {
+      tail.innerHTML = `<div class="dch">${l.choices.map(([t], i) => `<button data-c="${i}">${t}</button>`).join('')}</div>`;
+      tail.querySelectorAll('[data-c]').forEach(b => b.onclick = e => { e.stopPropagation(); const fn = l.choices[+b.dataset.c][1]; dq.shift(); showLine(); fn(); });
+      D.onclick = null; return;
+    }
+    tail.innerHTML = `<div class="dnext">▼</div>`;
+    D.onclick = () => { D.onclick = null; dq.shift(); showLine(); };
+  };
+  typer = setInterval(() => { n += 1; T.textContent = l.text.slice(0, n); if (n >= l.text.length) finish(); }, TYPE_MS);
+  D.onclick = () => finish();   // tap while typing: show the whole line
+}
+function closeDialog() { dq = []; clearInterval(typer); exitScene(); }
 const lines = (who, list, then) => { list.forEach((t, i) => say(who, t, i === list.length - 1 && then ? [['Continue', then]] : null)); };
 
 // ---------- opening scenes (S2-01 to S2-04, claude/story-scripts.md)
@@ -907,9 +1042,7 @@ function opening(s1) {
     'I am ISA, the Interspace System Assistant. I manage the arenas, the schedules and the rankings.',
     'Our records show your last battle was before the Bakugan returned to New Vestroia. Welcome back.',
     'Interspace opened to the public this season. Humans and Vestals battle here with their own partners and with synthetic Bakugan made by Interspace.'], () => {
-    $('dlg').hidden = false;
-    $('dlg').innerHTML = `<div class="dname isa2">ISA</div><div class="dtext">Please confirm your brawler name.</div><input id="nm" maxlength="14" placeholder="Name"><div class="dch"><button id="nmok">Confirm</button></div>`;
-    $('nmok').onclick = () => { const name = ($('nm').value || '').trim() || 'Brawler'; dq = []; pickStarter(s1, name); };
+    say('ISA', 'Please confirm your brawler name.', null, { input: { placeholder: 'Name', ok: 'Confirm', done: v => pickStarter(s1, v || 'Brawler') } });
   });
 }
 function pickStarter(s1, name) {
@@ -952,6 +1085,10 @@ async function start() {
   if (!save) { $('main').innerHTML = '<div class="hdr"><b>Bakugan Interspace</b></div>'; opening(s1); return; }
   if (save.season && save.you) { ensureColl(); migrateUps(); store(); }
   takeResult();
+  if (save.after && save.after.kind === 'newcomer') {   // back from the practice match with your first newcomer
+    const a = save.after; delete save.after; store();
+    if (save.season.B.you.rec.w + save.season.B.you.rec.l > a.w + a.l) scene('newcomerAfter', { id: a.id, won: save.season.B.you.rec.w > a.w });
+  }
   render(save.view === 'shop' || (save.view || '').startsWith('arena') ? 'commons' : save.view);
   for (const q of save.queue || []) if (q === 'firstLeagueWin') { say('ISA', `First league win recorded. Three points to ${save.you.name}.`); say('ISA', `Your name is now on the ${save.season.names[leagueOf('you')]} table.`); }
   save.queue = []; store();
@@ -962,3 +1099,5 @@ $('newgame').onclick = () => { if (confirm('Start a new story? This erases your 
 let loginDone = null, loginCtl = null, avatarSent = false;
 try { if (!sessionStorage.getItem('marbles-story-in')) { sessionStorage.setItem('marbles-story-in', '1'); const ready = new Promise(r => { loginDone = r; }); loginCtl = playLogin({ ready }); } } catch {}
 start().catch(e => console.error(e)).finally(() => { if (loginCtl && !avatarSent) loginCtl.setAvatar(null); loginDone && loginDone(); });
+// after the corridor: ISA's daily greeting (only for an existing story, and only if nothing else is being said)
+if (loginCtl) loginCtl.done.then(() => { if (save && save.season && save.you && !dq.length) scene('login'); });

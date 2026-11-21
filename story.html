@@ -30,12 +30,32 @@
   .msg { background: var(--panel); border-radius: 8px; padding: 8px 10px; margin: 6px 0; } .msg span { display: block; font-size: 12px; color: var(--dim); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; } th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #22314c; } tr.me td { color: #ffd76a; font-weight: 700; }
   .wk { background: var(--panel); border-radius: 8px; padding: 8px 10px; margin: 6px 0; font-size: 13px; } .wk.now { border: 1px solid var(--accent); }
-  #dlg { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 520px; background: linear-gradient(180deg, #13304d, #0c1b2d); border: 2px solid #3b8fd0;
-    border-radius: 14px 14px 0 0; padding: 12px 14px 22px; min-height: 140px; box-shadow: 0 -6px 24px #0008; }
-  .dname { font-weight: 700; margin-bottom: 4px; } .dtext { font-size: 16px; }
-  .dnext { text-align: right; color: #7fd3ff; animation: blink 1s infinite; } @keyframes blink { 50% { opacity: .2; } }
+  /* ---- Scene mode (Billy, Nov 20): the background freezes, the stage holds the characters (knee to waist up), the text box covers the bottom */
+  #scene { position: fixed; inset: 0; z-index: 5000; display: flex; flex-direction: column; background: linear-gradient(180deg, #0000 0%, #0004 45%, #000a 100%); }
+  #scene[hidden] { display: none; }
+  #sceneStage { flex: 1; position: relative; max-width: 520px; width: 100%; margin: 0 auto; overflow: hidden; }
+  /* MODELS GO HERE: each speaker gets an .actor slot, bottom-aligned on the text box (see stage() in js/story.js) */
+  .actor { position: absolute; bottom: 0; width: 46%; height: 78%; }
+  .actor.left { left: 2%; } .actor.right { right: 2%; } .actor.dim { filter: brightness(.55); }
+  .isaPanel { position: absolute; left: 50%; bottom: 14%; width: 132px; height: 132px; margin-left: -66px; border-radius: 50%;
+    background: radial-gradient(circle, #bff3ff 0%, #39b6ff 38%, #0b3a5c 70%, #0000 72%); box-shadow: 0 0 40px #39b6ffaa; animation: isaPulse 2.4s ease-in-out infinite; }
+  .isaPanel::after { content: 'ISA'; position: absolute; left: 0; right: 0; top: 50%; margin-top: -10px; text-align: center; font: 900 18px system-ui; letter-spacing: .2em; color: #06253d; }
+  .isaPanel.talk { animation: isaPulse .5s ease-in-out infinite; }
+  @keyframes isaPulse { 50% { transform: scale(1.06); box-shadow: 0 0 60px #39b6ffdd; } }
+  .callWin { position: absolute; left: 50%; bottom: 10%; width: 190px; margin-left: -95px; border-radius: 12px; border: 2px solid var(--cc, #ffcf3a); background: #0b1626ee;
+    box-shadow: 0 0 24px #0008; overflow: hidden; text-align: center; font: 800 13px system-ui; }
+  .callWin .bar { background: var(--cc, #ffcf3a); color: #111; font-size: 11px; padding: 3px; letter-spacing: .1em; }
+  .callWin .emb { width: 74px; height: 74px; margin: 12px auto 6px; border-radius: 50%; background: radial-gradient(circle, #fff8 0%, var(--cc, #ffcf3a) 60%, #0000 62%); }
+  .callWin .nm { padding: 0 0 10px; }
+  #dlg { position: relative; flex: 0 0 auto; height: 32vh; min-height: 168px; max-width: 520px; width: 100%; margin: 0 auto; box-sizing: border-box;
+    background: linear-gradient(180deg, #13304d, #0c1b2d); border: 2px solid #3b8fd0; border-bottom: 0; border-radius: 14px 14px 0 0;
+    padding: 22px 16px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 24px #0008; overflow: visible; }
+  .dname { position: absolute; top: -15px; left: 14px; padding: 3px 14px; border-radius: 10px; background: #ffcf3a; color: #111; font: 800 14px system-ui; box-shadow: 0 2px 8px #0008; }
+  .dname.isa2 { background: #39b6ff; color: #04223a; } .dname.call { background: #0b1626; color: #ffcf3a; border: 1px solid #ffcf3a; }
+  .dtext { font-size: 17px; line-height: 1.4; min-height: 3em; }
+  .dnext { position: absolute; right: 16px; bottom: calc(10px + env(safe-area-inset-bottom)); color: #7fd3ff; animation: blink 1s infinite; } @keyframes blink { 50% { opacity: .2; } }
   .dch { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; } .dch button { text-align: left; }
-  #dlg input { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid var(--edge); background: #0b1626; color: var(--text); font: inherit; }
+  #dlg input { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid var(--edge); background: #0b1626; color: var(--text); font: inherit; box-sizing: border-box; }
   .top { display: flex; justify-content: space-between; max-width: 520px; margin: 0 auto; padding: 8px 12px 0; font-size: 13px; }
   .top a, .top button { color: var(--dim); background: none; border: none; padding: 4px; text-decoration: none; }
   #map { position: relative; height: 58vh; max-width: 720px; margin: 8px auto 0; overflow: hidden; border-radius: 14px; }
@@ -69,7 +89,7 @@
 <div class="top"><a href="index.html">‹ Home</a><span>The Commons</span><button id="newgame">New story</button></div>
 <div id="map" hidden></div>
 <div id="main"></div>
-<div id="dlg" hidden></div>
+<div id="scene" hidden><div id="sceneStage"></div><div id="dlg"></div></div>
 <script type="module" src="js/story.js"></script>
 </body>
 </html>
