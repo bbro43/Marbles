@@ -211,7 +211,7 @@ function closet(start) {
     // race (Billy, Nov 21): Human, Vestal, Gundalian, Neathian, then that race's options (see RACE_OPT in avatar.js)
     const r = look.race || 'human';
     bar(r === 'gundalian' ? 'Gundalian: gray skin, eye marks, neck marks and a forehead plate.'
-      : r === 'neathian' ? 'Neathian: diamond eyes and an arc on the upper face. Skin: light blue (male) or light pink (female).'
+      : r === 'neathian' ? 'Neathian: diamond eyes, no eyebrows. Skin: light blue (male) or light pink (female).'
       : r === 'vestal' ? 'Vestal: hazed eyes.' : 'Race');
     right(`<div class="pill" style="left:138px;top:20px;width:112px">Race</div><div class="box" style="left:136px;top:40px;width:116px;height:128px"></div>`);
     RACES.forEach((v, i) => right(`<div class="pill tap ${r === v ? 'sel gold' : ''}" data-race="${v}" style="left:${141 + (i % 2) * 55}px;top:${44 + Math.floor(i / 2) * 20}px;width:52px;height:17px;line-height:17px;font-size:8.5px">${RACE_LABEL[v]}</div>`));

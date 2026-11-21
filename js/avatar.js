@@ -142,8 +142,9 @@ function neathianArc(c, L) {
 function raceTexture(name, img, L) {
   const r = L.race || 'human', to = SKIN_OF(L);
   if (/^eye_/.test(name)) { if (r === 'vestal') return hazeEye(img); if (r === 'neathian') return neathianEye(img, opt(L, 'neye') === 'tint'); if (to) return reskin(toCanvas(img), to); return null; }
+  if (/^eyeblow_/.test(name)) { if (r !== 'neathian') return null; const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; return c; }   // Neathians have no eyebrows (Billy, Nov 21)
   if (!to) return null;
-  if (/^facial_/.test(name)) { const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c, opt(L, 'marks') === 'around') : neathianArc(neathianFace(c), L); }
+  if (/^facial_/.test(name)) { const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c, opt(L, 'marks') === 'around') : neathianFace(c); }
   // the skin sheet is all skin, so it takes a wider reach (the ear is pinker than the face)
   if (/^skin_/.test(name)) { const c = reskin(toCanvas(img), to, 140); return r === 'gundalian' ? (opt(L, 'marks') === 'around' ? gundalianChin(gundalianNeck(c)) : gundalianNeck(c)) : c; }
   return null;
@@ -268,7 +269,7 @@ export async function buildAvatar(L, url) {
     if (!texCache.has(name)) texCache.set(name, (async () => {
       const src = await url(`creator/textures/${name}.png`);
       let t = null;
-      if (raced && /^(eye|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L); if (c) t = new THREE.CanvasTexture(c); }
+      if (raced && /^(eye|eyeblow|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L); if (c) t = new THREE.CanvasTexture(c); }
       if (!t) t = await texLoader.loadAsync(src);
       t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t;
     })().catch(() => { console.warn('no texture', name); return null; }));
@@ -284,7 +285,7 @@ export async function buildAvatar(L, url) {
       const mats = Array.isArray(o.material) ? o.material : [o.material];
       for (const mat of mats) {
         const old = mat.map; if (!old) continue;
-        const want = variantFor(old.name, L) || old.name; if (want === old.name && !(raced && /^(eye|facial|skin)_/.test(old.name))) continue;
+        const want = variantFor(old.name, L) || old.name; if (want === old.name && !(raced && /^(eye|eyeblow|facial|skin)_/.test(old.name))) continue;
         jobs.push(tex(want).then(t => { if (t) { t.wrapS = old.wrapS; t.wrapT = old.wrapT; mat.map = t; mat.needsUpdate = true; } }));
       }
     });
