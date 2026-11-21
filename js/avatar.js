@@ -6,17 +6,29 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // what you can change, how many styles and colors each has (from pack/creator/catalog.json)
 export const PARTS = {
-  hair:    { styles: 16, colors: 12, label: 'Hair' },   // styles 10-15 are our own (scripts/girlhair.mjs); colors 6-11 are the bright Vestal colors (scripts/haircolors.py)
+  hair:    { styles: 16, colors: 22, label: 'Hair' },   // styles 10-15 are our own (scripts/girlhair.mjs); colors 6-11 are the bright Vestal colors (scripts/haircolors.py)
   cap:     { styles: 6, colors: 6, label: 'Hat', optional: true },
   glasses: { styles: 6, colors: 4, label: 'Glasses', optional: true },
   eye:     { styles: 6, colors: 12, label: 'Eyes' },   // 6-11: same colors with a tinted pupil instead of black, for Vestals (scripts/vestaleyes.py)
-  eyeblow: { styles: 8, colors: 12, label: 'Eyebrows' },   // 6-7 are softer (scripts/softbrows.py)
+  eyeblow: { styles: 8, colors: 22, label: 'Eyebrows' },   // 6-7 are softer (scripts/softbrows.py)
   facial:  { styles: 6, colors: 5, label: 'Face' },
   top:     { styles: 8, colors: 6, label: 'Top' },
   down:    { styles: 10, colors: 6, label: 'Pants' },   // 8-9 are skirts (scripts/girlskirt.mjs)
   shoes:   { styles: 4, colors: 6, label: 'Shoes' },
 };
 export const SKIN_TONES = 5;
+// more hair colors (Billy, Nov 21): colors 12+ are made here by tinting the blond texture (color 02), so the pack needs nothing new.
+// Darker and stronger colors that stand out against the pale Gundalian and Neathian skin. Eyebrows follow the hair.
+export const EXTRA_HAIR = ['#1f3a8a', '#2f6fd6', '#1f8f8f', '#1e5e4a', '#4fbf7a', '#5f6b75', '#b9b4e0', '#d9aa22', '#e2762a', '#4a2d7a'];
+const EXTRA0 = 12;
+function tintHair(img, hexc) {
+  const c = toCanvas(img), g = c.getContext('2d'), d = g.getImageData(0, 0, c.width, c.height), p = d.data, to = hex(hexc);
+  let n = 0, m = 0; for (let i = 0; i < p.length; i += 4) if (p[i + 3] > 100) { n++; m += p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11; }
+  m = n ? m / n : 200;
+  for (let i = 0; i < p.length; i += 4) { if (!p[i + 3]) continue; const k = (p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11) / m;
+    for (let j = 0; j < 3; j++) p[i + j] = Math.round(Math.min(255, to[j] * k + Math.max(0, k - 1) * 60)); }   // keeps the light and shade, highlights go a bit paler
+  g.putImageData(d, 0, 0); return c;
+}
 // Races (Billy, Nov 20-21). All done here on the existing textures and with one small extra piece, so the pack needs nothing new.
 //   human
 //   vestal     hazed eyes: no pupil, the iris glows milky toward the center
@@ -280,9 +292,12 @@ export async function buildAvatar(L, url) {
   const raced = (L.race || 'human') !== 'human';
   const tex = async name => {
     if (!texCache.has(name)) texCache.set(name, (async () => {
-      const src = await url(`creator/textures/${name}.png`);
       let t = null;
-      if (raced && /^(eye|eyeblow|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L); if (c) t = new THREE.CanvasTexture(c); }
+      const xh = /^(hair|caphair|eyeblow)_(\d\d)_(\d\d)$/.exec(name), extra = xh && +xh[3] >= EXTRA0;
+      // an extra hair color: tint the blond texture (Neathian eyebrows are blanked whatever the color)
+      const src = await url(`creator/textures/${extra ? `${xh[1]}_${xh[2]}_02` : name}.png`);
+      if (extra && !(L.race === 'neathian' && xh[1] === 'eyeblow')) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintHair(im, EXTRA_HAIR[+xh[3] - EXTRA0] || '#888')); }
+      else if (raced && /^(eye|eyeblow|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L); if (c) t = new THREE.CanvasTexture(c); }
       if (!t) t = await texLoader.loadAsync(src);
       t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t;
     })().catch(() => { console.warn('no texture', name); return null; }));

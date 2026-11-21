@@ -1,7 +1,7 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
 import * as THREE from 'three';
 import { Pack } from './pack.js';
-import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, RACES, RACE_LABEL, RACE_OPT, GUN_HAIR, opt } from './avatar.js';
+import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, EXTRA_HAIR, RACES, RACE_LABEL, RACE_OPT, GUN_HAIR, opt } from './avatar.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -186,6 +186,7 @@ const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: '
 const LABEL = { race: 'Race', band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes' };
 const VIEW_OF = { race: 'head', band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower' };
 let look = null, editCat = null, editPart = null, isNew = false;
+const HAIR_MORE = ['#ff8ada', '#67acff', '#45f7da', '#bd6dff', '#ff2e45', '#7ef767'];   // hair colors 6-11 (the bright Vestal ones): the pack's swatch list stops at 6
 // a Gundalian can't keep a hair style that covers the forehead band: switch to the nearest one that doesn't
 function fixHair() { if (look.race !== 'gundalian' || GUN_HAIR.includes(look.hair[0])) return; const h = look.hair[0]; look.hair[0] = GUN_HAIR.reduce((a, b) => Math.abs(b - h) < Math.abs(a - h) ? b : a); }
 function closet(start) {
@@ -244,8 +245,11 @@ function closet(start) {
       right(`<img src="${pic}" class="icon tap ${cur === v ? 'sel' : ''} ${off ? 'off' : ''}" data-style="${v}" style="${off ? 'opacity:.25;filter:grayscale(1);' : ''}left:${140 + (i % cols) * (sz + 1)}px;top:${44 + Math.floor(i / cols) * (sz + 1)}px;width:${sz}px;height:${sz}px" alt="">`);
     }
     if (k !== 'skin') {
-      const sw = (M.swatch || {})[k === 'eye' ? 'eye' : k] || [];
-      for (let c = 0; c < def.colors; c++) right(`<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="left:${142 + c * 18}px;top:152px;background:${sw[c] || '#888'}"></div>`);
+      let sw = (M.swatch || {})[k === 'eye' ? 'eye' : k] || [];
+      if (k === 'hair') { sw = [...sw]; while (sw.length < 12) sw.push(HAIR_MORE[sw.length - 6] || '#888'); sw.push(...EXTRA_HAIR); }
+      // the colors in one row that scrolls sideways when there are more than fit
+      right(`<div class="swrow" style="position:absolute;left:138px;top:149px;width:112px;height:17px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none">` +
+        [...Array(def.colors)].map((_, c) => `<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="position:relative;display:inline-block;margin:3px 3px 0;background:${sw[c] || '#888'}"></div>`).join('') + `</div>`);
     }
   }
   $('bot').innerHTML = h;
