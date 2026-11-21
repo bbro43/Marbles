@@ -7,12 +7,26 @@
 //   Bottoms 10 Cargo pants         pants 0 + pockets on the sides of the thighs
 //           11 Long skirt          skirt 9 reshaped to the ankles (with a top in the same color it reads as a dress)
 //   Shoes    4 Tall boots          shoes 0, and the legs below the knees in the boot color with a cuff at the top
+//   Second wave (Billy, Nov 21), all with the accent color for their trim:
+//   Tops    12 Open jacket          top 2 as a white shirt + a short-sleeve jacket over it, open at the front, bands on the sleeves
+//           13 Biker jacket         top 4 + a wide collar and cuffs at the wrists
+//           14 Wrap top             top 2 + a panel crossing over the front, edged in the accent
+//           15 Panel jacket         top 6 with the sides and sleeves in the accent
+//           16 Utility vest         the vest (9) with two chest pockets
+//           17 Fitted top           top 6 in one color with a small collar and wrist cuffs (with the long skirt: a dress)
+//   Bottoms 12 Joggers              pants 0 slimmed below the knee into cuffs at the ankles
+//           13 Slim pants           pants 0 slimmed below the knee
+//   Shoes    5 High-tops            shoes 0 + the legs to just above the ankle, with a cuff
+//            6 Ankle boots          shoes 0 + the legs to mid-shin, with a strap
+//   Accent   a new part: one more color for trim, cuffs, collars, bands and panels (none = a darker shade of each piece)
 //   Gloves   a new part: fingerless or full gloves in their own color (none = they follow the top, as before)
 import * as THREE from 'three';
 
-export const XTOP = { 8: { base: 4, add: 'coat', label: 'Long coat' }, 9: { base: 2, add: 'vest', label: 'Vest' }, 10: { base: 6, add: 'collar', label: 'High collar' }, 11: { base: 2, add: 'puff', label: 'Puffed sleeves' } };
-export const XDOWN = { 10: { base: 0, add: 'cargo', label: 'Cargo pants' }, 11: { base: 9, add: 'long', label: 'Long skirt' } };
-export const XSHOES = { 4: { base: 0, add: 'boots', label: 'Tall boots' } };
+export const XTOP = { 8: { base: 4, add: 'coat', label: 'Long coat' }, 9: { base: 2, add: 'vest', label: 'Vest' }, 10: { base: 6, add: 'collar', label: 'High collar' }, 11: { base: 2, add: 'puff', label: 'Puffed sleeves' },
+  12: { base: 2, add: 'open', label: 'Open jacket' }, 13: { base: 4, add: 'biker', label: 'Biker jacket' }, 14: { base: 2, add: 'wrap', label: 'Wrap top' }, 15: { base: 6, add: 'panel', label: 'Panel jacket' },
+  16: { base: 2, add: 'utility', label: 'Utility vest' }, 17: { base: 6, add: 'fitted', label: 'Fitted top' } };
+export const XDOWN = { 10: { base: 0, add: 'cargo', label: 'Cargo pants' }, 11: { base: 9, add: 'long', label: 'Long skirt' }, 12: { base: 0, add: 'jogger', label: 'Joggers' }, 13: { base: 0, add: 'slim', label: 'Slim pants' } };
+export const XSHOES = { 4: { base: 0, add: 'boots', label: 'Tall boots' }, 5: { base: 0, add: 'hightop', label: 'High-tops' }, 6: { base: 0, add: 'ankle', label: 'Ankle boots' } };
 export const GLOVE_STYLES = ['Fingerless', 'Full'];
 
 // the colors (6 for each new style)
@@ -26,6 +40,17 @@ export const XCOLORS = {
   down11: DRESS,
   shoes4: ['#3a2a1f', '#1e1e22', '#7a5a3a', '#5a1e24', '#d8d0c0', '#2a3346'],
   gloves: ['#1e1e22', '#6b4a33', '#e6e6e6', '#7a1f2b', '#1f3a5a', '#3c5a3a'],
+  top12: ['#3b5f8a', '#6b4a2a', '#2f5a3a', '#8a3a5a', '#4a4a52', '#b08a3a'],
+  top13: ['#1e1e22', '#5a2a1e', '#2a3a5a', '#4a5a2a', '#8a8f96', '#6a1f3a'],
+  top14: ['#4a2a5a', '#1f3f4a', '#7a3a2a', '#2a2a30', '#5f7a8a', '#9a7a5a'],
+  top15: ['#2a4a6a', '#3a3a3a', '#5a2a2a', '#2a5a4a', '#6a5a7a', '#d8d2c4'],
+  top16: ['#5a6a3a', '#7a6a4a', '#3a4a5a', '#2a2a2a', '#6a3a2a', '#8a8a7a'],
+  top17: DRESS,
+  down12: ['#2a2a30', '#4a5a6a', '#6a6a72', '#3a4a3a', '#5a3a4a', '#8a7a6a'],
+  down13: ['#1e2430', '#5a4a3a', '#3a3a42', '#6a6a6a', '#2a4a5a', '#4a2a2a'],
+  shoes5: ['#e8e4da', '#1e1e22', '#b3262e', '#2a5a9a', '#3c7a4a', '#6a6a72'],
+  shoes6: ['#3a2a1f', '#1e1e22', '#6b4a2a', '#4a4a52', '#2a3346', '#7a3a2a'],
+  accent: ['#e8e4da', '#1e1e22', '#c9a227', '#b3262e', '#2a6fb0', '#3c8c4a', '#7a4ab0', '#e07a1f', '#8a8f96', '#5b3a29'],
 };
 const SHIRT = '#e9e6df';   // the shirt under the vest
 
@@ -66,8 +91,9 @@ export function xVariant(texName, L) {
 export function xSource(name) {
   const m = /^x([a-z]+)_(\d\d)_(\d\d)$/.exec(name); if (!m) return null;
   const [, kind, s, c] = m, si = +s, ci = +c;
-  if (kind === 'top') return { src: `top_${two(XTOP[si].base)}_00`, color: si === 9 ? SHIRT : XCOLORS['top' + si][ci], all: si === 11 };   // 11: the sleeve's gray trim goes too, under the puff
-  if (kind === 'vest') return { src: `top_${two(XTOP[si].base)}_00`, color: XCOLORS.top9[ci] };
+  if (kind === 'top') return { src: `top_${two(XTOP[si].base)}_00`, color: [9, 12, 16].includes(si) ? SHIRT : XCOLORS['top' + si][ci], all: si === 11 || si === 17 };   // 11: the sleeve's gray trim goes too, under the puff
+  if (kind === 'vest') return { src: `top_${two(XTOP[si].base)}_00`, color: XCOLORS['top' + si][ci] };   // a jacket or vest over the shirt
+  if (kind === 'acc') return { src: `top_${two(XTOP[si].base)}_00`, color: XCOLORS.accent[ci], all: true };   // accent panels
   if (kind === 'band') return { src: 'band_00_00', color: XCOLORS['top' + si][ci] };
   if (kind === 'glove') return { src: 'band_00_00', color: XCOLORS.gloves[ci] };
   if (kind === 'down') return { src: `down_${two(XDOWN[si].base)}_00`, color: XCOLORS['down' + si][ci] };
@@ -126,22 +152,126 @@ export function addClothes(L, parts) {
   const T = XTOP[L.top[0]], D = XDOWN[L.down[0]], S = XSHOES[L.shoes[0]];
   const top = parts.top && partMesh(parts.top), down = parts.down && partMesh(parts.down), shoes = parts.shoes && partMesh(parts.shoes);
   const W = waistOf(parts.top);   // the top's own width at its hem: the skirts and the coat's belt start there, flush
+  const A = L.accent && L.accent[0] >= 0 ? XCOLORS.accent[L.accent[1]] : null, acc = (c, k) => A || shade(c, k);   // the accent, or a darker shade
   if (T && top) {
-    const color = T.add === 'vest' ? XCOLORS.top9[L.top[1]] : XCOLORS['top' + L.top[0]][L.top[1]];
-    if (T.add === 'coat' && down) { Object.assign(COAT, { rx0: W.rx, rz0: W.rz, z: W.z }); tuckPants(down); coatTails(down, color); }
-    if (T.add === 'vest') vest(parts.top, L);
-    if (T.add === 'collar') collar(top, color);
-    if (T.add === 'puff') puffs(top, color);
+    const color = XCOLORS['top' + L.top[0]][L.top[1]], ts = two(L.top[0]), tc = two(L.top[1]);
+    if (T.add === 'coat' && down) { Object.assign(COAT, { rx0: W.rx, rz0: W.rz, z: W.z }); tuckPants(down); coatTails(down, color, acc(color, 0.6)); }
+    if (T.add === 'vest' || T.add === 'utility') vest(parts.top, `xvest_${ts}_${tc}`);
+    if (T.add === 'utility') chestPockets(parts.top, top, acc(color, 0.8));
+    if (T.add === 'collar') collar(top, color, acc(color, 0.62));
+    if (T.add === 'puff') puffs(top, color, acc(color, 0.85));
+    if (T.add === 'open') { shell(parts.top, f => !(f.z > 0 && Math.abs(f.x) < 0.026 && f.y > 0.46), `xvest_${ts}_${tc}`, 0.004); sleeveBands(parts.top, top, acc(color, 0.7)); }
+    if (T.add === 'biker') { collar(top, color, acc(color, 0.6), BIKER); cuffs(top, acc(color, 0.6)); }
+    if (T.add === 'wrap') wrap(parts.top, top, acc(color, 0.6));
+    if (T.add === 'panel') shell(parts.top, f => Math.abs(f.x) > 0.042, A ? `xacc_${ts}_${two(L.accent[1])}` : null, 0.0025, shade(color, 0.6));
+    if (T.add === 'fitted') { collar(top, acc(color, 0.8), acc(color, 0.6), SMALL); cuffs(top, acc(color, 0.8)); }
   }
   if (D && down) {
     const color = XCOLORS['down' + L.down[0]][L.down[1]];
-    if (D.add === 'cargo') pockets(down, color);
-    if (D.add === 'long') { longSkirt(parts.down, W); waistband(down, shade(color, 0.8), W); }
+    if (D.add === 'cargo') pockets(down, color, acc(color, 0.68));
+    if (D.add === 'long') { longSkirt(parts.down, W); waistband(down, acc(color, 0.8), W); }
+    if (D.add === 'jogger' && !S) { slimLegs(down, JOG); ankleCuffs(down, acc(color, 0.75)); }
+    if (D.add === 'slim' && !S) slimLegs(down, SLIM);
   }
-  if (S && down) boots(shoes, down, XCOLORS['shoes' + L.shoes[0]][L.shoes[1]]);
+  if (S && down) {
+    const color = XCOLORS['shoes' + L.shoes[0]][L.shoes[1]], h = { boots: BOOT, hightop: HIGH, ankle: ANKLE }[S.add];
+    boots(shoes, down, color, h, acc(color, 0.75));
+  }
   if (L.gloves && L.gloves[0] === 1 && top) fullGloves(top, XCOLORS.gloves[L.gloves[1]]);
 }
-
+// a layer over the top: its body's faces that keep(face middle {x, y, z}) says, a little bigger. In the pack texture recolored
+// (texName, made in avatar.js) or in a plain color.
+function bodyOf(topScene) {
+  let body = null;
+  topScene.traverse(o => { if (!o.isSkinnedMesh || !/^x?top_/.test(o.material.map?.name || '')) return; if (!body || o.geometry.index.count > body.geometry.index.count) body = o; });
+  return body;
+}
+function shell(topScene, keep, texName, out, color) {
+  const body = bodyOf(topScene); if (!body) return;
+  const g = body.geometry.clone(), P = g.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); const r = Math.hypot(v.x, v.z) || 1, k = (r + out) / r; P.setXYZ(i, v.x * k, v.y, v.z * k); }
+  const idx = g.index.array, kept = [];
+  for (let f = 0; f < idx.length; f += 3) { let x = 0, y = 0, z = 0; for (let q = 0; q < 3; q++) { x += P.getX(idx[f + q]); y += P.getY(idx[f + q]); z += P.getZ(idx[f + q]); }
+    if (keep({ x: x / 3, y: y / 3, z: z / 3 })) kept.push(idx[f], idx[f + 1], idx[f + 2]); }
+  g.setIndex(kept); g.computeVertexNormals();
+  if (!texName) return addPiece(body, g, color, { hem: false });
+  const mat = body.material.clone(); mat.side = THREE.DoubleSide;
+  const m = new THREE.SkinnedMesh(g, mat); m.frustumCulled = false; m.userData.xvest = texName;
+  body.parent.add(m); m.position.copy(body.position); m.quaternion.copy(body.quaternion); m.scale.copy(body.scale); m.bind(body.skeleton, body.bindMatrix); return m;
+}
+// a bone's position in the part's model space
+function bonePos(mesh, name) { const b = mesh.skeleton.bones.find(x => x.name === name); if (!b) return null; b.updateWorldMatrix(true, false);
+  return new THREE.Vector3().setFromMatrixPosition(b.matrixWorld).applyMatrix4(new THREE.Matrix4().copy(mesh.matrixWorld).invert()); }
+// a band round a limb: from a bone toward another, at fraction f0..f1 of the way, radius r
+function limbBand(host, from, to, f0, f1, r, color, bone) {
+  const a = bonePos(host, from), b = bonePos(host, to); if (!a || !b) return;
+  const axis = b.clone().sub(a), len = axis.length(); axis.normalize();
+  const up = Math.abs(axis.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0), s1 = new THREE.Vector3().crossVectors(axis, up).normalize(), s2 = new THREE.Vector3().crossVectors(s1, axis).normalize();
+  const geo = ringGeo(18, 1, (u, t) => { const an = u * 2 * Math.PI, c = a.clone().addScaledVector(axis, lerp(f0, f1, t) * len); return c.addScaledVector(s1, Math.cos(an) * r).addScaledVector(s2, Math.sin(an) * r).toArray(); }, () => [[boneIx(host, bone || from), 1]]);
+  addPiece(host, geo, color, { hem: false });
+}
+// how far out the top's sleeve reaches along the arm, and its size there
+function sleeveEnd(topScene) {
+  const body = bodyOf(topScene); if (!body) return null; const P = body.geometry.attributes.position, v = new THREE.Vector3(); let x = 0;
+  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (v.x > x && v.y > 0.55) x = v.x; }
+  return x;
+}
+function sleeveBands(topScene, top, color) {
+  const end = sleeveEnd(topScene); if (!end) return;
+  for (const L of ['L', 'R']) { const a = bonePos(top, `Bip01_${L}_UpperArm`), b = bonePos(top, `Bip01_${L}_Forearm`); if (!a || !b) continue;
+    const f = clamp((end - Math.abs(a.x)) / Math.abs(b.x - a.x), 0.2, 1); limbBand(top, `Bip01_${L}_UpperArm`, `Bip01_${L}_Forearm`, f - 0.16, f - 0.02, 0.0215, color); }
+}
+// cuffs at the wrists
+function cuffs(top, color) { for (const L of ['L', 'R']) limbBand(top, `Bip01_${L}_Forearm`, `Bip01_${L}_Hand`, 0.78, 0.98, 0.0165, color); }
+// the wrap top: an edge in the accent running from one shoulder down across the front to the other side of the waist,
+// laid on the body's surface (found by pointing a ray at it)
+function wrap(topScene, top, edge) {
+  const body = bodyOf(topScene); if (!body) return;
+  const probe = new THREE.Mesh(body.geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide })), ray = new THREE.Raycaster();
+  const sp = boneIx(top, 'Bip01_Spine2') >= 0 ? boneIx(top, 'Bip01_Spine2') : boneIx(top, 'Bip01_Spine');
+  const surf = (x, y) => { ray.set(new THREE.Vector3(x, y, 1), new THREE.Vector3(0, 0, -1)); const h = ray.intersectObject(probe)[0]; return h ? h.point.z : 0.04; };
+  const N = 16, P = [], U = [], J = [], Wt = [], I = [];
+  for (let i = 0; i <= N; i++) { const t = i / N, y = lerp(WRAP.y1, WRAP.y0, t), x = lerp(WRAP.x1, WRAP.x0, t);
+    for (const d of [-WRAP.w, WRAP.w]) { P.push(x + d, y, surf(x + d, y) + WRAP.out); U.push(d > 0 ? 1 : 0, t); J.push(sp, 0, 0, 0); Wt.push(1, 0, 0, 0); } }
+  for (let i = 0; i < N; i++) { const a = i * 2; I.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+  g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(J, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(Wt, 4)); g.setIndex(I); g.computeVertexNormals();
+  addPiece(top, g, edge, { hem: false });
+}
+const WRAP = { x1: 0.035, y1: 0.635, x0: -0.05, y0: 0.475, w: 0.0045, out: 0.003 };
+// two pockets with flaps on the chest
+function chestPockets(topScene, top, color) {
+  const body = bodyOf(topScene); if (!body) return; const sp = boneIx(top, 'Bip01_Spine2') >= 0 ? boneIx(top, 'Bip01_Spine2') : boneIx(top, 'Bip01_Spine');
+  const P = body.geometry.attributes.position, v = new THREE.Vector3();
+  for (const side of [1, -1]) {
+    const probe = new THREE.Mesh(body.geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide })), ray = new THREE.Raycaster(); ray.set(new THREE.Vector3(side * 0.046, 0.575, 1), new THREE.Vector3(0, 0, -1));
+    const z = ray.intersectObject(probe)[0]?.point.z ?? 0.04;   // the chest's front surface
+    const x0 = side * 0.046 - 0.014, x1 = side * 0.046 + 0.014, y0 = 0.545, y1 = 0.583, z0 = z + 0.005, z1 = z + 0.012;   // over the vest
+    for (const [c, k] of [[[x0, y0, z0, x1, y1, z1], 1], [[x0 - 0.002, y1 - 0.012, z0, x1 + 0.002, y1 + 0.002, z1 + 0.002], 0.8]]) {
+      const [a0, b0, c0, a1, b1, c1] = c, C = [[a0, b0, c0], [a1, b0, c0], [a1, b1, c0], [a0, b1, c0], [a0, b0, c1], [a1, b0, c1], [a1, b1, c1], [a0, b1, c1]];
+      const F = [[4, 5, 6, 7], [1, 2, 6, 5], [0, 4, 7, 3], [3, 7, 6, 2], [0, 1, 5, 4]], Pp = [], U = [], J = [], Wt = [], I = [];
+      F.forEach(f => { const bb = Pp.length / 3; f.forEach((ci, q) => { Pp.push(...C[ci]); U.push(q === 1 || q === 2 ? 1 : 0, 0.5); J.push(sp, 0, 0, 0); Wt.push(1, 0, 0, 0); }); I.push(bb, bb + 1, bb + 2, bb, bb + 2, bb + 3); });
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(Pp, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+      g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(J, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(Wt, 4)); g.setIndex(I); g.computeVertexNormals();
+      addPiece(top, g, shade(color, k), { hem: false });
+    }
+  }
+}
+// pants slimmed below the knee: the legs pulled in toward their middles, down to r at the ankle
+function slimLegs(down, h) {
+  const mids = {}; for (const side of [1, -1]) { const lo = legAt(down, 0.055, side), hi = legAt(down, h.y1 - 0.02, side); if (lo && hi) mids[side] = { lo, hi }; }
+  const P = down.geometry.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (v.y > h.y1) continue; const m = mids[Math.sign(v.x) || 1]; if (!m) continue;
+    const t = clamp((v.y - 0.035) / (h.y1 - 0.035), 0, 1), cx = lerp(m.lo.x, m.hi.x, t), cz = lerp(m.lo.z, m.hi.z, t), max = lerp(h.r0, m.hi.r, t ** 1.5);
+    const dx = v.x - cx, dz = v.z - cz, d = Math.hypot(dx, dz); if (d > max) P.setXYZ(i, cx + dx / d * max, v.y, cz + dz / d * max); }
+  P.needsUpdate = true; down.geometry.computeVertexNormals(); down.userData.mids = mids;
+}
+const JOG = { y1: 0.26, r0: 0.026 }, SLIM = { y1: 0.3, r0: 0.03 };
+function ankleCuffs(down, color) {
+  const mids = down.userData.mids || {};
+  for (const side of [1, -1]) { const m = mids[side], calf = boneIx(down, side > 0 ? 'Bip01_L_Calf' : 'Bip01_R_Calf'); if (!m) continue;
+    addPiece(down, ringGeo(18, 1, (u, t) => { const a = u * 2 * Math.PI, r = JOG.r0 + 0.003; return [m.lo.x + Math.sin(a) * r, lerp(0.07, 0.04, t), m.lo.z + Math.cos(a) * r]; }, () => [[calf, 1]]), color, { hem: false }); }
+}
 // the top's size at its bottom edge (an oval round the waist): x half-width, z half-depth and middle
 function waistOf(sc) {
   const out = { rx: 0.056, rz: 0.046, z: 0 }; if (!sc) return out;
@@ -163,7 +293,7 @@ function tuckPants(down) {
     Q.needsUpdate = true; } });
 }
 // coat tails: from the waist to the knees, open at the front, flaring out. They follow the thighs like the skirts.
-function coatTails(down, color) {
+function coatTails(down, color, beltColor) {
   const pel = boneIx(down, 'Bip01_Pelvis'), lt = boneIx(down, 'Bip01_L_Thigh'), rt = boneIx(down, 'Bip01_R_Thigh'), gap = COAT.gap;
   const th = u => gap + u * (2 * Math.PI - 2 * gap);
   const geo = ringGeo(48, 8, (u, t) => { const a = th(u), rx = lerp(COAT.rx0, COAT.rx1, t ** 0.8), rz = lerp(COAT.rz0, COAT.rz1, t ** 0.8);
@@ -173,42 +303,29 @@ function coatTails(down, color) {
   addPiece(down, geo, color);
   // a belt round the waist where the tails start
   const belt = ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * (COAT.rx0 + 0.0015), lerp(COAT.y0 + 0.006, COAT.y0 - 0.008, t), COAT.z + Math.cos(a) * (COAT.rz0 + 0.0015)]; }, () => [[pel, 1]]);
-  addPiece(down, belt, shade(color, 0.6), { hem: false });
+  addPiece(down, belt, beltColor, { hem: false });
 }
 const COAT = { gap: 0.3, y0: 0.472, y1: 0.22, rx0: 0.054, rx1: 0.09, rz0: 0.043, rz1: 0.07, z: -0.004, vent: 0.45 };
-// the vest: the shirt's body, a little bigger, minus a V down the front, in the vest color
-function vest(topScene, L) {
-  let body = null;   // the body piece: the mesh whose texture is the top's (top_..), the most faces
-  topScene.traverse(o => { if (!o.isSkinnedMesh || !/^x?top_/.test(o.material.map?.name || o.material.name || '') && !o.userData.topBody) return;
-    if (!body || o.geometry.index.count > body.geometry.index.count) body = o; });
-  if (!body) return;
-  const g = body.geometry.clone(), P = g.attributes.position, v = new THREE.Vector3();
-  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); const r = Math.hypot(v.x, v.z) || 1, k = (r + VEST.out) / r; P.setXYZ(i, v.x * k, v.y, v.z * k); }
-  const idx = g.index.array, keep = [];
-  for (let f = 0; f < idx.length; f += 3) {
-    let cx = 0, cy = 0, cz = 0; for (let q = 0; q < 3; q++) { cx += P.getX(idx[f + q]); cy += P.getY(idx[f + q]); cz += P.getZ(idx[f + q]); } cx /= 3; cy /= 3; cz /= 3;
-    const open = cz > 0 && Math.abs(cx) < VEST.v0 + (cy - VEST.yLow) * VEST.vk;   // the V opening at the front
-    const arm = Math.abs(cx) > VEST.arm;                                            // no sleeves
-    if (!open && !arm) keep.push(idx[f], idx[f + 1], idx[f + 2]);
-  }
-  g.setIndex(keep); g.computeVertexNormals();
-  const mat = body.material.clone(); mat.side = THREE.DoubleSide; mat.userData.xvest = `xvest_09_${two(L.top[1])}`;
-  const m = new THREE.SkinnedMesh(g, mat); m.frustumCulled = false; m.userData.xvest = mat.userData.xvest;
-  body.parent.add(m); m.position.copy(body.position); m.quaternion.copy(body.quaternion); m.scale.copy(body.scale); m.bind(body.skeleton, body.bindMatrix);
+// the vest: the shirt's body, a little bigger, minus a V down the front and the sleeves, in the vest color
+function vest(topScene, texName) {
+  shell(topScene, f => !(f.z > 0 && Math.abs(f.x) < VEST.v0 + (f.y - VEST.yLow) * VEST.vk) && Math.abs(f.x) <= VEST.arm, texName, VEST.out);
 }
 const VEST = { out: 0.004, v0: 0.004, yLow: 0.5, vk: 0.22, arm: 0.1 };
 // a tall collar standing up round the neck, open at the front
-function collar(top, color) {
-  const sp = boneIx(top, 'Bip01_Spine'), gap = COLLAR.gap;
-  const ring = (r0, r1, k) => ringGeo(32, 3, (u, t) => { const th = gap + u * (2 * Math.PI - 2 * gap), f = 1 + 0.5 * Math.sin(u * Math.PI) ** 4 * 0;
-      const rx = lerp(COLLAR.rx0, COLLAR.rx1, t) + r0, rz = lerp(COLLAR.rz0, COLLAR.rz1, t) + r0, y = lerp(COLLAR.y0, COLLAR.y1 - 0.012 * Math.cos(u * 2 * Math.PI) ** 2 * 0 , t) - (1 - Math.sin(u * Math.PI)) * COLLAR.dip * t;
-      return [Math.sin(th) * rx, y, COLLAR.z + Math.cos(th) * rz]; }, () => [[sp, 1]]);
-  addPiece(top, ring(0.0015, 0, 0), color, { hem: false });                // outside
-  addPiece(top, ring(-0.0015, 0, 0), shade(color, 0.62), { hem: false });  // the lining
+function collar(top, color, lining, C = COLLAR) {
+  const sp = boneIx(top, 'Bip01_Spine'), gap = C.gap;
+  const ring = r0 => ringGeo(32, 3, (u, t) => { const th = gap + u * (2 * Math.PI - 2 * gap);
+      const rx = lerp(C.rx0, C.rx1, t) + r0, rz = lerp(C.rz0, C.rz1, t) + r0, y = lerp(C.y0, C.y1, t) - (1 - Math.sin(u * Math.PI)) * C.dip * t;
+      return [Math.sin(th) * rx, y, C.z + Math.cos(th) * rz]; }, () => [[sp, 1]]);
+  addPiece(top, ring(0.0015), color, { hem: false });    // outside
+  addPiece(top, ring(-0.0015), lining, { hem: false });  // the lining
 }
 const COLLAR = { gap: 0.55, y0: 0.63, y1: 0.685, rx0: 0.05, rx1: 0.062, rz0: 0.042, rz1: 0.054, z: -0.004, dip: 0.022 };
+// the biker jacket's collar: lower and wider, folding out over the shoulders; the fitted top's: a small band
+const BIKER = { gap: 0.75, y0: 0.625, y1: 0.66, rx0: 0.052, rx1: 0.078, rz0: 0.044, rz1: 0.066, z: -0.004, dip: 0.03 };
+const SMALL = { gap: 0.4, y0: 0.632, y1: 0.652, rx0: 0.048, rx1: 0.05, rz0: 0.04, rz1: 0.042, z: -0.002, dip: 0.006 };
 // puffed sleeves: a long balloon from the shoulder seam to above the elbow, gathered into a cuff (Billy's mockup, Nov 21)
-function puffs(top, color) {
+function puffs(top, color, cuffColor) {
   const pos = n => { const b = top.skeleton.bones.find(x => x.name === n); b.updateWorldMatrix(true, false); return new THREE.Vector3().setFromMatrixPosition(b.matrixWorld).applyMatrix4(new THREE.Matrix4().copy(top.matrixWorld).invert()); };
   for (const side of [1, -1]) {
     const L = side > 0 ? 'L' : 'R', ua = boneIx(top, `Bip01_${L}_UpperArm`), sh = pos(`Bip01_${L}_UpperArm`), el = pos(`Bip01_${L}_Forearm`);
@@ -221,12 +338,12 @@ function puffs(top, color) {
     // the cuff
     const cuff = ringGeo(20, 1, (u, t) => { const a = u * 2 * Math.PI, d = (PUFF.end - 0.02 + t * PUFF.cuff) * len, r = PUFF.rEnd + 0.002, c = sh.clone().addScaledVector(axis, d);
       return c.addScaledVector(side1, Math.cos(a) * r).addScaledVector(side2, Math.sin(a) * r).toArray(); }, () => [[ua, 1]]);
-    addPiece(top, cuff, shade(color, 0.85), { hem: false });
+    addPiece(top, cuff, cuffColor, { hem: false });
   }
 }
 const PUFF = { back: 0.06, end: 0.8, r0: 0.03, rMax: 0.045, rEnd: 0.019, peakT: 0.5, lift: 0.004, cuff: 0.1 };
 // cargo pockets: a box on the outside of each thigh
-function pockets(down, color) {
+function pockets(down, color, flap) {
   const box = (C, th, col) => {
     const F = [[1, 2, 6, 5], [2, 3, 7, 6], [0, 1, 5, 4], [0, 3, 2, 1], [4, 5, 6, 7]], P = [], U = [], J = [], W = [], I = [];
     F.forEach(f => { const b = P.length / 3; f.forEach((ci, q) => { P.push(...C[ci]); U.push(q === 1 || q === 2 ? 1 : 0, q >= 2 ? 0.2 : 0.8); J.push(th, 0, 0, 0); W.push(1, 0, 0, 0); }); I.push(b, b + 1, b + 2, b, b + 2, b + 3); });
@@ -242,7 +359,7 @@ function pockets(down, color) {
     const cube = (o0, o1, w, y0, y1) => [at(o0, -w, y0), at(o1, -w, y0), at(o1, -w, y1), at(o0, -w, y1), at(o0, w, y0), at(o1, w, y0), at(o1, w, y1), at(o0, w, y1)];
     const y0 = POCKET.y - POCKET.h / 2, y1 = POCKET.y + POCKET.h / 2;
     box(cube(-0.004, POCKET.d, POCKET.w / 2, y0, y1), th, shade(color, 0.85));                          // the pocket
-    box(cube(-0.004, POCKET.d + 0.003, POCKET.w / 2 + 0.002, y1 - 0.016, y1 + 0.002), th, shade(color, 0.68));   // its flap
+    box(cube(-0.004, POCKET.d + 0.003, POCKET.w / 2 + 0.002, y1 - 0.016, y1 + 0.002), th, flap);   // its flap
   }
 }
 const POCKET = { y: 0.32, h: 0.06, w: 0.05, d: 0.01, turn: 0.55 };
@@ -271,19 +388,19 @@ function waistband(down, color, W) {
   addPiece(down, ringGeo(40, 1, (u, t) => { const a = u * 2 * Math.PI; return [Math.sin(a) * (W.rx + 0.0015), lerp(0.478, 0.466, t), W.z + Math.cos(a) * (W.rz + 0.0015)]; }, () => [[pel, 1]]), color, { hem: false });
 }
 // boot shafts: from the shoe up to below the knee, round each lower leg
-function boots(shoes, down, color) {
+function boots(shoes, down, color, B = BOOT, cuffColor = shade(color, 0.75)) {
   // the legs' middles, measured before the pants are tucked in
-  const mids = {}; for (const side of [1, -1]) { const lo = legAt(down, BOOT.y0 + 0.02, side), hi = legAt(down, BOOT.y1 - 0.02, side); if (lo && hi) mids[side] = { lo, hi }; }
-  const at = (m, y) => { const t = clamp((y - BOOT.y0) / (BOOT.y1 - BOOT.y0), 0, 1); return { x: lerp(m.lo.x, m.hi.x, t), z: lerp(m.lo.z, m.hi.z, t), r: lerp(BOOT.r0, BOOT.r1, t) }; };
+  const mids = {}; for (const side of [1, -1]) { const lo = legAt(down, B.y0 + 0.02, side), hi = legAt(down, B.y1 - 0.02, side); if (lo && hi) mids[side] = { lo, hi }; }
+  const at = (m, y) => { const t = clamp((y - B.y0) / (B.y1 - B.y0), 0, 1); return { x: lerp(m.lo.x, m.hi.x, t), z: lerp(m.lo.z, m.hi.z, t), r: lerp(B.r0, B.r1, t) }; };
   // slim the legs below the knee into a boot shape
   const P = down.geometry.attributes.position, v = new THREE.Vector3();
-  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (v.y > BOOT.y1 + 0.005) continue; const m = mids[Math.sign(v.x) || 1]; if (!m) continue;
+  for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); if (v.y > B.y1 + 0.005) continue; const m = mids[Math.sign(v.x) || 1]; if (!m) continue;
     const c = at(m, v.y), dx = v.x - c.x, dz = v.z - c.z, d = Math.hypot(dx, dz), max = c.r; if (d > max) P.setXYZ(i, c.x + dx / d * max, v.y, c.z + dz / d * max); }
   P.needsUpdate = true; down.geometry.computeVertexNormals();
   // the boot: the legs' own faces below the knee, in the boot color (the pants' texture recolored, so the shading matches)
   const g = down.geometry.clone(), idx = g.index.array, keep = [], G = g.attributes.position, N = g.attributes.normal;
-  for (let f = 0; f < idx.length; f += 3) { const cy = (G.getY(idx[f]) + G.getY(idx[f + 1]) + G.getY(idx[f + 2])) / 3; if (cy < BOOT.y1) keep.push(idx[f], idx[f + 1], idx[f + 2]); }
-  for (let i = 0; i < G.count; i++) G.setXYZ(i, G.getX(i) + N.getX(i) * 0.0012, G.getY(i), G.getZ(i) + N.getZ(i) * 0.0012);
+  for (let f = 0; f < idx.length; f += 3) { const cy = (G.getY(idx[f]) + G.getY(idx[f + 1]) + G.getY(idx[f + 2])) / 3; if (cy < B.y1) keep.push(idx[f], idx[f + 1], idx[f + 2]); }
+  for (let i = 0; i < G.count; i++) G.setXYZ(i, G.getX(i) + N.getX(i) * 0.0012, Math.min(G.getY(i), B.y1), G.getZ(i) + N.getZ(i) * 0.0012);   // faces reaching past the top stop there
   g.setIndex(keep);
   const img = down.material.map?.image, map = img ? new THREE.CanvasTexture(recolorAll(img, color)) : null;
   if (map) { map.colorSpace = THREE.SRGBColorSpace; map.magFilter = THREE.NearestFilter; map.flipY = down.material.map.flipY; map.wrapS = down.material.map.wrapS; map.wrapT = down.material.map.wrapT; }
@@ -291,8 +408,8 @@ function boots(shoes, down, color) {
   // a cuff at the top of each boot
   for (const side of [1, -1]) {
     const calf = boneIx(down, side > 0 ? 'Bip01_L_Calf' : 'Bip01_R_Calf'), m = mids[side]; if (!m || calf < 0) continue;
-    const cuff = ringGeo(18, 1, (u, t) => { const a = u * 2 * Math.PI, y = lerp(BOOT.y1 + 0.006, BOOT.y1 - BOOT.cuff, t), c = at(m, BOOT.y1), r = c.r + 0.004; return [c.x + Math.sin(a) * r, y, c.z + Math.cos(a) * r]; }, () => [[calf, 1]]);
-    addPiece(down, cuff, shade(color, 0.75), { hem: false });
+    const cuff = ringGeo(18, 1, (u, t) => { const a = u * 2 * Math.PI, y = lerp(B.y1 + 0.006, B.y1 - B.cuff, t), c = at(m, B.y1), r = c.r + 0.004; return [c.x + Math.sin(a) * r, y, c.z + Math.cos(a) * r]; }, () => [[calf, 1]]);
+    addPiece(down, cuff, cuffColor, { hem: false });
   }
 }
 // the whole texture in one color, keeping its light and shade
@@ -306,6 +423,7 @@ function recolorAll(img, color) {
   g.putImageData(d, 0, 0); return c;
 }
 const BOOT = { y0: 0.035, y1: 0.245, r0: 0.026, r1: 0.032, cuff: 0.02 };
+const HIGH = { y0: 0.035, y1: 0.095, r0: 0.027, r1: 0.029, cuff: 0.014 }, ANKLE = { y0: 0.035, y1: 0.14, r0: 0.026, r1: 0.029, cuff: 0.01 };   // high-tops, ankle boots
 // full gloves: the hands' fingers covered too (fingerless gloves are the band piece in the glove color)
 function fullGloves(top, color) {
   top.parent.traverse(o => {

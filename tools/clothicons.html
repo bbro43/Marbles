@@ -17,18 +17,24 @@ const SPECS = [
   ['part_top8', { top: [8, 0] }, 1, 'top'], ['part_top9', { top: [9, 0] }, 1, 'top'], ['part_top10', { top: [10, 0] }, 1, 'top'], ['part_top11', { top: [11, 0] }, 1, 'top'],
   ['part_bottom10', { down: [10, 0] }, 2, 'down'], ['part_bottom11', { down: [11, 0] }, 2, 'down'], ['part_shoes4', { shoes: [4, 0] }, 3, 'shoes'],
   ['part_gloves1', { gloves: [0, 0] }, 1, 'glove'], ['part_gloves2', { gloves: [1, 0] }, 1, 'glove'],
+  ['part_top12', { top: [12, 0] }, 1, 'top'], ['part_top13', { top: [13, 0] }, 1, 'top'], ['part_top14', { top: [14, 0], accent: [0, 2] }, 1, 'top'], ['part_top15', { top: [15, 0] }, 1, 'top'],
+  ['part_top16', { top: [16, 0] }, 1, 'top'], ['part_top17', { top: [17, 0] }, 1, 'top'], ['part_bottom12', { down: [12, 0] }, 2, 'down'], ['part_bottom13', { down: [13, 0] }, 2, 'down'],
+  ['part_shoes5', { shoes: [5, 0] }, 3, 'shoes'], ['part_shoes6', { shoes: [6, 0] }, 3, 'shoes'],
 ];
 const out = {};
 for (const [key, change, part, frame] of SPECS) {
   const look = JSON.parse(JSON.stringify({ ...DEFAULT_LOOK, ...change }));
   const av = await buildAvatar(look, url), grp = av.children[0];
-  grp.children.forEach((sc, i) => sc.visible = i === part || (frame === 'top' && i === 2 && look.top[0] === 8));   // the coat's tails are on the pants
-  const want = [];
+  const bootBits = [];
+  grp.children.forEach((sc, i) => sc.visible = i === part || (frame === 'top' && i === 2 && look.top[0] === 8) || (frame === 'shoes' && i === 2));   // the coat's tails and the boots are on the pants
+  if (frame === 'shoes') grp.children[2].traverse(o => { if (!o.isMesh) return; if (!(o.userData.keepMap || !(o.material.map?.name))) { o.visible = false; return; }
+    o.material = new THREE.MeshLambertMaterial({ color: CYAN, side: THREE.DoubleSide }); bootBits.push(o); });
+  const want = [...bootBits];
   grp.children[part].traverse(o => { if (!o.isMesh) return; o.frustumCulled = false;
     const nm = o.material.map?.name || '', added = !nm || o.userData.xvest || o.userData.glove;
     let col = CYAN;
     if (frame === 'glove') { if (!(/^xglove|^band/.test(nm) || o.userData.glove)) { o.visible = false; return; } }
-    else if (look.top[0] === 9 && part === 1 && !o.userData.xvest && /^xtop/.test(nm)) col = PALE;   // the shirt under the vest
+    else if ([9, 12, 16].includes(look.top[0]) && part === 1 && !o.userData.xvest && /^xtop/.test(nm)) col = PALE;   // the shirt under the vest
     else if (/^skin|^gauntlet/.test(nm) || /gauntlet/.test(nm)) { o.visible = false; return; }
     o.material = new THREE.MeshLambertMaterial({ color: col, side: THREE.DoubleSide, skinning: true }); want.push(o); });
   if (look.top[0] === 8 && part === 1) grp.children[2].traverse(o => { if (!o.isMesh) return; const nm = o.material.map?.name || '';

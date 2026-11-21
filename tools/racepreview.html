@@ -23,6 +23,9 @@ SETS.tops = [...Array(+(Q.get('n') || 8))].map((_, i) => ['top ' + i, { race: 'h
 SETS.clothes = [['Long coat', { hair: [2, 1], top: [8, 0], down: [0, 2], shoes: [0, 0] }], ['Vest', { hair: [4, 0], top: [9, 0], down: [10, 1], shoes: [4, 0] }],
   ['High collar', { hair: [9, 3], top: [10, 3], down: [0, 0], shoes: [4, 1], gloves: [1, 0] }], ['Puffed sleeves', { hair: [12, 2], top: [11, 1], down: [11, 1], shoes: [0, 0] }],
   ['Cargo pants', { hair: [6, 5], top: [2, 3], down: [10, 0], shoes: [4, 2], gloves: [0, 1] }], ['Long skirt', { hair: [14, 13], top: [11, 2], down: [11, 2], shoes: [1, 0] }]];
+SETS.clothes2 = [['Open jacket', { hair: [2, 6], top: [12, 1], down: [13, 0], shoes: [5, 1], accent: [0, 3] }], ['Biker jacket', { hair: [9, 2], top: [13, 3], down: [12, 1], shoes: [6, 0] }],
+  ['Wrap top', { hair: [12, 15], top: [14, 4], down: [13, 2], shoes: [5, 0], accent: [0, 2] }], ['Panel jacket', { hair: [6, 0], top: [15, 0], down: [12, 3], shoes: [5, 4], accent: [0, 9] }],
+  ['Utility vest', { hair: [14, 1], top: [16, 1], down: [10, 2], shoes: [6, 2] }], ['Fitted top + skirt', { hair: [11, 20], top: [17, 4], down: [11, 4], shoes: [0, 0], accent: [0, 0] }]];
 SETS.hair = [...Array(16)].map((_, i) => ['hair ' + i, { race: 'gundalian', hair: [i, 1] }]);
 SETS.nea = [['blue m', { race: 'neathian', sex: 'm', hair: [5, 9] }], ['blue f', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 0] }], ['tint f', { race: 'neathian', sex: 'f', hair: [11, 3], eye: [1, 4], neye: 'tint' }], ['tint m', { race: 'neathian', sex: 'm', hair: [2, 2], eye: [0, 6], neye: 'tint' }]];
 const looks = SETS[Q.get('set')] || [['Human', { race: 'human' }], ['Vestal', { race: 'vestal', hair: [12, 8] }], ['Gundalian', { race: 'gundalian', hair: [3, 1] }], ['Neathian (m)', { race: 'neathian', sex: 'm', hair: [5, 9] }], ['Neathian (f)', { race: 'neathian', sex: 'f', hair: [10, 7], eye: [1, 0], eyeblow: [6, 7] }]];

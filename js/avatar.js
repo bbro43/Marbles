@@ -13,10 +13,11 @@ export const PARTS = {
   eye:     { styles: 6, colors: 12, label: 'Eyes' },   // 6-11: same colors with a tinted pupil instead of black, for Vestals (scripts/vestaleyes.py)
   eyeblow: { styles: 8, colors: 22, label: 'Eyebrows' },   // 6-7 are softer (scripts/softbrows.py)
   facial:  { styles: 6, colors: 5, label: 'Face' },
-  top:     { styles: 12, colors: 6, label: 'Top' },     // 8-11 are our own (js/clothes.js)
-  down:    { styles: 12, colors: 6, label: 'Pants' },   // 8-9 are skirts (scripts/girlskirt.mjs)
-  shoes:   { styles: 5, colors: 6, label: 'Shoes' },
-  gloves:  { styles: 2, colors: 6, label: 'Gloves', optional: true },   // our own (js/clothes.js); none = they follow the top
+  top:     { styles: 18, colors: 6, label: 'Top' },     // 8-11 are our own (js/clothes.js)
+  down:    { styles: 14, colors: 6, label: 'Pants' },   // 8-9 are skirts (scripts/girlskirt.mjs)
+  shoes:   { styles: 7, colors: 6, label: 'Shoes' },
+  gloves:  { styles: 2, colors: 6, label: 'Gloves', optional: true },
+  accent:  { styles: 1, colors: 10, label: 'Accent', optional: true },   // trim color for the new clothes (js/clothes.js); none = a darker shade   // our own (js/clothes.js); none = they follow the top
 };
 export const SKIN_TONES = 5;
 // more hair colors (Billy, Nov 21): colors 12+ are made here by tinting the blond texture (color 02), so the pack needs nothing new.
@@ -243,7 +244,7 @@ function hazeEye(img) {
 // the gauntlet's color is an attribute: textures gauntlet_<attribute> (made in scripts/menuart.py)
 export const BAND = { pyrus: 0, aquos: 1, subterra: 2, haos: 3, darkus: 4, ventus: 5 };
 // a starting look (Liam-like: brown hair, black top, blue jeans)
-export const DEFAULT_LOOK = { hair: [0, 0], cap: [-1, 0], glasses: [-1, 0], gloves: [-1, 0], eye: [0, 0], eyeblow: [0, 0], facial: [0, 0],
+export const DEFAULT_LOOK = { hair: [0, 0], cap: [-1, 0], glasses: [-1, 0], gloves: [-1, 0], accent: [-1, 0], eye: [0, 0], eyeblow: [0, 0], facial: [0, 0],
   top: [1, 1], down: [0, 2], shoes: [0, 1], skin: 0, band: 'pyrus' };
 const two = n => String(n).padStart(2, '0');
 export function randomLook() {
