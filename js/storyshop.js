@@ -29,13 +29,17 @@ export const trapAttrCap = league => ({ 4: 1, 3: 2, 2: 3, 1: 6 })[league] || 1; 
 const MULT = { 4: 1, 3: 1.4, 2: 1.9, 1: 2.6 };   // stronger tiers cost more on top of the base price
 const round50 = n => Math.round(n / 50) * 50;
 const GATE_BASE = { gold: 250, silver: 200, copper: 150 };
-export const priceToy = t => round50(toyPrice(t) * MULT[tierOfToy(t)]);
+// the pack 0.51 Bakugan have set prices (Billy, Nov 22): used as they are (sales still apply)
+export const TT_PRICE = { tt_00: 2900, tt_01: 2600, tt_02: 2100, tt_03: 2450, tt_04: 2100, tt_05: 2450, tt_06: 2000, tt_07: 2400, tt_08: 2100, tt_09: 2500,
+  tt_10: 1700, tt_11: 1500, tt_12: 2400, tt_13: 2100, tt_14: 2100, tt_15: 2100, tt_16: 1600, tt_17: 1800, tt_18: 1550, tt_19: 2000, tt_20: 1100, tt_21: 1300,
+  tt_22: 2400, tt_23: 2400, tt_24: 2400 };
+export const priceToy = t => TT_PRICE[t.id] ?? round50(toyPrice(t) * MULT[tierOfToy(t)]);
 export const priceGate = c => round50((GATE_BASE[c.color] || 200) * MULT[tierOfGate(c)] * 1.5);
 export const priceAbility = c => round50(400 * MULT[tierOfAbility(c)]);
 export const priceTrap = n => trapPrice(n);
 
 export function stock(cat) {
-  const toys = cat.toys.filter(t => t.baseG && (t.psShop || SYNTHETIC.has(t.name)) && !NOT_SOLD.has(t.name))
+  const toys = cat.toys.filter(isSoldToy)
     .map(t => ({ t, tier: tierOfToy(t), price: priceToy(t) })).sort((a, b) => a.t.baseG - b.t.baseG);
   const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus).map(c => ({ c, tier: tierOfGate(c), price: priceGate(c) }));
   const abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c)).map(c => ({ c, tier: tierOfAbility(c), price: priceAbility(c) }));
@@ -70,4 +74,4 @@ export const discountOn = (season, day, item) => salesOnDay(season, day).reduce(
 export const saleText = x => x.mid ? `MID-SEASON SALE: ${x.pct}% off everything` : `${x.pct}% off ${x.label}`;
 export const tierOf = (kind, x) => kind === 'bakugan' ? tierOfToy(x) : x.type === 'gate' ? tierOfGate(x) : tierOfAbility(x);
 export const priceOf = (kind, x) => kind === 'bakugan' ? priceToy(x) : x.type === 'gate' ? priceGate(x) : priceAbility(x);
-export const isSoldToy = t => t.baseG && (t.psShop || SYNTHETIC.has(t.name)) && !NOT_SOLD.has(t.name);
+export const isSoldToy = t => t.baseG && (t.psShop || SYNTHETIC.has(t.name) || TT_PRICE[t.id] !== undefined) && !NOT_SOLD.has(t.name);

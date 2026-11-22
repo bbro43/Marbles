@@ -40,14 +40,15 @@ export function storyDeckIds(y) {
   const d = y.deck; if (!d) return null;
   const id = x => x && (x.id || x), tr = d.trap && (y.coll.traps || []).find(t => t.id === d.trap.id && (t.attrs || []).join() === (d.trap.attrs || []).join());
   return { toys: d.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_C.map(c => [c, id(d.gates[c])])),
-    abilities: Object.fromEntries(AB_C.map(c => [c, id(d.abilities[c])])), extra: Object.fromEntries(AB_C.map(c => [c, ((d.extra || {})[c] || []).map(id)])), trap: tr ? tr.uid : null };
+    abilities: Object.fromEntries(AB_C.map(c => [c, id(d.abilities[c])])), extra: Object.fromEntries(AB_C.map(c => [c, ((d.extra || {})[c] || []).map(id)])), trap: tr ? tr.uid : null,
+    gear: d.gear || null, nano: d.nano || null };   // Battle Gear and BakuNano: their uids
 }
 // a profile as everything outside Story sees it: with a Story save, its name, look, deck, BP and collection come from there
 export function view(p, slot) {
   const st = loadStory(slot); if (!p || !st || !st.you || !st.season || !st.you.coll) return p;
   const y = st.you, w = st.season.B.you, dk = storyDeckIds(y);
   return { ...p, name: y.name || p.name, look: y.look || p.look, deck: dk, deckNV: dk, bp: w.wallet, story: true,
-    owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {}, ...JSON.parse(JSON.stringify(y.coll.toys[k] || {})) }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
+    owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {}, ...JSON.parse(JSON.stringify(y.coll.toys[k] || {})) }])), cards: [...y.coll.cards], traps: [...y.coll.traps], gear: [...(y.coll.gear || [])], nano: [...(y.coll.nano || [])] } };
 }
 // titles by number of wins (the DS's ranks)
 export const TITLES = [[0, 'Rookie'], [5, 'Beginner'], [15, 'Intermediate'], [30, 'Advanced'], [50, 'Bakugan Pro'], [80, 'Bakugan Master'], [120, 'Bakugan Emperor'], [200, 'Ultimate Brawler']];
@@ -91,6 +92,8 @@ export const key = (id, attr) => `${id}:${attr}`;
 export function ensureShop(p) {
   if (p.bp === undefined) p.bp = START_BP;
   if (p.owned && !p.owned.traps) p.owned.traps = [];
+  if (p.owned && !p.owned.gear) p.owned.gear = [];   // Battle Gear and BakuNano (js/gear.js): { uid, id, color }
+  if (p.owned && !p.owned.nano) p.owned.nano = [];
   // the Maxus Helios pieces (build 58) and Wired (build 60) became Bakugan: Traps bought as those are refunded
   const GONE = ['dc_spt_fencer', 'dc_spt_foxbat', 'dc_spt_leefram', 'dc_spt_scraper', 'dc_spt_spindle', 'dc_spt_klawgor', 'dc_spt11'];
   if (p.owned && p.owned.traps.some(t => GONE.includes(t.id))) {

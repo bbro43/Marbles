@@ -1,4 +1,5 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
+import { GEAR_COLORS, gearDefs, nanoDefs, boostOf, priceOf as priceOfGear } from './gear.js';
 import * as THREE from 'three';
 import { Pack } from './pack.js';
 import { swatches, XCOLORS } from './clothes.js';
@@ -123,21 +124,22 @@ const SD = () => STORY || P.hasStory();   // use the Story save
 const sLeague = s => Math.min(4, s.season.leagues.findIndex(l => l.includes('you')) + 1);
 function storyProf() {
   const s = sLoad(), y = s.you, w = s.season.B.you;
-  return { name: y.name || 'You', look: y.look || DEFAULT_LOOK, deck: sDeckIds(y), deckNV: sDeckIds(y), bp: w.wallet, owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {}, ...JSON.parse(JSON.stringify(y.coll.toys[k] || {})) }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
+  return { name: y.name || 'You', look: y.look || DEFAULT_LOOK, deck: sDeckIds(y), deckNV: sDeckIds(y), bp: w.wallet, owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {}, ...JSON.parse(JSON.stringify(y.coll.toys[k] || {})) }])), cards: [...y.coll.cards], traps: [...y.coll.traps], gear: [...(y.coll.gear || [])], nano: [...(y.coll.nano || [])] } };
 }
 // story decks store { id, name } objects; My Room's deck screen uses plain ids (and a Trap's uid)
 function sDeckIds(y) {
   const d = y.deck; if (!d) return null;
   const id = x => x && (x.id || x), tr = d.trap && (y.coll.traps || []).find(t => t.id === d.trap.id && (t.attrs || []).join() === (d.trap.attrs || []).join());
   return { toys: d.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_COLORS.map(c => [c, id(d.gates[c])])),
-    abilities: Object.fromEntries(AB_COLORS.map(c => [c, id(d.abilities[c])])), extra: Object.fromEntries(AB_COLORS.map(c => [c, ((d.extra || {})[c] || []).map(id)])), trap: tr ? tr.uid : null };
+    abilities: Object.fromEntries(AB_COLORS.map(c => [c, id(d.abilities[c])])), extra: Object.fromEntries(AB_COLORS.map(c => [c, ((d.extra || {})[c] || []).map(id)])), trap: tr ? tr.uid : null,
+    gear: d.gear || null, nano: d.nano || null };
 }
 function sDeckFromIds(d, s) {
   const card = i => { const c = pack.catalog.cards.find(x => x.id === i); return c ? { id: c.id, name: c.name } : null; };
   const tr = d.trap && s.you.coll.traps.find(t => t.uid === d.trap);
   return { toys: d.toys.map(x => ({ id: x.id, attr: x.attr, name: (pack.catalog.toys.find(t => t.id === x.id) || {}).name })),
     gates: Object.fromEntries(GATE_COLORS.map(c => [c, card(d.gates[c])])), abilities: Object.fromEntries(AB_COLORS.map(c => [c, card(d.abilities[c])])),
-    extra: Object.fromEntries(AB_COLORS.map(c => [c, ((d.extra || {})[c] || []).map(card).filter(Boolean)])), trap: tr ? { id: tr.id, name: tr.name, attrs: tr.attrs } : null };
+    extra: Object.fromEntries(AB_COLORS.map(c => [c, ((d.extra || {})[c] || []).map(card).filter(Boolean)])), trap: tr ? { id: tr.id, name: tr.name, attrs: tr.attrs } : null, gear: d.gear || null, nano: d.nano || null };
 }
 // apply a purchase: to the active profile, or (story mode) to the story save
 function upd(fn) {
@@ -151,6 +153,8 @@ function upd(fn) {
     const tr = { uid: t.uid, id: t.id, name: T.name || t.id, attrs: t.attrs, color: t.color };
     s.you.coll.traps.push(tr); if (!s.you.deck.trap) s.you.deck.trap = { id: tr.id, name: tr.name, attrs: tr.attrs };
   }
+  for (const k of ['gear', 'nano']) { s.you.coll[k] = s.you.coll[k] || [];   // Battle Gear and BakuNano bought: into the collection (and the deck, if it has none)
+    for (const t of q.owned[k] || []) if (!s.you.coll[k].some(x => x.uid === t.uid)) { s.you.coll[k].push(t); if (!s.you.deck[k]) s.you.deck[k] = t.uid; } }
   sSave(s);
 }
 // story prices: tier price, less today's sale; null = locked for your league
@@ -159,7 +163,7 @@ function sPrice(kind, x, item) {
   return { price: Math.round(base * (100 - off) / 100), full: base, off, lock: tierOf(kind, x) < sLeague(s) ? tierOf(kind, x) : 0 };
 }
 const CLERK = { name: 'Alice', look: { hair: [12, 7], cap: [-1, 0], glasses: [-1, 0], eye: [6, 3], eyeblow: [6, 7], facial: [0, 0], top: [3, 4], down: [8, 1], shoes: [1, 2], skin: 1, band: 'aquos' } };
-function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade, trapShop, storyBoost })[s](...a); }
+function go(s, ...a) { if (s !== 'shop') { inShop = false; if (shop3d) shop3d.visible = false; holder.visible = true; } screen = s; $('topUI').innerHTML = ''; $('bot').innerHTML = ''; ({ room, closet, deck, save, info, tips, ranking, stats, starter, shop, shopList, upgrade, trapShop, gearShop, storyBoost })[s](...a); }
 
 // My Room: the DS carousel
 const ROOM = [['info', 'INFO', 'You can check your statistics on the computer.'], ['save', 'SAVE', 'Switch players or start a new one (up to 6).'],
@@ -333,14 +337,15 @@ function deck() {
     `<div class="pill tap" id="dEdit" style="left:40px;top:48px;width:176px">Edit deck</div>` +
     `<div class="pill tap" id="dAuto" style="left:40px;top:74px;width:176px">Auto-Create</div>` +
     `<div class="pill tap" id="dReset" style="left:40px;top:100px;width:176px">Reset</div>` +
-    (nv ? `<div class="pill tap" id="dTrap" style="left:40px;top:126px;width:176px">Trap: ${esc(trapLabel(p))}</div>` : '');
-  bar(nv ? 'New Vestroia rules: up to 3 Ability cards of each color, plus your Trap.' : d ? 'Classic rules: 1 Ability card of each color.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
+    (nv ? `<div class="pill tap" id="dTrap" style="left:40px;top:126px;width:176px">Trap: ${esc(trapLabel(p))}</div>` +
+      `<div class="pill tap" id="dGear" style="left:6px;top:150px;width:120px;font-size:8px">Gear: ${esc(gearLabel(p, 'gear'))}</div><div class="pill tap" id="dNano" style="left:130px;top:150px;width:120px;font-size:8px">Nano: ${esc(gearLabel(p, 'nano'))}</div>` : '');
+  bar(nv ? 'New Vestroia rules: up to 3 Ability cards of each color, plus your Trap, Battle Gear and BakuNano.' : d ? 'Classic rules: 1 Ability card of each color.' : 'You have no deck yet — tap Edit deck or Auto-Create.');
   $('bot').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { deckMode = b.dataset.mode; go('deck'); });
   const edit = async (start) => {
     $('ds').style.visibility = 'hidden';
     const r = await setupTeams(cat, pack, [{ id: 'you', name: p.name }, null], start || d || { name: p.name }, p.owned, nv);
     $('ds').style.visibility = '';
-    if (r.deck) upd(q => { q[deckKey()] = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, extra: nv ? r.deck.extra || {} : {}, trap: nv ? (deckOf(q) || {}).trap || null : null }; });
+    if (r.deck) upd(q => { q[deckKey()] = { toys: r.deck.toys, gates: r.deck.gates, abilities: r.deck.abilities, extra: nv ? r.deck.extra || {} : {}, trap: nv ? (deckOf(q) || {}).trap || null : null, gear: nv ? (deckOf(q) || {}).gear || null : null, nano: nv ? (deckOf(q) || {}).nano || null : null }; });
     go('deck');
   };
   $('dEdit').onclick = () => edit();
@@ -351,10 +356,21 @@ function deck() {
     const ids = [null, ...list.map(t => t.uid)], cur = ids.indexOf((d || {}).trap || null);
     upd(q => { const dd = deckOf(q); if (dd) { dd.trap = ids[(cur + 1) % ids.length]; q.deckNV = dd; } }); go('deck');
   };
+  for (const [btn, k, what] of [['dGear', 'gear', 'Battle Gear'], ['dNano', 'nano', 'BakuNano']]) if ($(btn)) $(btn).onclick = () => {   // tap to cycle through the ones you own
+    const list = p.owned[k] || [];
+    if (!list.length) { bar(`You have no ${what} yet. Buy one in the Shop.`); return; }
+    const ids = [null, ...list.map(t => t.uid)], cur = ids.indexOf((d || {})[k] || null);
+    upd(q => { const dd = deckOf(q); if (dd) { dd[k] = ids[(cur + 1) % ids.length]; q.deckNV = dd; } }); go('deck');
+  };
   $('dReset').onclick = () => { upd(q => { q[deckKey()] = null; }); go('deck'); };
   backBtn(() => go('room'));
 }
 
+// the Battle Gear or BakuNano in your deck (k = 'gear' or 'nano')
+function gearLabel(p, k) {
+  const t = (p.owned[k] || []).find(x => x.uid === ((p.deckNV || p.deck) || {})[k]); if (!t) return 'none';
+  const d = (k === 'gear' ? gearDefs(pack.catalog) : nanoDefs(pack.catalog)).find(x => x.id === t.id); return `${d ? d.name : '?'} (${cap(t.color)} +${boostOf(d, t.color)})`;
+}
 function trapLabel(p) {
   const t = (p.owned.traps || []).find(x => x.uid === ((p.deckNV || p.deck) || {}).trap); if (!t) return 'none';
   const d = (pack.catalog.traps || []).find(x => x.id === t.id); return `${d ? d.name : 'Trap'} · ${t.attrs.map(a => cap(a).slice(0, 3)).join('/')}`;
@@ -541,21 +557,21 @@ function shopTop(on) {
 }
 function shopCam() { camera.position.set(-2.75, 0.8, 1.55); camera.lookAt(-0.35, 0.5, -0.05); }
 const SHOP = [['bakugan', 'BAKUGAN', 'Hi there! Pick a Bakugan to buy.'], ['card', 'CARD', 'You can use your BP to buy a new card.'], ['upgrade', 'UPGRADE', 'You can use your BP to upgrade your Bakugan.'],
-  ['trap', 'TRAP', 'Traps! Pick its color and its attributes. More attributes cost more.']];
+  ['trap', 'TRAP', 'Traps! Pick its color and its attributes. More attributes cost more.'], ['gear', 'GEAR', 'Battle Gear and BakuNano! Pick one and its color.']];
 async function shop() {
   const p = prof(); await loadShop(); shopTop(true);
   const sale = SD() ? salesOnDay(sLoad().season, sLoad().day).map(saleText).join(' · ') : '';
   $('topUI').innerHTML = `<div class="bubble"><b>${SD() ? CLERK.name : 'Alice'}</b>${SD() && shopSel === 0 && sLeague(sLoad()) > 1 ? 'Welcome! Stronger stock unlocks as you move up the leagues.' : SHOP[shopSel][2]}${sale ? `<br><span style="color:#c0262e;font-weight:900">${sale}</span>` : ''}</div>`;
   const n = SHOP.length, L = (shopSel + n - 1) % n, R = (shopSel + 1) % n;
   $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 22) +
-    `<img src="${art('shop_' + (SHOP[L][0] === 'trap' ? 'bakugan' : SHOP[L][0]))}" class="tap" id="sL" style="left:2px;top:66px" alt="">` +
-    `<img src="${art('shop_' + (SHOP[shopSel][0] === 'trap' ? 'bakugan' : SHOP[shopSel][0]) + '_on')}" class="tap" id="sC" style="left:88px;top:54px;${SHOP[shopSel][0] === 'trap' ? 'filter:hue-rotate(180deg) saturate(.4)' : ''}" alt="">` +
-    `<img src="${art('shop_' + (SHOP[R][0] === 'trap' ? 'bakugan' : SHOP[R][0]))}" class="tap" id="sR" style="left:198px;top:66px" alt="">` +
+    `<img src="${art('shop_' + (/^(trap|gear)$/.test(SHOP[L][0]) ? 'bakugan' : SHOP[L][0]))}" class="tap" id="sL" style="left:2px;top:66px" alt="">` +
+    `<img src="${art('shop_' + (/^(trap|gear)$/.test(SHOP[shopSel][0]) ? 'bakugan' : SHOP[shopSel][0]) + '_on')}" class="tap" id="sC" style="left:88px;top:54px;${SHOP[shopSel][0] === 'trap' ? 'filter:hue-rotate(180deg) saturate(.4)' : SHOP[shopSel][0] === 'gear' ? 'filter:hue-rotate(300deg) saturate(1.3)' : ''}" alt="">` +
+    `<img src="${art('shop_' + (/^(trap|gear)$/.test(SHOP[R][0]) ? 'bakugan' : SHOP[R][0]))}" class="tap" id="sR" style="left:198px;top:66px" alt="">` +
     `<div style="position:absolute;left:0;right:0;top:140px;height:14px;background:linear-gradient(#2f7fe8,#1146a8);border-top:1px solid #9fd0ff;border-bottom:1px solid #0a2a66;text-align:center;font:900 10px/14px system-ui;letter-spacing:1px;text-shadow:0 1px 0 #000">${SHOP[shopSel][1]}</div>`;
   bar('Select the type of item you want to buy.');
   $('sL').onclick = () => { shopSel = L; shop(); };
   $('sR').onclick = () => { shopSel = R; shop(); };
-  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; k === 'upgrade' ? go('upgrade') : go(k === 'trap' ? 'trapShop' : 'shopList', k); };
+  $('sC').onclick = () => { listTab = 0; listTop = 0; const k = SHOP[shopSel][0]; k === 'upgrade' ? go('upgrade') : go(k === 'trap' ? 'trapShop' : k === 'gear' ? 'gearShop' : 'shopList', k); };
   backBtn(() => { if (STORY) { location.href = 'story.html'; return; } shopTop(false); go('room'); });
 }
 const bpBar = (bp, x, y) => `<div style="position:absolute;left:${x}px;top:${y}px;width:96px;height:14px;border-radius:7px;background:linear-gradient(90deg,#0a3b7a,#06204a);border:2px solid #39b8ff;
@@ -739,6 +755,42 @@ function storyBoost() {
   backBtn(() => go('shop'));
 }
 
+// ---------- Battle Gear and BakuNano (pack 0.51, js/gear.js): pick one, then its color (copper, silver, gold), each with its own
+// boost and price. Story: the same sales as Traps, and stronger colors unlock as you move up (silver League 3, gold League 2).
+let gearPick = { i: 0, color: 'copper' };
+const GEAR_LEAGUE = { copper: 4, silver: 3, gold: 2 };
+function gearShop() {
+  const pill = (txt, x, y, w, id, on) => `<div class="pill tap ${on ? 'sel' : ''}" ${id} style="left:${x}px;top:${y}px;width:${w}px;height:16px;line-height:14px;font-size:9px">${txt}</div>`;
+  const p = prof(), items = [...gearDefs(pack.catalog).map(d => ({ d, k: 'gear', what: 'Battle Gear' })), ...nanoDefs(pack.catalog).map(d => ({ d, k: 'nano', what: 'BakuNano' }))];
+  if (!items.length) { bar('No Battle Gear or BakuNano in this asset pack yet.'); backBtn(() => go('shop')); return; }
+  const it = items[gearPick.i % items.length], D = it.d, color = gearPick.color;
+  const lg = SD() ? sLeague(sLoad()) : 1, locked = lg > GEAR_LEAGUE[color];
+  const off = SD() ? discountOn(sLoad().season, sLoad().day, { kind: 'trap' }) : 0, price = Math.round(priceOfGear(D, color) * (100 - off) / 100), mine = p.owned[it.k] || [];
+  $('topUI').innerHTML = `<div class="box" style="left:6px;top:30px;width:244px;height:150px"></div>` +
+    (D.thumbs && D.thumbs[color] ? `<img data-src="${D.thumbs[color]}" style="left:88px;top:40px;width:80px;height:80px" alt="">` : '') +
+    `<div class="txt" style="left:0;right:0;top:124px;text-align:center"><b>${esc(D.name)}</b> · ${it.what}</div>` +
+    `<div class="txt" style="left:0;right:0;top:140px;text-align:center;color:#ffd54a">${cap(color)}: +${boostOf(D, color)}G ${it.k === 'gear' ? 'in every battle while equipped' : 'in one battle, once per match'}</div>` +
+    `<div class="txt" style="left:0;right:0;top:156px;text-align:center;color:${locked ? '#ffcf3a' : '#9fd4ff'}">${locked ? `Unlocks in League ${GEAR_LEAGUE[color]}` : `${off ? `<s>${priceOfGear(D, color)}</s> ` : ''}${price} BP`}</div>`;
+  $('topUI').querySelectorAll('[data-src]').forEach(async im => { im.src = await pack.url(im.dataset.src); });
+  $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 4) +
+    pill('◀', 6, 30, 22, 'id="gPrev"') + `<div class="txt" style="left:32px;top:32px;width:192px;text-align:center">${esc(D.name)} (${gearPick.i % items.length + 1}/${items.length})</div>` + pill('▶', 228, 30, 22, 'id="gNext"') +
+    GEAR_COLORS.map((c, i) => `<div class="pill tap ${c === color ? 'sel gold' : ''}" data-gc="${c}" style="left:${18 + i * 76}px;top:62px;width:70px;font-size:9px">${cap(c)} +${boostOf(D, c)}</div>`).join('') +
+    `<div class="pill gold tap ${!locked && p.bp >= price ? '' : 'off'}" id="gBuy" style="left:60px;top:100px;width:136px">Buy for ${price} BP</div>` +
+    `<div class="txt" style="left:8px;top:132px;font-size:9px">You own ${mine.length} ${it.what}</div>`;
+  bar(it.k === 'gear' ? 'Battle Gear: equip it before a throw. It stays on until that Bakugan wins a battle or gets a double stand.' : 'BakuNano: add it to your Bakugan in one battle. Once per match.');
+  $('gPrev').onclick = () => { gearPick.i = (gearPick.i + items.length - 1) % items.length; gearShop(); };
+  $('gNext').onclick = () => { gearPick.i = (gearPick.i + 1) % items.length; gearShop(); };
+  $('bot').querySelectorAll('[data-gc]').forEach(b => b.onclick = () => { gearPick.color = b.dataset.gc; gearShop(); });
+  $('gBuy').onclick = () => {
+    if (locked) { bar(`${cap(color)} unlocks in League ${GEAR_LEAGUE[color]}.`); return; }
+    if (p.bp < price) { bar(`You need ${price - p.bp} more BP.`); return; }
+    const uid = (it.k === 'gear' ? 'g' : 'n') + Date.now().toString(36);
+    upd(q => { P.ensureShop(q); q.owned[it.k] = q.owned[it.k] || []; q.bp -= price; q.owned[it.k].push({ uid, id: D.id, color });
+      const dd = q.deckNV || (q.deck && { ...q.deck }); if (dd && !dd[it.k]) { dd[it.k] = uid; q.deckNV = dd; } });
+    gearShop(); bar(`Thanks! ${D.name} (${cap(color)}) is yours. Choose it in My Room > Deck > New Vestroia deck.`);
+  };
+  backBtn(() => go('shop'));
+}
 // ---------- Traps: pick the Trap, its color, and 2 or more attributes. One Trap goes in your deck.
 let trapPick = { i: 0, color: null, attrs: [] };
 function trapShop() {

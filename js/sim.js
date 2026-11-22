@@ -3,6 +3,7 @@
 // The throw itself is a dice roll instead of physics: how likely it is to land where it was aimed depends on the
 // level and the Bakugan's Magnet; a Bakugan aimed at a card with an opponent on it can knock it off (Speed vs Defense).
 // Before- and after-throw Ability cards are not used here yet.
+import { aiGear } from './gear.js';
 import { bestOf, attrsOf } from './dual.js';
 import * as R from './rules.js';
 import { makeToy, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -28,6 +29,8 @@ export function buildPlayer(cat, team, { name, owner = null, nv = false } = {}) 
     ...(nv ? AB_COLORS.flatMap(c => ((team.extra || {})[c] || []).map(x => cardBy.get(x.id || x))) : [])].filter(Boolean);
   const pl = { name, toys, gates: GATE_COLORS.map(c => cardBy.get(team.gates[c].id)), abilities };
   if (nv && team.trap) pl.trap = { type: 'trap', color: 'trap', id: 'ai-' + team.trap.id, trapId: team.trap.id, name: `Trap: ${team.trap.name}`, attrs: team.trap.attrs };
+  // Battle Gear and BakuNano (New Vestroia): the team's own (Story passes yours), else one of each in its best color
+  if (nv) { const g = team.gear !== undefined ? { gear: team.gear, nano: team.nano } : aiGear(cat, owner || name); if (g.gear) pl.gear = g.gear; if (g.nano) pl.nano = g.nano; }
   return pl;
 }
 
@@ -142,6 +145,7 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
         if (rng() < chance) { count(R.knockOff(s, [{ p: foe.p, t: foe.t, card: f.card }], pl.t)); if (s.winner !== null) break; k = s.field.indexOf(f); if (k < 0) k = null; }
       }
     }
+    if (R.canEquip(s, p)) R.equipGear(s, pl.t, p);   // the computer always equips its Battle Gear when it's free
     const r = R.land(s, pl.t, k, () => null);
     count(r.events);
     if (r.battle && s.winner === null) battle(r.battle.fieldIdx);

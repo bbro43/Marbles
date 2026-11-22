@@ -4,6 +4,7 @@
 // - End of season: promotion (Season 2's special rule, then top 2 up / bottom 2 down), the next season, and the upgrade reset every 4 seasons.
 // - Social: teams (fixed show teams, computer teams that form, your own), friendship, rivals, trade offers.
 // - Scenes: scene(key) plays a conversation from SCENES (claude/story-scripts.md). Models for scenes: still to build (search "MODELS GO HERE").
+import { ownedForBattle } from './gear.js';
 import { fixAttr } from './dual.js';
 import { Pack } from './pack.js';
 import { makeRng, playMatch, buildPlayer } from './sim.js';
@@ -42,7 +43,9 @@ function teamOf(id) {   // the deck for this brawler right now (level cards + th
   const b = save.season.B[id];
   if (id === 'you') {   // each of your Bakugan has its own upgrades (bought in the Shop): G-Power boosts and stat upgrades
     ensureColl(); migrateUps(); migrateDual();
-    return { ...save.you.deck, upgrades: 0, toys: save.you.deck.toys.map(x => { const u = save.you.coll.toys[tkey(x.id, x.attr)] || {}; return { ...x, up: u.g || 0, st: u.st || {} }; }) };
+    // your Battle Gear and BakuNano (js/gear.js): from the collection, by the uids in your deck (none = you play without)
+    const g = ownedForBattle(cat, save.you.coll, save.you.deck);
+    return { ...save.you.deck, gear: g.gear, nano: g.nano, upgrades: 0, toys: save.you.deck.toys.map(x => { const u = save.you.coll.toys[tkey(x.id, x.attr)] || {}; return { ...x, up: u.g || 0, st: u.st || {} }; }) };
   }
   return { ...teamDef(id)[b.level], upgrades: b.up };
 }

@@ -1,6 +1,7 @@
 // Team setup before a match: each player picks 3 toys (and their attributes), 1 Gold, 1 Silver and
 // 1 Copper Gate card, and 1 Red, 1 Blue and 1 Green Ability card. Then who goes first.
 // Each player slot remembers its last team on this device.
+import { GEAR_COLORS, gearDefs, nanoDefs, gearForBattle, nanoForBattle } from './gear.js';
 import { fixAttr, secondOf } from './dual.js';
 import { baseStats, controlOf } from './control.js';
 import { isCoded } from './abilities.js';
@@ -51,9 +52,10 @@ const CSS = `
 
 // Evolution lines: a team can hold only one toy from each line (Billy's call).
 // Preyas II Angelo / Diablo share a line (one or the other); Preyas and Warius have no line.
+// tt_00 (Alpha Hydranoid, pack 0.51) is in the Hydranoid line
 const LINES = {
   dragonoid: ['bb_00', 'bb_01', 'dc_sp00', 'dc_sp00_00', 'dc_sp00_01'], tigrerra: ['bb_04', 'bb_05'], preyas2: ['bb_07', 'bb_08'],
-  gorem: ['bb_09', 'bb_10'], skyress: ['bb_11', 'bb_12'], hydranoid: ['bb_13', 'bb_14'], leonidas: ['bb_62', 'bb_63'],
+  gorem: ['bb_09', 'bb_10'], skyress: ['bb_11', 'bb_12'], hydranoid: ['bb_13', 'bb_14', 'tt_00'], leonidas: ['bb_62', 'bb_63'],
   vladitor: ['bb_64', 'bb_65'], ingram: ['dc_sp01', 'dc_sp01_00'], elfin: ['dc_sp02', 'dc_sp02_00'],
   percival: ['dc_sp03', 'dc_sp03_00', 'dc_sp12'], wilda: ['dc_sp04', 'dc_sp04_00'], nemus: ['dc_sp05', 'dc_sp05_00'],
   helios: ['dc_sp06', 'dc_sp06_01'],
@@ -101,6 +103,10 @@ const pick = arr => arr[rand(arr.length)];
 const NV_NO_EFFECT = new Set(['Early Victory']);
 const NV_WARN = 'This card won\'t have any effect in this mode.';
 export async function setupTeams(cat, pack, picked = null, deck = null, owned = null, nv = false) {
+  // Battle Gear and BakuNano choices (New Vestroia, js/gear.js): every one in every color
+  const opts = defs => defs.flatMap(d => GEAR_COLORS.filter(c => (d.boost || {})[c] !== undefined).map(c => ({ id: d.id, color: c, name: d.name, boost: d.boost[c] })));
+  const GEAR_OPTS = opts(gearDefs(cat)), NANO_OPTS = opts(nanoDefs(cat));
+  const optLabel = o => o ? `${o.name} (${o.color[0].toUpperCase() + o.color.slice(1)} +${o.boost})` : 'none';
   const style = document.createElement('style'); style.textContent = CSS; document.head.append(style);
   const root = document.createElement('div'); root.id = 'setup'; document.body.append(root);
   // pictures: toy thumbnails, card art, blank card frames (all from the asset pack)
@@ -248,6 +254,8 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
         <h3>Ability cards${nv ? ' <small>(New Vestroia rules: up to 3 of each color)</small>' : ''}</h3>
         <div class="tabs">${AB_COLORS.map(c => tab('a', c, t.abilities[c], c === abTab)).join('')}</div>
         <div class="list">${abList || '<span class="none">No matches</span>'}</div>
+        ${nv && !deck && GEAR_OPTS.length ? `<h3>Battle Gear and BakuNano <small>(tap to change)</small></h3>
+        <div class="row"><button class="item" id="sgear">Battle Gear: ${esc(optLabel(t.gearPick))}</button><button class="item" id="snano">BakuNano: ${esc(optLabel(t.nanoPick, true))}</button></div>` : ''}
         <div class="bar"><button id="srand">Random</button><button id="sauto">Auto finish</button><button class="go" id="sdone" ${complete(t) ? '' : 'disabled'}>${skipFixed(who + 1, 1) < 2 ? 'Next player' : 'Done'}</button></div>`;
       const $ = s => root.querySelector(s);
       if ($('#sname')) $('#sname').oninput = e => { t.name = e.target.value || `Player ${who + 1}`; root.querySelector('h2').textContent = `${t.name}: set up your team`; };
@@ -281,6 +289,10 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
       root.querySelectorAll('[data-atab]').forEach(b => b.onclick = () => { abTab = b.dataset.atab; render(); });
       $('#srand').onclick = () => { Object.assign(t, randomTeam()); nvScrub(t); render(); };
       $('#sauto').onclick = () => { autoFinish(t, fa); nvScrub(t); render(); };
+      // Battle Gear and BakuNano (New Vestroia): tap to cycle through every one in every color, then none
+      const cyc = (list, cur) => { const i = list.findIndex(o => cur && o.id === cur.id && o.color === cur.color); return i + 1 < list.length ? list[i + 1] : null; };
+      if (root.querySelector('#sgear')) root.querySelector('#sgear').onclick = () => { t.gearPick = cyc(GEAR_OPTS, t.gearPick); render(); };
+      if (root.querySelector('#snano')) root.querySelector('#snano').onclick = () => { t.nanoPick = cyc(NANO_OPTS, t.nanoPick); render(); };
       root.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt.has(b.dataset.f) ? filt.delete(b.dataset.f) : filt.add(b.dataset.f); render(); });
       if (deck) { $('#sdone').textContent = 'Save deck'; const c = document.createElement('button'); c.textContent = 'Cancel'; $('#sdone').before(c);
         c.onclick = () => { root.remove(); style.remove(); resolve({ deck: null }); }; }
@@ -306,6 +318,8 @@ export async function setupTeams(cat, pack, picked = null, deck = null, owned = 
             toys: t.toys.map(x => makeToy(toyById.get(x.id), x.attr, t.owner)),
             gates: GATE_COLORS.map(c => cardById.get(t.gates[c])),
             abilities: [...AB_COLORS.map(c => cardById.get(t.abilities[c])), ...(nv ? AB_COLORS.flatMap(c => ((t.extra || {})[c] || []).map(id => cardById.get(id))).filter(Boolean) : [])],
+            ...(nv && t.gearPick ? { gear: gearForBattle(gearDefs(cat).find(d => d.id === t.gearPick.id), t.gearPick.color) } : {}),
+            ...(nv && t.nanoPick ? { nano: nanoForBattle(nanoDefs(cat).find(d => d.id === t.nanoPick.id), t.nanoPick.color) } : {}),
           })),
         });
       });

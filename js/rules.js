@@ -40,7 +40,8 @@ export function newMatch(players, { first = 0, grid = DEFAULT_GRID, corners = DE
       unused: p.toys.map((_, i) => i),
       used: [],
       gateHand: [...p.gates],
-      abilityHand: [...(p.abilities || []), ...(p.trap ? [p.trap] : [])],   // a Trap plays like an Ability card, once
+      abilityHand: [...(p.abilities || []), ...(p.trap ? [p.trap] : []), ...(p.nano ? [p.nano] : [])],   // a Trap or a BakuNano plays like an Ability card, once
+      gear: p.gear ? { ...p.gear, on: null } : null,   // Battle Gear (New Vestroia): on = the Bakugan wearing it (toy index), or null
       abilityUsed: [],
       captured: [],
       life: START_LIFE, gateUsed: [], out: false,
@@ -154,6 +155,11 @@ export function moveOptions(s, fieldIdx, p = s.turn) {
   return s.field.map((f, k) => k).filter(k => k !== fieldIdx && touching(here, s.field[k].cell) && !s.field[k].toys.some(x => sameTeam(s, x.p, p)));
 }
 
+// Battle Gear (Billy, Nov 22): before a throw you may equip it to the Bakugan you're about to throw. It stays on that
+// Bakugan (in every battle it's in, it adds its boost) until that Bakugan wins a battle or gets a double stand.
+export const canEquip = (s, p = s.turn) => { const gr = s.players[p].gear; return !!gr && gr.on === null; };
+export function equipGear(s, t, p = s.turn) { if (!canEquip(s, p)) return []; s.players[p].gear.on = t; return [{ type: 'gearOn', p, t, gear: s.players[p].gear }]; }
+function gearOff(s, p, t, why) { const gr = s.players[p].gear; if (!gr || gr.on !== t) return []; gr.on = null; return [{ type: 'gearOff', p, t, gear: gr, why }]; }
 export function canThrow(s, p = s.turn) {
   return s.winner === null && s.players[p].unused.length > 0 && s.field.length > 0;
 }
@@ -205,6 +211,7 @@ export function land(s, t, fieldIdx, chooseMove = opts => opts[0]) {
   if (!otherGate) {
     g.toys.push({ p, t });
     ev.push({ type: 'stand', p, t, fieldIdx, ...at(g) });
+    for (const x of g.toys.filter(x => x.p === p)) ev.push(...gearOff(s, p, x.t, 'double stand'));   // a double stand takes the Battle Gear off
     ev.push(...capture(s, p, fieldIdx, 'uncontested'));
     return endTurn(s, ev);
   }
@@ -420,6 +427,8 @@ export function computeBattle(s, b) {
     const notes = [sd.noGate && 'blocked', sd.useHighest && !sd.noGate && 'highest bonus', sd.gateMult > 1 && !sd.noGate && 'x' + sd.gateMult].filter(Boolean);
     step(sd, `Gate card: ${g.card.name}`, amt, notes.join(', ') || undefined);
   }
+  // Battle Gear: the Bakugan wearing it adds its boost
+  for (const sd of sides) { const gr = s.players[sd.p].gear; if (gr && gr.on === sd.t) step(sd, gr.name, gr.boost || 0); }
   // Attribute arena (Billy): every Bakugan of the arena's attribute gets +50G, whoever owns it; a Trap played here with that attribute too
   if (s.arena) {
     const label = s.arena[0].toUpperCase() + s.arena.slice(1) + ' Field';
@@ -444,6 +453,8 @@ export function computeBattle(s, b) {
 export function resolveBattle(s, battle) {
   const ev = [];
   const g = s.field[battle.fieldIdx];
+  // a Bakugan that wins a battle takes its Battle Gear off
+  if (battle.result !== 'tie') for (const sd of battle.sides) if (teamOf(s, sd.p) === battle.result) ev.push(...gearOff(s, sd.p, sd.t, 'won'));
   if (s.nv) {
     if (battle.result !== 'tie') {
       // every losing team takes the difference from the winning team's total, split between its players in the battle

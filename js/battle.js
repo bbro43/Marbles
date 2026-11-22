@@ -1,4 +1,5 @@
 // Battle screen: arena, toys, Gate cards, swipe-to-throw, and the battle count-up.
+import { aiGear, ownedForBattle } from './gear.js';
 import { bestOf, attrsOf } from './dual.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -141,6 +142,7 @@ async function aiThrow(p) {
   const plan = aiPlan(p);
   if (!plan || state.turn !== p) return;
   select(plan.t);
+  if (R.canEquip(state, p)) { R.equipGear(state, plan.t, p); flash(`${state.players[p].gear.name} equipped`); await sleep(500); }   // the computer always equips its Battle Gear when it's free
   say(`${state.players[p].name} aims ${state.players[p].toys[plan.t].name} at ${state.field[plan.k].card.name}…`);
   await sleep(900);
   const aim = AI_AIM[aiLevel[p]], tm = toysMesh[p][selected], from = tm.holder.position, to = cellCenter(state.field[plan.k].cell);
@@ -416,7 +418,7 @@ function showPicker() {
   const p = state.turn, pl = state.players[p];
   $('picker').innerHTML = pl.unused.map(t => {
     const toy = pl.toys[t];
-    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${attrsOf(toy).join(' + ')}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')} · Ctl ${lv(toy.stats || {}, 'control')}</span></span></button>`;
+    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${attrsOf(toy).join(' + ')}${pl.gear && pl.gear.on === t ? ` · ⚙ ${pl.gear.name}` : ''}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')} · Ctl ${lv(toy.stats || {}, 'control')}</span></span></button>`;
   }).join('');
   fillPics($('picker'));
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));
@@ -433,10 +435,17 @@ function showPicker() {
 let promptedPre = false;
 // Red "before you throw" cards that work with the selected toy, shown after the toys. Tap to arm, tap again to cancel.
 let armed = null;   // index into the Ability hand of the armed Red card
+let armGear = false;   // Battle Gear armed for this throw
 function showThrowCards() {
   $('picker').querySelectorAll('.chip.red').forEach(b => b.remove());
   if (selected === null) return;
   const hand = state.players[state.turn].abilityHand;
+  // Battle Gear: equip it to this Bakugan with this throw (tap to arm, tap again to cancel)
+  $('picker').querySelectorAll('.chip.gear').forEach(b => b.remove());
+  if (R.canEquip(state)) { const gr = state.players[state.turn].gear, b = document.createElement('button');
+    b.className = 'chip red gear' + (armGear ? ' sel' : ''); b.style.setProperty('--c', ABILITY_COLOR.gear);
+    b.innerHTML = `<b>${gr.name}</b><span>Battle Gear · equip with this throw</span><span class="st">+${gr.boost}G in every battle this Bakugan is in, until it wins one</span>`;
+    b.onclick = () => { armGear = !armGear; showThrowCards(); }; $('picker').append(b); }
   for (const i of R.throwOptions(state, selected)) {
     const b = document.createElement('button');
     b.className = 'chip red' + (armed === i ? ' sel' : ''); b.dataset.a = i; b.style.setProperty('--c', ABILITY_COLOR.red);
@@ -451,7 +460,7 @@ function select(t) {
   if (selected !== null) { const prev = toysMesh[p][selected]; if (!isStanding(p, selected)) prev.holder.visible = false; }
   selected = t;
   $('picker').querySelectorAll('button[data-t]').forEach(b => b.classList.toggle('sel', +b.dataset.t === t));
-  armed = null; showThrowCards();
+  armed = null; armGear = false; showThrowCards();
   const tm = toysMesh[p][t]; setOpen(tm, 0);
   tm.holder.position.copy(DIR[p]).multiplyScalar(START).setY(RADIUS);
   tm.holder.rotation.set(0, Math.atan2(-DIR[p].x, -DIR[p].z), 0);    // facing the center
@@ -703,6 +712,7 @@ function throwToy(vel) {
   vel = aim.vel; if (vel.length() > top) vel.setLength(top);
   busy = true; $('picker').classList.add('off');
   if (armed !== null) { const card = state.players[state.turn].abilityHand[armed]; R.playBeforeThrow(state, armed, selected); armed = null; flash(card.name); }
+  if (armGear && R.canEquip(state)) { R.equipGear(state, selected); flash(`${state.players[state.turn].gear.name} equipped`); } armGear = false;
   const tm = toysMesh[state.turn][selected];
   const ball = { tm, pos: tm.holder.position.clone(), vel, p: state.turn, t: selected, kind: 'ball', steer: aim.steer };
   const stands = state.field.flatMap(f => f.toys.map(x => {
@@ -1058,7 +1068,7 @@ async function postThrowCards(ball, stands) {
 
 // ---------- battle overlay with the count-up
 // ---------- Ability cards during a battle: active player first, then back and forth until both pass.
-const ABILITY_COLOR = { red: '#d9534f', blue: '#4a8fe0', green: '#4caf6a', trap: '#b0b8c4' };
+const ABILITY_COLOR = { red: '#d9534f', blue: '#4a8fe0', green: '#4caf6a', trap: '#b0b8c4', nano: '#c9a227', gear: '#c98a3a' };
 let abilityResolve = null;
 async function abilityPhase(bt) {
   const o = $('battle'); o.hidden = false; $('bnext').hidden = true;
@@ -1395,6 +1405,15 @@ async function start() {
     abilities: Object.fromEntries(AB_COLORS.map((k, i) => [k, players[p].abilities[i].id])) }; }); });
   if (picked) for (let p = 0; p < picked.length; p++) { try { const u = picked[p].face && picked[p].face.startsWith('data:') ? picked[p].face : await pack.url(picked[p].face); $('p' + p + 'name').insertAdjacentHTML('beforebegin', `<img class="face" src="${u}" alt="">`); } catch {} }
   $('loading').hidden = false;
+  // Battle Gear and BakuNano (New Vestroia rules): a character brings one of each in its best color; You bring yours from My Room > Deck
+  if (NV) players.forEach((pl, p) => {
+    const c = picked && picked[p]; if (!c) return;
+    let g = null;
+    if (c.profile !== undefined && c.profile !== null) { const pr = Profiles.view(Profiles.load().slots[c.profile], c.profile); g = pr && ownedForBattle(cat, pr.owned, pr.deckNV || pr.deck); }
+    else if (c.team && c.team.gear !== undefined) g = { gear: c.team.gear, nano: c.team.nano };   // story passes its own
+    else if (!c.custom) g = aiGear(cat, c.id);
+    if (g) { if (g.gear) pl.gear = g.gear; if (g.nano) pl.nano = g.nano; }
+  });
   // a New Vestroia character's own Trap (js/aiteams.js)
   players.forEach((pl, p) => {
     const tr = NV && picked && picked[p] && picked[p].team && picked[p].team.trap; if (!tr) return;   // Traps are for New Vestroia rules

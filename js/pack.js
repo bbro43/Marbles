@@ -18,7 +18,7 @@ export async function idbPut(key, val) {
   return new Promise((res, rej) => { const t = d.transaction(STORE, 'readwrite'); t.objectStore(STORE).put(val, key); t.oncomplete = res; t.onerror = () => rej(t.error); });
 }
 
-// The pack can be one zip or split across several (pack 0.49+: marbles-pack-1.zip = toys, traps, cards;
+// The pack can be one zip or split across several (pack 0.49+: marbles-pack-1.zip = toys and cards (traps too before 0.51);
 // marbles-pack-2.zip = everything else, including catalog.json and pack.json). Files are looked up in each zip in turn.
 // a pack split into parts may carry a catalog.json / pack.json in each part: merge them into one
 export async function mergedJson(zips, name) {

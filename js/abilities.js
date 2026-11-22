@@ -202,7 +202,9 @@ export const fieldEffectOf = card => FIELD_EFFECTS[card.name] || null;
 // A Trap (New Vestroia): 0G of its own; once per game you add it to a battle like an Ability card,
 // and it gets the Gate card's bonus for each of its attributes, added to your Bakugan's total.
 const TRAP = { when: 'battle', can: () => true, add: c => (c.card.attrs || []).reduce((n, a) => n + (c.table[a] || 0), 0) };
-export const effectOf = card => card.type === 'trap' ? TRAP : EFFECTS[card.name + '|' + card.color] || EFFECTS[card.name] || null;
+// A BakuNano (Billy, Nov 22): once per match you add it to your Bakugan in a battle, no Ability card needed; it adds its boost
+const NANO = { when: 'battle', can: () => true, add: c => c.card.boost || 0 };
+export const effectOf = card => card.type === 'trap' ? TRAP : card.type === 'nano' ? NANO : EFFECTS[card.name + '|' + card.color] || EFFECTS[card.name] || null;
 export function gateEffectOf(card) {
   if (card.color === 'gold') return GATE_EFFECTS[card.name] || goldEffect(card);   // custom gold cards have their own effect
   return GATE_EFFECTS[card.name] || null;
