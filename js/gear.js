@@ -9,10 +9,20 @@
 export const GEAR_COLORS = ['copper', 'silver', 'gold'];
 export const gearDefs = cat => cat.battleGear || [];
 export const nanoDefs = cat => cat.bakuNano || [];
-export const boostOf = (def, color) => ((def && def.boost) || {})[color] || 0;
-export const priceOf = (def, color) => ((def && def.price) || {})[color] || 0;
+// Billy's numbers (Battle_Gear_and_BakuNano_Boosts.xlsx), used when the catalog entry has no boost / price of its own
+const DEFAULTS = {
+  tt_battleturbine: { boost: { copper: 70, silver: 80, gold: 70 }, price: { copper: 1050, silver: 1200, gold: 1050 } },
+  tt_jetkor:        { boost: { copper: 70, silver: 70, gold: 70 }, price: { copper: 1050, silver: 1050, gold: 1050 } },
+  tt_boomix:        { boost: { copper: 80, silver: 50, gold: 80 }, price: { copper: 1200, silver: 750, gold: 1200 } },
+  tt_crosstriker:   { boost: { copper: 50, silver: 50, gold: 50 }, price: { copper: 750, silver: 750, gold: 750 } },
+  tt_lanzato:       { boost: { copper: 50, silver: 60, gold: 70 }, price: { copper: 750, silver: 900, gold: 1050 } },
+  tt_slingpike:     { boost: { copper: 40, silver: 50, gold: 60 }, price: { copper: 600, silver: 750, gold: 900 } },
+};
+const field = (def, k, color) => def ? ((def[k] || {})[color] ?? ((DEFAULTS[def.id] || {})[k] || {})[color] ?? 0) : 0;
+export const boostOf = (def, color) => field(def, 'boost', color);
+export const priceOf = (def, color) => field(def, 'price', color);
 // the color with the highest boost (of the ones given)
-export const bestColor = (def, colors = GEAR_COLORS) => [...colors].filter(c => (def.attributes || def.boost || {})[c] !== undefined).sort((a, b) => boostOf(def, b) - boostOf(def, a))[0] || colors[0];
+export const bestColor = (def, colors = GEAR_COLORS) => [...colors].filter(c => (def.attributes || def.boost || (DEFAULTS[def.id] || {}).boost || {})[c] !== undefined).sort((a, b) => boostOf(def, b) - boostOf(def, a))[0] || colors[0];
 // for a battle player
 export const gearForBattle = (def, color, uid) => def && { id: uid || 'gear-' + def.id, gearId: def.id, color, name: def.name, boost: boostOf(def, color) };
 export const nanoForBattle = (def, color, uid) => def && { type: 'nano', color: 'nano', id: uid || 'nano-' + def.id, nanoId: def.id, nanoColor: color, name: def.name,
