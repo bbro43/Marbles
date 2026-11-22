@@ -764,13 +764,15 @@ function gearShop() {
   const p = prof(), items = [...gearDefs(pack.catalog).map(d => ({ d, k: 'gear', what: 'Battle Gear' })), ...nanoDefs(pack.catalog).map(d => ({ d, k: 'nano', what: 'BakuNano' }))];
   if (!items.length) { bar('No Battle Gear or BakuNano in this asset pack yet.'); backBtn(() => go('shop')); return; }
   const it = items[gearPick.i % items.length], D = it.d, color = gearPick.color;
-  const lg = SD() ? sLeague(sLoad()) : 1, locked = lg > GEAR_LEAGUE[color];
+  // no price in the catalog yet: not for sale (so it never shows up free)
+  const noPrice = !priceOfGear(D, color);
+  const lg = SD() ? sLeague(sLoad()) : 1, locked = noPrice || lg > GEAR_LEAGUE[color];
   const off = SD() ? discountOn(sLoad().season, sLoad().day, { kind: 'trap' }) : 0, price = Math.round(priceOfGear(D, color) * (100 - off) / 100), mine = p.owned[it.k] || [];
   $('topUI').innerHTML = `<div class="box" style="left:6px;top:30px;width:244px;height:150px"></div>` +
     (D.thumbs && D.thumbs[color] ? `<img data-src="${D.thumbs[color]}" style="left:88px;top:40px;width:80px;height:80px" alt="">` : '') +
     `<div class="txt" style="left:0;right:0;top:124px;text-align:center"><b>${esc(D.name)}</b> · ${it.what}</div>` +
     `<div class="txt" style="left:0;right:0;top:140px;text-align:center;color:#ffd54a">${cap(color)}: +${boostOf(D, color)}G ${it.k === 'gear' ? 'in every battle while equipped' : 'in one battle, once per match'}</div>` +
-    `<div class="txt" style="left:0;right:0;top:156px;text-align:center;color:${locked ? '#ffcf3a' : '#9fd4ff'}">${locked ? `Unlocks in League ${GEAR_LEAGUE[color]}` : `${off ? `<s>${priceOfGear(D, color)}</s> ` : ''}${price} BP`}</div>`;
+    `<div class="txt" style="left:0;right:0;top:156px;text-align:center;color:${locked ? '#ffcf3a' : '#9fd4ff'}">${noPrice ? 'Not for sale yet' : locked ? `Unlocks in League ${GEAR_LEAGUE[color]}` : `${off ? `<s>${priceOfGear(D, color)}</s> ` : ''}${price} BP`}</div>`;
   $('topUI').querySelectorAll('[data-src]').forEach(async im => { im.src = await pack.url(im.dataset.src); });
   $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 4) +
     pill('◀', 6, 30, 22, 'id="gPrev"') + `<div class="txt" style="left:32px;top:32px;width:192px;text-align:center">${esc(D.name)} (${gearPick.i % items.length + 1}/${items.length})</div>` + pill('▶', 228, 30, 22, 'id="gNext"') +
@@ -782,6 +784,7 @@ function gearShop() {
   $('gNext').onclick = () => { gearPick.i = (gearPick.i + 1) % items.length; gearShop(); };
   $('bot').querySelectorAll('[data-gc]').forEach(b => b.onclick = () => { gearPick.color = b.dataset.gc; gearShop(); });
   $('gBuy').onclick = () => {
+    if (noPrice) { bar('Not for sale yet.'); return; }
     if (locked) { bar(`${cap(color)} unlocks in League ${GEAR_LEAGUE[color]}.`); return; }
     if (p.bp < price) { bar(`You need ${price - p.bp} more BP.`); return; }
     const uid = (it.k === 'gear' ? 'g' : 'n') + Date.now().toString(36);
