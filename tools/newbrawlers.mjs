@@ -29,15 +29,16 @@ const NEW = [
   ['arcadius', 'Arcadius', 'Neathian', ['pyrus'], 'Apollonir', 3, 'normal'],
   ['mousoulios', 'Mousoulios', 'Neathian', ['aquos'], 'Frosch', 3, 'normal'],
   ['demitri', 'Demitri', 'Neathian', ['subterra'], 'Clayf', 3, 'normal'],
-  ['sophia', 'Sophia', 'Neathian', ['haos'], 'Lars Lion', 3, 'normal'],
+  ['eirene', 'Eirene', 'Neathian', ['haos'], 'Lars Lion', 3, 'normal'],
   ['petronas', 'Petronas', 'Neathian', ['darkus'], 'Exedra', 3, 'normal'],
   ['eudocia', 'Eudocia', 'Neathian', ['ventus'], 'Oberus', 3, 'normal'],
   // Ignatios: Alpha Hydranoid went to Masquerade (Billy, Nov 22) and every tt_ Bakugan has an owner, so his signature is from the regular pool
   ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], 'Laserman', 3, 'normal'],
   // Humans and Vestals
   ['jason', 'Jason', 'Human', ['ventus'], 'Tuskor', 3, 'easy'],
-  ['evelyn', 'Evelyn', 'Vestal', ['darkus'], 'Dryoid', 4, 'easy'],
-  ['nina', 'Nina', 'Vestal', ['darkus'], 'Rattleoid', 4, 'easy'],
+  ['evelyn', 'Evelyn', 'Vestal', ['darkus'], 'Rattleoid', 4, 'easy'],
+  // Onyx replaces Nina (Billy, Nov 22): a male Vestal powerhouse, Dryoid his Subterra partner, Normal in Story
+  ['onyx', 'Onyx', 'Vestal', ['subterra'], 'Dryoid', 4, 'normal'],
   ['kala', 'Kala', 'Human', ['aquos'], 'Fifth Paladin', 4, 'easy'],
   ['olivia', 'Olivia', 'Human', ['subterra'], 'Wormquake', 4, 'easy'],
   ['raymond', 'Raymond', 'Human', ['subterra', 'haos', 'aquos'], 'Goblin Ball', 0, 'easy'],

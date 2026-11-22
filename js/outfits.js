@@ -21,13 +21,14 @@ export const BCOLORS = {
   outfit0: ['#7a182a'], outfit1: ['#2e385e'], outfit2: ['#223274'], outfit3: ['#1b255a'],
 };
 export const OUTFITS = [
-  { label: 'Formal Gown', top: 30, down: null, shoes: 19 },
-  { label: 'High Uniform Dress', top: 31, down: null, shoes: 20 },
-  { label: 'Blue Dueling Coat', top: 27, down: 14, shoes: 7 },
-  { label: 'Navy Leader Coat', top: 29, down: 22, shoes: 15 },
+  { label: 'Formal Gown', top: 30, down: null, shoes: 2, shoeColor: 0 },
+  { label: 'High Uniform Dress', top: 31, down: null, shoes: 2, shoeColor: 1 },
+  { label: 'Blue Dueling Coat', top: 27, down: 14, shoes: 6, shoeColor: 1 },
+  { label: 'Navy Leader Coat', top: 29, down: 22, shoes: 5, shoeColor: 1 },
 ];
+// whole outfits wear the game's own shoes (styles 0-6) in a set color, not Billy's boots (Billy, Nov 22)
 // the look as worn: a whole outfit replaces the top, pants and shoes (down is null under the gown and the dress)
 export function wear(L) {
   const o = L && L.outfit && L.outfit[0] >= 0 && OUTFITS[L.outfit[0]]; if (!o) return L;
-  return { ...L, top: [o.top, 0], down: o.down === null ? null : [o.down, 0], shoes: [o.shoes, 0], gloves: [-1, 0], accent: [-1, 0] };
+  return { ...L, top: [o.top, 0], down: o.down === null ? null : [o.down, 0], shoes: [o.shoes, o.shoeColor || 0], gloves: [-1, 0], accent: [-1, 0] };
 }

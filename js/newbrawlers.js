@@ -2844,8 +2844,8 @@ export const NEW_BRAWLERS = {
    }
   }
  },
- "sophia": {
-  "name": "Sophia",
+ "eirene": {
+  "name": "Eirene",
   "species": "Neathian",
   "attrs": [
    "haos"
@@ -4110,16 +4110,16 @@ export const NEW_BRAWLERS = {
   "attrs": [
    "darkus"
   ],
-  "signature": "Dryoid",
+  "signature": "Rattleoid",
   "joins": 4,
   "easy": {
    "attr": "darkus",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_23",
+     "id": "tt_18",
      "attr": "darkus",
-     "name": "Dryoid"
+     "name": "Rattleoid"
     },
     {
      "id": "bb_25",
@@ -4198,9 +4198,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_23",
+     "id": "tt_18",
      "attr": "darkus",
-     "name": "Dryoid"
+     "name": "Rattleoid"
     },
     {
      "id": "bb_25",
@@ -4279,9 +4279,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_23",
+     "id": "tt_18",
      "attr": "darkus",
-     "name": "Dryoid"
+     "name": "Rattleoid"
     },
     {
      "id": "bb_25",
@@ -4356,31 +4356,31 @@ export const NEW_BRAWLERS = {
    }
   }
  },
- "nina": {
-  "name": "Nina",
+ "onyx": {
+  "name": "Onyx",
   "species": "Vestal",
   "attrs": [
-   "darkus"
+   "subterra"
   ],
-  "signature": "Rattleoid",
+  "signature": "Dryoid",
   "joins": 4,
   "easy": {
-   "attr": "darkus",
+   "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_18",
-     "attr": "darkus",
-     "name": "Rattleoid"
+     "id": "tt_23",
+     "attr": "subterra",
+     "name": "Dryoid"
     },
     {
      "id": "bb_40",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Robotallion"
     },
     {
      "id": "bb_52",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Gargonoid"
     }
    ],
@@ -4390,12 +4390,12 @@ export const NEW_BRAWLERS = {
      "name": "Robotallion"
     },
     "silver": {
-     "id": "ds_222",
-     "name": "Pit Dweller"
+     "id": "ds_202",
+     "name": "Muddy Ground"
     },
     "copper": {
-     "id": "ds_331",
-     "name": "Mega Warrior"
+     "id": "ds_303",
+     "name": "Clipped Wings"
     }
    },
    "abilities": {
@@ -4404,8 +4404,8 @@ export const NEW_BRAWLERS = {
      "name": "Twin Swap"
     },
     "blue": {
-     "id": "ds_611",
-     "name": "G-Power Bonus"
+     "id": "ds_602",
+     "name": "G-Power Boost"
     },
     "green": {
      "id": "ds_505",
@@ -4425,12 +4425,12 @@ export const NEW_BRAWLERS = {
     ],
     "blue": [
      {
-      "id": "ds_601",
-      "name": "Bright Light"
+      "id": "ds_612",
+      "name": "G-Power Up"
      },
      {
-      "id": "ds_609",
-      "name": "Hot Wind"
+      "id": "ds_601",
+      "name": "Bright Light"
      }
     ],
     "green": [
@@ -4446,22 +4446,22 @@ export const NEW_BRAWLERS = {
    }
   },
   "normal": {
-   "attr": "darkus",
+   "attr": "subterra",
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_18",
-     "attr": "darkus",
-     "name": "Rattleoid"
+     "id": "tt_23",
+     "attr": "subterra",
+     "name": "Dryoid"
     },
     {
      "id": "bb_40",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Robotallion"
     },
     {
      "id": "bb_52",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Gargonoid"
     }
    ],
@@ -4471,22 +4471,22 @@ export const NEW_BRAWLERS = {
      "name": "Robotallion"
     },
     "silver": {
-     "id": "ds_203",
-     "name": "Light-Burst"
+     "id": "ds_208",
+     "name": "Whirlpool"
     },
     "copper": {
-     "id": "ds_321",
-     "name": "Reflexes"
+     "id": "ds_305",
+     "name": "Down For The Count"
     }
    },
    "abilities": {
     "red": {
-     "id": "ds_413",
-     "name": "Darkus Time Breaker"
+     "id": "ds_411",
+     "name": "Subterra Time Breaker"
     },
     "blue": {
-     "id": "ds_621",
-     "name": "The Shadow"
+     "id": "ds_608",
+     "name": "Mega Impact"
     },
     "green": {
      "id": "ds_502",
@@ -4500,18 +4500,18 @@ export const NEW_BRAWLERS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_429",
-      "name": "Darkus Double Input"
+      "id": "ds_427",
+      "name": "Subterra Double Input"
      }
     ],
     "blue": [
      {
-      "id": "ds_613",
-      "name": "Dark Growth"
+      "id": "ds_616",
+      "name": "Brushfire"
      },
      {
-      "id": "ds_602",
-      "name": "G-Power Boost"
+      "id": "ds_622",
+      "name": "The Gust"
      }
     ],
     "green": [
@@ -4527,22 +4527,22 @@ export const NEW_BRAWLERS = {
    }
   },
   "hard": {
-   "attr": "darkus",
+   "attr": "subterra",
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_18",
-     "attr": "darkus",
-     "name": "Rattleoid"
+     "id": "tt_23",
+     "attr": "subterra",
+     "name": "Dryoid"
     },
     {
      "id": "bb_40",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Robotallion"
     },
     {
      "id": "bb_52",
-     "attr": "darkus",
+     "attr": "subterra",
      "name": "Gargonoid"
     }
    ],
@@ -4552,8 +4552,8 @@ export const NEW_BRAWLERS = {
      "name": "Robotallion"
     },
     "silver": {
-     "id": "ds_214",
-     "name": "Haunted Night"
+     "id": "ds_209",
+     "name": "Earthen Mound"
     },
     "copper": {
      "id": "ds_309",
@@ -4562,12 +4562,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_405",
-     "name": "Darkus Swap"
+     "id": "ds_403",
+     "name": "Subterra Swap"
     },
     "blue": {
-     "id": "ds_606",
-     "name": "Power From Darkness"
+     "id": "ds_605",
+     "name": "Home Advantage"
     },
     "green": {
      "id": "ds_501",
@@ -4577,8 +4577,8 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_413",
-      "name": "Darkus Time Breaker"
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
      },
      {
       "id": "ds_418",
@@ -4587,12 +4587,12 @@ export const NEW_BRAWLERS = {
     ],
     "blue": [
      {
-      "id": "ds_621",
-      "name": "The Shadow"
+      "id": "ds_608",
+      "name": "Mega Impact"
      },
      {
-      "id": "ds_613",
-      "name": "Dark Growth"
+      "id": "ds_616",
+      "name": "Brushfire"
      }
     ],
     "green": [
@@ -5368,8 +5368,8 @@ export const NEW_BRAWLERS = {
  }
 };
 // the season each joins in (0 = never: Raymond)
-export const JOINS = {"brodny":3,"kasimir":3,"pavel":3,"tibor":3,"zarek":3,"zorro":3,"vasek":3,"vesna":3,"arcadius":3,"mousoulios":3,"demitri":3,"sophia":3,"petronas":3,"eudocia":3,"ignatios":3,"jason":3,"evelyn":4,"nina":4,"kala":4,"olivia":4,"raymond":0};
+export const JOINS = {"brodny":3,"kasimir":3,"pavel":3,"tibor":3,"zarek":3,"zorro":3,"vasek":3,"vesna":3,"arcadius":3,"mousoulios":3,"demitri":3,"eirene":3,"petronas":3,"eudocia":3,"ignatios":3,"jason":3,"evelyn":4,"onyx":4,"kala":4,"olivia":4,"raymond":0};
 export const SEASON3_NEW = Object.keys(JOINS).filter(id => JOINS[id] === 3);
 export const SEASON4_NEW = Object.keys(JOINS).filter(id => JOINS[id] === 4);
 Object.assign(INTERSPACE, NEW_BRAWLERS);
-Object.assign(STORY_START, {"brodny":"normal","kasimir":"normal","pavel":"normal","tibor":"normal","zarek":"normal","zorro":"normal","vasek":"normal","vesna":"normal","arcadius":"normal","mousoulios":"normal","demitri":"normal","sophia":"normal","petronas":"normal","eudocia":"normal","ignatios":"normal","jason":"easy","evelyn":"easy","nina":"easy","kala":"easy","olivia":"easy","raymond":"easy"});
+Object.assign(STORY_START, {"brodny":"normal","kasimir":"normal","pavel":"normal","tibor":"normal","zarek":"normal","zorro":"normal","vasek":"normal","vesna":"normal","arcadius":"normal","mousoulios":"normal","demitri":"normal","eirene":"normal","petronas":"normal","eudocia":"normal","ignatios":"normal","jason":"easy","evelyn":"easy","onyx":"normal","kala":"easy","olivia":"easy","raymond":"easy"});
