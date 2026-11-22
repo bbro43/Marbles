@@ -32,7 +32,8 @@ const NEW = [
   ['sophia', 'Sophia', 'Neathian', ['haos'], 'Lars Lion', 3, 'normal'],
   ['petronas', 'Petronas', 'Neathian', ['darkus'], 'Exedra', 3, 'normal'],
   ['eudocia', 'Eudocia', 'Neathian', ['ventus'], 'Oberus', 3, 'normal'],
-  ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], 'Alpha Hydranoid', 3, 'normal'],
+  // Ignatios: Alpha Hydranoid went to Masquerade (Billy, Nov 22) and every tt_ Bakugan has an owner, so his signature is from the regular pool
+  ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], 'Laserman', 3, 'normal'],
   // Humans and Vestals
   ['jason', 'Jason', 'Human', ['ventus'], 'Tuskor', 3, 'easy'],
   ['evelyn', 'Evelyn', 'Vestal', ['darkus'], 'Dryoid', 4, 'easy'],

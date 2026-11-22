@@ -24,7 +24,7 @@ const CH = {
   julio:      ['haos',     ['Tentaclear', 'Manion', 'Saurus'],          ['Tentaclear', 'Griffon', 'Ravenoid'],      ['Tentaclear', 'Laserman', 'Monarus']],
   chanlee:    ['pyrus',    ['Fortress', 'Gargonoid', 'Ravenoid'],       ['Fortress', 'Falconeer', 'Griffon'],       ['Fortress', 'Warius', 'Laserman']],
   klaus:      ['aquos',    ['Sirenoid', 'Stinglash', 'Serpenoid'],      ['Sirenoid', 'Reaper', 'Stinglash'],        ['Sirenoid', 'Warius', 'Laserman']],
-  masquerade: ['darkus',   ['Hydranoid', 'Reaper', 'Fear Ripper'],      ['Hydranoid', 'Reaper', 'Laserman'],        ['Dual Hydranoid', 'Reaper', 'Warius']],
+  masquerade: ['darkus',   ['Hydranoid', 'Reaper', 'Fear Ripper'],      ['Dual Hydranoid', 'Reaper', 'Laserman'],   ['Alpha Hydranoid', 'Reaper', 'Warius']],   // partner by level (Billy, Nov 22)
   // New Vestroia: generics are Classic Bakugan, except the six Vexos, who use the six Maxus Helios pieces (Billy, Nov 16)
   nv_dan:     ['pyrus',    ['Neo Dragonoid', 'Griffon', 'Falconeer'],   ['Neo Dragonoid', 'Laserman', 'Monarus'],   ['Hyper Dragonoid', 'Warius', 'Laserman']],
   nv_shun:    ['ventus',   ['Ingram', 'Ravenoid', 'Falconeer'],         ['Ingram', 'Monarus', 'Laserman'],          ['Cosmic Ingram', 'Monarus', 'Laserman']],
@@ -44,7 +44,7 @@ const NEW_VESTROIA = new Set(['nv_dan', 'nv_shun', 'nv_marucho', 'ace', 'mira', 
 const PARTNERS = {
   dan: ['Dragonoid', 'Delta Dragonoid II', 'Neo Dragonoid', 'Hyper Dragonoid', 'Maxus Dragonoid'], runo: ['Tigrerra', 'Blade Tigrerra'],
   marucho: ['Preyas', 'Preyas II (Angelo)', 'Preyas II (Diablo)', 'Elfin', 'Dual Elfin'], julie: ['Gorem', 'Hammer Gorem'],
-  shun: ['Skyress', 'Storm Skyress', 'Ingram', 'Cosmic Ingram'], masquerade: ['Hydranoid', 'Dual Hydranoid'], chanlee: ['Fortress'], klaus: ['Sirenoid'],
+  shun: ['Skyress', 'Storm Skyress', 'Ingram', 'Cosmic Ingram'], masquerade: ['Hydranoid', 'Dual Hydranoid', 'Alpha Hydranoid'], chanlee: ['Fortress'], klaus: ['Sirenoid'],
   julio: ['Tentaclear'], billy: ['Cycloid'], komba: ['Harpus'], marduk: ['Vladitor', 'Battle Ax Vladitor'] /* Marduk is out for now; Vladitor stays his */, jenny: ['Siege'], jewls: ['Centipoid'],
   christopher: ['Juggernoid'], player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
   spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico', 'Macubass'], volt: ['Brontes', 'Boriates'], shadow: ['Hades'], lync: ['Altair', 'Wired'],

@@ -3606,16 +3606,16 @@ export const NEW_BRAWLERS = {
   "attrs": [
    "pyrus"
   ],
-  "signature": "Alpha Hydranoid",
+  "signature": "Laserman",
   "joins": 3,
   "easy": {
    "attr": "pyrus",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_00",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Alpha Hydranoid"
+     "name": "Laserman"
     },
     {
      "id": "dc_sp06_20",
@@ -3630,8 +3630,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_226",
@@ -3694,9 +3694,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_00",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Alpha Hydranoid"
+     "name": "Laserman"
     },
     {
      "id": "dc_sp06_20",
@@ -3711,8 +3711,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_207",
@@ -3775,9 +3775,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_00",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Alpha Hydranoid"
+     "name": "Laserman"
     },
     {
      "id": "dc_sp06_20",
@@ -3792,8 +3792,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_216",

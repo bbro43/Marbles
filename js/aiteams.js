@@ -3534,9 +3534,9 @@ export const AI_TEAMS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_13",
+     "id": "bb_14",
      "attr": "darkus",
-     "name": "Hydranoid"
+     "name": "Dual Hydranoid"
     },
     {
      "id": "bb_25",
@@ -3615,9 +3615,9 @@ export const AI_TEAMS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_14",
+     "id": "tt_00",
      "attr": "darkus",
-     "name": "Dual Hydranoid"
+     "name": "Alpha Hydranoid"
     },
     {
      "id": "bb_25",
@@ -6155,8 +6155,8 @@ export const AI_TEAMS = {
     "color": "haos",
     "attrs": [
      "haos",
-     "subterra",
-     "darkus"
+     "darkus",
+     "subterra"
     ]
    }
   }
