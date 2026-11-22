@@ -11,6 +11,7 @@ import { makeRng, playMatch, buildPlayer } from './sim.js';
 import { BP, MAX_UP, UPS_PER_SEASON, ATTRS6 } from './season.js';
 import { setupSeason2, LEAGUE_NAMES, season2Events, promoteSeason2, VEXOS, NEWCOMERS, NEWCOMER_UP } from './season2.js';
 import { SEASON3_NEW, SEASON4_NEW } from './newbrawlers.js';
+import { NEW_TALK, RACE_CHALLENGE, SEASON_INTRO, RACE_CLASH } from './newdialog.js';
 import { PRIZE_BAND } from './season.js';
 import { AI_TEAMS, INTERSPACE, STARTERS, STORY_START } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
@@ -331,6 +332,20 @@ const SCENES = {
     else say('ISA', `${t.name} now has ${t.ids.length} members. Your team room is open.`);
     say('ISA', 'You will find it in the Team Rooms building in The Commons.');
   },
+  // ---- the Season 3-4 newcomers (js/newdialog.js)
+  // the first time you meet one: their introduction, then a practice match offer
+  meetNew({ id, arena }) {
+    const T = NEW_TALK[id]; if (!T) return;
+    T.intro.forEach((l, i) => say(id, fillT(l), i === T.intro.length - 1 ? [
+      ['Battle', () => launch(id, { key: `M${save.day}-${save.slot}-${id}`, arena: arena || 'arena' })],
+      ['Not now', () => say(id, fillT(T.notNow))]] : null));
+  },
+  // after a match against one (they react to the result)
+  newAfter({ id, won }) { const T = NEW_TALK[id]; if (T) say(id, fillT(won ? T.theyLost : T.theyWon)); },
+  // the first time a Gundalian and a Neathian are in the same place as you
+  raceClash({ g, n }) { RACE_CLASH.forEach(([w, l]) => say(w === 'g' ? g : w === 'n' ? n : 'ISA', l)); },
+  // ISA announces the newcomers at the start of Seasons 3 and 4
+  seasonIntro({ n }) { (SEASON_INTRO[n] || []).forEach(l => say('ISA', l)); },
   // DRAFT: the daily greeting after the login corridor
   login() {
     const f = myFixture(save.day), ev = eventToday();
@@ -617,6 +632,15 @@ function presence() {
 }
 function friendship(id) { return (save.friends || {})[id] || 0; }
 function tone(id) { const f = friendship(id); return f >= 75 ? 'best' : f >= 40 ? 'friend' : f >= 10 ? 'acq' : 'cold'; }
+// a brawler's challenge line: the Season 3-4 newcomers use their own line half the time (by day) and their race's voice the other half
+const fillT = t => t.replace(/\{you\}/g, save.you.name).replace(/\{div\}/g, divName());
+const speciesOf = id => (INTERSPACE[id] || {}).species;
+function challengeLine(id) {
+  const T = NEW_TALK[id], race = RACE_CHALLENGE[speciesOf(id)];
+  if (T && ((save.day + id.length) % 2 === 0 || !race)) return fillT(T.challenge);
+  if (T && race) return race[tone(id)];
+  return CHALLENGE[tone(id)];
+}
 const CHALLENGE = { best: 'Hey, there you are! Up for a match? I\'ve been testing a new combo.', friend: 'Got time for a battle? Let\'s see how your deck\'s coming along.',
   acq: 'You free? I could use a match.', cold: 'You\'re up next on my list. Let\'s get it over with.' };
 
@@ -652,6 +676,7 @@ function takeResult() {
   if (sides.length === 2 && sides[1].length === 1) {
     const opp = sides[1][0], wasRival = isRival(opp); noteMatch(opp, w === 0 ? 'w' : w === null ? 'd' : 'l');
     if (wasRival && w !== null) save.queue = [...(save.queue || []), { rivalAfter: opp, won: w === 0 }];   // rival: after-match line
+    else if (NEW_TALK[opp] && w !== null) save.queue = [...(save.queue || []), { newAfter: opp, won: w === 0 }];   // a Season 3-4 newcomer reacts
   }
   save.dayLog = save.dayLog && save.dayLog.day === save.day ? save.dayLog : { day: save.day, m: 0, bp: 0 };
   save.dayLog.m++; save.dayLog.bp += bp.you || 0;
@@ -731,6 +756,13 @@ function render(view = save.view || 'commons') {
     const here = (presence()[view] || []).filter(id => mine.includes(id));
     const id = here[0] || mine[makeRng(save.season.seed + 5).int(mine.length)];
     if (id) { save.seen.firstNewcomer = id; store(); scene('firstNewcomer', { id, arena: 'arena' }); }
+  }
+  if (!dq.length && !mandatoryToday() && view !== 'commons') {   // Season 3 on: meeting a newcomer for the first time, and the first Gundalian-Neathian clash
+    const here = presence()[view] || [], met = save.seen.metNew || {};
+    const g = here.find(id => speciesOf(id) === 'Gundalian' && save.season.B[id]), n = here.find(id => speciesOf(id) === 'Neathian' && save.season.B[id]);
+    const id = here.find(x => NEW_TALK[x] && save.season.B[x] && !met[x]);
+    if (g && n && !save.seen.raceClash) { save.seen.raceClash = true; store(); scene('raceClash', { g, n }); }
+    else if (id) { save.seen.metNew = { ...met, [id]: true }; store(); scene('meetNew', { id, arena: view.startsWith('arena') ? 'arena' : 'arena' }); }
   }
   $('main').querySelectorAll('[data-go]').forEach(b => b.onclick = () => render(b.dataset.go));
   $('main').querySelectorAll('[data-back]').forEach(b => b.onclick = () => render('commons'));
@@ -911,13 +943,13 @@ function who(place) {
   return ids.map(id => { const b = save.season.B[id];
     const o = tradeOffer(id), t = teamWith(id);
     return `<div class="card"><div><b>${nameOf(id)}</b>${isRival(id) ? ' <span class="lock">Rival</span>' : ''} · ${save.season.names[leagueOf(id)]} · ${b.rec.w}-${b.rec.l}${t ? ` · ${t.name}` : ''} · ${frLevel(id)}</div>
-      <div class="say">“${CHALLENGE[tone(id)]}”</div><button data-challenge="${id}">Challenge</button>
+      <div class="say">“${isRival(id) ? `Our record's too close. Let's fix that.` : challengeLine(id)}”</div><button data-challenge="${id}">Challenge</button>
       ${o ? `<div class="note">Trade offer: their <b>${o.get.name}</b> for your <b>${o.give.name}</b>.</div><button data-trade="${id}">Trade</button>` : ''}</div>`; }).join('');
 }
 function challenge(id) {
   const rng = makeRng(save.season.seed + save.day * 13 + save.slot), arena = rng() < 0.6 ? 'field_' + mainAttr(id) : 'arena';
   const fieldName = arena === 'arena' ? 'the neutral Arena' : `the ${cap(mainAttr(id))} Field`;
-  say(id, isRival(id) ? `Our record's too close. Let's fix that.` : CHALLENGE[tone(id)]);
+  say(id, isRival(id) ? `Our record's too close. Let's fix that.` : challengeLine(id));
   say('ISA', `Challenge from ${nameOf(id)}. Arena: ${fieldName}. Free match: BP and your career record only.`, [
     ['Accept', () => launch(id, { key: `F${save.day}-${save.slot}-${id}`, arena })], ['Decline', () => closeDialog()]]);
 }
@@ -1131,6 +1163,7 @@ function nextSeason() {
   save.seasonNo = n; save.day = 0; save.slot = 0; save.view = 'commons'; save.seen.midseason = false;
   msg('ISA', `Season ${n} begins. You are in League ${after}.${reset ? ' Upgrades have been reset for everyone.' : ''}`);
   dayStart();
+  if (SEASON_INTRO[n]) scene('seasonIntro', { n });   // ISA announces the newcomers
 }
 
 // ---------- dialogue box (ISA over the intercom, brawlers in person)
@@ -1248,6 +1281,7 @@ async function start() {
     if (save.season.B.you.rec.w + save.season.B.you.rec.l > a.w + a.l) scene('newcomerAfter', { id: a.id, won: save.season.B.you.rec.w > a.w });
   }
   render(save.view === 'shop' || (save.view || '').startsWith('arena') ? 'commons' : save.view);
+  for (const q of save.queue || []) if (q && q.newAfter) scene('newAfter', { id: q.newAfter, won: q.won });
   for (const q of save.queue || []) if (q && q.rivalAfter) say(q.rivalAfter, q.won ? `Fine. That one's yours. Next one's mine.` : `That evens it up. Same time tomorrow?`);
   for (const q of save.queue || []) if (q === 'firstLeagueWin') { say('ISA', `First league win recorded. Three points to ${save.you.name}.`); say('ISA', `Your name is now on the ${save.season.names[leagueOf('you')]} table.`); }
   save.queue = []; store();
