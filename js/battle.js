@@ -9,7 +9,8 @@ import { Pack } from './pack.js';
 import * as R from './rules.js';
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 import * as Profiles from './profiles.js';
-import { AI_TEAMS, UPGRADE_G } from './aiteams.js';
+import { AI_TEAMS, UPGRADE_G, INTERSPACE } from './aiteams.js';
+import './newbrawlers.js';   // the Season 3-4 brawlers join INTERSPACE
 
 // ---------- real-world scale
 // The Arena mat is 56 cm square = 285 model units, so 1 cm = 285/56 ≈ 5.09 units.
@@ -1377,6 +1378,7 @@ async function start() {
   if (picked) picked.forEach((c, p) => {
     const lvl = c.level || (typeof c.ai === 'string' ? c.ai : null);
     if (lvl && AI_TEAMS[c.id] && !c.team) c.team = AI_TEAMS[c.id][lvl];   // story mode passes its own team (with that season's upgrades)
+    else if (lvl && INTERSPACE[c.id] && !c.team) c.team = INTERSPACE[c.id][lvl];   // our own characters, from the Battle Arena's pages 3 and on
     if (c.ai) { aiLevel[p] = lvl || 'normal'; aiStyle[p] = styleOf(c.id); }
   });
   const { players, first } = await setupTeams(cat, pack, picked, null, null, NV);

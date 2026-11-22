@@ -69,7 +69,7 @@ async function idbGet(key) { const d = await db(); return new Promise((res, rej)
 
 const $ = id => document.getElementById(id);
 try { sessionStorage.removeItem('marbles-story-in'); } catch {}   // next Story visit walks through the login corridor
-const APP_BUILD = 158;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 159;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -96,10 +96,18 @@ async function openPack(blob) {
   Pack.zip = zip; Pack.info = await mergedJson(zips, 'pack.json');
   Pack.cat = await mergedJson(zips, 'catalog.json');
   Pack.urls.forEach(u => URL.revokeObjectURL(u)); Pack.urls.clear();
-  const files = Object.values((Pack.cat.menu || {}).files || {}).concat((Pack.cat.menu?.chars || []).map(c => c.face));
+  const files = Object.values((Pack.cat.menu || {}).files || {}).concat((Pack.cat.menu?.chars || []).map(c => c.face), customChars().map(c => c.face));
   await Promise.all([...new Set(files)].map(async f => { const z = zip.file(f); if (z) Pack.urls.set(f, URL.createObjectURL(await z.async('blob'))); }));
 }
 const art = k => Pack.urls.get((Pack.cat?.menu?.files || {})[k]) || '';
+// our own characters (the Interspace brawlers and the Season 3-4 newcomers, pack 2) on Battle Arena pages 3 and on (Billy, Nov 22):
+// 17 a page in the 6 x 3 grid (the last spot is Random), in the pack's order; each plays its Easy / Normal / Hard team
+const CUSTOM_PER_PAGE = 17;
+function customChars() {
+  return (Pack.cat?.characters || []).filter(c => c.kind === 'interspace' && c.face).map((c, i) => {
+    const k = i % CUSTOM_PER_PAGE; return { id: c.id, name: c.name, face: c.face, col: k % 6, row: Math.floor(k / 6), page: 'c' + (Math.floor(i / CUSTOM_PER_PAGE) + 1) };
+  });
+}
 const hasArt = () => !!art('title_top');
 
 // ---- layout: scale the two DS screens to the phone
@@ -212,13 +220,20 @@ function chars() {
     (picks[p] ? `<div class="txt" style="left:78px;top:${y + 9}px;font-size:12px">${esc(picks[p].name)}</div>` : '');
   $('top').innerHTML = img('arena_top', 0, 0) + img('banner_character', 56, 7) + picks.map((_, p) => rowTop(p, picks.length > 2 ? 34 + p * 36 : 40 + p * 38)).join('') +
     (teams && picks.length === 4 && teams[2] === 0 ? `<div class="txt" style="left:200px;top:34px;font-size:9px">TAG TEAM</div>` : teams ? `<div class="txt" style="left:190px;top:34px;font-size:9px">BATTLE ROYALE</div>` : '');
-  const onPage = M.chars.filter(c => (c.page || 'bb') === page);
+  const all = M.chars.concat(customChars()), pages = ['bb', 'nv', ...[...new Set(customChars().map(c => c.page))]];
+  if (!pages.includes(page)) page = 'bb';
+  const custom = page[0] === 'c', onPage = all.filter(c => (c.page || 'bb') === page);
+  // a custom page has no grid art: empty hex frames, the faces, and a Random hex
+  const hexAt = (col, row) => img('hex_empty', G.x + col * G.step - 5, G.y + row * G.step - 3);
+  const customGrid = custom ? onPage.map(c => hexAt(c.col, c.row) + `<img src="${face(c)}" style="left:${G.x + c.col * G.step}px;top:${G.y + c.row * G.step}px" alt="">`).join('') +
+    hexAt(5, 2) + `<div class="txt" style="left:${G.x + 5 * G.step + 9}px;top:${G.y + 2 * G.step + 4}px;font-size:16px">?</div>` : '';
+  const pageName = page === 'nv' ? 'New Vestroia' : page === 'bb' ? 'Battle Brawlers' : `Interspace ${page.slice(1)}`;
   const frames = picks.map((c, p) => c && (c.page || 'bb') === page ? img('hex_p' + (p + 1), G.x + c.col * G.step - 5, G.y + c.row * G.step - 3) : '').join('');
-  $('bot').innerHTML = img('arena_bot', 0, 0) + img(page === 'nv' ? 'ch_grid_nv' : 'ch_grid', 0, 0) + frames +
+  $('bot').innerHTML = img('arena_bot', 0, 0) + (custom ? customGrid : img(page === 'nv' ? 'ch_grid_nv' : 'ch_grid', 0, 0)) + frames +
     onPage.map(c => `<div class="px tap" data-c="${c.id}" style="left:${G.x + c.col * G.step - 5}px;top:${G.y + c.row * G.step - 3}px;width:40px;height:34px"></div>`).join('') +
     (page === 'bb' ? `<div class="px tap" id="cYou" style="left:${G.x - 5}px;top:${G.y - 3}px;width:40px;height:34px"></div>` : '') +
     `<img src="${art('arrow_left')}" class="tap" id="pgL" style="left:4px;top:166px" alt=""><img src="${art('arrow_right')}" class="tap" id="pgR" style="left:150px;top:166px" alt="">` +
-    `<div class="txt" style="left:38px;top:172px;width:112px;text-align:center;font-size:9px">${page === 'nv' ? 'New Vestroia' : 'Battle Brawlers'}</div>` +
+    `<div class="txt" style="left:38px;top:172px;width:112px;text-align:center;font-size:9px">${pageName}</div>` +
     `<div class="px tap" id="cRand" style="left:${G.x + 5 * G.step - 5}px;top:${G.y + 2 * G.step - 3}px;width:40px;height:34px"></div>` +
     `<img src="${art('back')}" class="tap" id="bBack" style="left:223px;top:170px" alt="">`;
   const cpu = mode === 'single' && pickFor >= 1;
@@ -240,9 +255,10 @@ function chars() {
     picks[pickFor] = c; render();
     difficulty(c, cpu, lv => { picks[pickFor] = { ...c, level: lv }; next(); });
   };
-  $('bot').querySelectorAll('[data-c]').forEach(b => b.onclick = () => choose(M.chars.find(c => c.id === b.dataset.c)));
+  $('bot').querySelectorAll('[data-c]').forEach(b => b.onclick = () => choose(all.find(c => c.id === b.dataset.c)));
   $('cRand').onclick = () => choose(onPage[Math.floor(Math.random() * onPage.length)]);
-  $('pgL').onclick = $('pgR').onclick = () => { page = page === 'nv' ? 'bb' : 'nv'; render(); };
+  const turn = d => { page = pages[(pages.indexOf(page) + d + pages.length) % pages.length]; render(); };
+  $('pgL').onclick = () => turn(-1); $('pgR').onclick = () => turn(1);
   if ($('cYou')) $('cYou').onclick = () => {
     if (cpu) { $('bar').remove(); bar('The computer plays a character — pick one of them.'); return; }
     // You = the player picked in My Room (name, face, deck). Player 2 on this device builds a deck instead.
