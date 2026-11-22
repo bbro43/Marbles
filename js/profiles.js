@@ -16,6 +16,39 @@ export function create(d, slot, name, look) {
   d.active = slot; save(d); return d.slots[slot];
 }
 export function update(slot, fn) { const d = load(); if (!d.slots[slot]) return; fn(d.slots[slot]); save(d); }
+
+// ---------- Each profile has its own Story save (Billy, Nov 22). The main menu's My Room, both Shops and the Battle Arena
+// all use that profile's Story character, deck, collection and BP, so it's one character everywhere.
+const OLD_STORY = 'marbles-story';
+export const activeSlot = (d = load()) => d.active !== null && d.active !== undefined && d.slots[d.active] ? d.active : null;
+export const storyKey = (slot = activeSlot()) => slot === null || slot === undefined ? null : `marbles-story-${slot}`;
+export function loadStory(slot = activeSlot()) { const k = storyKey(slot); if (!k) return null; try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } }
+export function saveStory(st, slot = activeSlot()) { const k = storyKey(slot); if (!k) return; try { localStorage.setItem(k, JSON.stringify(st)); } catch {} }
+export const hasStory = (slot = activeSlot()) => { const st = loadStory(slot); return !!(st && st.you && st.season && st.you.coll); };
+export function dropStory(slot) { const k = storyKey(slot); if (k) try { localStorage.removeItem(k); } catch {} }
+// once: the single Story save from before goes to the active profile (no profile yet: a new one is made from it)
+export function migrateStory() {
+  let old = null; try { old = localStorage.getItem(OLD_STORY); } catch {} if (!old) return;
+  const d = load(); let slot = activeSlot(d);
+  if (slot === null) { let st = null; try { st = JSON.parse(old); } catch {} const y = (st && st.you) || {};
+    slot = d.slots.findIndex(x => !x); if (slot < 0) slot = 0; create(d, slot, y.name || 'Brawler', y.look || null); }
+  try { if (!localStorage.getItem(storyKey(slot))) localStorage.setItem(storyKey(slot), old); localStorage.removeItem(OLD_STORY); } catch {}
+}
+// a Story deck ({ id, name } objects) as My Room's deck (plain ids, and a Trap's uid)
+const GATE_C = ['gold', 'silver', 'copper'], AB_C = ['red', 'blue', 'green'];
+export function storyDeckIds(y) {
+  const d = y.deck; if (!d) return null;
+  const id = x => x && (x.id || x), tr = d.trap && (y.coll.traps || []).find(t => t.id === d.trap.id && (t.attrs || []).join() === (d.trap.attrs || []).join());
+  return { toys: d.toys.map(x => ({ id: x.id, attr: x.attr })), gates: Object.fromEntries(GATE_C.map(c => [c, id(d.gates[c])])),
+    abilities: Object.fromEntries(AB_C.map(c => [c, id(d.abilities[c])])), extra: Object.fromEntries(AB_C.map(c => [c, ((d.extra || {})[c] || []).map(id)])), trap: tr ? tr.uid : null };
+}
+// a profile as everything outside Story sees it: with a Story save, its name, look, deck, BP and collection come from there
+export function view(p, slot) {
+  const st = loadStory(slot); if (!p || !st || !st.you || !st.season || !st.you.coll) return p;
+  const y = st.you, w = st.season.B.you, dk = storyDeckIds(y);
+  return { ...p, name: y.name || p.name, look: y.look || p.look, deck: dk, deckNV: dk, bp: w.wallet, story: true,
+    owned: { toys: Object.fromEntries(Object.keys(y.coll.toys).map(k => [k, { g: 0, st: {}, ...JSON.parse(JSON.stringify(y.coll.toys[k] || {})) }])), cards: [...y.coll.cards], traps: [...y.coll.traps] } };
+}
 // titles by number of wins (the DS's ranks)
 export const TITLES = [[0, 'Rookie'], [5, 'Beginner'], [15, 'Intermediate'], [30, 'Advanced'], [50, 'Bakugan Pro'], [80, 'Bakugan Master'], [120, 'Bakugan Emperor'], [200, 'Ultimate Brawler']];
 export const titleFor = wins => TITLES.filter(([n]) => wins >= n).at(-1)[1];
@@ -23,7 +56,9 @@ export const titleFor = wins => TITLES.filter(([n]) => wins >= n).at(-1)[1];
 export function record(slot, { opponent, won, gates = 0, knockouts = 0, level = 'normal' }) {
   let earned = 0;
   update(slot, p => {
-    ensureShop(p); earned = won ? (BP_WIN[level] || BP_WIN.normal) : BP_LOSS; p.bp += earned;
+    ensureShop(p); earned = won ? (BP_WIN[level] || BP_WIN.normal) : BP_LOSS;
+    // with a Story save the BP go to its wallet (spendable in both Shops), not to the season's BP ranking
+    const st = loadStory(slot); if (st && st.season && st.season.B && st.season.B.you) { st.season.B.you.wallet += earned; saveStory(st, slot); } else p.bp += earned;
     const s = p.stats = { ...newStats(), ...(p.stats || {}) };
     s.matches++; if (won) { s.wins++; s.streak++; s.best = Math.max(s.best, s.streak); } else { s.losses++; s.streak = 0; }
     s.gates += gates; s.knockouts += knockouts;
@@ -81,3 +116,6 @@ export function upgraded(t, attr, owned) {
   const st = {}; for (const k of STATS) st[k] = Math.min(STAT_CAP, (base[k] || 3) + ((u.st || {})[k] || 0));
   return { g: Math.min(G_CAP, (t.baseG || 250) + (u.g || 0) * G_STEP), stats: st, level: levelOf(u) };
 }
+
+// last, once everything above is defined: move an old single Story save over to its profile
+migrateStory();

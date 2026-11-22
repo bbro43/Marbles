@@ -110,14 +110,16 @@ async function faceShot() {
 
 // ---- screens
 let screen = 'room', roomSel = 3, slot = null;
-const prof = () => { if (STORY) return storyProf(); const d = P.load(); const p = d.active !== null ? d.slots[d.active] : null; if (p && (p.bp === undefined || !p.owned)) { P.ensureShop(p); P.save(d); } return p; };
+const prof = () => { if (SD()) return storyProf(); const d = P.load(); const p = d.active !== null ? d.slots[d.active] : null; if (p && (p.bp === undefined || !p.owned)) { P.ensureShop(p); P.save(d); } return p; };
 const act = () => P.load().active;
 // ---------- Story mode store (Billy, Nov 20): room.html?story=1 opens this store for story mode, with your story BP,
 // your story collection, league locks and the season's sales. The clerk is our own character (not from the show).
 const STORY = new URLSearchParams(location.search).has('story');
-const SKEY = 'marbles-story';
-const sLoad = () => { try { return JSON.parse(localStorage.getItem(SKEY) || 'null'); } catch { return null; } };
-const sSave = s => { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch {} };
+// Each profile has its own Story save (js/profiles.js, Billy Nov 22). Whenever the active profile has one, My Room from the
+// main menu edits that same character, deck and collection, and its Shop is the Story store (same prices, locks and sales).
+const sLoad = () => P.loadStory();
+const sSave = s => P.saveStory(s);
+const SD = () => STORY || P.hasStory();   // use the Story save
 const sLeague = s => Math.min(4, s.season.leagues.findIndex(l => l.includes('you')) + 1);
 function storyProf() {
   const s = sLoad(), y = s.you, w = s.season.B.you;
@@ -139,7 +141,7 @@ function sDeckFromIds(d, s) {
 }
 // apply a purchase: to the active profile, or (story mode) to the story save
 function upd(fn) {
-  if (!STORY) return P.update(act(), fn);
+  if (!SD()) return P.update(act(), fn);
   const s = sLoad(), q = storyProf(); fn(q);
     s.season.B.you.wallet = q.bp; const nd = q.deckNV || q.deck; if (nd && nd.toys && nd.toys.length === 3) s.you.deck = sDeckFromIds(nd, s);
   for (const k of Object.keys(q.owned.toys)) s.you.coll.toys[k] = q.owned.toys[k];   // each Bakugan's own upgrades (G-Power and stats) live here
@@ -276,9 +278,9 @@ function closet(start) {
     const c = +b.dataset.color; look[editPart][1] = c; if (editPart === 'hair') look.eyeblow[1] = c;
     go('closet');
   });
-  if ($('cName')) $('cName').onclick = () => askName(name).then(n => { if (n) { closetName = n; if (STORY) { const s = sLoad(); s.you.name = n; sSave(s); } else if (p && !isNew) P.update(P.load().active, q => { q.name = n; }); } go('closet'); });
+  if ($('cName')) $('cName').onclick = () => askName(name).then(n => { if (n) { closetName = n; if (SD()) { const s = sLoad(); s.you.name = n; sSave(s); P.update(P.load().active, q => { q.name = n; }); } else if (p && !isNew) P.update(P.load().active, q => { q.name = n; }); } go('closet'); });
   if ($('cDone')) $('cDone').onclick = async () => {
-    await building; if (STORY) { const s = sLoad(); s.you.look = look; sSave(s); look = null; editCat = editPart = null; return go('room'); }
+    await building; if (SD() && !isNew) { const s = sLoad(); s.you.look = look; sSave(s); P.update(P.load().active, q => { q.look = look; }); look = null; editCat = editPart = null; return go('room'); }
     const face = await faceShot();
     const d = P.load();
     const fresh = isNew;
@@ -308,7 +310,7 @@ let deckMode = 'classic';
 const deckKey = () => deckMode === 'nv' ? 'deckNV' : 'deck';
 const deckOf = p => deckMode === 'nv' ? (p.deckNV || (p.deck && { ...p.deck })) : p.deck;
 function deck() {
-  if (STORY) deckMode = 'nv'; const p = prof(); if (!p) return go('save');
+  if (SD()) deckMode = 'nv'; const p = prof(); if (!p) return go('save');
   top3d(false, `url(${art('arena_top')}) 0 0 / 256px 192px`);
   const nv = deckMode === 'nv', cat = pack.catalog, d = deckOf(p), toyBy = new Map(cat.toys.map(t => [t.id, t])), cardBy = new Map(cat.cards.map(c => [c.id, c]));
   let total = 0, pics = '';
@@ -374,7 +376,7 @@ function save() {
   bar(deleting ? 'Tap a player to delete it.' : 'Choose a player.');
   $('bot').querySelectorAll('[data-slot]').forEach(b => b.onclick = async () => {
     const i = +b.dataset.slot, dd = P.load(), s = dd.slots[i];
-    if (deleting) { if (s && confirm(`Delete ${s.name}? This can't be undone.`)) { dd.slots[i] = null; if (dd.active === i) dd.active = dd.slots.findIndex(Boolean) >= 0 ? dd.slots.findIndex(Boolean) : null; P.save(dd); } deleting = false; return go('save'); }
+    if (deleting) { if (s && confirm(`Delete ${s.name}? This can't be undone.`)) { dd.slots[i] = null; P.dropStory(i);   /* its Story goes with it */ if (dd.active === i) dd.active = dd.slots.findIndex(Boolean) >= 0 ? dd.slots.findIndex(Boolean) : null; P.save(dd); } deleting = false; return go('save'); }
     if (s) { dd.active = i; P.save(dd); return go('room'); }
     slot = i; const n = await askName(''); if (!n) return go('save');
     closetName = n; editCat = editPart = null; go('closet', { look: JSON.parse(JSON.stringify(DEFAULT_LOOK)), isNew: true, name: n });
@@ -542,8 +544,8 @@ const SHOP = [['bakugan', 'BAKUGAN', 'Hi there! Pick a Bakugan to buy.'], ['card
   ['trap', 'TRAP', 'Traps! Pick its color and its attributes. More attributes cost more.']];
 async function shop() {
   const p = prof(); await loadShop(); shopTop(true);
-  const sale = STORY ? salesOnDay(sLoad().season, sLoad().day).map(saleText).join(' · ') : '';
-  $('topUI').innerHTML = `<div class="bubble"><b>${STORY ? CLERK.name : 'Alice'}</b>${STORY && shopSel === 0 && sLeague(sLoad()) > 1 ? 'Welcome! Stronger stock unlocks as you move up the leagues.' : SHOP[shopSel][2]}${sale ? `<br><span style="color:#c0262e;font-weight:900">${sale}</span>` : ''}</div>`;
+  const sale = SD() ? salesOnDay(sLoad().season, sLoad().day).map(saleText).join(' · ') : '';
+  $('topUI').innerHTML = `<div class="bubble"><b>${SD() ? CLERK.name : 'Alice'}</b>${SD() && shopSel === 0 && sLeague(sLoad()) > 1 ? 'Welcome! Stronger stock unlocks as you move up the leagues.' : SHOP[shopSel][2]}${sale ? `<br><span style="color:#c0262e;font-weight:900">${sale}</span>` : ''}</div>`;
   const n = SHOP.length, L = (shopSel + n - 1) % n, R = (shopSel + 1) % n;
   $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 22) +
     `<img src="${art('shop_' + (SHOP[L][0] === 'trap' ? 'bakugan' : SHOP[L][0]))}" class="tap" id="sL" style="left:2px;top:66px" alt="">` +
@@ -578,14 +580,14 @@ function shopList(kind, confirmItem = null) {
   if (kind === 'bakugan') {
     const a = ATTRS[listTab];
     items = cat.toys.filter(t => t.baseG && t.attributes && t.attributes[a]).sort((x, y) => x.baseG - y.baseG)
-      .filter(t => !STORY || isSoldToy(t))
+      .filter(t => !SD() || isSoldToy(t))
       .map(t => ({ id: t.id, name: t.name, attr: a, price: P.toyPrice(t), g: t.baseG, owned: !!p.owned.toys[P.key(t.id, a)], t, pic: (t.thumbs || {})[a],
-        ...(STORY ? sPrice('bakugan', t, { kind: 'bakugan', attr: a }) : {}) }));
+        ...(SD() ? sPrice('bakugan', t, { kind: 'bakugan', attr: a }) : {}) }));
   } else {
     const c = CARD_TABS[listTab];
     items = cat.cards.filter(x => x.color === c && (x.type === 'gate' ? x.bonus : isCoded(x))).map(x => ({ id: x.id, name: x.name, price: P.cardPrice(x), owned: p.owned.cards.includes(x.id), c: x, pic: x.art,
-      ...(STORY ? sPrice('card', x, { kind: x.type === 'gate' ? 'gate' : 'ability', color: x.color }) : {}) }));
-    if (STORY) items.sort((a, b) => !!a.lock - !!b.lock || a.full - b.full);
+      ...(SD() ? sPrice('card', x, { kind: x.type === 'gate' ? 'gate' : 'ability', color: x.color }) : {}) }));
+    if (SD()) items.sort((a, b) => !!a.lock - !!b.lock || a.full - b.full);
   }
   listSel = Math.min(listSel, Math.max(0, items.length - 1));
   const it = items[listSel];
@@ -647,11 +649,11 @@ function upgrade(stage = 'list', ask = null, grow = null) {
   const mine = Object.keys(p.owned.toys).map(k => { const [id, attr] = k.split(':'); return { k, id, attr, t: toyBy.get(id) }; }).filter(x => x.t);
   if (!mine.length) { go('shop'); bar('You have no Bakugan yet.'); return; }
   upSel = Math.max(0, Math.min(upSel, mine.length - 1)); upTop = Math.max(0, Math.min(upTop, upSel, mine.length - 3));
-  const sv = STORY ? sLoad() : null, sNo = sv ? (sv.seasonNo || 2) : 0;
-  const off = STORY ? discountOn(sv.season, sv.day, { kind: 'upgrades' }) : 0, sale = c => Math.round(c * (100 - off) / 100);
+  const sv = SD() ? sLoad() : null, sNo = sv ? (sv.seasonNo || 2) : 0;
+  const off = SD() ? discountOn(sv.season, sv.day, { kind: 'upgrades' }) : 0, sale = c => Math.round(c * (100 - off) / 100);
   const info = m => { const u = p.owned.toys[m.k] || {}, up = P.upgraded(m.t, m.attr, p.owned);
     const statsLeft = up.level - 1 < P.LEVEL_UPS && UP_STATS.some(k => up.stats[k] < P.STAT_CAP);
-    const gLeft = up.g < P.G_CAP && !(STORY && ((u.gs || {})[sNo] || 0) >= 2);
+    const gLeft = up.g < P.G_CAP && !(SD() && ((u.gs || {})[sNo] || 0) >= 2);
     return { u, up, statsLeft, gLeft, lvCost: sale(P.levelPrice(up.level)), gCost: sale(P.gPrice(u.g || 0, up.g)) }; };
   const x = mine[upSel], X = info(x);
   // top screen: the selected Bakugan's stats (a just-bought stat grows from its old value)
@@ -694,7 +696,7 @@ function upgrade(stage = 'list', ask = null, grow = null) {
     $('cNo').onclick = () => upgrade('list');
     $('cYes').onclick = () => { if (p.bp < ask.cost) { upgrade('list'); bar(`You need ${ask.cost - p.bp} more BP.`); return; }
       if (ask.kind === 'stat') { upgrade('stats'); bar(`Pick a stat to raise for ${x.t.name}.`); }
-      else { buy(ask.cost, t => { t.g = (t.g || 0) + 1; if (STORY) { t.gs = t.gs || {}; t.gs[sNo] = (t.gs[sNo] || 0) + 1; } }); upgrade('list'); bar(`${x.t.name} is now ${Math.min(P.G_CAP, X.up.g + 10)}G!`); } };
+      else { buy(ask.cost, t => { t.g = (t.g || 0) + 1; if (SD()) { t.gs = t.gs || {}; t.gs[sNo] = (t.gs[sNo] || 0) + 1; } }); upgrade('list'); bar(`${x.t.name} is now ${Math.min(P.G_CAP, X.up.g + 10)}G!`); } };
     backBtn(() => upgrade('list'));
     if (!grow) bar(ask.kind === 'stat' ? `Upgrade ${x.t.name}'s stats for ${ask.cost} BP?` : `Raise ${x.t.name}'s G-Power for ${ask.cost} BP?`);
     return;
@@ -746,10 +748,10 @@ function trapShop() {
   if (slots === 6) trapPick.attrs = [...ATTRS];
   if (slots && trapPick.attrs.length > slots) trapPick.attrs = trapPick.attrs.slice(-slots);
   // story mode: your league caps how many attributes a Trap can cover (League 4: 1 ... League 1: all 6)
-  const sCap = STORY ? trapAttrCap(sLeague(sLoad())) : 6, lockedT = STORY && slots > sCap;
-  if (STORY && !slots && trapPick.attrs.length > sCap) trapPick.attrs = trapPick.attrs.slice(-sCap);
-  const need = slots || (STORY ? 1 : 2), n = trapPick.attrs.length, ready = !lockedT && (slots ? n === slots : n >= need);
-  const sOff = STORY ? discountOn(sLoad().season, sLoad().day, { kind: 'trap' }) : 0;
+  const sCap = SD() ? trapAttrCap(sLeague(sLoad())) : 6, lockedT = SD() && slots > sCap;
+  if (SD() && !slots && trapPick.attrs.length > sCap) trapPick.attrs = trapPick.attrs.slice(-sCap);
+  const need = slots || (SD() ? 1 : 2), n = trapPick.attrs.length, ready = !lockedT && (slots ? n === slots : n >= need);
+  const sOff = SD() ? discountOn(sLoad().season, sLoad().day, { kind: 'trap' }) : 0;
   const price = Math.round(P.trapPrice(Math.max(need, n)) * (100 - sOff) / 100), mine = (p.owned.traps || []);
   shopTop(false); top3d(false, 'linear-gradient(115deg,#5a0b1e 0%,#b0122a 45%,#5a0b2e 100%)');
   $('topUI').innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:22px;background:linear-gradient(#b0122a,#6b0d22);border-bottom:1px solid #fff5;font:900 11px/22px system-ui;text-align:center">
@@ -776,7 +778,7 @@ function trapShop() {
   $('tNext').onclick = () => { trapPick = { i: (trapPick.i + 1) % traps.length, color: null, attrs: trapPick.attrs }; trapShop(); };
   $('bot').querySelectorAll('[data-col]').forEach(b => b.onclick = () => { trapPick.color = b.dataset.col; trapShop(); });
   $('bot').querySelectorAll('[data-ta]').forEach(b => b.onclick = () => { if (slots === 6) return; const a = b.dataset.ta, k = trapPick.attrs.indexOf(a);
-    if (k >= 0) trapPick.attrs.splice(k, 1); else if (!STORY || slots || trapPick.attrs.length < sCap) trapPick.attrs.push(a); else bar(`In your league a Trap can cover ${sCap} attribute${sCap > 1 ? 's' : ''}.`); trapShop(); });
+    if (k >= 0) trapPick.attrs.splice(k, 1); else if (!SD() || slots || trapPick.attrs.length < sCap) trapPick.attrs.push(a); else bar(`In your league a Trap can cover ${sCap} attribute${sCap > 1 ? 's' : ''}.`); trapShop(); });
   $('tBuy').onclick = () => {
     if (lockedT) { bar(`${T.name} unlocks in a higher league.`); return; }
     if (!ready) { bar(slots ? `${T.name} has exactly ${slots} attributes.` : `A Trap needs ${need} or more attributes.`); return; }

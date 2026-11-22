@@ -326,6 +326,7 @@ function variantFor(texName, L) {
 
 // url(path in pack) -> fetchable URL. Returns a THREE.Group with the whole character, feet at y = 0.
 export async function buildAvatar(L, url) {
+  L = L || DEFAULT_LOOK;   // a profile without a look yet (e.g. made from an old Story save)
   const loader = new GLTFLoader(), texLoader = new THREE.TextureLoader(), group = new THREE.Group();
   const texCache = new Map();
   const raced = (L.race || 'human') !== 'human';

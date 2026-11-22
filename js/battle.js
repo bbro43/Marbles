@@ -1364,7 +1364,7 @@ async function start() {
   // You: your profile's name, face and deck (built in My Room)
   if (picked) picked.forEach(c => {
     if (c.profile === undefined || c.profile === null) return;
-    const pr = Profiles.load().slots[c.profile]; if (!pr) return;
+    const pr = Profiles.view(Profiles.load().slots[c.profile], c.profile); if (!pr) return;
     c.name = pr.name; c.face = pr.face || c.face;
     const d = NV ? (pr.deckNV || pr.deck) : pr.deck;   // each rule set has its own deck
     if (d && d.toys && d.toys.length === 3 && GATE_COLORS.every(k => d.gates[k]) && AB_COLORS.every(k => d.abilities[k]))
@@ -1386,7 +1386,7 @@ async function start() {
   // your Bakugan's upgrades from the Shop (G-Power and levels)
   players.forEach((pl, p) => {
     const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;
-    const pr = Profiles.load().slots[c.profile]; if (!pr || !pr.owned) return;
+    const pr = Profiles.view(Profiles.load().slots[c.profile], c.profile); if (!pr || !pr.owned) return;
     pl.toys.forEach(t => { const d = cat.toys.find(x => x.id === t.id); if (!d) return; const u = Profiles.upgraded(d, t.attr, pr.owned); t.g = u.g; t.stats = { ...t.stats, ...u.stats }; });
   });
   // a profile without a deck yet keeps the one just built
@@ -1404,7 +1404,7 @@ async function start() {
   // your Trap from My Room > Deck (one per game, played like an Ability card in a battle)
   players.forEach((pl, p) => {
     const c = picked && picked[p]; if (!c || c.profile === undefined || c.profile === null) return;
-    const pr = Profiles.load().slots[c.profile]; const dk = pr && (pr.deckNV || pr.deck); const tr = NV && dk && dk.trap && (pr.owned.traps || []).find(x => x.uid === dk.trap);
+    const pr = Profiles.view(Profiles.load().slots[c.profile], c.profile); const dk = pr && (pr.deckNV || pr.deck); const tr = NV && dk && dk.trap && (pr.owned.traps || []).find(x => x.uid === dk.trap);
     const d = tr && (cat.traps || []).find(x => x.id === tr.id);
     if (d) pl.trap = { type: 'trap', color: 'trap', id: tr.uid, trapId: d.id, trapColor: tr.color, name: `Trap: ${d.name}`, attrs: tr.attrs,
       text: `Adds the Gate bonus for ${tr.attrs.map(a => a[0].toUpperCase() + a.slice(1)).join(', ')}.` };

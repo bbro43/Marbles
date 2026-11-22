@@ -12,6 +12,7 @@ import { setupSeason2, LEAGUE_NAMES, season2Events, promoteSeason2, VEXOS, NEWCO
 import { PRIZE_BAND } from './season.js';
 import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
+import * as Prof from './profiles.js';
 import { mountCommons } from './commons3d.js';
 import { playLogin } from './login3d.js';
 import { buildAvatar, DEFAULT_LOOK } from './avatar.js';
@@ -20,7 +21,8 @@ import { stock, trapAttrCap, priceTrap, salesFor, salesOnDay, discountOn, saleTe
 import { setupTeams, GATE_COLORS, AB_COLORS } from './setup.js';
 
 const $ = id => document.getElementById(id);
-const KEY = 'marbles-story';
+// each profile has its own Story save (js/profiles.js): this page plays the active profile's
+const KEY = () => Prof.storyKey() || 'marbles-story-0';
 const SLOTS = ['Morning', 'Afternoon', 'Evening'];
 const DAYS = 91;
 const LEAGUE_DAYS = [0, 2, 4, 6, 8, 10, 11].map(w => w * 7 + 2);   // one league round a week (as js/season.js)
@@ -30,8 +32,8 @@ const cap = s => s[0].toUpperCase() + s.slice(1);
 const NAME = { nv_dan: 'Dan', nv_shun: 'Shun', nv_marucho: 'Marucho', chanlee: 'Chan Lee' };
 
 let cat = null, save = null, PACK = null;
-const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } };
-const store = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch {} };
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY()) || 'null'); } catch { return null; } };
+const store = () => { try { localStorage.setItem(KEY(), JSON.stringify(save)); } catch {} };
 
 // ---------- the season
 const teamDef = id => id === 'you' ? null : AI_TEAMS[id] || INTERSPACE[id];
@@ -1083,7 +1085,7 @@ function nextSeason() {
 //   say(who, text)                         a line (who: 'ISA', a brawler id or a name)
 //   say(who, text, [[label, fn], ...])     a line that ends with choices
 //   say(who, text, null, { call: true })   the speaker is on a call window (show characters, calls from far away)
-//   say(who, text, null, { input: { placeholder, ok, done(value) } })   ask for typed text (your name)
+//   say(who, text, null, { input: { placeholder, value, ok, done(value) } })   ask for typed text (your name), value pre-filled
 let dq = [], typer = null, answering = false;
 const TYPE_MS = 22;   // per letter
 function say(who, text, choices = null, opts = {}) { dq.push({ who, text, choices, ...opts }); if (dq.length === 1 && !answering) showLine(); }
@@ -1113,7 +1115,7 @@ function showLine() {
     clearInterval(typer); typer = null; T.textContent = l.text; const isa = $('sceneStage').querySelector('.isaPanel'); if (isa) isa.classList.remove('talk');
     const tail = D.querySelector('.tail');
     if (l.input) {
-      tail.innerHTML = `<input id="nm" maxlength="14" placeholder="${l.input.placeholder || ''}"><div class="dch"><button id="nmok">${l.input.ok || 'OK'}</button></div>`;
+      tail.innerHTML = `<input id="nm" maxlength="14" placeholder="${l.input.placeholder || ''}" value="${(l.input.value || '').replace(/"/g, '&quot;')}"><div class="dch"><button id="nmok">${l.input.ok || 'OK'}</button></div>`;
       $('nmok').onclick = e => { e.stopPropagation(); const v = ($('nm').value || '').trim(); answer(() => l.input.done(v)); };
       $('nm').onclick = e => e.stopPropagation(); D.onclick = null; return;
     }
@@ -1137,14 +1139,19 @@ function opening(s1) {
     'I am ISA, the Interspace System Assistant. I manage the arenas, the schedules and the rankings.',
     'Our records show your last battle was before the Bakugan returned to New Vestroia. Welcome back.',
     'Interspace opened to the public this season. Humans and Vestals battle here with their own partners and with synthetic Bakugan made by Interspace.'], () => {
-    say('ISA', 'Please confirm your brawler name.', null, { input: { placeholder: 'Name', ok: 'Confirm', done: v => pickStarter(s1, v || 'Brawler') } });
+    const prof = Prof.active();   // your profile's name, ready to confirm
+    say('ISA', 'Please confirm your brawler name.', null, { input: { placeholder: 'Name', value: (prof && prof.name) || '', ok: 'Confirm', done: v => pickStarter(s1, v || 'Brawler') } });
   });
 }
 function pickStarter(s1, name) {
   say('ISA', `Thank you, ${name}. Registration is complete.`);
   say('ISA', 'Every new brawler receives a synthetic starter set: three Bakugan, three Gate cards and three Ability cards.');
   say('ISA', 'Please choose the attribute you want to start with.', ATTRS6.map(a => [`${cap(a)} (${STARTERS[a].toys.map(t => t.name).join(', ')})`, () => {
-    save = { v: 1, you: { name, attr: a, partner: null }, day: 0, slot: 0, view: 'commons', messages: [], seen: {}, friends: {}, season: newSeason(s1, name, a) };
+    let prof = Prof.active();
+    if (!prof) { const d = Prof.load(), sl = Math.max(0, d.slots.findIndex(x => !x)); prof = Prof.create(d, sl, name, null); }   // no profile yet: Story makes yours
+    save = { v: 1, you: { name, attr: a, partner: null, look: (prof && prof.look) || undefined }, day: 0, slot: 0, view: 'commons', messages: [], seen: {}, friends: {}, season: newSeason(s1, name, a) };
+    if (prof) Prof.update(Prof.activeSlot(), q => { q.name = name; });   // one name everywhere
+    ensureColl();   // the starter set goes into the collection now, so My Room and the Shop can use it right away
     store();
     say('ISA', `${cap(a)} set registered. Your Bakugan are in your inventory.`);
     say('ISA', 'You may name one Bakugan as your partner. This is a personal choice. It does not change how it battles.',
@@ -1178,6 +1185,7 @@ async function start() {
   if (loginCtl) { avatarSent = true; loginCtl.setAvatar(buildAvatar((save && save.you && save.you.look) || DEFAULT_LOOK, p => pack.url(p)).catch(() => null)); }   // you, in your login pod
   const s1 = await (await fetch('data/season1.json')).json();
   if (!save) { $('main').innerHTML = '<div class="hdr"><b>Bakugan Interspace</b></div>'; opening(s1); return; }
+  if (save.you && !save.you.look) { const pr = Prof.active(); if (pr && pr.look) save.you.look = pr.look; }   // the profile's character, if Story never had one
   if (save.season && save.you) { ensureColl(); migrateUps(); bondTeam(myTeam(), false); store(); }   // older saves: teammates at least Acquaintances
   takeResult();
   if (save.after && save.after.kind === 'newcomer') {   // back from the practice match with your first newcomer
@@ -1189,7 +1197,7 @@ async function start() {
   for (const q of save.queue || []) if (q === 'firstLeagueWin') { say('ISA', `First league win recorded. Three points to ${save.you.name}.`); say('ISA', `Your name is now on the ${save.season.names[leagueOf('you')]} table.`); }
   save.queue = []; store();
 }
-$('newgame').onclick = () => { if (confirm('Start a new story? This erases your current one.')) { localStorage.removeItem(KEY); location.reload(); } };
+$('newgame').onclick = () => { if (confirm('Start a new story? This erases your current one.')) { localStorage.removeItem(KEY()); location.reload(); } };
 // The login corridor plays each time you open Story mode from the menu (not when you come back from a battle or the Shop).
 // It stays up at least 4 seconds, or until the page has finished loading.
 let loginDone = null, loginCtl = null, avatarSent = false;

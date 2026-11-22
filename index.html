@@ -69,7 +69,7 @@ async function idbGet(key) { const d = await db(); return new Promise((res, rej)
 
 const $ = id => document.getElementById(id);
 try { sessionStorage.removeItem('marbles-story-in'); } catch {}   // next Story visit walks through the login corridor
-const APP_BUILD = 141;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 142;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -246,7 +246,7 @@ function chars() {
   if ($('cYou')) $('cYou').onclick = () => {
     if (cpu) { $('bar').remove(); bar('The computer plays a character — pick one of them.'); return; }
     // You = the player picked in My Room (name, face, deck). Player 2 on this device builds a deck instead.
-    let pr = null; try { const d = JSON.parse(localStorage.getItem('marbles-profiles') || 'null'); if (d && d.active !== null) pr = d.slots[d.active]; if (pr) pr.idx = d.active; } catch {}
+    let pr = null; try { const d = JSON.parse(localStorage.getItem('marbles-profiles') || 'null'); if (d && d.active !== null) pr = d.slots[d.active]; if (pr) { pr.idx = d.active; const st = JSON.parse(localStorage.getItem('marbles-story-' + d.active) || 'null'); if (st && st.you) { pr.name = st.you.name || pr.name; if (st.you.deck) pr.deck = pr.deck || {}; } } } catch {}   // with a Story save, its name and deck
     const taken = picks.some(c => c && c.profile !== undefined);
     if (!pr && !taken && pickFor === 0) { $('bar').remove(); bar('Make your character in My Room first (Title > My Room).'); return; }
     if (pr && !taken && !pr.deck) { $('bar').remove(); bar(`${pr.name} needs a deck — pick a starter deck in My Room.`); return; }
