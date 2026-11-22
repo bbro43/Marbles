@@ -5815,8 +5815,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "cu_002",
-     "name": "Elico"
+     "id": "cu_008",
+     "name": "Elfin"
     },
     "silver": {
      "id": "ds_208",
@@ -6091,8 +6091,8 @@ export const AI_TEAMS = {
    ],
    "gates": {
     "gold": {
-     "id": "cu_006",
-     "name": "Brontes"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_203",
