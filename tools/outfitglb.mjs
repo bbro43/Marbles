@@ -5,12 +5,15 @@
 // The tidy-up pass (fit(), shade()): split each face in four, pull tops and sleeves onto our fitted top_04 (mirrored, so both
 // sleeves are long) and pants onto down_00, lower the collars, narrow the coat tails and skirts, and bake shading and folds into the
 // vertex colors (the game draws clothes unlit, so shading has to be baked in).
+// Billy's v3 set (Nov 22) is already fitted and shaded: convert it with FIX=0.
 // Usage: node outfitglb.mjs <unzipped OBJ folder> <pack creator/models folder (templates)> <out folder>
 import { NodeIO } from '@gltf-transform/core';
 import { KHRMaterialsUnlit } from '@gltf-transform/extensions';
 import { prune } from '@gltf-transform/functions';
 import fs from 'fs';
 const [, , SRC, TPL, OUT] = process.argv;
+// FIX=0: skip the tidy-up pass (for pieces already fitted and shaded, like Billy's v3 set)
+const FIX = process.env.FIX !== '0';
 const io = new NodeIO().registerExtensions([KHRMaterialsUnlit]);
 
 // model name, OBJ, template, kind
@@ -165,12 +168,17 @@ for (const [name, obj, tpl] of PIECES) {
   const refs = isTop ? prims.filter(p => ['top_00', 'skin_00'].includes(p.getMaterial().getName())) : [cloth];
   const ref = []; for (const p of refs) { const A = p.getAttribute('POSITION'), J = p.getAttribute('JOINTS_0'), W = p.getAttribute('WEIGHTS_0'), e = [], j = [], w = [];
     for (const i of new Set(p.getIndices().getArray())) { A.getElement(i, e); J.getElement(i, j); W.getElement(i, w); ref.push([...e, [...j], [...w]]); } }
-  const m = readObj(`${SRC}/${obj}.obj`), kind = name.split('_')[0]; await fit(m, kind, name); inflate(m, isTop ? 0.0018 : tpl.startsWith('shoes') ? 0.0015 : 0.0005);
+  const m = readObj(`${SRC}/${obj}.obj`), kind = name.split('_')[0]; if (FIX) await fit(m, kind, name); inflate(m, isTop ? 0.0018 : tpl.startsWith('shoes') ? 0.0015 : 0.0005);
   const n = m.pos.length / 3, J = new Uint16Array(n * 4), W = new Float32Array(n * 4);
+  // tops: our template's left sleeve is short (the gauntlet covers the forearm), so both arms take their weights from the right
+  // arm (x <= 0), mirrored, with left and right bones swapped
+  const swapJ = joints.map(nm => { const o = nm.replace(/_L_|_R_|L_|R_/, t => t.replace('L', '#').replace('R', 'L').replace('#', 'R')); const k = joints.indexOf(o); return k < 0 ? joints.indexOf(nm) : k; });
+  const refL = isTop ? ref.filter(r => r[0] <= 0.002) : ref;
   for (let i = 0; i < n; i++) {
     const x = m.pos[i * 3], y = m.pos[i * 3 + 1], z = m.pos[i * 3 + 2];
-    let best = null, bd = 1e9; for (const r of ref) { const d = (r[0] - x) ** 2 + (r[1] - y) ** 2 + (r[2] - z) ** 2; if (d < bd) { bd = d; best = r; } }
-    const w = new Map(); best[3].forEach((jj, k) => { if (best[4][k] > 0) w.set(jj, (w.get(jj) || 0) + best[4][k]); });
+    const mir = isTop && x > 0, qx = mir ? -x : x;
+    let best = null, bd = 1e9; for (const r of refL) { const d = (r[0] - qx) ** 2 + (r[1] - y) ** 2 + (r[2] - z) ** 2; if (d < bd) { bd = d; best = r; } }
+    const w = new Map(); best[3].forEach((jj, k) => { const j2 = mir ? swapJ[jj] : jj; if (best[4][k] > 0) w.set(j2, (w.get(j2) || 0) + best[4][k]); });
     if (isTop && pelvis >= 0) {   // below the waist: the pelvis (blend over the hem)
       const t = Math.min(1, Math.max(0, (0.47 - y) / 0.05));
       if (t > 0) { for (const k of w.keys()) w.set(k, w.get(k) * (1 - t)); w.set(pelvis, (w.get(pelvis) || 0) + t); }
@@ -186,7 +194,7 @@ for (const [name, obj, tpl] of PIECES) {
     .setAttribute('POSITION', acc(new Float32Array(m.pos), 'VEC3')).setAttribute('TEXCOORD_0', acc(new Float32Array(m.uv), 'VEC2'))
     .setAttribute('JOINTS_0', acc(J, 'VEC4')).setAttribute('WEIGHTS_0', acc(W, 'VEC4'))
     .setIndices(acc(n > 65535 ? new Uint32Array(m.idx) : new Uint16Array(m.idx), 'SCALAR'));
-  prim.setAttribute('COLOR_0', acc(shade(m, kind), 'VEC3').setNormalized(true));
+  prim.setAttribute('COLOR_0', acc(FIX ? shade(m, kind) : new Uint8Array(m.pos.length).fill(255), 'VEC3').setNormalized(true));
   // keep our hands and gauntlet (and, for short sleeves, our bare arms); drop our cloth and the wrist bands
   for (const p of prims) { const mn = p.getMaterial().getName(); if (!isTop || mn === 'top_00' || !['skin_00', 'gauntlet_00'].includes(mn)) mesh.removePrimitive(p); }
   mesh.addPrimitive(prim); mesh.setName(name); root.listNodes().find(x => x.getMesh()).setName(name);
