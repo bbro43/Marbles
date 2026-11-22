@@ -14,6 +14,19 @@ import fs from 'fs';
 const [, , SRC, TPL, OUT] = process.argv;
 // FIX=0: skip the tidy-up pass (for pieces already fitted and shaded, like Billy's v3 set)
 const FIX = process.env.FIX !== '0';
+// ARMS=1: test of the armpit-gap fix: sleeves centered on the arm bone (y 0.612), torso widened under the arms
+const ARMS = process.env.ARMS === '1';
+function armFix(m) {
+  const P = m.pos, sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  for (let i = 0; i < P.length; i += 3) {
+    const ax = Math.abs(P[i]), y = P[i + 1];
+    // sleeves: down 0.006 (fades in from the shoulder)
+    if (y > 0.57) P[i + 1] -= 0.006 * sm(0.07, 0.1, ax);
+    // torso sides under the arms: out to about +-0.058 (fades out toward the waist, the shoulders and the middle)
+    const k = sm(0.44, 0.5, y) * (1 - sm(0.6, 0.63, y)) * sm(0.02, 0.045, ax) * (1 - sm(0.07, 0.085, ax));
+    P[i] *= 1 + 0.18 * k;
+  }
+}
 const io = new NodeIO().registerExtensions([KHRMaterialsUnlit]);
 
 // model name, OBJ, template, kind
@@ -168,7 +181,8 @@ for (const [name, obj, tpl] of PIECES) {
   const refs = isTop ? prims.filter(p => ['top_00', 'skin_00'].includes(p.getMaterial().getName())) : [cloth];
   const ref = []; for (const p of refs) { const A = p.getAttribute('POSITION'), J = p.getAttribute('JOINTS_0'), W = p.getAttribute('WEIGHTS_0'), e = [], j = [], w = [];
     for (const i of new Set(p.getIndices().getArray())) { A.getElement(i, e); J.getElement(i, j); W.getElement(i, w); ref.push([...e, [...j], [...w]]); } }
-  const m = readObj(`${SRC}/${obj}.obj`), kind = name.split('_')[0]; if (FIX) await fit(m, kind, name); inflate(m, isTop ? 0.0018 : tpl.startsWith('shoes') ? 0.0015 : 0.0005);
+  const m = readObj(`${SRC}/${obj}.obj`), kind = name.split('_')[0]; if (FIX) await fit(m, kind, name);
+  if (ARMS && kind === 'top') armFix(m); inflate(m, isTop ? 0.0018 : tpl.startsWith('shoes') ? 0.0015 : 0.0005);
   const n = m.pos.length / 3, J = new Uint16Array(n * 4), W = new Float32Array(n * 4);
   // tops: our template's left sleeve is short (the gauntlet covers the forearm), so both arms take their weights from the right
   // arm (x <= 0), mirrored, with left and right bones swapped
