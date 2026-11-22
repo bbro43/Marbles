@@ -4,7 +4,7 @@
 // - End of season: promotion (Season 2's special rule, then top 2 up / bottom 2 down), the next season, and the upgrade reset every 4 seasons.
 // - Social: teams (fixed show teams, computer teams that form, your own), friendship, rivals, trade offers.
 // - Scenes: scene(key) plays a conversation from SCENES (claude/story-scripts.md). Models for scenes: still to build (search "MODELS GO HERE").
-import { ownedForBattle } from './gear.js';
+import { ownedForBattle, GEAR_COLORS, GEAR_LEAGUE, gearDefs, nanoDefs, boostOf, priceOf as priceOfGear } from './gear.js';
 import { fixAttr } from './dual.js';
 import { Pack } from './pack.js';
 import { makeRng, playMatch, buildPlayer } from './sim.js';
@@ -340,6 +340,7 @@ const SCENES = {
   },
 };
 window.STORY_SCENE = (key, data) => scene(key, data);   // for testing: play any scene from the console
+window.STORY_GO = v => render(v);   // for testing: open any Story screen from the console
 const ordinal = n => n + (['th', 'st', 'nd', 'rd'][(n % 100 - 20) % 10] || ['th', 'st', 'nd', 'rd'][n % 100] || 'th');
 function scene(key, data = {}) { const f = SCENES[key]; if (f) try { f(data); } catch (e) { console.error('scene', key, e); } }
 
@@ -708,7 +709,10 @@ function render(view = save.view || 'commons') {
       <p>Ability cards: ${AB_COLORS.map(c => [t.abilities[c], ...((t.extra || {})[c] || [])].filter(Boolean).map(x => nm(x.id || x)).join(', ')).join(' · ')}</p>
       <button class="big" id="editDeck">Edit deck</button>
       <h3>Trap</h3>${y.coll.traps.length ? y.coll.traps.map(x => `<button class="row ${t.trap && t.trap.id === x.id && t.trap.attrs.join() === x.attrs.join() ? 'on' : ''}" data-usetrap="${x.uid}">${x.name} · ${x.attrs.map(cap).join(', ')}</button>`).join('') : '<p class="note">No Traps yet. The Shop sells them.</p>'}
-      <p class="note">Collection: ${Object.keys(y.coll.toys).length} Bakugan, ${y.coll.cards.length} cards, ${y.coll.traps.length} Traps.</p>` + back();
+` + [['gear', 'Battle Gear', gearDefs(cat)], ['nano', 'BakuNano', nanoDefs(cat)]].map(([k, title, defs]) => `<h3>${title}</h3>` + ((y.coll[k] || []).length
+        ? y.coll[k].map(x => { const D = defs.find(d => d.id === x.id) || { name: x.id }; return `<button class="row ${t[k] === x.uid ? 'on' : ''}" data-usesup="${k}:${x.uid}">${D.name} · ${cap(x.color)} · +${boostOf(D, x.color)}G</button>`; }).join('')
+        : `<p class="note">No ${title} yet. The Shop sells it.</p>`)).join('') +
+      `<p class="note">Collection: ${Object.keys(y.coll.toys).length} Bakugan, ${y.coll.cards.length} cards, ${y.coll.traps.length} Traps.</p>` + back();
   }
   { const mh = $('map'); if (mh && mh.parentNode === $('main')) document.body.appendChild(mh); }   // keep the 3D map when the page is redrawn
   if (room3d) { room3d.dispose(); room3d = null; }
@@ -733,6 +737,7 @@ function render(view = save.view || 'commons') {
   $('main').querySelectorAll('[data-partner]').forEach(b => b.onclick = () => { save.you.partner = b.dataset.partner; store(); render('inventory'); });
   if ($('rest')) $('rest').onclick = rest;
   if ($('editDeck')) $('editDeck').onclick = editDeck;
+  $('main').querySelectorAll('[data-usesup]').forEach(e => e.onclick = () => { const [k, uid] = e.dataset.usesup.split(':'); save.you.deck[k] = uid; store(); render('inventory'); });
   $('main').querySelectorAll('[data-usetrap]').forEach(e => e.onclick = () => { const x = save.you.coll.traps.find(q => q.uid === e.dataset.usetrap);
     save.you.deck.trap = { id: x.id, name: x.name, attrs: x.attrs }; store(); render('inventory'); });
   if ($('playLeague')) $('playLeague').onclick = () => launch(f.opp, { key: f.key, league: true });
@@ -789,7 +794,7 @@ function shopView() {
   ensureColl(); STOCK = STOCK || stock(cat);
   const b = save.season.B.you, L = leagueNum(), y = save.you;
   shopAttr = shopAttr || y.attr;
-  const tabs = [['boost', 'Boosts'], ['bakugan', 'Bakugan'], ['gate', 'Gate cards'], ['ability', 'Ability cards'], ['trap', 'Traps']];
+  const tabs = [['boost', 'Boosts'], ['bakugan', 'Bakugan'], ['gate', 'Gate cards'], ['ability', 'Ability cards'], ['trap', 'Traps'], ['gear', 'Gear']];
   let h = `<h2>The Shop</h2><p class="note">You have <b>${b.wallet} BP</b>. You're in ${save.season.names[leagueOf('you')]}: higher leagues unlock stronger stock.</p>` +
     salesOn().map(x => `<p class="sale">On sale: ${saleText(x)}${x.to > save.day ? ` (until day ${x.to + 1})` : ' (last day)'}</p>`).join('') +
     `<div class="tabs">${tabs.map(([k, n]) => `<button class="${shopTab === k ? 'on' : ''}" data-stab="${k}">${n}</button>`).join('')}</div>`;
@@ -815,6 +820,15 @@ function shopView() {
       STOCK.traps.map(x => `<button class="row ${trapPick.id === x.t.id ? 'on' : ''}" data-trap="${x.t.id}">${x.t.name}</button>`).join('') +
       (trapPick.id ? `<p>Attributes (${trapPick.attrs.length}/${capN}):</p><div class="tabs">${ATTRS6.map(a => `<button class="${trapPick.attrs.includes(a) ? 'on' : ''}" data-tattr="${a}" style="border-color:${ATTR_COLOR[a]}">${cap(a)}</button>`).join('')}</div>
         <p>Cost: ${priceTag(price, it)}</p><button class="big" id="buyTrap" ${!trapPick.attrs.length || b.wallet < salePrice(price, it) ? 'disabled' : ''}>Buy Trap</button>` : '');
+  } else if (shopTab === 'gear') {
+    // Battle Gear and BakuNano (js/gear.js): Support like a Trap, added to a battle once per match for its boost. On sale with Traps.
+    const it = { kind: 'trap' }, owned = (k, id, c) => (y.coll[k] || []).some(q => q.id === id && q.color === c);
+    const rows = (k, defs) => defs.map(D => `<div class="item"><span class="nm">${D.name}</span></div>` + GEAR_COLORS.map(c => {
+      const pr = priceOfGear(D, c), lock = L > GEAR_LEAGUE[c];
+      return `<div class="item ${lock ? 'locked' : ''}"><span class="nm"><small>${cap(c)} · +${boostOf(D, c)}G</small></span>
+        ${!pr ? '<span class="own">Not for sale yet</span>' : owned(k, D.id, c) ? '<span class="own">Owned</span>' : lock ? LOCK(GEAR_LEAGUE[c]) : `${priceTag(pr, it)} <button data-gbuy="${k}:${D.id}:${c}" ${b.wallet < salePrice(pr, it) ? 'disabled' : ''}>Buy</button>`}</div>`; }).join('')).join('');
+    h += `<p class="note">Battle Gear and BakuNano are Support, like a Trap: add one to a battle for its boost, once per match. Your deck holds one of each. Used in New Vestroia matches.</p>` +
+      `<h3>Battle Gear</h3>${rows('gear', gearDefs(cat))}<h3>BakuNano</h3>${rows('nano', nanoDefs(cat))}`;
   }
   return h + who('shop') + back();
 }
@@ -835,6 +849,14 @@ function shopWire() {
       if (x.tier < leagueNum() || b.wallet < p || y.coll.cards.includes(id)) return; b.wallet -= p; y.coll.cards.push(id);
       msg('ISA', `${x.c.name} added to your collection for ${p} BP.`); }
     store(); render('shop');
+  });
+  m.querySelectorAll('[data-gbuy]').forEach(e => e.onclick = () => {
+    const [k, id, c] = e.dataset.gbuy.split(':'), D = (k === 'gear' ? gearDefs(cat) : nanoDefs(cat)).find(d => d.id === id), pr = D && priceOfGear(D, c);
+    if (!pr || leagueNum() > GEAR_LEAGUE[c]) return;
+    const p = salePrice(pr, { kind: 'trap' }); if (b.wallet < p) return;
+    b.wallet -= p; y.coll[k] = y.coll[k] || []; const uid = (k === 'gear' ? 'g' : 'n') + Date.now().toString(36);
+    y.coll[k].push({ uid, id, color: c }); if (!y.deck[k]) y.deck[k] = uid;
+    msg('ISA', `${D.name} (${cap(c)}) purchased for ${p} BP.${y.deck[k] === uid ? ' It is in your deck.' : ' Choose it in My Room.'}`); store(); render('shop');
   });
   if ($('buyTrap')) $('buyTrap').onclick = () => {
     const T = STOCK.traps.find(q => q.t.id === trapPick.id).t, p = salePrice(priceTrap(trapPick.attrs.length), { kind: 'trap' });

@@ -1,12 +1,13 @@
 // Battle Gear and BakuNano (Billy, Nov 22; pack 0.51, catalog `battleGear` and `bakuNano`, files in pack 2).
 // New Vestroia rules only, like Traps. Each comes in three colors (copper, silver, gold), each with its own boost and price.
 // Each player brings 1 Battle Gear and 1 BakuNano with their Trap.
-//   Battle Gear: before a throw, equip it to the Bakugan you're throwing; in every battle that Bakugan is in it adds its boost;
-//                it comes off when that Bakugan wins a battle or gets a double stand, and can be equipped again later (js/rules.js).
-//   BakuNano:    once per match, add it to your Bakugan in a battle (no Ability card needed): it adds its boost (js/abilities.js).
+// All Support works the same (Billy, Nov 22): a Trap, a Battle Gear or a BakuNano is added to a battle like an Ability card,
+// once per match, for its power boost (js/abilities.js); its model drops onto the Gate card beside your Bakugan (js/battle.js).
 // Owned ones are kept like Traps: { uid, id, color } in owned.gear / owned.nano (Story: you.coll.gear / you.coll.nano),
 // and a deck holds the uid in deck.gear / deck.nano.
 export const GEAR_COLORS = ['copper', 'silver', 'gold'];
+// Story: copper is sold from League 4, silver from League 3, gold from League 2 (Billy confirmed, Nov 22). Sales follow the Trap sales.
+export const GEAR_LEAGUE = { copper: 4, silver: 3, gold: 2 };
 export const gearDefs = cat => cat.battleGear || [];
 export const nanoDefs = cat => cat.bakuNano || [];
 // Billy's numbers (Battle_Gear_and_BakuNano_Boosts.xlsx), used when the catalog entry has no boost / price of its own
@@ -24,7 +25,8 @@ export const priceOf = (def, color) => field(def, 'price', color);
 // the color with the highest boost (of the ones given)
 export const bestColor = (def, colors = GEAR_COLORS) => [...colors].filter(c => (def.attributes || def.boost || (DEFAULTS[def.id] || {}).boost || {})[c] !== undefined).sort((a, b) => boostOf(def, b) - boostOf(def, a))[0] || colors[0];
 // for a battle player
-export const gearForBattle = (def, color, uid) => def && { id: uid || 'gear-' + def.id, gearId: def.id, color, name: def.name, boost: boostOf(def, color) };
+export const gearForBattle = (def, color, uid) => def && { type: 'gear', color: 'gear', id: uid || 'gear-' + def.id, gearId: def.id, gearColor: color, name: def.name,
+  boost: boostOf(def, color), text: `Battle Gear: +${boostOf(def, color)}G to your Bakugan in this battle. Once per match.` };
 export const nanoForBattle = (def, color, uid) => def && { type: 'nano', color: 'nano', id: uid || 'nano-' + def.id, nanoId: def.id, nanoColor: color, name: def.name,
   boost: boostOf(def, color), text: `BakuNano: +${boostOf(def, color)}G to your Bakugan in this battle. Once per match.` };
 // a computer brawler: one of each, picked from its name so it's always the same, in its highest-boost color

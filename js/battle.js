@@ -142,7 +142,6 @@ async function aiThrow(p) {
   const plan = aiPlan(p);
   if (!plan || state.turn !== p) return;
   select(plan.t);
-  if (R.canEquip(state, p)) { R.equipGear(state, plan.t, p); flash(`${state.players[p].gear.name} equipped`); await sleep(500); }   // the computer always equips its Battle Gear when it's free
   say(`${state.players[p].name} aims ${state.players[p].toys[plan.t].name} at ${state.field[plan.k].card.name}…`);
   await sleep(900);
   const aim = AI_AIM[aiLevel[p]], tm = toysMesh[p][selected], from = tm.holder.position, to = cellCenter(state.field[plan.k].cell);
@@ -418,7 +417,7 @@ function showPicker() {
   const p = state.turn, pl = state.players[p];
   $('picker').innerHTML = pl.unused.map(t => {
     const toy = pl.toys[t];
-    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${attrsOf(toy).join(' + ')}${pl.gear && pl.gear.on === t ? ` · ⚙ ${pl.gear.name}` : ''}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')} · Ctl ${lv(toy.stats || {}, 'control')}</span></span></button>`;
+    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${attrsOf(toy).join(' + ')}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')} · Ctl ${lv(toy.stats || {}, 'control')}</span></span></button>`;
   }).join('');
   fillPics($('picker'));
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));
@@ -435,17 +434,10 @@ function showPicker() {
 let promptedPre = false;
 // Red "before you throw" cards that work with the selected toy, shown after the toys. Tap to arm, tap again to cancel.
 let armed = null;   // index into the Ability hand of the armed Red card
-let armGear = false;   // Battle Gear armed for this throw
 function showThrowCards() {
   $('picker').querySelectorAll('.chip.red').forEach(b => b.remove());
   if (selected === null) return;
   const hand = state.players[state.turn].abilityHand;
-  // Battle Gear: equip it to this Bakugan with this throw (tap to arm, tap again to cancel)
-  $('picker').querySelectorAll('.chip.gear').forEach(b => b.remove());
-  if (R.canEquip(state)) { const gr = state.players[state.turn].gear, b = document.createElement('button');
-    b.className = 'chip red gear' + (armGear ? ' sel' : ''); b.style.setProperty('--c', ABILITY_COLOR.gear);
-    b.innerHTML = `<b>${gr.name}</b><span>Battle Gear · equip with this throw</span><span class="st">+${gr.boost}G in every battle this Bakugan is in, until it wins one</span>`;
-    b.onclick = () => { armGear = !armGear; showThrowCards(); }; $('picker').append(b); }
   for (const i of R.throwOptions(state, selected)) {
     const b = document.createElement('button');
     b.className = 'chip red' + (armed === i ? ' sel' : ''); b.dataset.a = i; b.style.setProperty('--c', ABILITY_COLOR.red);
@@ -460,7 +452,7 @@ function select(t) {
   if (selected !== null) { const prev = toysMesh[p][selected]; if (!isStanding(p, selected)) prev.holder.visible = false; }
   selected = t;
   $('picker').querySelectorAll('button[data-t]').forEach(b => b.classList.toggle('sel', +b.dataset.t === t));
-  armed = null; armGear = false; showThrowCards();
+  armed = null; showThrowCards();
   const tm = toysMesh[p][t]; setOpen(tm, 0);
   tm.holder.position.copy(DIR[p]).multiplyScalar(START).setY(RADIUS);
   tm.holder.rotation.set(0, Math.atan2(-DIR[p].x, -DIR[p].z), 0);    // facing the center
@@ -712,7 +704,6 @@ function throwToy(vel) {
   vel = aim.vel; if (vel.length() > top) vel.setLength(top);
   busy = true; $('picker').classList.add('off');
   if (armed !== null) { const card = state.players[state.turn].abilityHand[armed]; R.playBeforeThrow(state, armed, selected); armed = null; flash(card.name); }
-  if (armGear && R.canEquip(state)) { R.equipGear(state, selected); flash(`${state.players[state.turn].gear.name} equipped`); } armGear = false;
   const tm = toysMesh[state.turn][selected];
   const ball = { tm, pos: tm.holder.position.clone(), vel, p: state.turn, t: selected, kind: 'ball', steer: aim.steer };
   const stands = state.field.flatMap(f => f.toys.map(x => {
@@ -845,19 +836,21 @@ async function usedUp(e, b) {
   if (e.how === 'uncontested') say(`${e.card.name} is used up; ${state.players[e.p].name}'s Bakugan come back.`);
   hud(); await sleep(e.how === 'uncontested' ? 1200 : 400);
 }
-// A Trap played in a battle: its model drops onto the Gate card beside your Bakugan and opens
+// Support played in a battle (Trap, Battle Gear or BakuNano): its model drops onto the Gate card beside your Bakugan and opens
 const trapMeshes = [];
+const SUPPORT = { trap: ['traps', 'trapId', 'trapColor', 'sets'], gear: ['battleGear', 'gearId', 'gearColor', 'adds'], nano: ['bakuNano', 'nanoId', 'nanoColor', 'adds'] };
 async function placeTrap(card, p, bt) {
-  const d = (pack.catalog.traps || []).find(x => x.id === card.trapId); if (!d) return;
+  const [list, idKey, colorKey, verb] = SUPPORT[card.type] || [];
+  const d = list && (pack.catalog[list] || []).find(x => x.id === card[idKey]); if (!d) return;
   const f = state.field[bt.fieldIdx], mine = f.toys.find(x => x.p === p); if (!mine) return;
-  const tm = await loadToy({ id: d.id, model: d.model, attrTexture: (d.attributes || {})[card.trapColor] });
+  const tm = await loadToy({ id: d.id, model: d.model, attrTexture: (d.attributes || {})[card[colorKey]] });
   const at = toysMesh[p][mine.t].holder.position, c = cellCenter(f.cell);
   const side = new THREE.Vector3(at.x - c.x, 0, at.z - c.z); if (side.lengthSq() < 1) side.set(1, 0, 0);
   const spot = c.clone().add(side.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2).multiplyScalar(GATE_W * 0.28));
   tm.holder.position.set(spot.x, at.y + 25, spot.z); tm.holder.rotation.y = toysMesh[p][mine.t].holder.rotation.y; tm.holder.scale.setScalar(1.6); tm.holder.visible = true;
   trapMeshes.push({ tm, card: f.card });
   const panel = $('battle'), op = panel.style.opacity; panel.style.opacity = '0.12';
-  say(`${state.players[p].name} sets ${card.name.replace('Trap: ', '')} on ${f.card.name}!`);
+  say(`${state.players[p].name} ${verb} ${card.name.replace('Trap: ', '')} ${verb === 'sets' ? 'on' : 'to the battle on'} ${f.card.name}!`);
   await glide(tm, new THREE.Vector3(spot.x, at.y, spot.z), 450);
   await animateOpen(tm, 1, 500); await sleep(700);
   panel.style.opacity = op;
@@ -1125,7 +1118,7 @@ async function abilityPhase(bt) {
       $('bplay').innerHTML = `<div class="who2">${state.players[p].name} is thinking…</div>`;
       await sleep(900);
       const i = aiAbility(p, bt, opts);
-      if (i < 0) R.passAbility(state, bt); else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(700); if (card.type === 'trap') await placeTrap(card, p, bt); }
+      if (i < 0) R.passAbility(state, bt); else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(700); if (SUPPORT[card.type]) await placeTrap(card, p, bt); }
       continue;
     }
     $('bplay').innerHTML = `<div class="who2">${state.players[p].name}: play an Ability card?</div>` +
@@ -1147,7 +1140,7 @@ async function abilityPhase(bt) {
       $('bplay').querySelectorAll('button').forEach(b => b.onclick = () => { abilityResolve = null; res(+b.dataset.a); });
     });
     if (i < 0) R.passAbility(state, bt);
-    else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(500); if (card.type === 'trap') await placeTrap(card, p, bt); }
+    else { const card = hand[i]; R.playAbility(state, bt, i); flash(card.name); await sleep(500); if (SUPPORT[card.type]) await placeTrap(card, p, bt); }
   }
   await preview();
   $('bplay').innerHTML = '';

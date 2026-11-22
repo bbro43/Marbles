@@ -145,7 +145,6 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
         if (rng() < chance) { count(R.knockOff(s, [{ p: foe.p, t: foe.t, card: f.card }], pl.t)); if (s.winner !== null) break; k = s.field.indexOf(f); if (k < 0) k = null; }
       }
     }
-    if (R.canEquip(s, p)) R.equipGear(s, pl.t, p);   // the computer always equips its Battle Gear when it's free
     const r = R.land(s, pl.t, k, () => null);
     count(r.events);
     if (r.battle && s.winner === null) battle(r.battle.fieldIdx);

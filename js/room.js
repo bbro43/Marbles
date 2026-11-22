@@ -1,5 +1,5 @@
 // My Room: Info (Tips, Ranking, Statistics), Save (6 profiles), Deck, Closet (character creator) and the Bakugan collection.
-import { GEAR_COLORS, gearDefs, nanoDefs, boostOf, priceOf as priceOfGear } from './gear.js';
+import { GEAR_COLORS, GEAR_LEAGUE, gearDefs, nanoDefs, boostOf, priceOf as priceOfGear } from './gear.js';
 import * as THREE from 'three';
 import { Pack } from './pack.js';
 import { swatches, XCOLORS } from './clothes.js';
@@ -764,7 +764,6 @@ function storyBoost() {
 // ---------- Battle Gear and BakuNano (pack 0.51, js/gear.js): pick one, then its color (copper, silver, gold), each with its own
 // boost and price. Story: the same sales as Traps, and stronger colors unlock as you move up (silver League 3, gold League 2).
 let gearPick = { i: 0, color: 'copper' };
-const GEAR_LEAGUE = { copper: 4, silver: 3, gold: 2 };
 function gearShop() {
   const pill = (txt, x, y, w, id, on) => `<div class="pill tap ${on ? 'sel' : ''}" ${id} style="left:${x}px;top:${y}px;width:${w}px;height:16px;line-height:14px;font-size:9px">${txt}</div>`;
   const p = prof(), items = [...gearDefs(pack.catalog).map(d => ({ d, k: 'gear', what: 'Battle Gear' })), ...nanoDefs(pack.catalog).map(d => ({ d, k: 'nano', what: 'BakuNano' }))];
@@ -777,7 +776,7 @@ function gearShop() {
   $('topUI').innerHTML = `<div class="box" style="left:6px;top:30px;width:244px;height:150px"></div>` +
     (D.thumbs && D.thumbs[color] ? `<img data-src="${D.thumbs[color]}" style="left:88px;top:40px;width:80px;height:80px" alt="">` : '') +
     `<div class="txt" style="left:0;right:0;top:124px;text-align:center"><b>${esc(D.name)}</b> · ${it.what}</div>` +
-    `<div class="txt" style="left:0;right:0;top:140px;text-align:center;color:#ffd54a">${cap(color)}: +${boostOf(D, color)}G ${it.k === 'gear' ? 'in every battle while equipped' : 'in one battle, once per match'}</div>` +
+    `<div class="txt" style="left:0;right:0;top:140px;text-align:center;color:#ffd54a">${cap(color)}: +${boostOf(D, color)}G in one battle, once per match</div>` +
     `<div class="txt" style="left:0;right:0;top:156px;text-align:center;color:${locked ? '#ffcf3a' : '#9fd4ff'}">${noPrice ? 'Not for sale yet' : locked ? `Unlocks in League ${GEAR_LEAGUE[color]}` : `${off ? `<s>${priceOfGear(D, color)}</s> ` : ''}${price} BP`}</div>`;
   $('topUI').querySelectorAll('[data-src]').forEach(async im => { im.src = await pack.url(im.dataset.src); });
   $('bot').innerHTML = img('shop_bot', 0, 0) + bpBar(p.bp, 4, 4) +
@@ -785,7 +784,7 @@ function gearShop() {
     GEAR_COLORS.map((c, i) => `<div class="pill tap ${c === color ? 'sel gold' : ''}" data-gc="${c}" style="left:${18 + i * 76}px;top:62px;width:70px;font-size:9px">${cap(c)} +${boostOf(D, c)}</div>`).join('') +
     `<div class="pill gold tap ${!locked && p.bp >= price ? '' : 'off'}" id="gBuy" style="left:60px;top:100px;width:136px">Buy for ${price} BP</div>` +
     `<div class="txt" style="left:8px;top:132px;font-size:9px">You own ${mine.length} ${it.what}</div>`;
-  bar(it.k === 'gear' ? 'Battle Gear: equip it before a throw. It stays on until that Bakugan wins a battle or gets a double stand.' : 'BakuNano: add it to your Bakugan in one battle. Once per match.');
+  bar(`${it.k === 'gear' ? 'Battle Gear' : 'BakuNano'}: add it to a battle like a Trap for its power boost. Once per match.`);
   $('gPrev').onclick = () => { gearPick.i = (gearPick.i + items.length - 1) % items.length; gearShop(); };
   $('gNext').onclick = () => { gearPick.i = (gearPick.i + 1) % items.length; gearShop(); };
   $('bot').querySelectorAll('[data-gc]').forEach(b => b.onclick = () => { gearPick.color = b.dataset.gc; gearShop(); });
