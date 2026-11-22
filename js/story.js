@@ -9,9 +9,10 @@ import { fixAttr } from './dual.js';
 import { Pack } from './pack.js';
 import { makeRng, playMatch, buildPlayer } from './sim.js';
 import { BP, MAX_UP, UPS_PER_SEASON, ATTRS6 } from './season.js';
-import { setupSeason2, LEAGUE_NAMES, season2Events, promoteSeason2, VEXOS, NEWCOMERS } from './season2.js';
+import { setupSeason2, LEAGUE_NAMES, season2Events, promoteSeason2, VEXOS, NEWCOMERS, NEWCOMER_UP } from './season2.js';
+import { SEASON3_NEW, SEASON4_NEW } from './newbrawlers.js';
 import { PRIZE_BAND } from './season.js';
-import { AI_TEAMS, INTERSPACE, STARTERS } from './aiteams.js';
+import { AI_TEAMS, INTERSPACE, STARTERS, STORY_START } from './aiteams.js';
 import { gPrice, G_CAP } from './profiles.js';
 import * as Prof from './profiles.js';
 import { mountCommons } from './commons3d.js';
@@ -1067,9 +1068,28 @@ function finalTables() { const B = save.season.B; return save.season.leagues.map
 function promotedLeagues() {
   const t = finalTables();
   if (t.length === 6) return promoteSeason2(t);   // Season 2: top 4 of League 2, top 8 of League 3, top 4 of each League 4 division go up
+  if (t.length === 5) return promoteSeason3(t);   // Season 3: promotion only, into four leagues of 16
   const nl = t.map(x => [...x]);   // from Season 3: top 2 up, bottom 2 down
   for (let i = 0; i + 1 < nl.length; i++) { const up = t[i + 1].slice(0, 2), down = t[i].slice(-2); nl[i] = nl[i].filter(id => !down.includes(id)).concat(up); nl[i + 1] = nl[i + 1].filter(id => !up.includes(id)).concat(down); }
   return nl;
+}
+// Season 3 (Billy, Nov 22): League 4 holds the 16 newcomers in two divisions. No relegation; the top 4 of League 2, the top 8 of
+// League 3 and the top 6 of each League 4 division go up -> 16 / 16 / 16 / 16 (Season 4 then adds 4 more to League 4: 20).
+function promoteSeason3([l1, l2, l3, a, b]) {
+  return [[...l1, ...l2.slice(0, 4)], [...l2.slice(4), ...l3.slice(0, 8)], [...l3.slice(8), ...a.slice(0, 6), ...b.slice(0, 6)], [...a.slice(6), ...b.slice(6)]];
+}
+// league days for the longest league: one round a week (day 2 of the week), then a second one on day 5 from week 1 on.
+// Events are on day 0 of a week, so they never clash.
+function leagueDaysFor(rounds) {
+  const d = [...Array(13)].map((_, w) => w * 7 + 2);
+  for (let w = 0; d.length < rounds && w < 13; w++) d.push(w * 7 + 5);
+  return d.sort((a, b) => a - b).slice(0, Math.max(11, rounds));
+}
+// a brawler joining this season (Seasons 3 and 4: js/newbrawlers.js)
+function newcomerB(id) {
+  const lvl = STORY_START[id] || 'easy', up = NEWCOMER_UP[lvl] || 0;
+  return { id, name: (INTERSPACE[id] || {}).name || cap(id), level: lvl, up, startUp: up, elo: 1450, bp: 0, wallet: 0, rec: { w: 0, l: 0, d: 0 },
+    lg: { w: 0, l: 0, d: 0, pts: 0, bp: 0 }, titles: [], career: { w: 0, l: 0, d: 0, titles: [] } };
 }
 function seasonEndView() {
   const S = save.season, before = leagueNum(), nl = promotedLeagues(), after = nl.findIndex(l => l.includes('you')) + 1;
@@ -1094,9 +1114,19 @@ function nextSeason() {
     B[id] = { id, name: b.name, level: b.level, up, startUp: up, elo: b.elo, bp: 0, wallet: b.wallet, rec: { w: 0, l: 0, d: 0 }, lg: { w: 0, l: 0, d: 0, pts: 0, bp: 0 }, titles: [],
       career: { w: ((b.career || {}).w || 0) + b.rec.w, l: ((b.career || {}).l || 0) + b.rec.l, d: ((b.career || {}).d || 0) + b.rec.d, titles: [...((b.career || {}).titles || []), ...b.titles.map(t => `S${n - 1} ${t}`)] } };
   }
-  const days = [0, 2, 4, 6, 8, 10, 11, 1, 3, 5, 7].map(w => w * 7 + 2).sort((a, b) => a - b);   // 11 rounds for leagues of 12
-  save.season = { seed, B, leagues: nl, names: ['League 1', 'League 2', 'League 3', 'League 4'], events: season2Events(rng).map(e => ({ ...e, day: e.week * 7 })),
-    fixtures: nl.map(rounds), leagueDays: days, done: {}, eventsDone: [] };
+  let leagues = nl, names = ['League 1', 'League 2', 'League 3', 'League 4'];
+  // Season 3: the Gundalians, the Neathians and Jason join League 4, split into two divisions (stronger and weaker by Elo, dealt in turn)
+  if (n === 3) { const L4 = [...nl[3], ...SEASON3_NEW.filter(id => !B[id])]; SEASON3_NEW.forEach(id => { if (!B[id]) B[id] = newcomerB(id); });
+    const byElo = [...L4].sort((x, y) => B[y].elo - B[x].elo), A = [], Bd = [];
+    byElo.forEach((id, i) => ([A, Bd, Bd, A][i % 4]).push(id));   // snake: A B B A ...
+    leagues = [nl[0], nl[1], nl[2], A, Bd]; names = ['League 1', 'League 2', 'League 3', 'League 4 · Division A', 'League 4 · Division B']; }
+  // Season 4: Evelyn, Nina, Kala and Olivia join League 4 (Raymond never joins)
+  if (n === 4) { SEASON4_NEW.forEach(id => { if (!B[id]) B[id] = newcomerB(id); }); leagues = [nl[0], nl[1], nl[2], [...nl[3], ...SEASON4_NEW.filter(id => !nl[3].includes(id))]]; }
+  const fixtures = leagues.map(rounds), days = leagueDaysFor(Math.max(...fixtures.map(f => f.length)));
+  save.season = { seed, B, leagues, names, events: season2Events(rng).map(e => ({ ...e, day: e.week * 7 })),
+    fixtures, leagueDays: days, done: {}, eventsDone: [] };
+  if (n === 3) msg('ISA', `Season 3: ${SEASON3_NEW.length} new brawlers have joined League 4, which now plays in two divisions. There is no relegation this season.`);
+  if (n === 4) msg('ISA', `Season 4: ${SEASON4_NEW.length} new brawlers have joined League 4.`);
   if (reset) for (const k of Object.keys(save.you.coll.toys)) save.you.coll.toys[k] = {};   // the yearly reset clears your Bakugan's upgrades too
   save.seasonNo = n; save.day = 0; save.slot = 0; save.view = 'commons'; save.seen.midseason = false;
   msg('ISA', `Season ${n} begins. You are in League ${after}.${reset ? ' Upgrades have been reset for everyone.' : ''}`);

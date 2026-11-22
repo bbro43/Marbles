@@ -3,6 +3,7 @@ import { aiGear, ownedForBattle } from './gear.js';
 import { bestOf, attrsOf } from './dual.js';
 import * as THREE from 'three';
 import { fitToy } from './toyfit.js';
+import { styleOf, standing, chooseAbility, planBias, fieldChance, preCardsMax } from './aistyle.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
 import * as R from './rules.js';
@@ -86,6 +87,8 @@ const loader = new GLTFLoader();
 // ---------- computer opponent
 // aiLevel[p] = 'easy' | 'normal' | 'hard' for a computer player, null for a person on this device.
 let aiLevel = [null, null, null, null];
+let aiStyle = ['balanced', 'balanced', 'balanced', 'balanced'];   // race playstyle (js/aistyle.js)
+const aiSt = p => standing(state, p, R.teamOf);
 const isAI = p => !!aiLevel[p];
 // the camera stays behind the one person on this device (if there is exactly one); otherwise it follows the turn
 const viewOf = p => { if (!isAI(p) || !state) return p; const people = state.players.map((_, q) => q).filter(q => !isAI(q)); return people.length === 1 ? people[0] : p; };
@@ -129,6 +132,7 @@ function aiPlan(p) {
         : myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
     } else if (mine.length) v = state.nv ? 5 : lvl === 'hard' ? 120 : 70;          // Classic: two of mine there takes the card
     else v = (state.nv ? 15 + bonusFor(f.card, toy) / 20 : 30 + bonusFor(f.card, toy) / 10) + (state.earlyVictory === p && !state.nv ? 120 : 0);   // Early Victory (Classic): an empty card wins it
+    if (lvl !== 'easy') v += planBias(aiStyle[p], { battle: theirs.length > 0, diff: theirs.length ? myG - Math.max(...theirs.map(gOf)) : 0, empty: !theirs.length && !mine.length }, aiSt(p));
     v -= cellCenter(f.cell).distanceTo(home) / (lvl === 'hard' ? 60 : 30);   // far cards are harder to hit
     v += Math.random() * (lvl === 'normal' ? 40 : 10);
     options.push({ t, k, v });
@@ -155,20 +159,16 @@ function aiAbility(p, bt, opts) {
   const lvl = aiLevel[p], hand = state.players[p].abilityHand;
   const gap = c => { const me = c.sides.find(x => x.p === p), op = c.sides.find(x => x.p !== p); return me.total - op.total; };
   const now = gap(R.computeBattle(state, bt));
-  if (now > 0 && lvl !== 'hard') return -1;
-  const scored = opts.map(i => ({ i, g: gap(R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] })) })).sort((a, b) => b.g - a.g);
   if (lvl === 'easy') return now <= 0 && Math.random() < 0.35 ? opts[Math.floor(Math.random() * opts.length)] : -1;
-  const best = scored[0];
-  if (!best || best.g <= now) return -1;
-  if (lvl === 'normal') return Math.random() < 0.75 ? best.i : -1;
-  return now > 0 && now > 120 ? -1 : best.i;      // hard: saves cards when already well ahead
+  const scored = opts.map(i => ({ i, g: gap(R.computeBattle(state, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] })) })).sort((a, b) => b.g - a.g);
+  return chooseAbility(aiStyle[p], lvl, now, scored, aiSt(p), Math.random);   // race playstyle (js/aistyle.js)
 }
 // ---------- the computer's before-throw and after-throw Ability cards
 // how likely each level is to look for one: Easy sometimes, Normal often, Hard always
 const AI_FIELD_CHANCE = { easy: 0.3, normal: 0.7, hard: 1 };
 function aiFieldCard(p, phase, landing) {
   const lvl = aiLevel[p] || 'normal';
-  if (Math.random() > AI_FIELD_CHANCE[lvl]) return null;
+  if (Math.random() > fieldChance(aiStyle[p], lvl, aiSt(p), AI_FIELD_CHANCE[lvl])) return null;
   const pl = state.players[p], hand = pl.abilityHand, opts = R.fieldCardOptions(state, phase, landing, p);
   const has = n => opts.find(i => hand[i].name === n);
   const power = (q, t, card) => state.players[q].toys[t].g + bonusFor(card, state.players[q].toys[t]);
@@ -214,7 +214,7 @@ function aiFieldCard(p, phase, landing) {
 }
 // before throwing: returns true if the turn ended (Surprise Attack battles instead of a throw)
 async function aiPreCards(p) {
-  for (let k = 0; k < (aiLevel[p] === 'hard' ? 2 : 1); k++) {
+  for (let k = 0; k < preCardsMax(aiStyle[p], aiLevel[p]); k++) {
     const c = aiFieldCard(p, 'pre', null);
     if (!c) break;
     await sleep(500);
@@ -1377,7 +1377,7 @@ async function start() {
   if (picked) picked.forEach((c, p) => {
     const lvl = c.level || (typeof c.ai === 'string' ? c.ai : null);
     if (lvl && AI_TEAMS[c.id] && !c.team) c.team = AI_TEAMS[c.id][lvl];   // story mode passes its own team (with that season's upgrades)
-    if (c.ai) aiLevel[p] = lvl || 'normal';
+    if (c.ai) { aiLevel[p] = lvl || 'normal'; aiStyle[p] = styleOf(c.id); }
   });
   const { players, first } = await setupTeams(cat, pack, picked, null, null, NV);
   // computer upgrades: each adds UPGRADE_G to every Bakugan on its team, up to the 600G cap

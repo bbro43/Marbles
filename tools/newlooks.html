@@ -1,0 +1,28 @@
+<!doctype html><html><body style="margin:0;background:#dfe3e8">
+<!-- The new brawlers' looks (js/looks.js NEW_LOOKS), in rows: a test page. ?bake=1 also offers window.bake(id) -> GLB (base64) -->
+<script src="../vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/build/three.module.js", "three/addons/": "../vendor/three/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { Pack } from '../js/pack.js';
+import { buildAvatar } from '../js/avatar.js';
+import { NEW_LOOKS } from '../js/looks.js';
+const pack = await Pack.fromDevice(), url = p => pack.url(p), q = new URLSearchParams(location.search);
+// bake one brawler into a single model file, like the Season 2 newcomers in pack 2 (characters/<id>/model.glb)
+// the exporter isn't in the app's copy of three.js: the bake script serves three's examples at /_jsm (not in the repo)
+window.bake = async id => { const a = await buildAvatar(NEW_LOOKS[id], url), { GLTFExporter } = await import('/_jsm/exporters/GLTFExporter.js');
+  a.traverse(o => { o.userData = {}; });   // the idle animation's bone list isn't needed in the file (and is huge with a Gundalian crown)
+  const buf = await new GLTFExporter().parseAsync(a, { binary: true, onlyVisible: true });
+  let s = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
+if (q.get('bake')) { window.ready = true; document.title = 'ready'; }
+else {
+  const ids = (q.get('ids') || Object.keys(NEW_LOOKS).join(',')).split(','), side = q.get('side'), W = 1800, H = 600;
+  const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setSize(W, H); r.setClearColor(0xdfe3e8); document.body.appendChild(r.domElement);
+  const sc = new THREE.Scene(); sc.add(new THREE.AmbientLight(0xffffff, 2.6));
+  for (let i = 0; i < ids.length; i++) { const a = await buildAvatar(NEW_LOOKS[ids[i]], url); a.position.x = (i - (ids.length - 1) / 2) * 0.5; if (side) a.rotation.y = Math.PI / 2; sc.add(a); }
+  const hw = ids.length * 0.25 + 0.05, hh = hw * H / W, cam = new THREE.OrthographicCamera(-hw, hw, 0.22 + hh, 0.22 - hh, 0.1, 50);
+  cam.position.set(0, 0.22, 10); cam.lookAt(0, 0.22, 0); r.render(sc, cam); document.title = 'done';
+}
+</script></body></html>

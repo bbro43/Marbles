@@ -4,6 +4,7 @@
 // level and the Bakugan's Magnet; a Bakugan aimed at a card with an opponent on it can knock it off (Speed vs Defense).
 // Before- and after-throw Ability cards are not used here yet.
 import { aiGear } from './gear.js';
+import { styleOf, standing, chooseAbility, planBias } from './aistyle.js';
 import { bestOf, attrsOf } from './dual.js';
 import * as R from './rules.js';
 import { makeToy, GATE_COLORS, AB_COLORS } from './setup.js';
@@ -27,7 +28,7 @@ export function buildPlayer(cat, team, { name, owner = null, nv = false } = {}) 
     return t; });
   const abilities = [...AB_COLORS.map(c => cardBy.get(team.abilities[c].id)),
     ...(nv ? AB_COLORS.flatMap(c => ((team.extra || {})[c] || []).map(x => cardBy.get(x.id || x))) : [])].filter(Boolean);
-  const pl = { name, toys, gates: GATE_COLORS.map(c => cardBy.get(team.gates[c].id)), abilities };
+  const pl = { name, toys, gates: GATE_COLORS.map(c => cardBy.get(team.gates[c].id)), abilities, style: styleOf(owner) };   // race playstyle (js/aistyle.js)
   if (nv && team.trap) pl.trap = { type: 'trap', color: 'trap', id: 'ai-' + team.trap.id, trapId: team.trap.id, name: `Trap: ${team.trap.name}`, attrs: team.trap.attrs };
   // Battle Gear and BakuNano (New Vestroia): the team's own (Story passes yours), else one of each in its best color
   if (nv) { const g = team.gear !== undefined ? { gear: team.gear, nano: team.nano } : aiGear(cat, owner || name); if (g.gear) pl.gear = g.gear; if (g.nano) pl.nano = g.nano; }
@@ -44,6 +45,7 @@ const lv = (toy, k) => (toy.stats || {})[k] ?? 3;
 export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1), first = null, maxTurns = 400, arena = null } = {}) {
   const s = R.newMatch(entrants.map(e => e.player), { nv, teams, arena, first: first ?? rng.int(entrants.length) });
   const lvl = p => entrants[p].level || 'normal';
+  const sty = p => entrants[p].style || entrants[p].player.style || 'balanced', st = p => standing(s, p, R.teamOf);
   const stats = entrants.map(() => ({ beaten: 0, gates: 0, dealt: 0, life: 0, out: false }));
   const same = (a, b) => R.sameTeam(s, a, b);
   const home = p => { const [sx, sz] = s.corners[p]; return [sx * 3, sz * 3]; };
@@ -71,6 +73,7 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
           : myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
       } else if (mine.length) v = s.nv ? 5 : lvl(p) === 'hard' ? 120 : 70;
       else v = s.nv ? 15 + bonusFor(f.card, toy) / 20 : 30 + bonusFor(f.card, toy) / 10;
+      if (lvl(p) !== 'easy') v += planBias(sty(p), { battle: theirs.length > 0, diff: theirs.length ? myG - Math.max(...theirs.map(gOf)) : 0, empty: !theirs.length && !mine.length }, st(p));
       v -= dist(p, f.cell) * (lvl(p) === 'hard' ? 2 : 4);
       v += rng() * (lvl(p) === 'normal' ? 40 : 10);
       options.push({ t, k, v });
@@ -83,12 +86,10 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
   const gap = (c, p) => { const mine = c.teamTotal[R.teamOf(s, p)] || 0; const o = Object.entries(c.teamTotal).filter(([tm]) => +tm !== R.teamOf(s, p)).map(([, v]) => v); return mine - (o.length ? Math.max(...o) : 0); };
   const ability = (p, bt, opts) => {
     const hand = s.players[p].abilityHand, now = gap(R.computeBattle(s, bt), p);
-    if (now > 0 && lvl(p) !== 'hard') return -1;
+    if (now > 0 && lvl(p) === 'easy') return -1;
     if (lvl(p) === 'easy') return now <= 0 && rng() < 0.35 ? rng.pick(opts) : -1;
-    const best = opts.map(i => ({ i, g: gap(R.computeBattle(s, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] }), p) })).sort((a, b) => b.g - a.g)[0];
-    if (!best || best.g <= now) return -1;
-    if (lvl(p) === 'normal') return rng() < 0.75 ? best.i : -1;
-    return now > 120 ? -1 : best.i;
+    const scored = opts.map(i => ({ i, g: gap(R.computeBattle(s, { ...bt, plays: [...bt.plays, { p, card: hand[i] }] }), p) })).sort((a, b) => b.g - a.g);
+    return chooseAbility(sty(p), lvl(p), now, scored, st(p), rng);
   };
   // credit Gate cards won and damage dealt. In a battle the winning team's players share the credit; outside a battle, the thrower gets it.
   const count = (ev, winners = null) => { for (const e of ev) {

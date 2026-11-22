@@ -33,8 +33,8 @@ const CH = {
   mira:       ['subterra', ['Wilda', 'Terrorclaw', 'Gargonoid'],        ['Wilda', 'Terrorclaw', 'Monarus'],         ['Thunder Wilda', 'Laserman', 'Terrorclaw']],
   baron:      ['haos',     ['Nemus', 'Ravenoid', 'Manion'],             ['Nemus', 'Monarus', 'Griffon'],            ['Mega Nemus', 'Laserman', 'Monarus']],
   spectra:    ['pyrus',    ['Helios', 'Klawgor', 'Foxbat'],           ['Helios', 'Fencer', 'Leefram'],            ['Helios', 'Spindle', 'Fencer']],
-  mylene:     ['aquos',    ['Elico', 'Foxbat', 'Klawgor'],            ['Elico', 'Foxbat', 'Scraper'],             ['Elico', 'Spindle', 'Scraper']],
-  volt:       ['haos',     ['Brontes', 'Leefram', 'Foxbat'],          ['Brontes', 'Fencer', 'Foxbat'],            ['Brontes', 'Fencer', 'Spindle']],
+  mylene:     ['aquos',    ['Elico', 'Foxbat', 'Klawgor'],            ['Elico', 'Foxbat', 'Scraper'],             ['Macubass', 'Spindle', 'Scraper']],   // Hard partner: Macubass (Billy, Nov 22)
+  volt:       ['haos',     ['Brontes', 'Leefram', 'Foxbat'],          ['Brontes', 'Fencer', 'Foxbat'],            ['Boriates', 'Fencer', 'Spindle']],   // Hard partner: Boriates (Billy, Nov 22)
   gus:        ['subterra', ['Premo Vulcan', 'Leefram', 'Klawgor'],    ['Premo Vulcan', 'Scraper', 'Leefram'],     ['Premo Vulcan', 'Scraper', 'Spindle']],
   shadow:     ['darkus',   ['Hades', 'Klawgor', 'Leefram'],           ['Hades', 'Scraper', 'Klawgor'],            ['Hades', 'Fencer', 'Scraper']],
   lync:       ['ventus',   ['Altair', 'Wired', 'Foxbat'],             ['Altair', 'Wired', 'Klawgor'],             ['Altair', 'Wired', 'Spindle']],
@@ -47,7 +47,7 @@ const PARTNERS = {
   shun: ['Skyress', 'Storm Skyress', 'Ingram', 'Cosmic Ingram'], masquerade: ['Hydranoid', 'Dual Hydranoid'], chanlee: ['Fortress'], klaus: ['Sirenoid'],
   julio: ['Tentaclear'], billy: ['Cycloid'], komba: ['Harpus'], marduk: ['Vladitor', 'Battle Ax Vladitor'] /* Marduk is out for now; Vladitor stays his */, jenny: ['Siege'], jewls: ['Centipoid'],
   christopher: ['Juggernoid'], player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
-  spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico'], volt: ['Brontes'], shadow: ['Hades'], lync: ['Altair', 'Wired'],
+  spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico', 'Macubass'], volt: ['Brontes', 'Boriates'], shadow: ['Hades'], lync: ['Altair', 'Wired'],
 };
 // New Vestroia characters' Traps (only they get one). Gus and Lync get Maxus Helios pieces in their attribute.
 const TRAPS = { nv_dan: 'Scorpion', nv_shun: 'Hylash', nv_marucho: 'Tripod Epsilon', mira: 'Baliton', ace: 'Falcon Fly', baron: 'Piercian',
@@ -62,6 +62,8 @@ const CARDS = {
   spectra: { hard: { red: ['Pyrus Swap', 'Pyrus Time Breaker', 'Trickster'], blue: ['Brushfire', 'Circle Of Fire', 'The Glow'], green: ['Imbalance', 'No Trading', 'Invulnerable'] } },
 };
 const SAME = { nv_dan: 'dan', nv_shun: 'shun', nv_marucho: 'marucho' };
+// Gold Gate cards picked by hand: no Gold card for the partner, so the one best for the attribute (Billy, Nov 22)
+const GOLD = { volt: { hard: 'Blade Tigrerra' }, mylene: { hard: 'Elfin' } };
 const ownerOf = new Map(Object.entries(PARTNERS).flatMap(([who, list]) => list.map(n => [n, who])));
 // starter decks for new players: generic Bakugan only; cards = that attribute's main character's Easy cards
 // Billy (Nov 17): every attribute's starter is different, but the 3 Bakugan's G add up to within 50 of every other starter (630-640 now)
@@ -102,6 +104,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     const attrs = [attr], ranked = (arr, score) => [...arr].sort((a, b) => score(b) - score(a));
     const team = { attr, upgrades, toys, gates: {}, abilities: {} };
     team.gates = pickGates(toys.map(x => x.name), attr, rank);
+    if (GOLD[id] && GOLD[id][lvl]) { const g = gates.find(x => x.name === GOLD[id][lvl] && x.color === 'gold'); if (g) team.gates.gold = { id: g.id, name: g.name }; else problems.push(`${id}: no Gold card ${GOLD[id][lvl]}`); }
     for (const c of AB_COLORS) {
       let pool = abilities.filter(a => a.name !== 'Early Victory').filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
       const r = ranked(pool, a => abilityScore(a, attrs)); const a = r[Math.min(rank, r.length - 1)]; team.abilities[c] = { id: a.id, name: a.name };
