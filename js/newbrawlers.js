@@ -6,14 +6,20 @@ export const NEW_BRAWLERS = {
   "name": "Brodny",
   "species": "Gundalian",
   "attrs": [
-   "subterra"
+   "subterra",
+   "haos"
   ],
-  "signature": "Mantris",
+  "signature": "Tricloid",
   "joins": 3,
   "easy": {
    "attr": "subterra",
    "upgrades": 0,
    "toys": [
+    {
+     "id": "tt_15",
+     "attr": "subterra",
+     "name": "Tricloid"
+    },
     {
      "id": "tt_11",
      "attr": "subterra",
@@ -21,13 +27,8 @@ export const NEW_BRAWLERS = {
     },
     {
      "id": "dc_sp06_22",
-     "attr": "subterra",
+     "attr": "haos",
      "name": "Leefram"
-    },
-    {
-     "id": "bt_bee",
-     "attr": "subterra",
-     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -46,12 +47,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_407",
-     "name": "Twin Swap"
+     "id": "ds_418",
+     "name": "Spin Battle Redo"
     },
     "blue": {
-     "id": "ds_602",
-     "name": "G-Power Boost"
+     "id": "ds_612",
+     "name": "G-Power Up"
     },
     "green": {
      "id": "ds_505",
@@ -61,22 +62,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_408",
-      "name": "Counter Swap"
+      "id": "ds_427",
+      "name": "Subterra Double Input"
      },
      {
-      "id": "ds_415",
-      "name": "Twin Time Breaker"
+      "id": "ds_428",
+      "name": "Haos Double Input"
      }
     ],
     "blue": [
      {
-      "id": "ds_612",
-      "name": "G-Power Up"
+      "id": "ds_605",
+      "name": "Home Advantage"
      },
      {
-      "id": "ds_601",
-      "name": "Bright Light"
+      "id": "ds_624",
+      "name": "Ventus and Haos Combo"
      }
     ],
     "green": [
@@ -96,19 +97,19 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
+     "id": "tt_15",
+     "attr": "subterra",
+     "name": "Tricloid"
+    },
+    {
      "id": "tt_11",
      "attr": "subterra",
      "name": "Mantris"
     },
     {
      "id": "dc_sp06_22",
-     "attr": "subterra",
+     "attr": "haos",
      "name": "Leefram"
-    },
-    {
-     "id": "bt_bee",
-     "attr": "subterra",
-     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -127,12 +128,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_411",
-     "name": "Subterra Time Breaker"
+     "id": "ds_404",
+     "name": "Haos Swap"
     },
     "blue": {
-     "id": "ds_608",
-     "name": "Mega Impact"
+     "id": "ds_620",
+     "name": "The Glow"
     },
     "green": {
      "id": "ds_502",
@@ -142,22 +143,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
+      "id": "ds_412",
+      "name": "Haos Time Breaker"
      }
     ],
     "blue": [
      {
-      "id": "ds_616",
-      "name": "Brushfire"
+      "id": "ds_601",
+      "name": "Bright Light"
      },
      {
-      "id": "ds_622",
-      "name": "The Gust"
+      "id": "ds_608",
+      "name": "Mega Impact"
      }
     ],
     "green": [
@@ -177,19 +178,19 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
+     "id": "tt_15",
+     "attr": "subterra",
+     "name": "Tricloid"
+    },
+    {
      "id": "tt_11",
      "attr": "subterra",
      "name": "Mantris"
     },
     {
      "id": "dc_sp06_22",
-     "attr": "subterra",
+     "attr": "haos",
      "name": "Leefram"
-    },
-    {
-     "id": "bt_bee",
-     "attr": "subterra",
-     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -212,8 +213,8 @@ export const NEW_BRAWLERS = {
      "name": "Subterra Swap"
     },
     "blue": {
-     "id": "ds_605",
-     "name": "Home Advantage"
+     "id": "ds_610",
+     "name": "Flash"
     },
     "green": {
      "id": "ds_501",
@@ -223,22 +224,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_411",
-      "name": "Subterra Time Breaker"
+      "id": "ds_404",
+      "name": "Haos Swap"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
      }
     ],
     "blue": [
      {
-      "id": "ds_608",
-      "name": "Mega Impact"
+      "id": "ds_620",
+      "name": "The Glow"
      },
      {
-      "id": "ds_616",
-      "name": "Brushfire"
+      "id": "ds_601",
+      "name": "Bright Light"
      }
     ],
     "green": [
@@ -258,34 +259,35 @@ export const NEW_BRAWLERS = {
   "name": "Kasimir",
   "species": "Gundalian",
   "attrs": [
-   "haos"
+   "haos",
+   "subterra"
   ],
-  "signature": "Oberus",
+  "signature": "Rabeeder",
   "joins": 3,
   "easy": {
    "attr": "haos",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_12",
+     "id": "tt_13",
      "attr": "haos",
-     "name": "Oberus"
+     "name": "Rabeeder"
     },
     {
-     "id": "dc_sp06_24",
+     "id": "bb_50",
      "attr": "haos",
-     "name": "Spindle"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_58",
-     "attr": "haos",
-     "name": "Ravenoid"
+     "id": "dc_sp06_23",
+     "attr": "subterra",
+     "name": "Scraper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_223",
@@ -298,12 +300,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_407",
-     "name": "Twin Swap"
+     "id": "ds_418",
+     "name": "Spin Battle Redo"
     },
     "blue": {
-     "id": "ds_606",
-     "name": "Power From Darkness"
+     "id": "ds_612",
+     "name": "G-Power Up"
     },
     "green": {
      "id": "ds_505",
@@ -313,22 +315,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_408",
-      "name": "Counter Swap"
+      "id": "ds_427",
+      "name": "Subterra Double Input"
      },
      {
-      "id": "ds_415",
-      "name": "Twin Time Breaker"
+      "id": "ds_428",
+      "name": "Haos Double Input"
      }
     ],
     "blue": [
      {
-      "id": "ds_612",
-      "name": "G-Power Up"
+      "id": "ds_605",
+      "name": "Home Advantage"
      },
      {
-      "id": "ds_617",
-      "name": "G-Power Increase"
+      "id": "ds_624",
+      "name": "Ventus and Haos Combo"
      }
     ],
     "green": [
@@ -348,25 +350,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_12",
+     "id": "tt_13",
      "attr": "haos",
-     "name": "Oberus"
+     "name": "Rabeeder"
     },
     {
-     "id": "dc_sp06_24",
+     "id": "bb_50",
      "attr": "haos",
-     "name": "Spindle"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_58",
-     "attr": "haos",
-     "name": "Ravenoid"
+     "id": "dc_sp06_23",
+     "attr": "subterra",
+     "name": "Scraper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_209",
@@ -379,12 +381,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_412",
-     "name": "Haos Time Breaker"
+     "id": "ds_404",
+     "name": "Haos Swap"
     },
     "blue": {
-     "id": "ds_610",
-     "name": "Flash"
+     "id": "ds_620",
+     "name": "The Glow"
     },
     "green": {
      "id": "ds_502",
@@ -394,12 +396,12 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
      },
      {
-      "id": "ds_428",
-      "name": "Haos Double Input"
+      "id": "ds_412",
+      "name": "Haos Time Breaker"
      }
     ],
     "blue": [
@@ -408,8 +410,8 @@ export const NEW_BRAWLERS = {
       "name": "Bright Light"
      },
      {
-      "id": "ds_603",
-      "name": "G-Power Bump"
+      "id": "ds_608",
+      "name": "Mega Impact"
      }
     ],
     "green": [
@@ -429,25 +431,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_12",
+     "id": "tt_13",
      "attr": "haos",
-     "name": "Oberus"
+     "name": "Rabeeder"
     },
     {
-     "id": "dc_sp06_24",
+     "id": "bb_50",
      "attr": "haos",
-     "name": "Spindle"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_58",
-     "attr": "haos",
-     "name": "Ravenoid"
+     "id": "dc_sp06_23",
+     "attr": "subterra",
+     "name": "Scraper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_203",
@@ -460,12 +462,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_404",
-     "name": "Haos Swap"
+     "id": "ds_403",
+     "name": "Subterra Swap"
     },
     "blue": {
-     "id": "ds_620",
-     "name": "The Glow"
+     "id": "ds_610",
+     "name": "Flash"
     },
     "green": {
      "id": "ds_501",
@@ -475,18 +477,18 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_412",
-      "name": "Haos Time Breaker"
+      "id": "ds_404",
+      "name": "Haos Swap"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
      }
     ],
     "blue": [
      {
-      "id": "ds_610",
-      "name": "Flash"
+      "id": "ds_620",
+      "name": "The Glow"
      },
      {
       "id": "ds_601",
@@ -510,34 +512,35 @@ export const NEW_BRAWLERS = {
   "name": "Pavel",
   "species": "Gundalian",
   "attrs": [
-   "ventus"
+   "ventus",
+   "aquos"
   ],
-  "signature": "El Condor",
+  "signature": "Hairadee",
   "joins": 3,
   "easy": {
    "attr": "ventus",
    "upgrades": 0,
    "toys": [
     {
+     "id": "tt_08",
+     "attr": "ventus",
+     "name": "Hairadee"
+    },
+    {
      "id": "tt_19",
      "attr": "ventus",
      "name": "El Condor"
     },
     {
-     "id": "bb_43",
-     "attr": "ventus",
-     "name": "Falconeer"
-    },
-    {
-     "id": "bb_45",
-     "attr": "ventus",
-     "name": "Griffon"
+     "id": "bb_60",
+     "attr": "aquos",
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_232",
@@ -550,12 +553,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_407",
-     "name": "Twin Swap"
+     "id": "ds_418",
+     "name": "Spin Battle Redo"
     },
     "blue": {
-     "id": "ds_611",
-     "name": "G-Power Bonus"
+     "id": "ds_622",
+     "name": "The Gust"
     },
     "green": {
      "id": "ds_505",
@@ -565,22 +568,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_408",
-      "name": "Counter Swap"
+      "id": "ds_426",
+      "name": "Aquos Double Input"
      },
      {
-      "id": "ds_415",
-      "name": "Twin Time Breaker"
+      "id": "ds_430",
+      "name": "Ventus Double Input"
      }
     ],
     "blue": [
      {
-      "id": "ds_617",
-      "name": "G-Power Increase"
-     },
-     {
       "id": "ds_604",
       "name": "Blaze"
+     },
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
      }
     ],
     "green": [
@@ -610,25 +613,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
+     "id": "tt_08",
+     "attr": "ventus",
+     "name": "Hairadee"
+    },
+    {
      "id": "tt_19",
      "attr": "ventus",
      "name": "El Condor"
     },
     {
-     "id": "bb_43",
-     "attr": "ventus",
-     "name": "Falconeer"
-    },
-    {
-     "id": "bb_45",
-     "attr": "ventus",
-     "name": "Griffon"
+     "id": "bb_60",
+     "attr": "aquos",
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_213",
@@ -641,12 +644,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_414",
-     "name": "Ventus Time Breaker"
+     "id": "ds_406",
+     "name": "Ventus Swap"
     },
     "blue": {
-     "id": "ds_622",
-     "name": "The Gust"
+     "id": "ds_615",
+     "name": "Updraft"
     },
     "green": {
      "id": "ds_502",
@@ -656,22 +659,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
      },
      {
-      "id": "ds_430",
-      "name": "Ventus Double Input"
+      "id": "ds_414",
+      "name": "Ventus Time Breaker"
      }
     ],
     "blue": [
      {
-      "id": "ds_609",
-      "name": "Hot Wind"
-     },
-     {
       "id": "ds_603",
       "name": "G-Power Bump"
+     },
+     {
+      "id": "ds_611",
+      "name": "G-Power Bonus"
      }
     ],
     "green": [
@@ -701,25 +704,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
+     "id": "tt_08",
+     "attr": "ventus",
+     "name": "Hairadee"
+    },
+    {
      "id": "tt_19",
      "attr": "ventus",
      "name": "El Condor"
     },
     {
-     "id": "bb_43",
-     "attr": "ventus",
-     "name": "Falconeer"
-    },
-    {
-     "id": "bb_45",
-     "attr": "ventus",
-     "name": "Griffon"
+     "id": "bb_60",
+     "attr": "aquos",
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_207",
@@ -732,12 +735,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_406",
-     "name": "Ventus Swap"
+     "id": "ds_402",
+     "name": "Aquos Swap"
     },
     "blue": {
-     "id": "ds_615",
-     "name": "Updraft"
+     "id": "ds_607",
+     "name": "Summon Wave"
     },
     "green": {
      "id": "ds_501",
@@ -747,22 +750,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_414",
-      "name": "Ventus Time Breaker"
+      "id": "ds_406",
+      "name": "Ventus Swap"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
      }
     ],
     "blue": [
      {
-      "id": "ds_622",
-      "name": "The Gust"
+      "id": "ds_615",
+      "name": "Updraft"
      },
      {
-      "id": "ds_609",
-      "name": "Hot Wind"
+      "id": "ds_603",
+      "name": "G-Power Bump"
      }
     ],
     "green": [
@@ -792,54 +795,53 @@ export const NEW_BRAWLERS = {
   "name": "Tibor",
   "species": "Gundalian",
   "attrs": [
-   "pyrus",
-   "ventus",
-   "darkus"
+   "darkus",
+   "pyrus"
   ],
-  "signature": "Wormquake",
+  "signature": "Centorrior",
   "joins": 3,
   "easy": {
-   "attr": "pyrus",
+   "attr": "darkus",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_17",
-     "attr": "pyrus",
-     "name": "Wormquake"
+     "id": "tt_02",
+     "attr": "darkus",
+     "name": "Centorrior"
     },
     {
      "id": "dc_sp06_23",
-     "attr": "ventus",
+     "attr": "darkus",
      "name": "Scraper"
     },
     {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
+     "id": "bb_52",
+     "attr": "pyrus",
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
-     "id": "ds_226",
-     "name": "Earthen Wave"
+     "id": "ds_222",
+     "name": "Pit Dweller"
     },
     "copper": {
-     "id": "ds_310",
-     "name": "Bait and Switch"
+     "id": "ds_331",
+     "name": "Mega Warrior"
     }
    },
    "abilities": {
     "red": {
-     "id": "ds_413",
-     "name": "Darkus Time Breaker"
+     "id": "ds_418",
+     "name": "Spin Battle Redo"
     },
     "blue": {
-     "id": "ds_606",
-     "name": "Power From Darkness"
+     "id": "ds_614",
+     "name": "Circle Of Fire"
     },
     "green": {
      "id": "ds_505",
@@ -849,22 +851,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_414",
-      "name": "Ventus Time Breaker"
+      "id": "ds_424",
+      "name": "Level Field"
      },
      {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
+      "id": "ds_425",
+      "name": "Pyrus Double Input"
      }
     ],
     "blue": [
      {
-      "id": "ds_616",
-      "name": "Brushfire"
+      "id": "ds_609",
+      "name": "Hot Wind"
      },
      {
-      "id": "ds_604",
-      "name": "Blaze"
+      "id": "ds_620",
+      "name": "The Glow"
      }
     ],
     "green": [
@@ -881,9 +883,9 @@ export const NEW_BRAWLERS = {
    "trap": {
     "id": "dc_spt02",
     "name": "Tripod Epsilon",
-    "color": "pyrus",
+    "color": "darkus",
     "attrs": [
-     "pyrus",
+     "darkus",
      "aquos",
      "haos",
      "subterra"
@@ -891,37 +893,37 @@ export const NEW_BRAWLERS = {
    }
   },
   "normal": {
-   "attr": "pyrus",
+   "attr": "darkus",
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_17",
-     "attr": "pyrus",
-     "name": "Wormquake"
+     "id": "tt_02",
+     "attr": "darkus",
+     "name": "Centorrior"
     },
     {
      "id": "dc_sp06_23",
-     "attr": "ventus",
+     "attr": "darkus",
      "name": "Scraper"
     },
     {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
+     "id": "bb_52",
+     "attr": "pyrus",
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
-     "id": "ds_207",
-     "name": "Tornado Alley"
+     "id": "ds_203",
+     "name": "Light-Burst"
     },
     "copper": {
-     "id": "ds_317",
-     "name": "Waist Deep"
+     "id": "ds_321",
+     "name": "Reflexes"
     }
    },
    "abilities": {
@@ -930,8 +932,8 @@ export const NEW_BRAWLERS = {
      "name": "Darkus Swap"
     },
     "blue": {
-     "id": "ds_609",
-     "name": "Hot Wind"
+     "id": "ds_616",
+     "name": "Brushfire"
     },
     "green": {
      "id": "ds_502",
@@ -941,22 +943,22 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_406",
-      "name": "Ventus Swap"
-     },
-     {
       "id": "ds_409",
       "name": "Pyrus Time Breaker"
+     },
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
      }
     ],
     "blue": [
      {
-      "id": "ds_622",
-      "name": "The Gust"
+      "id": "ds_602",
+      "name": "G-Power Boost"
      },
      {
-      "id": "ds_614",
-      "name": "Circle Of Fire"
+      "id": "ds_621",
+      "name": "The Shadow"
      }
     ],
     "green": [
@@ -973,9 +975,9 @@ export const NEW_BRAWLERS = {
    "trap": {
     "id": "dc_spt02",
     "name": "Tripod Epsilon",
-    "color": "pyrus",
+    "color": "darkus",
     "attrs": [
-     "pyrus",
+     "darkus",
      "aquos",
      "haos",
      "subterra"
@@ -983,33 +985,33 @@ export const NEW_BRAWLERS = {
    }
   },
   "hard": {
-   "attr": "pyrus",
+   "attr": "darkus",
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_17",
-     "attr": "pyrus",
-     "name": "Wormquake"
+     "id": "tt_02",
+     "attr": "darkus",
+     "name": "Centorrior"
     },
     {
      "id": "dc_sp06_23",
-     "attr": "ventus",
+     "attr": "darkus",
      "name": "Scraper"
     },
     {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
+     "id": "bb_52",
+     "attr": "pyrus",
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
-     "id": "ds_216",
-     "name": "Volcanic Lake"
+     "id": "ds_214",
+     "name": "Haunted Night"
     },
     "copper": {
      "id": "ds_309",
@@ -1022,8 +1024,8 @@ export const NEW_BRAWLERS = {
      "name": "Pyrus Swap"
     },
     "blue": {
-     "id": "ds_615",
-     "name": "Updraft"
+     "id": "ds_606",
+     "name": "Power From Darkness"
     },
     "green": {
      "id": "ds_501",
@@ -1037,18 +1039,18 @@ export const NEW_BRAWLERS = {
       "name": "Darkus Swap"
      },
      {
-      "id": "ds_406",
-      "name": "Ventus Swap"
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
      }
     ],
     "blue": [
      {
-      "id": "ds_609",
-      "name": "Hot Wind"
+      "id": "ds_616",
+      "name": "Brushfire"
      },
      {
-      "id": "ds_622",
-      "name": "The Gust"
+      "id": "ds_602",
+      "name": "G-Power Boost"
      }
     ],
     "green": [
@@ -1065,12 +1067,518 @@ export const NEW_BRAWLERS = {
    "trap": {
     "id": "dc_spt02",
     "name": "Tripod Epsilon",
-    "color": "pyrus",
+    "color": "darkus",
     "attrs": [
-     "pyrus",
+     "darkus",
      "aquos",
      "haos",
      "subterra"
+    ]
+   }
+  }
+ },
+ "zarek": {
+  "name": "Zarek",
+  "species": "Gundalian",
+  "attrs": [
+   "aquos",
+   "ventus"
+  ],
+  "signature": "Tayghen",
+  "joins": 3,
+  "easy": {
+   "attr": "aquos",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "tt_14",
+     "attr": "aquos",
+     "name": "Tayghen"
+    },
+    {
+     "id": "bb_48",
+     "attr": "aquos",
+     "name": "Fear Ripper"
+    },
+    {
+     "id": "bb_56",
+     "attr": "ventus",
+     "name": "Manion"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_128",
+     "name": "Fear Ripper"
+    },
+    "silver": {
+     "id": "ds_225",
+     "name": "Spitting Fire"
+    },
+    "copper": {
+     "id": "ds_308",
+     "name": "Load Up"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_418",
+     "name": "Spin Battle Redo"
+    },
+    "blue": {
+     "id": "ds_622",
+     "name": "The Gust"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_426",
+      "name": "Aquos Double Input"
+     },
+     {
+      "id": "ds_430",
+      "name": "Ventus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     },
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   }
+  },
+  "normal": {
+   "attr": "aquos",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "tt_14",
+     "attr": "aquos",
+     "name": "Tayghen"
+    },
+    {
+     "id": "bb_48",
+     "attr": "aquos",
+     "name": "Fear Ripper"
+    },
+    {
+     "id": "bb_56",
+     "attr": "ventus",
+     "name": "Manion"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_128",
+     "name": "Fear Ripper"
+    },
+    "silver": {
+     "id": "ds_204",
+     "name": "Tsunami"
+    },
+    "copper": {
+     "id": "ds_303",
+     "name": "Clipped Wings"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_406",
+     "name": "Ventus Swap"
+    },
+    "blue": {
+     "id": "ds_615",
+     "name": "Updraft"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
+     },
+     {
+      "id": "ds_414",
+      "name": "Ventus Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     },
+     {
+      "id": "ds_611",
+      "name": "G-Power Bonus"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   }
+  },
+  "hard": {
+   "attr": "aquos",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "tt_14",
+     "attr": "aquos",
+     "name": "Tayghen"
+    },
+    {
+     "id": "bb_48",
+     "attr": "aquos",
+     "name": "Fear Ripper"
+    },
+    {
+     "id": "bb_56",
+     "attr": "ventus",
+     "name": "Manion"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_128",
+     "name": "Fear Ripper"
+    },
+    "silver": {
+     "id": "ds_208",
+     "name": "Whirlpool"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_402",
+     "name": "Aquos Swap"
+    },
+    "blue": {
+     "id": "ds_607",
+     "name": "Summon Wave"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_406",
+      "name": "Ventus Swap"
+     },
+     {
+      "id": "ds_410",
+      "name": "Aquos Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_615",
+      "name": "Updraft"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
+   }
+  }
+ },
+ "zorro": {
+  "name": "Zorro",
+  "species": "Gundalian",
+  "attrs": [
+   "pyrus",
+   "darkus"
+  ],
+  "signature": "Druman",
+  "joins": 3,
+  "easy": {
+   "attr": "pyrus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "tt_04",
+     "attr": "pyrus",
+     "name": "Druman"
+    },
+    {
+     "id": "bb_41",
+     "attr": "pyrus",
+     "name": "Saurus"
+    },
+    {
+     "id": "bb_58",
+     "attr": "darkus",
+     "name": "Ravenoid"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_121",
+     "name": "Saurus"
+    },
+    "silver": {
+     "id": "ds_226",
+     "name": "Earthen Wave"
+    },
+    "copper": {
+     "id": "ds_310",
+     "name": "Bait and Switch"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_418",
+     "name": "Spin Battle Redo"
+    },
+    "blue": {
+     "id": "ds_614",
+     "name": "Circle Of Fire"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_424",
+      "name": "Level Field"
+     },
+     {
+      "id": "ds_425",
+      "name": "Pyrus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     },
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   }
+  },
+  "normal": {
+   "attr": "pyrus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "tt_04",
+     "attr": "pyrus",
+     "name": "Druman"
+    },
+    {
+     "id": "bb_41",
+     "attr": "pyrus",
+     "name": "Saurus"
+    },
+    {
+     "id": "bb_58",
+     "attr": "darkus",
+     "name": "Ravenoid"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_121",
+     "name": "Saurus"
+    },
+    "silver": {
+     "id": "ds_207",
+     "name": "Tornado Alley"
+    },
+    "copper": {
+     "id": "ds_317",
+     "name": "Waist Deep"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_405",
+     "name": "Darkus Swap"
+    },
+    "blue": {
+     "id": "ds_616",
+     "name": "Brushfire"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
+     },
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     },
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   }
+  },
+  "hard": {
+   "attr": "pyrus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "tt_04",
+     "attr": "pyrus",
+     "name": "Druman"
+    },
+    {
+     "id": "bb_41",
+     "attr": "pyrus",
+     "name": "Saurus"
+    },
+    {
+     "id": "bb_58",
+     "attr": "darkus",
+     "name": "Ravenoid"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_121",
+     "name": "Saurus"
+    },
+    "silver": {
+     "id": "ds_216",
+     "name": "Volcanic Lake"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_401",
+     "name": "Pyrus Swap"
+    },
+    "blue": {
+     "id": "ds_606",
+     "name": "Power From Darkness"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_405",
+      "name": "Darkus Swap"
+     },
+     {
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_616",
+      "name": "Brushfire"
+     },
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
     ]
    }
   }
@@ -1081,32 +1589,32 @@ export const NEW_BRAWLERS = {
   "attrs": [
    "haos"
   ],
-  "signature": "Lars Lion",
+  "signature": "Limulus",
   "joins": 3,
   "easy": {
    "attr": "haos",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_09",
+     "id": "tt_10",
      "attr": "haos",
-     "name": "Lars Lion"
+     "name": "Limulus"
     },
     {
-     "id": "bb_60",
+     "id": "bb_44",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_61",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Hynoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_223",
@@ -1169,25 +1677,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_09",
+     "id": "tt_10",
      "attr": "haos",
-     "name": "Lars Lion"
+     "name": "Limulus"
     },
     {
-     "id": "bb_60",
+     "id": "bb_44",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_61",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Hynoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_209",
@@ -1250,25 +1758,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_09",
+     "id": "tt_10",
      "attr": "haos",
-     "name": "Lars Lion"
+     "name": "Limulus"
     },
     {
-     "id": "bb_60",
+     "id": "bb_44",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_61",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Hynoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_203",
@@ -1346,20 +1854,20 @@ export const NEW_BRAWLERS = {
      "name": "Jelldon"
     },
     {
-     "id": "bb_52",
+     "id": "bt_bee",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Bee Striker"
     },
     {
-     "id": "dc_sp06_25",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Klawgor"
+     "name": "Reaper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_226",
@@ -1427,20 +1935,20 @@ export const NEW_BRAWLERS = {
      "name": "Jelldon"
     },
     {
-     "id": "bb_52",
+     "id": "bt_bee",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Bee Striker"
     },
     {
-     "id": "dc_sp06_25",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Klawgor"
+     "name": "Reaper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_207",
@@ -1508,20 +2016,20 @@ export const NEW_BRAWLERS = {
      "name": "Jelldon"
     },
     {
-     "id": "bb_52",
+     "id": "bt_bee",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Bee Striker"
     },
     {
-     "id": "dc_sp06_25",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Klawgor"
+     "name": "Reaper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_216",
@@ -1580,262 +2088,9 @@ export const NEW_BRAWLERS = {
    }
   }
  },
- "zarek": {
-  "name": "Zarek",
-  "species": "Gundalian",
-  "attrs": [
-   "aquos",
-   "subterra"
-  ],
-  "signature": "Limulus",
-  "joins": 3,
-  "easy": {
-   "attr": "aquos",
-   "upgrades": 0,
-   "toys": [
-    {
-     "id": "tt_10",
-     "attr": "aquos",
-     "name": "Limulus"
-    },
-    {
-     "id": "bb_46",
-     "attr": "subterra",
-     "name": "Laserman"
-    },
-    {
-     "id": "bb_48",
-     "attr": "aquos",
-     "name": "Fear Ripper"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
-    },
-    "silver": {
-     "id": "ds_225",
-     "name": "Spitting Fire"
-    },
-    "copper": {
-     "id": "ds_308",
-     "name": "Load Up"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_418",
-     "name": "Spin Battle Redo"
-    },
-    "blue": {
-     "id": "ds_625",
-     "name": "Subterra and Aquos Combo"
-    },
-    "green": {
-     "id": "ds_505",
-     "name": "Negative Wave"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_426",
-      "name": "Aquos Double Input"
-     },
-     {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_626",
-      "name": "Pyrus and Subterra Combo"
-     },
-     {
-      "id": "ds_627",
-      "name": "Subterra and Haos Combo"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_506",
-      "name": "Imbalance"
-     },
-     {
-      "id": "ds_507",
-      "name": "Prevention"
-     }
-    ]
-   }
-  },
-  "normal": {
-   "attr": "aquos",
-   "upgrades": 5,
-   "toys": [
-    {
-     "id": "tt_10",
-     "attr": "aquos",
-     "name": "Limulus"
-    },
-    {
-     "id": "bb_46",
-     "attr": "subterra",
-     "name": "Laserman"
-    },
-    {
-     "id": "bb_48",
-     "attr": "aquos",
-     "name": "Fear Ripper"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
-    },
-    "silver": {
-     "id": "ds_204",
-     "name": "Tsunami"
-    },
-    "copper": {
-     "id": "ds_303",
-     "name": "Clipped Wings"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_403",
-     "name": "Subterra Swap"
-    },
-    "blue": {
-     "id": "ds_607",
-     "name": "Summon Wave"
-    },
-    "green": {
-     "id": "ds_502",
-     "name": "No Trading"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_410",
-      "name": "Aquos Time Breaker"
-     },
-     {
-      "id": "ds_411",
-      "name": "Subterra Time Breaker"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_608",
-      "name": "Mega Impact"
-     },
-     {
-      "id": "ds_621",
-      "name": "The Shadow"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     },
-     {
-      "id": "ds_504",
-      "name": "Double Input Cancel"
-     }
-    ]
-   }
-  },
-  "hard": {
-   "attr": "aquos",
-   "upgrades": 10,
-   "toys": [
-    {
-     "id": "tt_10",
-     "attr": "aquos",
-     "name": "Limulus"
-    },
-    {
-     "id": "bb_46",
-     "attr": "subterra",
-     "name": "Laserman"
-    },
-    {
-     "id": "bb_48",
-     "attr": "aquos",
-     "name": "Fear Ripper"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
-    },
-    "silver": {
-     "id": "ds_208",
-     "name": "Whirlpool"
-    },
-    "copper": {
-     "id": "ds_309",
-     "name": "Electrified"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_402",
-     "name": "Aquos Swap"
-    },
-    "blue": {
-     "id": "ds_605",
-     "name": "Home Advantage"
-    },
-    "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_403",
-      "name": "Subterra Swap"
-     },
-     {
-      "id": "ds_410",
-      "name": "Aquos Time Breaker"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_607",
-      "name": "Summon Wave"
-     },
-     {
-      "id": "ds_608",
-      "name": "Mega Impact"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_502",
-      "name": "No Trading"
-     },
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     }
-    ]
-   }
-  }
- },
- "zorro": {
-  "name": "Zorro",
-  "species": "Gundalian",
+ "arcadius": {
+  "name": "Arcadius",
+  "species": "Neathian",
   "attrs": [
    "pyrus"
   ],
@@ -1851,20 +2106,20 @@ export const NEW_BRAWLERS = {
      "name": "Apollonir"
     },
     {
-     "id": "bb_41",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Saurus"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp06_20",
+     "id": "bb_40",
      "attr": "pyrus",
-     "name": "Fencer"
+     "name": "Robotallion"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_226",
@@ -1932,20 +2187,20 @@ export const NEW_BRAWLERS = {
      "name": "Apollonir"
     },
     {
-     "id": "bb_41",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Saurus"
+     "name": "Laserman"
     },
     {
-     "id": "dc_sp06_20",
+     "id": "bb_40",
      "attr": "pyrus",
-     "name": "Fencer"
+     "name": "Robotallion"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_207",
@@ -2013,1028 +2268,20 @@ export const NEW_BRAWLERS = {
      "name": "Apollonir"
     },
     {
-     "id": "bb_41",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Saurus"
-    },
-    {
-     "id": "dc_sp06_20",
-     "attr": "pyrus",
-     "name": "Fencer"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
-    },
-    "silver": {
-     "id": "ds_216",
-     "name": "Volcanic Lake"
-    },
-    "copper": {
-     "id": "ds_309",
-     "name": "Electrified"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_401",
-     "name": "Pyrus Swap"
-    },
-    "blue": {
-     "id": "ds_616",
-     "name": "Brushfire"
-    },
-    "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_409",
-      "name": "Pyrus Time Breaker"
-     },
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_614",
-      "name": "Circle Of Fire"
-     },
-     {
-      "id": "ds_620",
-      "name": "The Glow"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_502",
-      "name": "No Trading"
-     },
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     }
-    ]
-   }
-  }
- },
- "arcadius": {
-  "name": "Arcadius",
-  "species": "Neathian",
-  "attrs": [
-   "pyrus"
-  ],
-  "signature": "Exedra",
-  "joins": 3,
-  "easy": {
-   "attr": "pyrus",
-   "upgrades": 0,
-   "toys": [
-    {
-     "id": "tt_05",
-     "attr": "pyrus",
-     "name": "Exedra"
-    },
-    {
-     "id": "tt_16",
-     "attr": "pyrus",
-     "name": "Tuskor"
-    },
-    {
-     "id": "bb_42",
-     "attr": "pyrus",
-     "name": "Serpenoid"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
-    },
-    "silver": {
-     "id": "ds_226",
-     "name": "Earthen Wave"
-    },
-    "copper": {
-     "id": "ds_310",
-     "name": "Bait and Switch"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_425",
-     "name": "Pyrus Double Input"
-    },
-    "blue": {
-     "id": "ds_615",
-     "name": "Updraft"
-    },
-    "green": {
-     "id": "ds_505",
-     "name": "Negative Wave"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_407",
-      "name": "Twin Swap"
-     },
-     {
-      "id": "ds_408",
-      "name": "Counter Swap"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_602",
-      "name": "G-Power Boost"
-     },
-     {
-      "id": "ds_607",
-      "name": "Summon Wave"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_506",
-      "name": "Imbalance"
-     },
-     {
-      "id": "ds_507",
-      "name": "Prevention"
-     }
-    ]
-   }
-  },
-  "normal": {
-   "attr": "pyrus",
-   "upgrades": 5,
-   "toys": [
-    {
-     "id": "tt_05",
-     "attr": "pyrus",
-     "name": "Exedra"
-    },
-    {
-     "id": "tt_16",
-     "attr": "pyrus",
-     "name": "Tuskor"
-    },
-    {
-     "id": "bb_42",
-     "attr": "pyrus",
-     "name": "Serpenoid"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
-    },
-    "silver": {
-     "id": "ds_207",
-     "name": "Tornado Alley"
-    },
-    "copper": {
-     "id": "ds_317",
-     "name": "Waist Deep"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_409",
-     "name": "Pyrus Time Breaker"
-    },
-    "blue": {
-     "id": "ds_614",
-     "name": "Circle Of Fire"
-    },
-    "green": {
-     "id": "ds_502",
-     "name": "No Trading"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     },
-     {
-      "id": "ds_424",
-      "name": "Level Field"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_620",
-      "name": "The Glow"
-     },
-     {
-      "id": "ds_604",
-      "name": "Blaze"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     },
-     {
-      "id": "ds_504",
-      "name": "Double Input Cancel"
-     }
-    ]
-   }
-  },
-  "hard": {
-   "attr": "pyrus",
-   "upgrades": 10,
-   "toys": [
-    {
-     "id": "tt_05",
-     "attr": "pyrus",
-     "name": "Exedra"
-    },
-    {
-     "id": "tt_16",
-     "attr": "pyrus",
-     "name": "Tuskor"
-    },
-    {
-     "id": "bb_42",
-     "attr": "pyrus",
-     "name": "Serpenoid"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
-    },
-    "silver": {
-     "id": "ds_216",
-     "name": "Volcanic Lake"
-    },
-    "copper": {
-     "id": "ds_309",
-     "name": "Electrified"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_401",
-     "name": "Pyrus Swap"
-    },
-    "blue": {
-     "id": "ds_616",
-     "name": "Brushfire"
-    },
-    "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_409",
-      "name": "Pyrus Time Breaker"
-     },
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_614",
-      "name": "Circle Of Fire"
-     },
-     {
-      "id": "ds_620",
-      "name": "The Glow"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_502",
-      "name": "No Trading"
-     },
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     }
-    ]
-   }
-  }
- },
- "demitri": {
-  "name": "Demitri",
-  "species": "Neathian",
-  "attrs": [
-   "subterra"
-  ],
-  "signature": "Tricloid",
-  "joins": 3,
-  "easy": {
-   "attr": "subterra",
-   "upgrades": 0,
-   "toys": [
-    {
-     "id": "tt_15",
-     "attr": "subterra",
-     "name": "Tricloid"
+     "name": "Laserman"
     },
     {
      "id": "bb_40",
-     "attr": "subterra",
+     "attr": "pyrus",
      "name": "Robotallion"
-    },
-    {
-     "id": "bb_50",
-     "attr": "subterra",
-     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
      "id": "ds_120",
      "name": "Robotallion"
-    },
-    "silver": {
-     "id": "ds_202",
-     "name": "Muddy Ground"
-    },
-    "copper": {
-     "id": "ds_303",
-     "name": "Clipped Wings"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_407",
-     "name": "Twin Swap"
-    },
-    "blue": {
-     "id": "ds_602",
-     "name": "G-Power Boost"
-    },
-    "green": {
-     "id": "ds_505",
-     "name": "Negative Wave"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_408",
-      "name": "Counter Swap"
-     },
-     {
-      "id": "ds_415",
-      "name": "Twin Time Breaker"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_612",
-      "name": "G-Power Up"
-     },
-     {
-      "id": "ds_601",
-      "name": "Bright Light"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_506",
-      "name": "Imbalance"
-     },
-     {
-      "id": "ds_507",
-      "name": "Prevention"
-     }
-    ]
-   }
-  },
-  "normal": {
-   "attr": "subterra",
-   "upgrades": 5,
-   "toys": [
-    {
-     "id": "tt_15",
-     "attr": "subterra",
-     "name": "Tricloid"
-    },
-    {
-     "id": "bb_40",
-     "attr": "subterra",
-     "name": "Robotallion"
-    },
-    {
-     "id": "bb_50",
-     "attr": "subterra",
-     "name": "Terrorclaw"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
-    },
-    "silver": {
-     "id": "ds_208",
-     "name": "Whirlpool"
-    },
-    "copper": {
-     "id": "ds_305",
-     "name": "Down For The Count"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_411",
-     "name": "Subterra Time Breaker"
-    },
-    "blue": {
-     "id": "ds_608",
-     "name": "Mega Impact"
-    },
-    "green": {
-     "id": "ds_502",
-     "name": "No Trading"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     },
-     {
-      "id": "ds_427",
-      "name": "Subterra Double Input"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_616",
-      "name": "Brushfire"
-     },
-     {
-      "id": "ds_622",
-      "name": "The Gust"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     },
-     {
-      "id": "ds_504",
-      "name": "Double Input Cancel"
-     }
-    ]
-   }
-  },
-  "hard": {
-   "attr": "subterra",
-   "upgrades": 10,
-   "toys": [
-    {
-     "id": "tt_15",
-     "attr": "subterra",
-     "name": "Tricloid"
-    },
-    {
-     "id": "bb_40",
-     "attr": "subterra",
-     "name": "Robotallion"
-    },
-    {
-     "id": "bb_50",
-     "attr": "subterra",
-     "name": "Terrorclaw"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
-    },
-    "silver": {
-     "id": "ds_209",
-     "name": "Earthen Mound"
-    },
-    "copper": {
-     "id": "ds_309",
-     "name": "Electrified"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_403",
-     "name": "Subterra Swap"
-    },
-    "blue": {
-     "id": "ds_605",
-     "name": "Home Advantage"
-    },
-    "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_411",
-      "name": "Subterra Time Breaker"
-     },
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_608",
-      "name": "Mega Impact"
-     },
-     {
-      "id": "ds_616",
-      "name": "Brushfire"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_502",
-      "name": "No Trading"
-     },
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     }
-    ]
-   }
-  }
- },
- "eudocia": {
-  "name": "Eudocia",
-  "species": "Neathian",
-  "attrs": [
-   "ventus"
-  ],
-  "signature": "Hairadee",
-  "joins": 3,
-  "easy": {
-   "attr": "ventus",
-   "upgrades": 0,
-   "toys": [
-    {
-     "id": "tt_08",
-     "attr": "ventus",
-     "name": "Hairadee"
-    },
-    {
-     "id": "bb_44",
-     "attr": "ventus",
-     "name": "Stinglash"
-    },
-    {
-     "id": "bt_hynoid",
-     "attr": "ventus",
-     "name": "Hynoid"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
-    },
-    "silver": {
-     "id": "ds_232",
-     "name": "Blue Sky"
-    },
-    "copper": {
-     "id": "ds_317",
-     "name": "Waist Deep"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_407",
-     "name": "Twin Swap"
-    },
-    "blue": {
-     "id": "ds_611",
-     "name": "G-Power Bonus"
-    },
-    "green": {
-     "id": "ds_505",
-     "name": "Negative Wave"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_408",
-      "name": "Counter Swap"
-     },
-     {
-      "id": "ds_415",
-      "name": "Twin Time Breaker"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_617",
-      "name": "G-Power Increase"
-     },
-     {
-      "id": "ds_604",
-      "name": "Blaze"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_506",
-      "name": "Imbalance"
-     },
-     {
-      "id": "ds_507",
-      "name": "Prevention"
-     }
-    ]
-   }
-  },
-  "normal": {
-   "attr": "ventus",
-   "upgrades": 5,
-   "toys": [
-    {
-     "id": "tt_08",
-     "attr": "ventus",
-     "name": "Hairadee"
-    },
-    {
-     "id": "bb_44",
-     "attr": "ventus",
-     "name": "Stinglash"
-    },
-    {
-     "id": "bt_hynoid",
-     "attr": "ventus",
-     "name": "Hynoid"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
-    },
-    "silver": {
-     "id": "ds_213",
-     "name": "Sand Storm"
-    },
-    "copper": {
-     "id": "ds_308",
-     "name": "Load Up"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_414",
-     "name": "Ventus Time Breaker"
-    },
-    "blue": {
-     "id": "ds_622",
-     "name": "The Gust"
-    },
-    "green": {
-     "id": "ds_502",
-     "name": "No Trading"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     },
-     {
-      "id": "ds_430",
-      "name": "Ventus Double Input"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_609",
-      "name": "Hot Wind"
-     },
-     {
-      "id": "ds_603",
-      "name": "G-Power Bump"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     },
-     {
-      "id": "ds_504",
-      "name": "Double Input Cancel"
-     }
-    ]
-   }
-  },
-  "hard": {
-   "attr": "ventus",
-   "upgrades": 10,
-   "toys": [
-    {
-     "id": "tt_08",
-     "attr": "ventus",
-     "name": "Hairadee"
-    },
-    {
-     "id": "bb_44",
-     "attr": "ventus",
-     "name": "Stinglash"
-    },
-    {
-     "id": "bt_hynoid",
-     "attr": "ventus",
-     "name": "Hynoid"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
-    },
-    "silver": {
-     "id": "ds_207",
-     "name": "Tornado Alley"
-    },
-    "copper": {
-     "id": "ds_312",
-     "name": "Heat Haze"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_406",
-     "name": "Ventus Swap"
-    },
-    "blue": {
-     "id": "ds_615",
-     "name": "Updraft"
-    },
-    "green": {
-     "id": "ds_501",
-     "name": "No Backsies"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_414",
-      "name": "Ventus Time Breaker"
-     },
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_622",
-      "name": "The Gust"
-     },
-     {
-      "id": "ds_609",
-      "name": "Hot Wind"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_502",
-      "name": "No Trading"
-     },
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     }
-    ]
-   }
-  }
- },
- "ignatios": {
-  "name": "Ignatios",
-  "species": "Neathian",
-  "attrs": [
-   "pyrus"
-  ],
-  "signature": "Druman",
-  "joins": 3,
-  "easy": {
-   "attr": "pyrus",
-   "upgrades": 0,
-   "toys": [
-    {
-     "id": "tt_04",
-     "attr": "pyrus",
-     "name": "Druman"
-    },
-    {
-     "id": "dc_sp06_21",
-     "attr": "pyrus",
-     "name": "Foxbat"
-    },
-    {
-     "id": "tt_20",
-     "attr": "pyrus",
-     "name": "Goblin Ball"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
-    },
-    "silver": {
-     "id": "ds_226",
-     "name": "Earthen Wave"
-    },
-    "copper": {
-     "id": "ds_310",
-     "name": "Bait and Switch"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_425",
-     "name": "Pyrus Double Input"
-    },
-    "blue": {
-     "id": "ds_615",
-     "name": "Updraft"
-    },
-    "green": {
-     "id": "ds_505",
-     "name": "Negative Wave"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_407",
-      "name": "Twin Swap"
-     },
-     {
-      "id": "ds_408",
-      "name": "Counter Swap"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_602",
-      "name": "G-Power Boost"
-     },
-     {
-      "id": "ds_607",
-      "name": "Summon Wave"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_506",
-      "name": "Imbalance"
-     },
-     {
-      "id": "ds_507",
-      "name": "Prevention"
-     }
-    ]
-   }
-  },
-  "normal": {
-   "attr": "pyrus",
-   "upgrades": 5,
-   "toys": [
-    {
-     "id": "tt_04",
-     "attr": "pyrus",
-     "name": "Druman"
-    },
-    {
-     "id": "dc_sp06_21",
-     "attr": "pyrus",
-     "name": "Foxbat"
-    },
-    {
-     "id": "tt_20",
-     "attr": "pyrus",
-     "name": "Goblin Ball"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
-    },
-    "silver": {
-     "id": "ds_207",
-     "name": "Tornado Alley"
-    },
-    "copper": {
-     "id": "ds_317",
-     "name": "Waist Deep"
-    }
-   },
-   "abilities": {
-    "red": {
-     "id": "ds_409",
-     "name": "Pyrus Time Breaker"
-    },
-    "blue": {
-     "id": "ds_614",
-     "name": "Circle Of Fire"
-    },
-    "green": {
-     "id": "ds_502",
-     "name": "No Trading"
-    }
-   },
-   "extra": {
-    "red": [
-     {
-      "id": "ds_418",
-      "name": "Spin Battle Redo"
-     },
-     {
-      "id": "ds_424",
-      "name": "Level Field"
-     }
-    ],
-    "blue": [
-     {
-      "id": "ds_620",
-      "name": "The Glow"
-     },
-     {
-      "id": "ds_604",
-      "name": "Blaze"
-     }
-    ],
-    "green": [
-     {
-      "id": "ds_503",
-      "name": "Out Of Time"
-     },
-     {
-      "id": "ds_504",
-      "name": "Double Input Cancel"
-     }
-    ]
-   }
-  },
-  "hard": {
-   "attr": "pyrus",
-   "upgrades": 10,
-   "toys": [
-    {
-     "id": "tt_04",
-     "attr": "pyrus",
-     "name": "Druman"
-    },
-    {
-     "id": "dc_sp06_21",
-     "attr": "pyrus",
-     "name": "Foxbat"
-    },
-    {
-     "id": "tt_20",
-     "attr": "pyrus",
-     "name": "Goblin Ball"
-    }
-   ],
-   "gates": {
-    "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_216",
@@ -3099,21 +2346,21 @@ export const NEW_BRAWLERS = {
   "attrs": [
    "aquos"
   ],
-  "signature": "Tayghen",
+  "signature": "Frosch",
   "joins": 3,
   "easy": {
    "attr": "aquos",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_14",
+     "id": "tt_07",
      "attr": "aquos",
-     "name": "Tayghen"
+     "name": "Frosch"
     },
     {
-     "id": "bb_56",
+     "id": "dc_sp06_24",
      "attr": "aquos",
-     "name": "Manion"
+     "name": "Spindle"
     },
     {
      "id": "bb_45",
@@ -3187,14 +2434,14 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_14",
+     "id": "tt_07",
      "attr": "aquos",
-     "name": "Tayghen"
+     "name": "Frosch"
     },
     {
-     "id": "bb_56",
+     "id": "dc_sp06_24",
      "attr": "aquos",
-     "name": "Manion"
+     "name": "Spindle"
     },
     {
      "id": "bb_45",
@@ -3268,14 +2515,14 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_14",
+     "id": "tt_07",
      "attr": "aquos",
-     "name": "Tayghen"
+     "name": "Frosch"
     },
     {
-     "id": "bb_56",
+     "id": "dc_sp06_24",
      "attr": "aquos",
-     "name": "Manion"
+     "name": "Spindle"
     },
     {
      "id": "bb_45",
@@ -3345,46 +2592,46 @@ export const NEW_BRAWLERS = {
    }
   }
  },
- "petronas": {
-  "name": "Petronas",
+ "demitri": {
+  "name": "Demitri",
   "species": "Neathian",
   "attrs": [
-   "darkus"
+   "subterra"
   ],
-  "signature": "Centorrior",
+  "signature": "Clayf",
   "joins": 3,
   "easy": {
-   "attr": "darkus",
+   "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_02",
-     "attr": "darkus",
-     "name": "Centorrior"
+     "id": "tt_03",
+     "attr": "subterra",
+     "name": "Clayf"
     },
     {
-     "id": "bb_58",
-     "attr": "darkus",
-     "name": "Ravenoid"
+     "id": "bb_42",
+     "attr": "subterra",
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
+     "id": "dc_sp06_20",
+     "attr": "subterra",
+     "name": "Fencer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
-     "id": "ds_222",
-     "name": "Pit Dweller"
+     "id": "ds_202",
+     "name": "Muddy Ground"
     },
     "copper": {
-     "id": "ds_331",
-     "name": "Mega Warrior"
+     "id": "ds_303",
+     "name": "Clipped Wings"
     }
    },
    "abilities": {
@@ -3393,8 +2640,8 @@ export const NEW_BRAWLERS = {
      "name": "Twin Swap"
     },
     "blue": {
-     "id": "ds_611",
-     "name": "G-Power Bonus"
+     "id": "ds_602",
+     "name": "G-Power Boost"
     },
     "green": {
      "id": "ds_505",
@@ -3414,12 +2661,12 @@ export const NEW_BRAWLERS = {
     ],
     "blue": [
      {
-      "id": "ds_601",
-      "name": "Bright Light"
+      "id": "ds_612",
+      "name": "G-Power Up"
      },
      {
-      "id": "ds_609",
-      "name": "Hot Wind"
+      "id": "ds_601",
+      "name": "Bright Light"
      }
     ],
     "green": [
@@ -3435,47 +2682,47 @@ export const NEW_BRAWLERS = {
    }
   },
   "normal": {
-   "attr": "darkus",
+   "attr": "subterra",
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_02",
-     "attr": "darkus",
-     "name": "Centorrior"
+     "id": "tt_03",
+     "attr": "subterra",
+     "name": "Clayf"
     },
     {
-     "id": "bb_58",
-     "attr": "darkus",
-     "name": "Ravenoid"
+     "id": "bb_42",
+     "attr": "subterra",
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
+     "id": "dc_sp06_20",
+     "attr": "subterra",
+     "name": "Fencer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
-     "id": "ds_203",
-     "name": "Light-Burst"
+     "id": "ds_208",
+     "name": "Whirlpool"
     },
     "copper": {
-     "id": "ds_321",
-     "name": "Reflexes"
+     "id": "ds_305",
+     "name": "Down For The Count"
     }
    },
    "abilities": {
     "red": {
-     "id": "ds_413",
-     "name": "Darkus Time Breaker"
+     "id": "ds_411",
+     "name": "Subterra Time Breaker"
     },
     "blue": {
-     "id": "ds_621",
-     "name": "The Shadow"
+     "id": "ds_608",
+     "name": "Mega Impact"
     },
     "green": {
      "id": "ds_502",
@@ -3489,18 +2736,18 @@ export const NEW_BRAWLERS = {
       "name": "Spin Battle Redo"
      },
      {
-      "id": "ds_429",
-      "name": "Darkus Double Input"
+      "id": "ds_427",
+      "name": "Subterra Double Input"
      }
     ],
     "blue": [
      {
-      "id": "ds_613",
-      "name": "Dark Growth"
+      "id": "ds_616",
+      "name": "Brushfire"
      },
      {
-      "id": "ds_602",
-      "name": "G-Power Boost"
+      "id": "ds_622",
+      "name": "The Gust"
      }
     ],
     "green": [
@@ -3516,33 +2763,33 @@ export const NEW_BRAWLERS = {
    }
   },
   "hard": {
-   "attr": "darkus",
+   "attr": "subterra",
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_02",
-     "attr": "darkus",
-     "name": "Centorrior"
+     "id": "tt_03",
+     "attr": "subterra",
+     "name": "Clayf"
     },
     {
-     "id": "bb_58",
-     "attr": "darkus",
-     "name": "Ravenoid"
+     "id": "bb_42",
+     "attr": "subterra",
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_25",
-     "attr": "darkus",
-     "name": "Reaper"
+     "id": "dc_sp06_20",
+     "attr": "subterra",
+     "name": "Fencer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
-     "id": "ds_214",
-     "name": "Haunted Night"
+     "id": "ds_209",
+     "name": "Earthen Mound"
     },
     "copper": {
      "id": "ds_309",
@@ -3551,12 +2798,12 @@ export const NEW_BRAWLERS = {
    },
    "abilities": {
     "red": {
-     "id": "ds_405",
-     "name": "Darkus Swap"
+     "id": "ds_403",
+     "name": "Subterra Swap"
     },
     "blue": {
-     "id": "ds_606",
-     "name": "Power From Darkness"
+     "id": "ds_605",
+     "name": "Home Advantage"
     },
     "green": {
      "id": "ds_501",
@@ -3566,8 +2813,8 @@ export const NEW_BRAWLERS = {
    "extra": {
     "red": [
      {
-      "id": "ds_413",
-      "name": "Darkus Time Breaker"
+      "id": "ds_411",
+      "name": "Subterra Time Breaker"
      },
      {
       "id": "ds_418",
@@ -3576,12 +2823,12 @@ export const NEW_BRAWLERS = {
     ],
     "blue": [
      {
-      "id": "ds_621",
-      "name": "The Shadow"
+      "id": "ds_608",
+      "name": "Mega Impact"
      },
      {
-      "id": "ds_613",
-      "name": "Dark Growth"
+      "id": "ds_616",
+      "name": "Brushfire"
      }
     ],
     "green": [
@@ -3603,32 +2850,32 @@ export const NEW_BRAWLERS = {
   "attrs": [
    "haos"
   ],
-  "signature": "Rabeeder",
+  "signature": "Lars Lion",
   "joins": 3,
   "easy": {
    "attr": "haos",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_13",
+     "id": "tt_09",
      "attr": "haos",
-     "name": "Rabeeder"
+     "name": "Lars Lion"
     },
     {
-     "id": "bb_60",
+     "id": "dc_sp06_21",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Foxbat"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp06_25",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Klawgor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_223",
@@ -3691,25 +2938,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_13",
+     "id": "tt_09",
      "attr": "haos",
-     "name": "Rabeeder"
+     "name": "Lars Lion"
     },
     {
-     "id": "bb_60",
+     "id": "dc_sp06_21",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Foxbat"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp06_25",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Klawgor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_209",
@@ -3772,25 +3019,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_13",
+     "id": "tt_09",
      "attr": "haos",
-     "name": "Rabeeder"
+     "name": "Lars Lion"
     },
     {
-     "id": "bb_60",
+     "id": "dc_sp06_21",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Foxbat"
     },
     {
-     "id": "bb_61",
+     "id": "dc_sp06_25",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Klawgor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_203",
@@ -3849,38 +3096,290 @@ export const NEW_BRAWLERS = {
    }
   }
  },
- "jason": {
-  "name": "Jason",
-  "species": "Human",
+ "petronas": {
+  "name": "Petronas",
+  "species": "Neathian",
+  "attrs": [
+   "darkus"
+  ],
+  "signature": "Exedra",
+  "joins": 3,
+  "easy": {
+   "attr": "darkus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "tt_05",
+     "attr": "darkus",
+     "name": "Exedra"
+    },
+    {
+     "id": "bb_58",
+     "attr": "darkus",
+     "name": "Ravenoid"
+    },
+    {
+     "id": "bb_43",
+     "attr": "darkus",
+     "name": "Falconeer"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_123",
+     "name": "Falconeer"
+    },
+    "silver": {
+     "id": "ds_222",
+     "name": "Pit Dweller"
+    },
+    "copper": {
+     "id": "ds_331",
+     "name": "Mega Warrior"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_611",
+     "name": "G-Power Bonus"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_601",
+      "name": "Bright Light"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   }
+  },
+  "normal": {
+   "attr": "darkus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "tt_05",
+     "attr": "darkus",
+     "name": "Exedra"
+    },
+    {
+     "id": "bb_58",
+     "attr": "darkus",
+     "name": "Ravenoid"
+    },
+    {
+     "id": "bb_43",
+     "attr": "darkus",
+     "name": "Falconeer"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_123",
+     "name": "Falconeer"
+    },
+    "silver": {
+     "id": "ds_203",
+     "name": "Light-Burst"
+    },
+    "copper": {
+     "id": "ds_321",
+     "name": "Reflexes"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_413",
+     "name": "Darkus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_621",
+     "name": "The Shadow"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_429",
+      "name": "Darkus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     },
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   }
+  },
+  "hard": {
+   "attr": "darkus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "tt_05",
+     "attr": "darkus",
+     "name": "Exedra"
+    },
+    {
+     "id": "bb_58",
+     "attr": "darkus",
+     "name": "Ravenoid"
+    },
+    {
+     "id": "bb_43",
+     "attr": "darkus",
+     "name": "Falconeer"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_123",
+     "name": "Falconeer"
+    },
+    "silver": {
+     "id": "ds_214",
+     "name": "Haunted Night"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_405",
+     "name": "Darkus Swap"
+    },
+    "blue": {
+     "id": "ds_606",
+     "name": "Power From Darkness"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_413",
+      "name": "Darkus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_621",
+      "name": "The Shadow"
+     },
+     {
+      "id": "ds_613",
+      "name": "Dark Growth"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
+   }
+  }
+ },
+ "eudocia": {
+  "name": "Eudocia",
+  "species": "Neathian",
   "attrs": [
    "ventus"
   ],
-  "signature": "Frosch",
+  "signature": "Oberus",
   "joins": 3,
   "easy": {
    "attr": "ventus",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_07",
+     "id": "tt_12",
      "attr": "ventus",
-     "name": "Frosch"
+     "name": "Oberus"
     },
     {
-     "id": "dc_sp06_22",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Leefram"
+     "name": "Monarus"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_56",
      "attr": "ventus",
-     "name": "Bee Striker"
+     "name": "Manion"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_232",
@@ -3943,25 +3442,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_07",
+     "id": "tt_12",
      "attr": "ventus",
-     "name": "Frosch"
+     "name": "Oberus"
     },
     {
-     "id": "dc_sp06_22",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Leefram"
+     "name": "Monarus"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_56",
      "attr": "ventus",
-     "name": "Bee Striker"
+     "name": "Manion"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_213",
@@ -4024,25 +3523,529 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_07",
+     "id": "tt_12",
      "attr": "ventus",
-     "name": "Frosch"
+     "name": "Oberus"
     },
     {
-     "id": "dc_sp06_22",
+     "id": "bb_61",
      "attr": "ventus",
-     "name": "Leefram"
+     "name": "Monarus"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_56",
      "attr": "ventus",
-     "name": "Bee Striker"
+     "name": "Manion"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_135",
+     "name": "Monarus"
+    },
+    "silver": {
+     "id": "ds_207",
+     "name": "Tornado Alley"
+    },
+    "copper": {
+     "id": "ds_312",
+     "name": "Heat Haze"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_406",
+     "name": "Ventus Swap"
+    },
+    "blue": {
+     "id": "ds_615",
+     "name": "Updraft"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_414",
+      "name": "Ventus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_622",
+      "name": "The Gust"
+     },
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
+   }
+  }
+ },
+ "ignatios": {
+  "name": "Ignatios",
+  "species": "Neathian",
+  "attrs": [
+   "pyrus"
+  ],
+  "signature": "Alpha Hydranoid",
+  "joins": 3,
+  "easy": {
+   "attr": "pyrus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "tt_00",
+     "attr": "pyrus",
+     "name": "Alpha Hydranoid"
+    },
+    {
+     "id": "dc_sp06_20",
+     "attr": "pyrus",
+     "name": "Fencer"
+    },
+    {
+     "id": "dc_sp06_22",
+     "attr": "pyrus",
+     "name": "Leefram"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
+    },
+    "silver": {
+     "id": "ds_226",
+     "name": "Earthen Wave"
+    },
+    "copper": {
+     "id": "ds_310",
+     "name": "Bait and Switch"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_425",
+     "name": "Pyrus Double Input"
+    },
+    "blue": {
+     "id": "ds_615",
+     "name": "Updraft"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_407",
+      "name": "Twin Swap"
+     },
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_602",
+      "name": "G-Power Boost"
+     },
+     {
+      "id": "ds_607",
+      "name": "Summon Wave"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   }
+  },
+  "normal": {
+   "attr": "pyrus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "tt_00",
+     "attr": "pyrus",
+     "name": "Alpha Hydranoid"
+    },
+    {
+     "id": "dc_sp06_20",
+     "attr": "pyrus",
+     "name": "Fencer"
+    },
+    {
+     "id": "dc_sp06_22",
+     "attr": "pyrus",
+     "name": "Leefram"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
+    },
+    "silver": {
+     "id": "ds_207",
+     "name": "Tornado Alley"
+    },
+    "copper": {
+     "id": "ds_317",
+     "name": "Waist Deep"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_409",
+     "name": "Pyrus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_614",
+     "name": "Circle Of Fire"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_424",
+      "name": "Level Field"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   }
+  },
+  "hard": {
+   "attr": "pyrus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "tt_00",
+     "attr": "pyrus",
+     "name": "Alpha Hydranoid"
+    },
+    {
+     "id": "dc_sp06_20",
+     "attr": "pyrus",
+     "name": "Fencer"
+    },
+    {
+     "id": "dc_sp06_22",
+     "attr": "pyrus",
+     "name": "Leefram"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_112",
+     "name": "Dual Hydranoid"
+    },
+    "silver": {
+     "id": "ds_216",
+     "name": "Volcanic Lake"
+    },
+    "copper": {
+     "id": "ds_309",
+     "name": "Electrified"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_401",
+     "name": "Pyrus Swap"
+    },
+    "blue": {
+     "id": "ds_616",
+     "name": "Brushfire"
+    },
+    "green": {
+     "id": "ds_501",
+     "name": "No Backsies"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_409",
+      "name": "Pyrus Time Breaker"
+     },
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_614",
+      "name": "Circle Of Fire"
+     },
+     {
+      "id": "ds_620",
+      "name": "The Glow"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_502",
+      "name": "No Trading"
+     },
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     }
+    ]
+   }
+  }
+ },
+ "jason": {
+  "name": "Jason",
+  "species": "Human",
+  "attrs": [
+   "ventus"
+  ],
+  "signature": "Tuskor",
+  "joins": 3,
+  "easy": {
+   "attr": "ventus",
+   "upgrades": 0,
+   "toys": [
+    {
+     "id": "tt_16",
+     "attr": "ventus",
+     "name": "Tuskor"
+    },
+    {
+     "id": "bt_hynoid",
+     "attr": "ventus",
+     "name": "Hynoid"
+    },
+    {
+     "id": "bb_50",
+     "attr": "ventus",
+     "name": "Terrorclaw"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_130",
+     "name": "Terrorclaw"
+    },
+    "silver": {
+     "id": "ds_232",
+     "name": "Blue Sky"
+    },
+    "copper": {
+     "id": "ds_317",
+     "name": "Waist Deep"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_407",
+     "name": "Twin Swap"
+    },
+    "blue": {
+     "id": "ds_611",
+     "name": "G-Power Bonus"
+    },
+    "green": {
+     "id": "ds_505",
+     "name": "Negative Wave"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_408",
+      "name": "Counter Swap"
+     },
+     {
+      "id": "ds_415",
+      "name": "Twin Time Breaker"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_617",
+      "name": "G-Power Increase"
+     },
+     {
+      "id": "ds_604",
+      "name": "Blaze"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_506",
+      "name": "Imbalance"
+     },
+     {
+      "id": "ds_507",
+      "name": "Prevention"
+     }
+    ]
+   }
+  },
+  "normal": {
+   "attr": "ventus",
+   "upgrades": 5,
+   "toys": [
+    {
+     "id": "tt_16",
+     "attr": "ventus",
+     "name": "Tuskor"
+    },
+    {
+     "id": "bt_hynoid",
+     "attr": "ventus",
+     "name": "Hynoid"
+    },
+    {
+     "id": "bb_50",
+     "attr": "ventus",
+     "name": "Terrorclaw"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_130",
+     "name": "Terrorclaw"
+    },
+    "silver": {
+     "id": "ds_213",
+     "name": "Sand Storm"
+    },
+    "copper": {
+     "id": "ds_308",
+     "name": "Load Up"
+    }
+   },
+   "abilities": {
+    "red": {
+     "id": "ds_414",
+     "name": "Ventus Time Breaker"
+    },
+    "blue": {
+     "id": "ds_622",
+     "name": "The Gust"
+    },
+    "green": {
+     "id": "ds_502",
+     "name": "No Trading"
+    }
+   },
+   "extra": {
+    "red": [
+     {
+      "id": "ds_418",
+      "name": "Spin Battle Redo"
+     },
+     {
+      "id": "ds_430",
+      "name": "Ventus Double Input"
+     }
+    ],
+    "blue": [
+     {
+      "id": "ds_609",
+      "name": "Hot Wind"
+     },
+     {
+      "id": "ds_603",
+      "name": "G-Power Bump"
+     }
+    ],
+    "green": [
+     {
+      "id": "ds_503",
+      "name": "Out Of Time"
+     },
+     {
+      "id": "ds_504",
+      "name": "Double Input Cancel"
+     }
+    ]
+   }
+  },
+  "hard": {
+   "attr": "ventus",
+   "upgrades": 10,
+   "toys": [
+    {
+     "id": "tt_16",
+     "attr": "ventus",
+     "name": "Tuskor"
+    },
+    {
+     "id": "bt_hynoid",
+     "attr": "ventus",
+     "name": "Hynoid"
+    },
+    {
+     "id": "bb_50",
+     "attr": "ventus",
+     "name": "Terrorclaw"
+    }
+   ],
+   "gates": {
+    "gold": {
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_207",
@@ -4119,20 +4122,20 @@ export const NEW_BRAWLERS = {
      "name": "Dryoid"
     },
     {
-     "id": "dc_sp06_24",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Spindle"
+     "name": "Reaper"
     },
     {
-     "id": "bb_43",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Falconeer"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_222",
@@ -4200,20 +4203,20 @@ export const NEW_BRAWLERS = {
      "name": "Dryoid"
     },
     {
-     "id": "dc_sp06_24",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Spindle"
+     "name": "Reaper"
     },
     {
-     "id": "bb_43",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Falconeer"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_203",
@@ -4281,20 +4284,20 @@ export const NEW_BRAWLERS = {
      "name": "Dryoid"
     },
     {
-     "id": "dc_sp06_24",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Spindle"
+     "name": "Reaper"
     },
     {
-     "id": "bb_43",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Falconeer"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_214",
@@ -4371,20 +4374,20 @@ export const NEW_BRAWLERS = {
      "name": "Rattleoid"
     },
     {
-     "id": "dc_sp06_20",
+     "id": "bb_40",
      "attr": "darkus",
-     "name": "Fencer"
+     "name": "Robotallion"
     },
     {
-     "id": "dc_sp06_23",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Scraper"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_139",
-     "name": "Battle Ax Vladitor"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_222",
@@ -4452,20 +4455,20 @@ export const NEW_BRAWLERS = {
      "name": "Rattleoid"
     },
     {
-     "id": "dc_sp06_20",
+     "id": "bb_40",
      "attr": "darkus",
-     "name": "Fencer"
+     "name": "Robotallion"
     },
     {
-     "id": "dc_sp06_23",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Scraper"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_139",
-     "name": "Battle Ax Vladitor"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_203",
@@ -4533,20 +4536,20 @@ export const NEW_BRAWLERS = {
      "name": "Rattleoid"
     },
     {
-     "id": "dc_sp06_20",
+     "id": "bb_40",
      "attr": "darkus",
-     "name": "Fencer"
+     "name": "Robotallion"
     },
     {
-     "id": "dc_sp06_23",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Scraper"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_139",
-     "name": "Battle Ax Vladitor"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_214",
@@ -4623,20 +4626,20 @@ export const NEW_BRAWLERS = {
      "name": "Fifth Paladin"
     },
     {
-     "id": "tt_16",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Tuskor"
+     "name": "Griffon"
     },
     {
-     "id": "bb_42",
+     "id": "bb_48",
      "attr": "aquos",
-     "name": "Serpenoid"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_225",
@@ -4704,20 +4707,20 @@ export const NEW_BRAWLERS = {
      "name": "Fifth Paladin"
     },
     {
-     "id": "tt_16",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Tuskor"
+     "name": "Griffon"
     },
     {
-     "id": "bb_42",
+     "id": "bb_48",
      "attr": "aquos",
-     "name": "Serpenoid"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_204",
@@ -4785,20 +4788,20 @@ export const NEW_BRAWLERS = {
      "name": "Fifth Paladin"
     },
     {
-     "id": "tt_16",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Tuskor"
+     "name": "Griffon"
     },
     {
-     "id": "bb_42",
+     "id": "bb_48",
      "attr": "aquos",
-     "name": "Serpenoid"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_208",
@@ -4863,32 +4866,32 @@ export const NEW_BRAWLERS = {
   "attrs": [
    "subterra"
   ],
-  "signature": "Clayf",
+  "signature": "Wormquake",
   "joins": 4,
   "easy": {
    "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_03",
+     "id": "tt_17",
      "attr": "subterra",
-     "name": "Clayf"
+     "name": "Wormquake"
     },
     {
-     "id": "bb_40",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Robotallion"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_50",
+     "id": "dc_sp06_24",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Spindle"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_202",
@@ -4951,25 +4954,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_03",
+     "id": "tt_17",
      "attr": "subterra",
-     "name": "Clayf"
+     "name": "Wormquake"
     },
     {
-     "id": "bb_40",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Robotallion"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_50",
+     "id": "dc_sp06_24",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Spindle"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_208",
@@ -5032,25 +5035,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_03",
+     "id": "tt_17",
      "attr": "subterra",
-     "name": "Clayf"
+     "name": "Wormquake"
     },
     {
-     "id": "bb_40",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Robotallion"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_50",
+     "id": "dc_sp06_24",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Spindle"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_209",
@@ -5117,16 +5120,16 @@ export const NEW_BRAWLERS = {
    "haos",
    "aquos"
   ],
-  "signature": "Alpha Hydranoid",
+  "signature": "Goblin Ball",
   "joins": 0,
   "easy": {
    "attr": "subterra",
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_00",
+     "id": "tt_20",
      "attr": "subterra",
-     "name": "Alpha Hydranoid"
+     "name": "Goblin Ball"
     },
     {
      "id": "bb_40",
@@ -5134,15 +5137,15 @@ export const NEW_BRAWLERS = {
      "name": "Robotallion"
     },
     {
-     "id": "bb_52",
+     "id": "bb_41",
      "attr": "aquos",
-     "name": "Gargonoid"
+     "name": "Saurus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
      "id": "ds_202",
@@ -5205,9 +5208,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_00",
+     "id": "tt_20",
      "attr": "subterra",
-     "name": "Alpha Hydranoid"
+     "name": "Goblin Ball"
     },
     {
      "id": "bb_40",
@@ -5215,15 +5218,15 @@ export const NEW_BRAWLERS = {
      "name": "Robotallion"
     },
     {
-     "id": "bb_52",
+     "id": "bb_41",
      "attr": "aquos",
-     "name": "Gargonoid"
+     "name": "Saurus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
      "id": "ds_208",
@@ -5286,9 +5289,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_00",
+     "id": "tt_20",
      "attr": "subterra",
-     "name": "Alpha Hydranoid"
+     "name": "Goblin Ball"
     },
     {
      "id": "bb_40",
@@ -5296,15 +5299,15 @@ export const NEW_BRAWLERS = {
      "name": "Robotallion"
     },
     {
-     "id": "bb_52",
+     "id": "bb_41",
      "attr": "aquos",
-     "name": "Gargonoid"
+     "name": "Saurus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_112",
-     "name": "Dual Hydranoid"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
      "id": "ds_209",
@@ -5365,8 +5368,8 @@ export const NEW_BRAWLERS = {
  }
 };
 // the season each joins in (0 = never: Raymond)
-export const JOINS = {"brodny":3,"kasimir":3,"pavel":3,"tibor":3,"vasek":3,"vesna":3,"zarek":3,"zorro":3,"arcadius":3,"demitri":3,"eudocia":3,"ignatios":3,"mousoulios":3,"petronas":3,"sophia":3,"jason":3,"evelyn":4,"nina":4,"kala":4,"olivia":4,"raymond":0};
+export const JOINS = {"brodny":3,"kasimir":3,"pavel":3,"tibor":3,"zarek":3,"zorro":3,"vasek":3,"vesna":3,"arcadius":3,"mousoulios":3,"demitri":3,"sophia":3,"petronas":3,"eudocia":3,"ignatios":3,"jason":3,"evelyn":4,"nina":4,"kala":4,"olivia":4,"raymond":0};
 export const SEASON3_NEW = Object.keys(JOINS).filter(id => JOINS[id] === 3);
 export const SEASON4_NEW = Object.keys(JOINS).filter(id => JOINS[id] === 4);
 Object.assign(INTERSPACE, NEW_BRAWLERS);
-Object.assign(STORY_START, {"brodny":"normal","kasimir":"normal","pavel":"normal","tibor":"normal","vasek":"normal","vesna":"normal","zarek":"normal","zorro":"normal","arcadius":"normal","demitri":"normal","eudocia":"normal","ignatios":"normal","mousoulios":"normal","petronas":"normal","sophia":"normal","jason":"easy","evelyn":"easy","nina":"easy","kala":"easy","olivia":"easy","raymond":"easy"});
+Object.assign(STORY_START, {"brodny":"normal","kasimir":"normal","pavel":"normal","tibor":"normal","zarek":"normal","zorro":"normal","vasek":"normal","vesna":"normal","arcadius":"normal","mousoulios":"normal","demitri":"normal","sophia":"normal","petronas":"normal","eudocia":"normal","ignatios":"normal","jason":"easy","evelyn":"easy","nina":"easy","kala":"easy","olivia":"easy","raymond":"easy"});

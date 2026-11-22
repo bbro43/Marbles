@@ -38,7 +38,7 @@ export const NEW_LOOKS = {
   brodny: { ...O, race: 'gundalian', sex: 'm', hair: [4, 15], eye: [3, 2], eyeblow: [3, 15], facial: [2, 0], top: [26, 0], down: [19, 0], shoes: [12, 0], skin: 0, band: 'subterra' },
   kasimir: { ...O, race: 'gundalian', sex: 'm', hair: [7, 17], eye: [1, 0], eyeblow: [1, 17], facial: [4, 0], top: [29, 0], down: [22, 0], shoes: [15, 0], skin: 0, band: 'haos', outfit: [3, 0] },
   pavel: { ...O, race: 'gundalian', sex: 'm', hair: [9, 16], eye: [4, 3], eyeblow: [4, 16], facial: [1, 0], top: [20, 0], down: [20, 0], shoes: [13, 0], skin: 0, band: 'ventus' },
-  tibor: { ...O, race: 'gundalian', sex: 'm', hair: [2, 21], eye: [5, 1], eyeblow: [5, 21], facial: [3, 0], top: [21, 0], down: [24, 0], shoes: [17, 0], skin: 0, band: 'pyrus', gloves: [0, 0] },
+  tibor: { ...O, race: 'gundalian', sex: 'm', hair: [2, 21], eye: [5, 1], eyeblow: [5, 21], facial: [3, 0], top: [21, 0], down: [24, 0], shoes: [17, 0], skin: 0, band: 'darkus', gloves: [0, 0] },
   vasek: { ...O, race: 'gundalian', sex: 'm', hair: [6, 12], eye: [2, 4], eyeblow: [2, 12], facial: [0, 0], top: [28, 0], down: [15, 0], shoes: [8, 0], skin: 0, band: 'haos' },
   vesna: { ...O, race: 'gundalian', sex: 'f', hair: [11, 20], eye: [0, 1], eyeblow: [6, 20], facial: [0, 0], top: [23, 0], down: [9, 2], shoes: [11, 0], skin: 0, band: 'pyrus' },
   zarek: { ...O, race: 'gundalian', sex: 'm', hair: [10, 13], eye: [3, 4], eyeblow: [3, 13], facial: [2, 0], top: [27, 0], down: [14, 0], shoes: [7, 0], skin: 0, band: 'aquos', outfit: [2, 0] },

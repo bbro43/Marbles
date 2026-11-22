@@ -4,8 +4,8 @@
 //
 // Billy (Nov 22): Season 3 adds the 8 Gundalians, the 7 Neathians and Jason to League 4; Season 4 adds Evelyn, Nina, Kala and
 // Olivia. Raymond never joins (he's built, but not on any roster).
-// Signatures: each has one tt_ Bakugan of their own (the six single-attribute ones go to a brawler of that attribute). For the 6 Gundalians and 6 Neathians with partners these are STAND-INS
-// until Billy's 12 partner Bakugan are in the pack (change SIG below). Where the sheet names a tt_ Bakugan, that one is used.
+// Signatures: each has one tt_ Bakugan of their own. The 6 strongest Gundalians and Neathians have Billy's partners (Nov 22).
+// The others' signatures are spare tt_ Bakugan; the sheet's own tt_ Bakugan join as extras where they fit (Mantris, El Condor).
 // Attributes are the sheet's. The sheet's cards are mostly not in the game yet, so cards are picked from the game's set
 // like the Season 2 newcomers' (tools/aiteams.mjs). Traps: where the sheet gives one that's in the game.
 import fs from 'fs';
@@ -13,40 +13,41 @@ import { fitsAttrs, abilityScore, lineBlocked, GATE_COLORS, AB_COLORS } from '..
 import { isCoded, toyMatches } from '../js/abilities.js';
 const cat = JSON.parse(fs.readFileSync(process.argv[2]));
 const byName = new Map(cat.toys.filter(t => t.baseG).map(t => [t.name, t]));
-// id, name, species, attrs (from the sheet), signature (tt_), season they join (0 = never), story start level
+// id, name, species, attrs, signature (tt_), season they join (0 = never), story start level, 'dual' = a Dual Attribute partner
 const NEW = [
-  // Gundalians (Season 3)
-  ['brodny', 'Brodny', 'Gundalian', ['subterra'], 'Mantris', 3, 'normal'],
-  ['kasimir', 'Kasimir', 'Gundalian', ['haos'], 'Oberus', 3, 'normal'],
-  ['pavel', 'Pavel', 'Gundalian', ['ventus'], 'El Condor', 3, 'normal'],
-  ['tibor', 'Tibor', 'Gundalian', ['pyrus', 'ventus', 'darkus'], 'Wormquake', 3, 'normal'],
-  ['vasek', 'Vasek', 'Gundalian', ['haos'], 'Lars Lion', 3, 'normal'],
+  // Gundalians (Season 3). The 6 strongest have Billy's Dual Attribute partners (Nov 22): the first attribute is the toy's color,
+  // the second is the extra one (js/dual.js), and their other two Bakugan are one of each.
+  ['brodny', 'Brodny', 'Gundalian', ['subterra', 'haos'], 'Tricloid', 3, 'normal', 'dual'],
+  ['kasimir', 'Kasimir', 'Gundalian', ['haos', 'subterra'], 'Rabeeder', 3, 'normal', 'dual'],
+  ['pavel', 'Pavel', 'Gundalian', ['ventus', 'aquos'], 'Hairadee', 3, 'normal', 'dual'],
+  ['tibor', 'Tibor', 'Gundalian', ['darkus', 'pyrus'], 'Centorrior', 3, 'normal', 'dual'],
+  ['zarek', 'Zarek', 'Gundalian', ['aquos', 'ventus'], 'Tayghen', 3, 'normal', 'dual'],
+  ['zorro', 'Zorro', 'Gundalian', ['pyrus', 'darkus'], 'Druman', 3, 'normal', 'dual'],
+  ['vasek', 'Vasek', 'Gundalian', ['haos'], 'Limulus', 3, 'normal'],
   ['vesna', 'Vesna', 'Gundalian', ['pyrus', 'ventus'], 'Jelldon', 3, 'normal'],
-  ['zarek', 'Zarek', 'Gundalian', ['aquos', 'subterra'], 'Limulus', 3, 'normal'],
-  ['zorro', 'Zorro', 'Gundalian', ['pyrus'], 'Apollonir', 3, 'normal'],
-  // Neathians (Season 3)
-  ['arcadius', 'Arcadius', 'Neathian', ['pyrus'], 'Exedra', 3, 'normal'],
-  ['demitri', 'Demitri', 'Neathian', ['subterra'], 'Tricloid', 3, 'normal'],
-  ['eudocia', 'Eudocia', 'Neathian', ['ventus'], 'Hairadee', 3, 'normal'],
-  ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], 'Druman', 3, 'normal'],
-  ['mousoulios', 'Mousoulios', 'Neathian', ['aquos'], 'Tayghen', 3, 'normal'],
-  ['petronas', 'Petronas', 'Neathian', ['darkus'], 'Centorrior', 3, 'normal'],
-  ['sophia', 'Sophia', 'Neathian', ['haos'], 'Rabeeder', 3, 'normal'],
+  // Neathians (Season 3). The 6 strongest have Billy's partners (Nov 22), in the partner's attribute.
+  ['arcadius', 'Arcadius', 'Neathian', ['pyrus'], 'Apollonir', 3, 'normal'],
+  ['mousoulios', 'Mousoulios', 'Neathian', ['aquos'], 'Frosch', 3, 'normal'],
+  ['demitri', 'Demitri', 'Neathian', ['subterra'], 'Clayf', 3, 'normal'],
+  ['sophia', 'Sophia', 'Neathian', ['haos'], 'Lars Lion', 3, 'normal'],
+  ['petronas', 'Petronas', 'Neathian', ['darkus'], 'Exedra', 3, 'normal'],
+  ['eudocia', 'Eudocia', 'Neathian', ['ventus'], 'Oberus', 3, 'normal'],
+  ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], 'Alpha Hydranoid', 3, 'normal'],
   // Humans and Vestals
-  ['jason', 'Jason', 'Human', ['ventus'], 'Frosch', 3, 'easy'],
+  ['jason', 'Jason', 'Human', ['ventus'], 'Tuskor', 3, 'easy'],
   ['evelyn', 'Evelyn', 'Vestal', ['darkus'], 'Dryoid', 4, 'easy'],
   ['nina', 'Nina', 'Vestal', ['darkus'], 'Rattleoid', 4, 'easy'],
   ['kala', 'Kala', 'Human', ['aquos'], 'Fifth Paladin', 4, 'easy'],
-  ['olivia', 'Olivia', 'Human', ['subterra'], 'Clayf', 4, 'easy'],
-  ['raymond', 'Raymond', 'Human', ['subterra', 'haos', 'aquos'], 'Alpha Hydranoid', 0, 'easy'],
+  ['olivia', 'Olivia', 'Human', ['subterra'], 'Wormquake', 4, 'easy'],
+  ['raymond', 'Raymond', 'Human', ['subterra', 'haos', 'aquos'], 'Goblin Ball', 0, 'easy'],
 ];
 // the sheet's own Bakugan that are in the game and nobody's partner: used before the shared filler pool
-const SHEET_EXTRA = { pavel: ['Falconeer'], petronas: ['Ravenoid'], raymond: ['Robotallion'], tibor: ['Scraper'], zorro: ['Saurus'] };
+const SHEET_EXTRA = { brodny: ['Mantris'], pavel: ['El Condor'], petronas: ['Ravenoid'], raymond: ['Robotallion'], tibor: ['Scraper'], zorro: ['Saurus'] };
 // Traps from the sheet (in the game): [Trap, its attributes]
 const SHEET_TRAP = { pavel: ['Metalfencer', ['ventus', 'aquos', 'subterra']], tibor: ['Tripod Epsilon', ['aquos', 'haos', 'subterra']] };
 // filler: the Season 2 newcomers' synthetic pool plus the two tt_ Bakugan no one has
 const FILL = ['Leefram', 'Robotallion', 'Foxbat', 'Ravenoid', 'Klawgor', 'Reaper', 'Scraper', 'Fear Ripper', 'Monarus', 'Hynoid', 'Spindle', 'Gargonoid',
-  'Saurus', 'Fencer', 'Laserman', 'Warius', 'Serpenoid', 'Manion', 'Bee Striker', 'Terrorclaw', 'Griffon', 'Falconeer', 'Stinglash', 'Tuskor', 'Goblin Ball'];
+  'Saurus', 'Fencer', 'Laserman', 'Warius', 'Serpenoid', 'Manion', 'Bee Striker', 'Terrorclaw', 'Griffon', 'Falconeer', 'Stinglash'];
 const LEVELS = { easy: { upgrades: 0, rank: 4 }, normal: { upgrades: 5, rank: 1 }, hard: { upgrades: 10, rank: 0 } };
 const gates = cat.cards.filter(c => c.type === 'gate' && c.bonus), abilities = cat.cards.filter(c => c.type === 'ability' && isCoded(c));
 const problems = [], notes = [];
@@ -67,14 +68,15 @@ function pickGates(names, attr, rank) {
 }
 const used = Object.fromEntries(FILL.map(n => [n, 0])), sigs = new Set();
 const out = {}, start = {}, joins = {};
-NEW.forEach(([id, name, species, attrs, sig, season, lvl0], i) => {
+NEW.forEach(([id, name, species, attrs, sig, season, lvl0, dual], i) => {
   const s = byName.get(sig); if (!s) problems.push(`${id}: no Bakugan ${sig}`); if (sigs.has(sig)) problems.push(`${id}: ${sig} is someone else's`); sigs.add(sig);
   const names = [sig];
   for (const n of SHEET_EXTRA[id] || []) if (names.length < 3 && byName.get(n) && !lineBlocked(names.map(x => ({ id: byName.get(x).id })), byName.get(n).id)) names.push(n);
   const pool = FILL.filter(n => !names.includes(n) && byName.get(n)).sort((a, b) => used[a] - used[b] || ((FILL.indexOf(a) * 7 + i * 5) % FILL.length) - ((FILL.indexOf(b) * 7 + i * 5) % FILL.length));
   for (const n of pool) { if (names.length >= 3) break; if (lineBlocked(names.map(x => ({ id: byName.get(x).id })), byName.get(n).id)) continue; names.push(n); }
   names.slice(1).forEach(n => { if (n in used) used[n]++; });
-  const toyAttr = names.map((n, k) => attrs[k % attrs.length]);
+  // a Dual Attribute partner (toy's color first): the other two are one of each attribute; otherwise the attributes in turn
+  const toyAttr = dual ? [attrs[0], attrs[0], attrs[1]] : names.map((n, k) => attrs[k % attrs.length]);
   out[id] = { name, species, attrs, signature: sig, joins: season };
   start[id] = lvl0; joins[id] = season;
   for (const [lvl, { upgrades, rank }] of Object.entries(LEVELS)) {
