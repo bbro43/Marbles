@@ -3,6 +3,7 @@
 // Colors are texture swaps: a material whose texture is e.g. "hair_00_00" gets "hair_03_02" (style 3, color 2).
 import * as THREE from 'three';
 import { XTOP, XDOWN, XSHOES, baseModel, xVariant, xSource, tintCloth, addClothes, longSkirt } from './clothes.js';
+import { wear, isBilly } from './outfits.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // what you can change, how many styles and colors each has (from pack/creator/catalog.json)
@@ -13,9 +14,14 @@ export const PARTS = {
   eye:     { styles: 6, colors: 12, label: 'Eyes' },   // 6-11: same colors with a tinted pupil instead of black, for Vestals (scripts/vestaleyes.py)
   eyeblow: { styles: 8, colors: 22, label: 'Eyebrows' },   // 6-7 are softer (scripts/softbrows.py)
   facial:  { styles: 6, colors: 5, label: 'Face' },
-  top:     { styles: 18, colors: 6, label: 'Top' },     // 8-11 are our own (js/clothes.js)
-  down:    { styles: 14, colors: 6, label: 'Pants' },   // 8-9 are skirts (scripts/girlskirt.mjs)
-  shoes:   { styles: 7, colors: 6, label: 'Shoes' },
+  // 8-17 are our own (js/clothes.js); 18-29 are Billy's (js/outfits.js), one color each
+  top:     { styles: 30, colors: 6, label: 'Top' },
+  // 8-9 are skirts (scripts/girlskirt.mjs); 14-25 are Billy's
+  down:    { styles: 26, colors: 6, label: 'Pants' },
+  // 7-20 are Billy's
+  shoes:   { styles: 21, colors: 6, label: 'Shoes' },
+  // Billy's whole outfits (js/outfits.js): replace the top, pants and shoes
+  outfit:  { styles: 4, colors: 1, label: 'Outfit', optional: true },
   gloves:  { styles: 2, colors: 6, label: 'Gloves', optional: true },
   accent:  { styles: 1, colors: 10, label: 'Accent', optional: true },   // trim color for the new clothes (js/clothes.js); none = a darker shade   // our own (js/clothes.js); none = they follow the top
 };
@@ -286,6 +292,8 @@ export function randomLook() {
   const r = n => Math.floor(Math.random() * n), L = { skin: r(SKIN_TONES) };
   for (const [k, p] of Object.entries(PARTS)) L[k] = [p.optional && Math.random() < 0.6 ? -1 : r(p.styles), r(p.colors)];
   L.eyeblow[1] = L.hair[1];
+  L.outfit = Math.random() < 0.15 ? [r(PARTS.outfit.styles), 0] : [-1, 0];   // a whole outfit now and then
+  for (const k of ['top', 'down', 'shoes']) if (isBilly(k, L[k][0])) L[k][1] = 0;
   L.race = Math.random() < 0.2 ? 'vestal' : 'human';   // random looks stay Human or Vestal
   L.band = Object.keys(BAND)[r(6)];
   return L;
@@ -295,7 +303,8 @@ export function randomLook() {
 // the hair style to build: a Gundalian never gets one that covers the forehead band (the nearest allowed one instead)
 const hairOf = L => { const h = L.hair[0]; return L.race === 'gundalian' && !GUN_HAIR.includes(h) ? GUN_HAIR.reduce((a, b) => Math.abs(b - h) < Math.abs(a - h) ? b : a) : h; };
 function models(L) {
-  const m = ['head_00', baseModel('top', L.top[0]), baseModel('down', L.down[0]), baseModel('shoes', L.shoes[0])];
+  L = wear(L);
+  const m = ['head_00', baseModel('top', L.top[0]), ...(L.down ? [baseModel('down', L.down[0])] : []), baseModel('shoes', L.shoes[0])];
   m.push(L.cap[0] >= 0 ? 'cap_' + two(L.cap[0]) : 'hair_' + two(hairOf(L)));      // a hat comes with the hair under it
   if (L.glasses[0] >= 0) m.push('glasses_' + two(L.glasses[0]));
   return m;
@@ -306,6 +315,7 @@ function variantFor(texName, L) {
   if (texName === 'gauntlet') return L.band && L.band !== 'pyrus' ? `gauntlet_${L.band}` : null;   // the gauntlet's attribute color
   const m = /^([a-z]+)_(\d\d)_(\d\d)$/.exec(texName || ''); if (!m) return null;
   const kind = m[1], s = m[2];
+  if (isBilly(kind, +s)) return null;   // Billy's pieces: their own texture, one color
   switch (kind) {
     case 'hair': return `hair_${two(hairOf(L))}_${two(L.hair[1])}`;
     case 'caphair': return `caphair_${s}_${two(L.hair[1])}`;
@@ -318,7 +328,7 @@ function variantFor(texName, L) {
     case 'skin': return `skin_00_${two(Math.min(4, L.skin))}`;
     case 'top': return `top_${s}_${two(L.top[1])}`;
     case 'band': return `band_00_${two(L.top[1])}`;   // the gloves follow the top's color
-    case 'down': return `down_${s}_${two(L.down[1])}`;
+    case 'down': return L.down ? `down_${s}_${two(L.down[1])}` : null;
     case 'shoes': return `shoes_${s}_${two(L.shoes[1])}`;
   }
   return null;
@@ -326,7 +336,7 @@ function variantFor(texName, L) {
 
 // url(path in pack) -> fetchable URL. Returns a THREE.Group with the whole character, feet at y = 0.
 export async function buildAvatar(L, url) {
-  L = L || DEFAULT_LOOK;   // a profile without a look yet (e.g. made from an old Story save)
+  L = wear(L || DEFAULT_LOOK);   // a profile without a look yet (e.g. made from an old Story save); a whole outfit replaces the top, pants and shoes
   const loader = new GLTFLoader(), texLoader = new THREE.TextureLoader(), group = new THREE.Group();
   const texCache = new Map();
   const raced = (L.race || 'human') !== 'human';
@@ -347,8 +357,14 @@ export async function buildAvatar(L, url) {
     })().catch(() => { console.warn('no texture', name); return null; }));
     return texCache.get(name);
   };
-  const scenes = await Promise.all(models(L).map(async m => { const sc = (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene;
-    if (/^down_0[89]$/.test(m)) { if (XDOWN[L.down[0]]?.add === 'long') longSkirt(sc); else cinchSkirt(sc); } return sc; }));
+  const load = async m => (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene;
+  // a piece the pack doesn't have yet (Billy's outfits before pack 2 has them): a plain one of the same kind instead
+  const FALLBACK = { top: 'top_01', down: 'down_00', shoes: 'shoes_00' };
+  let legs = null;   // plain pants under a stand-in for the gown or the dress
+  const scenes = await Promise.all(models(L).map(async m => { let sc;
+    try { sc = await load(m); } catch (e) { const fb = FALLBACK[m.split('_')[0]]; if (!fb || fb === m) throw e; sc = await load(fb); if (fb === 'top_01' && !L.down) legs = load('down_00'); }
+    if (/^down_0[89]$/.test(m)) { if (L.down && XDOWN[L.down[0]]?.add === 'long') longSkirt(sc); else cinchSkirt(sc); } return sc; }));
+  if (legs) scenes.push(await legs);
   { const ms = models(L), at = k => scenes[ms.findIndex(n => n.startsWith(k + '_'))]; addClothes(L, { top: at('top'), down: at('down'), shoes: at('shoes') }); }
   if (L.race === 'gundalian') {
     // Billy's crown (creator/models/crown_00, Nov 22) when the pack has it, else the band made here

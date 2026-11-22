@@ -1,0 +1,26 @@
+<!doctype html><html><body style="margin:0;background:#dfe3e8">
+<!-- Billy's outfits (js/outfits.js) on characters with the arms relaxed: a test page, ?side=1 turns them sideways -->
+<script src="../vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/build/three.module.js", "three/addons/": "../vendor/three/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { Pack } from '../js/pack.js';
+import { buildAvatar, DEFAULT_LOOK } from '../js/avatar.js';
+const pack = await Pack.fromDevice(), url = p => pack.url(p);
+const side = new URLSearchParams(location.search).get('side'), W = 1800, H = 560;
+const r = new THREE.WebGLRenderer({ antialias: true }); r.setSize(W, H); r.setClearColor(0xdfe3e8); document.body.appendChild(r.domElement);
+const sc = new THREE.Scene(); sc.add(new THREE.AmbientLight(0xffffff, 2.6));
+const L = o => ({ ...JSON.parse(JSON.stringify(DEFAULT_LOOK)), outfit: [-1, 0], ...o });
+const looks = [ L({ outfit: [0, 0] }), L({ outfit: [1, 0] }), L({ outfit: [2, 0] }), L({ outfit: [3, 0] }) ];
+// each set's top with its own pants and shoes (sets 0-11 in B_SETS order; tops in js/outfits.js order)
+const TOPS = [27, 28, 18, 19, 23, 26, 20, 25, 29, 22, 21, 24];
+TOPS.forEach((t, i) => looks.push(L({ top: [t, 0], down: [14 + i, 0], shoes: [7 + i, 0] })));
+const n = looks.length;
+for (let i = 0; i < n; i++) { const a = await buildAvatar(looks[i], url); a.position.x = (i - (n - 1) / 2) * 0.5; if (side) a.rotation.y = Math.PI / 2; sc.add(a); }
+const cam = new THREE.OrthographicCamera(-n * 0.25, n * 0.25, 0.6 * H / W * n * 0.5 * 2 / 1.0 / 2 + 0.05, -0.05, 0.1, 50);
+const hw = n * 0.25, hh = hw * H / W; cam.left = -hw; cam.right = hw; cam.top = 0.5 + hh; cam.bottom = 0.5 - hh; cam.updateProjectionMatrix();
+cam.position.set(0, 0.5, 10); cam.lookAt(0, 0.5, 0); r.render(sc, cam);
+document.title = 'done';
+</script></body></html>

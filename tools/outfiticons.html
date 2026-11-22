@@ -1,0 +1,38 @@
+<!doctype html><html><body style="margin:0;background:#222">
+<!-- Icons for Billy's outfit pieces (js/outfits.js), drawn in cyan like the pack's icons. Saves nothing: the test script reads
+     window.ICONS (key -> PNG data URL, 160x160, transparent) and puts each in the icon frame. -->
+<script src="../vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/build/three.module.js", "three/addons/": "../vendor/three/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { Pack } from '../js/pack.js';
+import { buildAvatar, DEFAULT_LOOK } from '../js/avatar.js';
+import { OUTFITS } from '../js/outfits.js';
+const pack = await Pack.fromDevice(), url = p => pack.url(p);
+const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(160, 160); document.body.appendChild(r.domElement);
+const CYAN = 0x2fd8dc;
+// key, look change, which textures to draw (regex on the texture name)
+const SPECS = [];
+for (let s = 18; s <= 29; s++) SPECS.push([`part_top${s}`, { top: [s, 0] }, new RegExp(`^top_${s}_`)]);
+for (let s = 14; s <= 25; s++) SPECS.push([`part_bottom${s}`, { down: [s, 0] }, new RegExp(`^down_${s}_`)]);
+for (let s = 7; s <= 20; s++) SPECS.push([`part_shoes${s}`, { shoes: [s, 0] }, new RegExp(`^shoes_${String(s).padStart(2, '0')}_`)]);
+OUTFITS.forEach((o, i) => SPECS.push([`part_outfit${i + 1}`, { outfit: [i, 0] }, /^(top_[23]\d|down_[12]\d|shoes_[012]\d)_/]));
+const out = {};
+for (const [key, change, re] of SPECS) {
+  const look = JSON.parse(JSON.stringify({ ...DEFAULT_LOOK, outfit: [-1, 0], ...change }));
+  const av = await buildAvatar(look, url), want = [];
+  av.traverse(o => { if (!o.isMesh) return; const nm = o.material.map?.name || '';
+    if (!re.test(nm)) { o.visible = false; return; }
+    o.material = new THREE.MeshLambertMaterial({ color: CYAN, side: THREE.DoubleSide }); want.push(o); });
+  const sc = new THREE.Scene(); sc.add(new THREE.AmbientLight(0xffffff, 1.1)); const dl = new THREE.DirectionalLight(0xffffff, 2.2); dl.position.set(-1, 2, 2); sc.add(dl); sc.add(av);
+  av.updateMatrixWorld(true); av.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
+  const box = new THREE.Box3(); for (const o of want) box.expandByObject(o, true);
+  const c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3()), R = Math.max(s.x, s.y, s.z) * 0.56;
+  const cam = new THREE.OrthographicCamera(-R, R, R, -R, 0.001, 100), yw = 0.5;
+  cam.position.set(c.x + Math.sin(yw) * 10, c.y + 2, c.z + Math.cos(yw) * 10); cam.lookAt(c);
+  r.render(sc, cam); out[key] = r.domElement.toDataURL('image/png');
+}
+window.ICONS = out; document.title = 'done';
+</script></body></html>

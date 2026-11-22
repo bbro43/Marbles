@@ -3,6 +3,7 @@ import { GEAR_COLORS, gearDefs, nanoDefs, boostOf, priceOf as priceOfGear } from
 import * as THREE from 'three';
 import { Pack } from './pack.js';
 import { swatches, XCOLORS } from './clothes.js';
+import { isBilly } from './outfits.js';
 import { buildAvatar, idle, relaxArms, PARTS, SKIN_TONES, DEFAULT_LOOK, randomLook, EXTRA_HAIR, RACES, RACE_LABEL, RACE_OPT, GUN_HAIR, opt } from './avatar.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as P from './profiles.js';
@@ -19,8 +20,11 @@ let pack, M, urls = new Map();
 // from their models by tools/hairicons.html in the DS icon style). The pack's own copy wins if it has one.
 const APP_ART = new Set(['part_hair10', 'part_hair11', 'part_hair12', 'part_hair13', 'part_hair14', 'part_hair15', 'part_bottom8', 'part_bottom9']);
 // our own icons for the new clothes (js/clothes.js, made with tools/clothicons.html): these win over the pack's (it has an unused part_shoes4)
-const APP_OWN = new Set(['part_top8', 'part_top9', 'part_top10', 'part_top11', 'part_top12', 'part_top13', 'part_top14', 'part_top15', 'part_top16', 'part_top17', 'part_bottom10', 'part_bottom11', 'part_bottom12', 'part_bottom13', 'part_shoes4', 'part_shoes5', 'part_shoes6', 'part_gloves1', 'part_gloves2', 'part_accent1']);
-const art = k => APP_OWN.has(k) ? `img/creator/${k}.png` : /^part_(gloves|accent)0$/.test(k) ? art('part_glasses0') : urls.get(M.files[k]) || (APP_ART.has(k) ? `img/creator/${k}.png` : '');
+const APP_OWN = new Set(['part_top8', 'part_top9', 'part_top10', 'part_top11', 'part_top12', 'part_top13', 'part_top14', 'part_top15', 'part_top16', 'part_top17', 'part_bottom10', 'part_bottom11', 'part_bottom12', 'part_bottom13', 'part_shoes4', 'part_shoes5', 'part_shoes6', 'part_gloves1', 'part_gloves2', 'part_accent1',
+  // Billy's outfit pieces (js/outfits.js, made with tools/clothicons.html)
+  ...[...Array(12)].map((_, i) => 'part_top' + (18 + i)), ...[...Array(12)].map((_, i) => 'part_bottom' + (14 + i)),
+  ...[...Array(14)].map((_, i) => 'part_shoes' + (7 + i)), ...[...Array(4)].map((_, i) => 'part_outfit' + (1 + i))]);
+const art = k => APP_OWN.has(k) ? `img/creator/${k}.png` : /^part_(gloves|accent|outfit)0$/.test(k) ? art('part_glasses0') : urls.get(M.files[k]) || (APP_ART.has(k) ? `img/creator/${k}.png` : '');
 const img = (k, x, y, cls = '', extra = '') => art(k) ? `<img src="${art(k)}" style="left:${x}px;top:${y}px" class="${cls}" ${extra} alt="">` : '';
 
 // ---- the two screens, scaled to the phone
@@ -190,10 +194,10 @@ function room() {
 }
 
 // Closet: the character creator
-const CAT = { Head: ['race', 'hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['top', 'gloves', 'accent', 'band'], 'Lower body': ['down', 'shoes'] };
-const ICON = { hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: 'top', down: 'bottom', shoes: 'shoes', skin: 'skin', gloves: 'gloves', accent: 'accent' };
-const LABEL = { race: 'Race', band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes', gloves: 'Gloves', accent: 'Accent color' };
-const VIEW_OF = { race: 'head', band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower', gloves: 'upper', accent: 'full' };
+const CAT = { Head: ['race', 'hair', 'cap', 'glasses', 'eye', 'skin'], 'Upper body': ['outfit', 'top', 'gloves', 'accent', 'band'], 'Lower body': ['down', 'shoes'] };
+const ICON = { outfit: 'outfit', hair: 'hair', cap: 'cap', glasses: 'glasses', eye: 'face', top: 'top', down: 'bottom', shoes: 'shoes', skin: 'skin', gloves: 'gloves', accent: 'accent' };
+const LABEL = { outfit: 'Full outfit', race: 'Race', band: 'Gauntlet', hair: 'Hair', cap: 'Hat', glasses: 'Glasses', eye: 'Face', skin: 'Skin', top: 'Upper body', down: 'Pants', shoes: 'Shoes', gloves: 'Gloves', accent: 'Accent color' };
+const VIEW_OF = { outfit: 'full', race: 'head', band: 'upper', hair: 'head', cap: 'head', glasses: 'head', eye: 'head', skin: 'full', top: 'upper', down: 'lower', shoes: 'lower', gloves: 'upper', accent: 'full' };
 let look = null, editCat = null, editPart = null, isNew = false;
 const HAIR_MORE = ['#ff8ada', '#67acff', '#45f7da', '#bd6dff', '#ff2e45', '#7ef767'];   // hair colors 6-11 (the bright Vestal ones): the pack's swatch list stops at 6
 // a Gundalian can't keep a hair style that covers the forehead band: switch to the nearest one that doesn't
@@ -203,6 +207,7 @@ function closet(start) {
   if (start) { look = start.look; isNew = !!start.isNew; } else if (!look) look = JSON.parse(JSON.stringify(p ? p.look : DEFAULT_LOOK));
   if (!look.gloves) look.gloves = [-1, 0];   // looks saved before gloves
   if (!look.accent) look.accent = [-1, 0];
+  if (!look.outfit) look.outfit = [-1, 0];   // looks saved before Billy's outfits
   top3d(true); setView(editPart ? VIEW_OF[editPart] : editCat === 'Head' ? 'head' : editCat === 'Upper body' ? 'upper' : editCat === 'Lower body' ? 'lower' : 'full');
   showAvatar(look);
   const name = (p && !isNew) ? p.name : (start && start.name) || closetName;
@@ -250,7 +255,7 @@ function closet(start) {
     for (let i = 0; i < styles; i++) {
       const v = k === 'skin' ? i : def.optional ? i - 1 : i, cur = k === 'skin' ? look.skin : look[k][0];
       const pic = art(`part_${ICON[k]}${k === 'skin' ? i : def.optional ? i : i}`);
-      const cols = styles > 16 ? 5 : styles > 9 ? 4 : 3, sz = cols === 5 ? 21 : cols === 4 ? 27 : 36;
+      const cols = styles > 20 ? 6 : styles > 16 ? 5 : styles > 9 ? 4 : 3, sz = cols === 6 ? 18 : cols === 5 ? 21 : cols === 4 ? 27 : 36;
       if (k === 'skin') { right(`<div class="icon tap ${cur === v ? 'sel' : ''}" data-style="${v}" style="left:${140 + (i % 3) * 37}px;top:${44 + Math.floor(i / 3) * 37}px;background:${((M.swatch || {}).skin || [])[i] || '#ccc'};border:3px solid #c9ced4;box-shadow:inset 0 0 0 1px #0006"></div>`); continue; }
       const off = k === 'hair' && look.race === 'gundalian' && !GUN_HAIR.includes(v);   // would hide the Gundalian band
       right(`<img src="${pic}" class="icon tap ${cur === v ? 'sel' : ''} ${off ? 'off' : ''}" data-style="${v}" style="${off ? 'opacity:.25;filter:grayscale(1);' : ''}left:${140 + (i % cols) * (sz + 1)}px;top:${44 + Math.floor(i / cols) * (sz + 1)}px;width:${sz}px;height:${sz}px" alt="">`);
@@ -261,7 +266,7 @@ function closet(start) {
       sw = swatches(k === 'down' ? 'down' : k, look[k][0]) || (k === 'gloves' ? XCOLORS.gloves : k === 'accent' ? XCOLORS.accent : sw);   // a new clothes style has its own colors
       // the colors in one row that scrolls sideways when there are more than fit
       right(`<div class="swrow" style="position:absolute;left:138px;top:149px;width:112px;height:17px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none">` +
-        [...Array(def.colors)].map((_, c) => `<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="position:relative;display:inline-block;margin:3px 3px 0;background:${sw[c] || '#888'}"></div>`).join('') + `</div>`);
+        [...Array(isBilly(k, look[k][0]) ? 1 : def.colors)].map((_, c) => `<div class="dot tap ${look[k][1] === c ? 'sel' : ''}" data-color="${c}" style="position:relative;display:inline-block;margin:3px 3px 0;background:${sw[c] || '#888'}"></div>`).join('') + `</div>`);
     }
   }
   $('bot').innerHTML = h;
@@ -275,6 +280,7 @@ function closet(start) {
   $('bot').querySelectorAll('[data-ropt]').forEach(b => b.onclick = () => { look[b.dataset.ropt] = b.dataset.v; go('closet'); });
   $('bot').querySelectorAll('[data-style]').forEach(b => b.onclick = () => {
     const v = +b.dataset.style; if (b.classList.contains('off')) return; if (editPart === 'skin') look.skin = v; else look[editPart][0] = v;
+    if (['top', 'down', 'shoes'].includes(editPart)) { look.outfit = [-1, 0]; if (isBilly(editPart, v)) look[editPart][1] = 0; }   // picking a piece takes off a whole outfit
     if (editPart === 'eye') look.eyeblow[0] = v;
     go('closet');
   });

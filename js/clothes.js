@@ -21,6 +21,7 @@
 //   Accent   a new part: one more color for trim, cuffs, collars, bands and panels (none = a darker shade of each piece)
 //   Gloves   a new part: fingerless or full gloves in their own color (none = they follow the top, as before)
 import * as THREE from 'three';
+import { BCOLORS } from './outfits.js';
 
 export const XTOP = { 8: { base: 4, add: 'coat', label: 'Long coat' }, 9: { base: 2, add: 'vest', label: 'Vest' }, 10: { base: 6, add: 'collar', label: 'High collar' }, 11: { base: 2, add: 'puff', label: 'Puffed sleeves' },
   12: { base: 2, add: 'open', label: 'Open jacket' }, 13: { base: 4, add: 'biker', label: 'Biker jacket' }, 14: { base: 2, add: 'wrap', label: 'Wrap top' }, 15: { base: 6, add: 'panel', label: 'Panel jacket' },
@@ -83,7 +84,7 @@ export function xVariant(texName, L) {
   if (kind === 'top' && XTOP[L.top[0]]) return `xtop_${two(L.top[0])}_${two(L.top[1])}`;
   if (kind === 'band' && L.gloves && L.gloves[0] >= 0) return `xglove_00_${two(L.gloves[1])}`;
   if (kind === 'band' && XTOP[L.top[0]]) return `xband_${two(L.top[0])}_${two(L.top[1])}`;
-  if (kind === 'down' && XDOWN[L.down[0]]) return `xdown_${two(L.down[0])}_${two(L.down[1])}`;
+  if (kind === 'down' && L.down && XDOWN[L.down[0]]) return `xdown_${two(L.down[0])}_${two(L.down[1])}`;
   if (kind === 'shoes' && XSHOES[L.shoes[0]]) return `xshoes_${two(L.shoes[0])}_${two(L.shoes[1])}`;
   return null;
 }
@@ -100,7 +101,7 @@ export function xSource(name) {
   if (kind === 'shoes') return { src: `shoes_${two(XSHOES[si].base)}_00`, color: XCOLORS['shoes' + si][ci] };
   return null;
 }
-export const swatches = (kind, s) => XCOLORS[kind + s] || null;
+export const swatches = (kind, s) => XCOLORS[kind + s] || BCOLORS[kind + s] || null;   // Billy's pieces: one swatch (js/outfits.js)
 
 // --- added pieces
 // a plain cloth texture: the color, darker toward the bottom (v=1) and the sides (u=0 and 1), with a darker band at the hem
@@ -149,7 +150,7 @@ function legAt(down, y, side, tol = 0.02) {   // the pants are low-poly: widen t
 
 // L: the look; parts: { top, down, shoes } scenes
 export function addClothes(L, parts) {
-  const T = XTOP[L.top[0]], D = XDOWN[L.down[0]], S = XSHOES[L.shoes[0]];
+  const T = XTOP[L.top[0]], D = L.down && XDOWN[L.down[0]], S = XSHOES[L.shoes[0]];
   const top = parts.top && partMesh(parts.top), down = parts.down && partMesh(parts.down), shoes = parts.shoes && partMesh(parts.shoes);
   const W = waistOf(parts.top);   // the top's own width at its hem: the skirts and the coat's belt start there, flush
   const A = L.accent && L.accent[0] >= 0 ? XCOLORS.accent[L.accent[1]] : null, acc = (c, k) => A || shade(c, k);   // the accent, or a darker shade
