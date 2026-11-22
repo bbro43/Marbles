@@ -5798,9 +5798,9 @@ export const AI_TEAMS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "dc_sp07",
+     "id": "tt_24",
      "attr": "aquos",
-     "name": "Elico"
+     "name": "Macubass"
     },
     {
      "id": "dc_sp06_24",
@@ -6074,9 +6074,9 @@ export const AI_TEAMS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "dc_sp08",
+     "id": "tt_22",
      "attr": "haos",
-     "name": "Brontes"
+     "name": "Boriates"
     },
     {
      "id": "dc_sp06_20",
