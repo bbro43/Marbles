@@ -3,6 +3,7 @@
 // The throw itself is a dice roll instead of physics: how likely it is to land where it was aimed depends on the
 // level and the Bakugan's Magnet; a Bakugan aimed at a card with an opponent on it can knock it off (Speed vs Defense).
 // Before- and after-throw Ability cards are not used here yet.
+import { bestOf, attrsOf } from './dual.js';
 import * as R from './rules.js';
 import { makeToy, GATE_COLORS, AB_COLORS } from './setup.js';
 
@@ -31,7 +32,8 @@ export function buildPlayer(cat, team, { name, owner = null, nv = false } = {}) 
 }
 
 const HIT = { easy: 0.62, normal: 0.76, hard: 0.87 };       // chance a throw lands where it was aimed (before Magnet)
-const bonusFor = (card, attr) => ((card && card.bonus) || {})[attr] || 0;
+// a toy's Gate card bonus: a Dual Attribute Bakugan gets the better of its two (js/dual.js); attr can also be a toy
+const bonusFor = (card, attr) => typeof attr === 'object' ? bestOf(attr, a => ((card && card.bonus) || {})[a]) : ((card && card.bonus) || {})[attr] || 0;
 const lv = (toy, k) => (toy.stats || {})[k] ?? 3;
 
 // play one match. entrants: [{ name, level, player }] (player from buildPlayer). opts: { nv, teams, rng, first }
@@ -47,7 +49,8 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
   const gateIdx = p => {
     const pl = s.players[p], hand = pl.gateHand; if (!hand.length) return 0;
     if (lvl(p) === 'easy') return rng.int(hand.length);
-    const attrs = pl.unused.map(t => pl.toys[t].attr); let best = 0, bv = -1;
+    // toys, not attributes: a Dual Attribute Bakugan counts its better attribute
+    const attrs = pl.unused.map(t => pl.toys[t]); let best = 0, bv = -1;
     hand.forEach((c, i) => { const v = attrs.reduce((n, a) => n + bonusFor(c, a), 0) + rng(); if (v > bv) { bv = v; best = i; } });
     return best;
   };
@@ -56,15 +59,15 @@ export function playMatch(entrants, { nv = true, teams = null, rng = makeRng(1),
     for (const t of pl.unused) for (let k = 0; k < s.field.length; k++) {
       const f = s.field[k], toy = pl.toys[t];
       const theirs = f.toys.filter(x => !same(x.p, p)), mine = f.toys.filter(x => same(x.p, p));
-      const gOf = x => { const o = s.players[x.p].toys[x.t]; return o.g + (lvl(p) === 'hard' ? bonusFor(f.card, o.attr) : 0); };
-      const myG = toy.g + (lvl(p) === 'hard' ? bonusFor(f.card, toy.attr) : 0) + mine.reduce((n, x) => n + gOf(x), 0);
+      const gOf = x => { const o = s.players[x.p].toys[x.t]; return o.g + (lvl(p) === 'hard' ? bonusFor(f.card, o) : 0); };
+      const myG = toy.g + (lvl(p) === 'hard' ? bonusFor(f.card, toy) : 0) + mine.reduce((n, x) => n + gOf(x), 0);
       let v;
       if (theirs.length) {
         const oG = Math.max(...[...new Set(theirs.map(x => R.teamOf(s, x.p)))].map(tm => theirs.filter(x => R.teamOf(s, x.p) === tm).reduce((n, x) => n + gOf(x), 0)));
         v = s.nv ? (myG > oG ? 160 + (myG - oG) / 3 : myG === oG ? 0 : -90 + (myG - oG) / 5)   // New Vestroia: a won battle is damage
           : myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
       } else if (mine.length) v = s.nv ? 5 : lvl(p) === 'hard' ? 120 : 70;
-      else v = s.nv ? 15 + bonusFor(f.card, toy.attr) / 20 : 30 + bonusFor(f.card, toy.attr) / 10;
+      else v = s.nv ? 15 + bonusFor(f.card, toy) / 20 : 30 + bonusFor(f.card, toy) / 10;
       v -= dist(p, f.cell) * (lvl(p) === 'hard' ? 2 : 4);
       v += rng() * (lvl(p) === 'normal' ? 40 : 10);
       options.push({ t, k, v });

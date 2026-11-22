@@ -69,7 +69,7 @@ async function idbGet(key) { const d = await db(); return new Promise((res, rej)
 
 const $ = id => document.getElementById(id);
 try { sessionStorage.removeItem('marbles-story-in'); } catch {}   // next Story visit walks through the login corridor
-const APP_BUILD = 139;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 140;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 

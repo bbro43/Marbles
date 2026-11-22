@@ -1,3 +1,4 @@
+import { applyDual } from './dual.js';
 // Loads the asset pack the player stored on this device (IndexedDB) and hands out files from it.
 const DB_NAME = 'marbles', STORE = 'pack';
 
@@ -41,6 +42,7 @@ export class Pack {
     if (!find('pack.json')) throw new Error('This zip is not an asset pack (no pack.json).');
     p.info = await mergedJson(p.zips, 'pack.json');
     p.catalog = await mergedJson(p.zips, 'catalog.json');
+    applyDual(p.catalog);   // Dual Attribute Bakugan can't be their fixed second attribute (js/dual.js)
         // pictures named toys/<id>/thumb-<attribute>.png fill in each Bakugan's thumbs automatically
     for (const t of p.catalog.toys || []) {
       if (t.thumbs) continue;

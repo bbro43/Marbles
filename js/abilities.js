@@ -23,16 +23,22 @@
 // c = { s, field, gateCard, table, me, opp, sides, card }
 // side = { p, t, name, attr, printed, noGate, noAbility, gateMult, abilityMult }
 
+import { attrsOf, hasAttr, bestOf } from './dual.js';
 export const OPPOSITE = { pyrus: 'aquos', aquos: 'pyrus', subterra: 'ventus', ventus: 'subterra', haos: 'darkus', darkus: 'haos' };
 export const ATTRS = ['pyrus', 'aquos', 'subterra', 'haos', 'darkus', 'ventus'];
 
 // ---------- helpers
-const bonusOf = c => (c.card.bonus || {})[c.me.attr] || 0;
+// Dual Attribute Bakugan (js/dual.js) have two attributes and always get the better: a check on your own Bakugan passes if
+// either attribute fits, its bonus is the better of the two. A check on the other Bakugan passes only if it has just that one.
+const has = hasAttr, mine = a => c => has(c.me, a);
+const theirsIs = (sd, a) => attrsOf(sd).every(x => x === a);
+const overlap = (x, y) => attrsOf(x).some(a => attrsOf(y).includes(a));
+const bonusOf = c => bestOf(c.me, a => (c.card.bonus || {})[a]);
 const isOwnGate = c => c.field.owner === c.me.p;
 const isOppGate = c => c.field.owner !== c.me.p;
 const standing = (s, p) => s.field.flatMap((f, k) => f.toys.filter(x => x.p === p).map(x => ({ ...x, k })));
 const captured = (s, p) => s.players[p].captured.length;
-const teamAttrs = (s, p) => new Set(s.players[p].toys.map(t => t.attr));
+const teamAttrs = (s, p) => new Set(s.players[p].toys.flatMap(t => attrsOf(t)));
 const always = () => true;
 // "Preyas's" is the Preyas II card (either half); otherwise the card name is the toy name
 // A card that names a Bakugan works for every version of it (Billy, Nov 16): "Delta Dragonoid II" means any Dragonoid,
@@ -46,18 +52,18 @@ export const toyMatches = (toyName, cardName) => { const b = baseOf(cardName); r
 const plain = (can = always) => ({ when: 'battle', can, add: bonusOf });
 const forToy = toyName => ({ when: 'battle', can: c => toyMatches(c.me.name, toyName), add: () => 200 });
 const swapIf = cond => ({ when: 'battle', can: cond, swap: true, tag: 'swap' });
-const vs = (mine, theirs) => ({ when: 'battle', can: c => c.me.attr === mine && c.opp.attr === theirs, add: () => 200 });
+const vs = (a, b) => ({ when: 'battle', can: c => has(c.me, a) && theirsIs(c.opp, b), add: () => 200 });
 const pair = (a, b) => ({ when: 'battle', can: c => { const t = teamAttrs(c.s, c.me.p); return t.has(a) && t.has(b); }, add: () => 200 });
 const trio = (...attrs) => ({
   when: 'battle',
-  can: c => { const t = teamAttrs(c.s, c.me.p); return t.size === 3 && attrs.every(a => t.has(a)) && attrs.includes(c.me.attr); },
+  can: c => { const t = teamAttrs(c.s, c.me.p); return attrs.every(a => t.has(a)) && attrs.some(a => has(c.me, a)); },   // a team of 3 can only cover all 3 if it's exactly them (or a Dual Attribute fills one)
   add: () => 400,
 });
-const triangle = (...attrs) => ({ when: 'battle', can: c => attrs.includes(c.me.attr), add: c => 50 * captured(c.s, c.me.p) });
+const triangle = (...attrs) => ({ when: 'battle', can: c => attrs.some(a => has(c.me, a)), add: c => 50 * captured(c.s, c.me.p) });
 
 // ---------- Mini-game cards: effects picked from Billy's card list to match each name (Billy's call)
-const attrIs = a => c => c.me.attr === a;
-const sameAttr = c => c.me.attr === c.opp.attr, diffAttr = c => c.me.attr !== c.opp.attr;
+const attrIs = mine;
+const sameAttr = c => overlap(c.me, c.opp), diffAttr = c => attrsOf(c.me).some(a => !attrsOf(c.opp).includes(a));
 // Time Breaker ← "Stuck": your opponent's Ability card bonuses count as zero this battle
 const timeBreaker = cond => ({ when: 'battle', can: cond, gate: c => { c.opp.noAbility = true; } });
 // Double Input ← "Rock On": your Gate and Ability card bonuses count twice
@@ -77,11 +83,11 @@ const MINI = {
   'Twin Double Input': doubleInput(sameAttr), 'Counter Double Input': doubleInput(diffAttr),
   // Battle Redos: start over with a twist
   'Scratch Battle Redo': { when: 'battle', can: always, table: c => { for (const a of ATTRS) c.table[a] = Math.min(50, c.table[a] || 0); } }, // ← Ground
-  'Spin Battle Redo': { when: 'battle', can: always, attr: c => { for (const sd of c.sides) sd.attr = OPPOSITE[sd.attr] || sd.attr; } },   // ← Special Mirror
+  'Spin Battle Redo': { when: 'battle', can: always, attr: c => { for (const sd of c.sides) { sd.attr = OPPOSITE[sd.attr] || sd.attr; if (sd.attr2) sd.attr2 = OPPOSITE[sd.attr2] || sd.attr2; } } },   // ← Special Mirror
   'Timing Battle Redo': { when: 'battle', can: always, gate: c => { c.me.useHighest = true; } },                                         // ← Gate Shift
   'Pop Battle Redo': { when: 'battle', can: always, table: c => { for (const a of ATTRS) c.table[a] = (c.table[a] || 0) * 2; } },       // ← Strong Winds Blow
   'Trace Battle Redo': { when: 'battle', can: always,                                                                                      // ← Mirror Element
-    attr: c => { const opts = [...new Set(c.s.players[c.opp.p].toys.map(t => t.attr))]; c.me.attr = opts.reduce((b, a) => ((c.table[a] || 0) > (c.table[b] || 0) ? a : b), opts[0]); } },
+    attr: c => { const opts = [...new Set(c.s.players[c.opp.p].toys.flatMap(t => attrsOf(t)))]; c.me.attr = opts.reduce((b, a) => ((c.table[a] || 0) > (c.table[b] || 0) ? a : b), opts[0]); } },
   'Bound Battle Redo': { when: 'battle', can: always, gate: c => { c.opp.noGate = true; } },                                              // ← Shadowfire
   'Rewind': { when: 'battle', can: always, resets: true, add: () => 50 },                                                                 // ← Abisomega
   'Level Field': { when: 'battle', can: always, printedZero: true },                                                                       // ← "Pyrus" (green)
@@ -101,10 +107,10 @@ const MINI = {
 export const EFFECTS = {
   ...MINI,
   // ---- Red: swaps (totals are swapped at the end of the battle)
-  'Pyrus Swap': swapIf(c => c.me.attr === 'pyrus'), 'Aquos Swap': swapIf(c => c.me.attr === 'aquos'),
-  'Subterra Swap': swapIf(c => c.me.attr === 'subterra'), 'Haos Swap': swapIf(c => c.me.attr === 'haos'),
-  'Darkus Swap': swapIf(c => c.me.attr === 'darkus'), 'Ventus Swap': swapIf(c => c.me.attr === 'ventus'),
-  'Twin Swap': swapIf(c => c.me.attr === c.opp.attr), 'Counter Swap': swapIf(c => c.me.attr !== c.opp.attr),
+  'Pyrus Swap': swapIf(mine('pyrus')), 'Aquos Swap': swapIf(mine('aquos')),
+  'Subterra Swap': swapIf(mine('subterra')), 'Haos Swap': swapIf(mine('haos')),
+  'Darkus Swap': swapIf(mine('darkus')), 'Ventus Swap': swapIf(mine('ventus')),
+  'Twin Swap': swapIf(sameAttr), 'Counter Swap': swapIf(diffAttr),
   // ---- Green
   'No Trading': { when: 'battle', can: always, blocks: card => (effectOf(card) || {}).tag === 'swap' },
   'Negative Wave': { when: 'battle', can: always, gate: c => { for (const sd of c.sides) { sd.noGate = true; sd.noAbility = true; } } },
@@ -144,11 +150,11 @@ const swapPrinted = cond => ({ printed: c => {
   const [a, b] = c.sides; [a.printed, b.printed] = [b.printed, a.printed];
   return [{ side: a, note: 'printed G-Power swapped' }, { side: b, note: 'printed G-Power swapped' }];
 } });
-const anyIs = attr => c => c.sides.some(sd => sd.attr === attr);
+const anyIs = attr => c => c.sides.some(sd => has(sd, attr));
 const fewerCaptured = c => { const [a, b] = c.sides.map(sd => captured(c.s, sd.p)); return a === b ? null : c.sides[a < b ? 0 : 1].p; };
 const lowerPrinted = c => { const lo = lowest(c); return lo ? lo.p : null; };
 const regainColor = (who, color) => ({ regain: c => { const p = who(c); return p === null ? [] : [{ p, color }]; } });
-const gateBonusOf = (c, sd) => c.table[sd.attr] || 0;
+const gateBonusOf = (c, sd) => bestOf(sd, a => c.table[a]);
 const blockWhere = pick => ({ noAbility: (c, p) => { const sd = pick(c); return !!sd && sd.p === p; } });
 const higherOf = f => c => { const [a, b] = c.sides.map(sd => f(c, sd)); return a === b ? null : c.sides[a > b ? 0 : 1]; };
 const lowerOf = f => c => { const [a, b] = c.sides.map(sd => f(c, sd)); return a === b ? null : c.sides[a < b ? 0 : 1]; };

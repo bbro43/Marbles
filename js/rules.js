@@ -11,6 +11,7 @@
 //              so the starting rectangle is the four cells [-1|0, -1|0] around the center.
 //   captured = Gate cards you've won (3 wins the match)
 
+import { bestOf, hasAttr } from './dual.js';
 import { effectOf, gateEffectOf, fieldEffectOf } from './abilities.js';
 export { isCoded } from './abilities.js';
 
@@ -351,7 +352,7 @@ function build(s, fieldIdx, plays) {
   const a = g.toys.find(x => x.p === s.turn) || g.toys.find(x => sameTeam(s, x.p, s.turn)) || g.toys[0];
   const sides = [a, ...g.toys.filter(x => x !== a)].map(x => {
     const toy = s.players[x.p].toys[x.t];
-    return { p: x.p, t: x.t, name: toy.name, attr: toy.attr, printed: toy.g, start: toy.g, total: toy.g, steps: [],
+    return { p: x.p, t: x.t, name: toy.name, attr: toy.attr, attr2: toy.attr2 || null, printed: toy.g, start: toy.g, total: toy.g, steps: [],
       noGate: false, noAbility: false, useHighest: false, gateMult: 1, abilityMult: 1 };
   });
   // Clear toys take the opponent's attribute.
@@ -415,14 +416,14 @@ export function computeBattle(s, b) {
   // Gate bonus
   const highest = Math.max(0, ...ATTRS.map(a => table[a] || 0));
   for (const sd of sides) {
-    let amt = sd.noGate ? 0 : (sd.useHighest ? highest : (table[sd.attr] || 0)) * sd.gateMult;
+    let amt = sd.noGate ? 0 : (sd.useHighest ? highest : bestOf(sd, a => table[a])) * sd.gateMult;   // Dual Attribute: the better of its two
     const notes = [sd.noGate && 'blocked', sd.useHighest && !sd.noGate && 'highest bonus', sd.gateMult > 1 && !sd.noGate && 'x' + sd.gateMult].filter(Boolean);
     step(sd, `Gate card: ${g.card.name}`, amt, notes.join(', ') || undefined);
   }
   // Attribute arena (Billy): every Bakugan of the arena's attribute gets +50G, whoever owns it; a Trap played here with that attribute too
   if (s.arena) {
     const label = s.arena[0].toUpperCase() + s.arena.slice(1) + ' Field';
-    for (const sd of sides) if (sd.attr === s.arena) step(sd, label, ARENA_BONUS);
+    for (const sd of sides) if (hasAttr(sd, s.arena)) step(sd, label, ARENA_BONUS);
     for (const play of b.plays) if (play.card.type === 'trap' && (play.card.attrs || []).includes(s.arena)) { const c = ctx(play); step(c.me, label, ARENA_BONUS, 'Trap'); }
   }
   // Swap cards: an odd number of swaps trades the two totals

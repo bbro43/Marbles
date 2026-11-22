@@ -1,4 +1,5 @@
 // Battle screen: arena, toys, Gate cards, swipe-to-throw, and the battle count-up.
+import { bestOf, attrsOf } from './dual.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
@@ -92,13 +93,15 @@ const foesOf = p => R.opponents(state, p);
 // how far off a throw can be: angle (radians) and distance (fraction), as a spread
 const AI_AIM = { easy: { ang: 0.17, dist: 0.28 }, normal: { ang: 0.08, dist: 0.13 }, hard: { ang: 0.035, dist: 0.06 } };
 const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
-const bonusFor = (card, attr) => ((card && card.bonus) || {})[attr] || 0;
+// a toy's Gate card bonus: a Dual Attribute Bakugan gets the better of its two (js/dual.js); attr can also be a toy
+const bonusFor = (card, attr) => typeof attr === 'object' ? bestOf(attr, a => ((card && card.bonus) || {})[a]) : ((card && card.bonus) || {})[attr] || 0;
 // which Gate card to set: Easy any, otherwise the one that helps its Bakugan the most
 function aiGateIndex(p) {
   const pl = state.players[p], hand = pl.gateHand;
   if (!hand.length) return null;
   if (aiLevel[p] === 'easy') return Math.floor(Math.random() * hand.length);
-  const attrs = pl.unused.map(t => pl.toys[t].attr);
+  // toys, not attributes: a Dual Attribute Bakugan counts its better attribute
+  const attrs = pl.unused.map(t => pl.toys[t]);
   let best = 0, bv = -1;
   hand.forEach((c, i) => { const v = attrs.reduce((n, a) => n + bonusFor(c, a), 0) + Math.random(); if (v > bv) { bv = v; best = i; } });
   return best;
@@ -116,15 +119,15 @@ function aiPlan(p) {
   for (const t of pl.unused) for (let k = 0; k < state.field.length; k++) {
     const f = state.field[k], toy = pl.toys[t];
     const theirs = f.toys.filter(x => !sameTeam(x.p, p)), mine = f.toys.filter(x => sameTeam(x.p, p));
-    const gOf = x => { const o = state.players[x.p].toys[x.t]; return o.g + (lvl === 'hard' ? bonusFor(f.card, o.attr) : 0); };
-    const myG = toy.g + (lvl === 'hard' ? bonusFor(f.card, toy.attr) : 0) + mine.reduce((n, x) => n + gOf(x), 0);
+    const gOf = x => { const o = state.players[x.p].toys[x.t]; return o.g + (lvl === 'hard' ? bonusFor(f.card, o) : 0); };
+    const myG = toy.g + (lvl === 'hard' ? bonusFor(f.card, toy) : 0) + mine.reduce((n, x) => n + gOf(x), 0);
     let v;
     if (theirs.length) {
       const oG = Math.max(...[...new Set(theirs.map(x => R.teamOf(state, x.p)))].map(tm => theirs.filter(x => R.teamOf(state, x.p) === tm).reduce((n, x) => n + gOf(x), 0)));
       v = state.nv ? (myG > oG ? 160 + (myG - oG) / 3 : myG === oG ? 0 : -90 + (myG - oG) / 5)   // New Vestroia: a won battle is damage
         : myG > oG ? 100 + (myG - oG) / 5 : myG === oG ? 10 : -60 + (myG - oG) / 5;
     } else if (mine.length) v = state.nv ? 5 : lvl === 'hard' ? 120 : 70;          // Classic: two of mine there takes the card
-    else v = (state.nv ? 15 + bonusFor(f.card, toy.attr) / 20 : 30 + bonusFor(f.card, toy.attr) / 10) + (state.earlyVictory === p && !state.nv ? 120 : 0);   // Early Victory (Classic): an empty card wins it
+    else v = (state.nv ? 15 + bonusFor(f.card, toy) / 20 : 30 + bonusFor(f.card, toy) / 10) + (state.earlyVictory === p && !state.nv ? 120 : 0);   // Early Victory (Classic): an empty card wins it
     v -= cellCenter(f.cell).distanceTo(home) / (lvl === 'hard' ? 60 : 30);   // far cards are harder to hit
     v += Math.random() * (lvl === 'normal' ? 40 : 10);
     options.push({ t, k, v });
@@ -167,7 +170,7 @@ function aiFieldCard(p, phase, landing) {
   if (Math.random() > AI_FIELD_CHANCE[lvl]) return null;
   const pl = state.players[p], hand = pl.abilityHand, opts = R.fieldCardOptions(state, phase, landing, p);
   const has = n => opts.find(i => hand[i].name === n);
-  const power = (q, t, card) => state.players[q].toys[t].g + bonusFor(card, state.players[q].toys[t].attr);
+  const power = (q, t, card) => state.players[q].toys[t].g + bonusFor(card, state.players[q].toys[t]);
   const stand = q => state.field.map((f, k) => ({ f, k, x: f.toys.find(y => y.p === q) })).filter(o => o.x && !o.f.toys.some(y => !sameTeam(y.p, q)));
   if (phase === 'pre') {
     // pull a weaker opponent Bakugan onto one of my cards
@@ -413,7 +416,7 @@ function showPicker() {
   const p = state.turn, pl = state.players[p];
   $('picker').innerHTML = pl.unused.map(t => {
     const toy = pl.toys[t];
-    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${toy.attr}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')} · Ctl ${lv(toy.stats || {}, 'control')}</span></span></button>`;
+    return `<button class="chip withart" data-t="${t}" style="--c:${ATTR_COLOR[toy.attr]}">${toyPic(p, t)}<span class="ctext"><b>${toy.name}</b><span>${toy.g}G · ${attrsOf(toy).join(' + ')}</span><span class="st">Spd ${lv(toy.stats || {}, 'speed')} · Def ${lv(toy.stats || {}, 'defense')} · Mag ${lv(toy.stats || {}, 'magnet')} · Ctl ${lv(toy.stats || {}, 'control')}</span></span></button>`;
   }).join('');
   fillPics($('picker'));
   $('picker').querySelectorAll('button').forEach(b => b.onclick = () => select(+b.dataset.t));

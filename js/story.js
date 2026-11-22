@@ -4,6 +4,7 @@
 // - End of season: promotion (Season 2's special rule, then top 2 up / bottom 2 down), the next season, and the upgrade reset every 4 seasons.
 // - Social: teams (fixed show teams, computer teams that form, your own), friendship, rivals, trade offers.
 // - Scenes: scene(key) plays a conversation from SCENES (claude/story-scripts.md). Models for scenes: still to build (search "MODELS GO HERE").
+import { fixAttr } from './dual.js';
 import { Pack } from './pack.js';
 import { makeRng, playMatch, buildPlayer } from './sim.js';
 import { BP, MAX_UP, UPS_PER_SEASON, ATTRS6 } from './season.js';
@@ -38,7 +39,7 @@ const nameOf = id => id === 'you' ? save.you.name : NAME[id] || (INTERSPACE[id] 
 function teamOf(id) {   // the deck for this brawler right now (level cards + this season's upgrades)
   const b = save.season.B[id];
   if (id === 'you') {   // each of your Bakugan has its own upgrades (bought in the Shop): G-Power boosts and stat upgrades
-    ensureColl(); migrateUps();
+    ensureColl(); migrateUps(); migrateDual();
     return { ...save.you.deck, upgrades: 0, toys: save.you.deck.toys.map(x => { const u = save.you.coll.toys[tkey(x.id, x.attr)] || {}; return { ...x, up: u.g || 0, st: u.st || {} }; }) };
   }
   return { ...teamDef(id)[b.level], upgrades: b.up };
@@ -69,6 +70,13 @@ function ensureColl() {
     cards: [...new Set([...Object.values(st.gates), ...Object.values(st.abilities), ...Object.values(st.extra || {}).flat()].map(c => c.id))], traps: [] };
 }
 // before Nov 20, boosts were bought for the whole team (B.you.up); move them onto each Bakugan you own, once
+// Dual Attribute Bakugan (js/dual.js) can't be their fixed second attribute: a save from before that rule gets the allowed one
+function migrateDual() {
+  const y = save.you; if (!y || y.dualFixed) return;
+  for (const x of (y.deck && y.deck.toys) || []) x.attr = fixAttr(x.id, x.attr);
+  if (y.coll) for (const k of Object.keys(y.coll.toys)) { const [id, a] = k.split(':'), f = fixAttr(id, a); if (f !== a) { y.coll.toys[tkey(id, f)] = y.coll.toys[tkey(id, f)] || y.coll.toys[k]; delete y.coll.toys[k]; } }
+  y.dualFixed = true;
+}
 function migrateUps() {
   const b = save.season.B.you; if (!b.up || save.you.upsMoved) return;
   for (const k of Object.keys(save.you.coll.toys)) { const u = save.you.coll.toys[k] = save.you.coll.toys[k] || {}; u.g = (u.g || 0) + b.up; }

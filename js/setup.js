@@ -1,6 +1,7 @@
 // Team setup before a match: each player picks 3 toys (and their attributes), 1 Gold, 1 Silver and
 // 1 Copper Gate card, and 1 Red, 1 Blue and 1 Green Ability card. Then who goes first.
 // Each player slot remembers its last team on this device.
+import { fixAttr, secondOf } from './dual.js';
 import { baseStats, controlOf } from './control.js';
 import { isCoded } from './abilities.js';
 
@@ -84,7 +85,8 @@ function saveTeam(i, t) { try { localStorage.setItem('marbles-team-' + i, JSON.s
 
 // owner: the character using it; some partners have that character's own colors (t.special[owner][attr], e.g. Spectra's Helios)
 export function makeToy(t, attr, owner = null) {
-  return { id: t.id, name: t.name, attr, g: t.baseG ?? 250, stats: baseStats(t),
+  attr = fixAttr(t.id, attr);   // a Dual Attribute Bakugan is never its fixed second attribute
+  return { id: t.id, name: t.name, attr, attr2: secondOf(t.id), g: t.baseG ?? 250, stats: baseStats(t),
     model: t.model, attrTexture: (owner && t.special?.[owner]?.[attr]) || t.attributes[attr] };
 }
 const rand = n => Math.floor(Math.random() * n);
