@@ -115,6 +115,21 @@ function neathianFace(c) {
     }
   });
 }
+// the Neathian eye color: blue, or (tint) the pack eye picture's own color, so the Face screen's color picker picks it
+function eyeColorOf(img, tint) {
+  if (!tint) return [64, 150, 225];
+  const c = toCanvas(img), p = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; const a = [0, 0, 0];
+  for (let i = 0; i < p.length; i += 4) { const mx = Math.max(p[i], p[i + 1], p[i + 2]), mn = Math.min(p[i], p[i + 1], p[i + 2]); if (mx > 40 && (mx - mn) / mx > 0.3) { n++; a[0] += p[i]; a[1] += p[i + 1]; a[2] += p[i + 2]; } }
+  if (!n) return [64, 150, 225]; const m = a.map(v => v / n), mx = Math.max(...m); return m.map(v => Math.round(Math.min(255, v / mx * 235)));
+}
+// Billy's eye: one solid color, keeping the picture's own light and shade
+function solidEye(img, col) {
+  const c = toCanvas(img), g = c.getContext('2d'), d = g.getImageData(0, 0, c.width, c.height), p = d.data; let m = 0, n = 0;
+  for (let i = 0; i < p.length; i += 4) if (p[i + 3] > 100) { m += p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11; n++; }
+  m = n ? m / n : 128;
+  for (let i = 0; i < p.length; i += 4) { const k = (p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11) / m; for (let j = 0; j < 3; j++) p[i + j] = Math.min(255, Math.round(col[j] * k)); }
+  g.putImageData(d, 0, 0); return c;
+}
 function neathianEye(img, tint) {
   const c = toCanvas(img), g = c.getContext('2d'), W = c.width, H = c.height;
   let stops = ['#d8f3ff', '#5cc2f2', '#1f6fc0', '#123e7a'];
@@ -155,12 +170,15 @@ function neathianArc(c, L) {
   });
 }
 // what a race does to one texture (null: nothing)
-function raceTexture(name, img, L) {
+// art: Billy's own Neathian pictures from the pack when it has them (creator/textures/neathian_eye_00.png and
+// neathian_facial_00.png, Nov 22): his face sheet frames the eye, and the eye is one solid color
+function raceTexture(name, img, L, art = {}) {
   const r = L.race || 'human', to = SKIN_OF(L);
-  if (/^eye_/.test(name)) { if (r === 'vestal') return hazeEye(img); if (r === 'neathian') return neathianEye(img, opt(L, 'neye') === 'tint'); if (to) return reskin(toCanvas(img), to); return null; }
-  if (/^eyeblow_/.test(name)) { if (r !== 'neathian') return null; const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; return c; }   // Neathians have no eyebrows (Billy, Nov 21)
+  if (/^eye_/.test(name)) { if (r === 'vestal') return hazeEye(img); if (r === 'neathian') return art.eye ? solidEye(art.eye, eyeColorOf(img, opt(L, 'neye') === 'tint')) : neathianEye(img, opt(L, 'neye') === 'tint'); if (to) return reskin(toCanvas(img), to); return null; }
+  // no eyebrows for Neathians, or for Gundalians (the crown sits where the brows were)
+  if (/^eyeblow_/.test(name)) { if (r !== 'neathian' && r !== 'gundalian') return null; const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; return c; }   // Neathians have no eyebrows (Billy, Nov 21)
   if (!to) return null;
-  if (/^facial_/.test(name)) { const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c, true) : neathianFace(c); }
+  if (/^facial_/.test(name)) { if (r === 'neathian' && art.face) return reskin(toCanvas(art.face), to); const c = reskin(toCanvas(img), to); return r === 'gundalian' ? gundalianFace(c, true) : neathianFace(c); }
   // the skin sheet is all skin, so it takes a wider reach (the ear is pinker than the face)
   if (/^skin_/.test(name)) { const c = reskin(toCanvas(img), to, 140); return r === 'gundalian' ? gundalianChin(gundalianNeck(c)) : c; }
   return null;
@@ -176,6 +194,23 @@ function skull(head) {
 }
 // the Gundalian forehead plate: a gold band like a tiara, round the head past the ears (not all the way), coming to a point toward the nose, fixed to the head bone so it
 // moves with the head. It sits a little out from the skull so it lies over the hair.
+// Billy's crown, modeled in place for short hair (±0.05 wide). It's fixed to the head bone; over wider hair its sides and
+// back are widened to sit outside the hair (the front stays where he put it).
+function wearCrown(head, hair, crown) {
+  const k = skull(head); if (!k) return;
+  let half = 0;   // the hair's half-width at the crown's height
+  if (hair) { hair.updateMatrixWorld(true); const v = new THREE.Vector3(); hair.traverse(o => { if (!o.isMesh) return; const P = o.geometry.attributes.position;
+    for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(o.matrixWorld); if (v.y > 0.69 && v.y < 0.745 && v.z < 0.03 && v.z > -0.03) half = Math.max(half, Math.abs(v.x)); } }); }
+  const widen = Math.max(1, (half + 0.003) / 0.05);
+  crown.updateMatrixWorld(true);
+  crown.traverse(o => { if (!o.isMesh) return;
+    o.material = new THREE.MeshLambertMaterial({ map: o.material.map, side: THREE.DoubleSide });
+    if (widen > 1.001) { const g = o.geometry = o.geometry.clone(), P = g.attributes.position;
+      for (let i = 0; i < P.count; i++) { const z = P.getZ(i), t = Math.min(1, Math.max(0, (0.045 - z) / 0.035)), e = t * t * (3 - 2 * t); P.setX(i, P.getX(i) * (1 + (widen - 1) * e)); }
+      P.needsUpdate = true; g.computeVertexNormals(); }
+    o.frustumCulled = false; });
+  head.add(crown); crown.updateMatrixWorld(true); k.bone.attach(crown);
+}
 function foreheadPlate(head, hair) {
   const k = skull(head); if (!k) return; const { bone, c, rx, rz, cy } = k;
   const mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(PLATE_GOLD), side: THREE.DoubleSide });
@@ -294,6 +329,8 @@ export async function buildAvatar(L, url) {
   const loader = new GLTFLoader(), texLoader = new THREE.TextureLoader(), group = new THREE.Group();
   const texCache = new Map();
   const raced = (L.race || 'human') !== 'human';
+  const tryImg = async p => { try { const im = new Image(); im.src = await url(p); await im.decode(); return im; } catch { return null; } };   // a picture the pack may not have yet
+  const art = L.race === 'neathian' ? { eye: await tryImg('creator/textures/neathian_eye_00.png'), face: await tryImg('creator/textures/neathian_facial_00.png') } : {};
   const tex = async name => {
     if (!texCache.has(name)) texCache.set(name, (async () => {
       let t = null;
@@ -303,7 +340,7 @@ export async function buildAvatar(L, url) {
       const src = await url(`creator/textures/${xs ? xs.src : extra ? `${xh[1]}_${xh[2]}_02` : name}.png`);
       if (xs) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintCloth(im, xs.color, xs.all)); } else
       if (extra && !(L.race === 'neathian' && xh[1] === 'eyeblow')) { const im = new Image(); im.src = src; await im.decode(); t = new THREE.CanvasTexture(tintHair(im, EXTRA_HAIR[+xh[3] - EXTRA0] || '#888')); }
-      else if (raced && /^(eye|eyeblow|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L); if (c) t = new THREE.CanvasTexture(c); }
+      else if (raced && /^(eye|eyeblow|facial|skin)_/.test(name)) { const im = new Image(); im.src = src; await im.decode(); const c = raceTexture(name, im, L, art); if (c) t = new THREE.CanvasTexture(c); }
       if (!t) t = await texLoader.loadAsync(src);
       t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; if (!t.name) t.name = name; return t;
     })().catch(() => { console.warn('no texture', name); return null; }));
@@ -312,7 +349,12 @@ export async function buildAvatar(L, url) {
   const scenes = await Promise.all(models(L).map(async m => { const sc = (await loader.loadAsync(await url(`creator/models/${m}/${m}.glb`))).scene;
     if (/^down_0[89]$/.test(m)) { if (XDOWN[L.down[0]]?.add === 'long') longSkirt(sc); else cinchSkirt(sc); } return sc; }));
   { const ms = models(L), at = k => scenes[ms.findIndex(n => n.startsWith(k + '_'))]; addClothes(L, { top: at('top'), down: at('down'), shoes: at('shoes') }); }
-  if (L.race === 'gundalian') foreheadPlate(scenes[models(L).indexOf('head_00')], scenes.find((_, i) => /^(hair|cap)_/.test(models(L)[i])));
+  if (L.race === 'gundalian') {
+    // Billy's crown (creator/models/crown_00, Nov 22) when the pack has it, else the band made here
+    const head = scenes[models(L).indexOf('head_00')], hair = scenes.find((_, i) => /^(hair|cap)_/.test(models(L)[i]));
+    let crown = null; try { crown = (await loader.loadAsync(await url('creator/models/crown_00/crown_00.glb'))).scene; } catch { }
+    if (crown) wearCrown(head, hair, crown); else foreheadPlate(head, hair);
+  }
   const jobs = [];
   for (const sc of scenes) {
     sc.traverse(o => {
