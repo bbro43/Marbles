@@ -7463,7 +7463,7 @@ export const STORY_START = {"masquerade":"hard","klaus":"hard","chanlee":"hard",
 // Interspace brawlers (story mode): all synthetic Bakugan
 export const INTERSPACE = {
  "maisie": {
-  "name": "Maisie",
+  "name": "Ashe",
   "species": "Vestal",
   "attrs": [
    "pyrus",
@@ -8728,7 +8728,7 @@ export const INTERSPACE = {
   }
  },
  "ella": {
-  "name": "Ella",
+  "name": "Scarlet",
   "species": "Vestal",
   "attrs": [
    "pyrus",
@@ -8980,7 +8980,7 @@ export const INTERSPACE = {
   }
  },
  "sophie": {
-  "name": "Selene",
+  "name": "Dusk",
   "species": "Vestal",
   "attrs": [
    "darkus",
@@ -9233,7 +9233,7 @@ export const INTERSPACE = {
   }
  },
  "nico": {
-  "name": "Nico",
+  "name": "Lux",
   "species": "Vestal",
   "attrs": [
    "haos"
@@ -9484,7 +9484,7 @@ export const INTERSPACE = {
   }
  },
  "freya": {
-  "name": "Freya",
+  "name": "Steam",
   "species": "Vestal",
   "attrs": [
    "pyrus",
@@ -9736,7 +9736,7 @@ export const INTERSPACE = {
   }
  },
  "zoya": {
-  "name": "Zoya",
+  "name": "Magma",
   "species": "Vestal",
   "attrs": [
    "pyrus",
@@ -9988,7 +9988,7 @@ export const INTERSPACE = {
   }
  },
  "xander": {
-  "name": "Xander",
+  "name": "Gale",
   "species": "Vestal",
   "attrs": [
    "ventus",
@@ -10743,7 +10743,7 @@ export const INTERSPACE = {
   }
  },
  "rocco": {
-  "name": "Rocco",
+  "name": "Grim",
   "species": "Vestal",
   "attrs": [
    "darkus",
@@ -10996,7 +10996,7 @@ export const INTERSPACE = {
   }
  },
  "otto": {
-  "name": "Otto",
+  "name": "Eclipse",
   "species": "Vestal",
   "attrs": [
    "darkus",
@@ -12259,7 +12259,7 @@ export const INTERSPACE = {
   }
  },
  "ellie": {
-  "name": "Ellie",
+  "name": "Marina",
   "species": "Vestal",
   "attrs": [
    "aquos",

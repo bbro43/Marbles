@@ -4105,7 +4105,7 @@ export const NEW_BRAWLERS = {
   }
  },
  "evelyn": {
-  "name": "Evelyn",
+  "name": "Raven",
   "species": "Vestal",
   "attrs": [
    "darkus"

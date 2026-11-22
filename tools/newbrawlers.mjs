@@ -2,7 +2,7 @@
 // Same shape as the Interspace brawlers in js/aiteams.js (name, species, attrs, signature, easy / normal / hard).
 // Usage: node tools/newbrawlers.mjs <pack-1 catalog.json>
 //
-// Billy (Nov 22): Season 3 adds the 8 Gundalians, the 7 Neathians and Jason to League 4; Season 4 adds Evelyn, Nina, Kala and
+// Billy (Nov 22): Season 3 adds the 8 Gundalians, the 7 Neathians and Jason to League 4; Season 4 adds Raven (evelyn), Onyx, Kala and
 // Olivia. Raymond never joins (he's built, but not on any roster).
 // Signatures: each has one tt_ Bakugan of their own. The 6 strongest Gundalians and Neathians have Billy's partners (Nov 22).
 // The others' signatures are spare tt_ Bakugan; the sheet's own tt_ Bakugan join as extras where they fit (Mantris, El Condor).
@@ -36,7 +36,7 @@ const NEW = [
   ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], 'Laserman', 3, 'normal'],
   // Humans and Vestals
   ['jason', 'Jason', 'Human', ['ventus'], 'Tuskor', 3, 'easy'],
-  ['evelyn', 'Evelyn', 'Vestal', ['darkus'], 'Rattleoid', 4, 'easy'],
+  ['evelyn', 'Raven', 'Vestal', ['darkus'], 'Rattleoid', 4, 'easy'],
   // Onyx replaces Nina (Billy, Nov 22): a male Vestal powerhouse, Dryoid his Subterra partner, Normal in Story
   ['onyx', 'Onyx', 'Vestal', ['subterra'], 'Dryoid', 4, 'normal'],
   ['kala', 'Kala', 'Human', ['aquos'], 'Fifth Paladin', 4, 'easy'],

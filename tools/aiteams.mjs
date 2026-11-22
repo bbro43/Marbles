@@ -41,6 +41,7 @@ const CH = {
 };
 const NEW_VESTROIA = new Set(['nv_dan', 'nv_shun', 'nv_marucho', 'ace', 'mira', 'baron', 'spectra', 'mylene', 'volt', 'gus', 'shadow', 'lync']);
 // partner Bakugan and who they belong to (the same person in both series counts once: Dan, Shun, Marucho)
+// Vestal names from Billy (Nov 22), after the Vexos and Resistance: the ids stay the same so saves and models keep working
 const PARTNERS = {
   dan: ['Dragonoid', 'Delta Dragonoid II', 'Neo Dragonoid', 'Hyper Dragonoid', 'Maxus Dragonoid'], runo: ['Tigrerra', 'Blade Tigrerra'],
   marucho: ['Preyas', 'Preyas II (Angelo)', 'Preyas II (Diablo)', 'Elfin', 'Dual Elfin'], julie: ['Gorem', 'Hammer Gorem'],
@@ -143,16 +144,16 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
 // Every Bakugan they carry is synthetic; each brawler's signature is one of the 23 unassigned Bakugan (each used once).
 // The other two are synthetics spread so every one of the 23 shows up about equally. Same Bakugan at every level.
 const INTERSPACE = [
-  ['maisie', 'Maisie', 'Vestal', ['pyrus', 'darkus', 'subterra'], 'Leefram'], ['richard', 'Richard', 'Human', ['pyrus', 'ventus', 'subterra'], 'Robotallion'],
+  ['maisie', 'Ashe', 'Vestal', ['pyrus', 'darkus', 'subterra'], 'Leefram'], ['richard', 'Richard', 'Human', ['pyrus', 'ventus', 'subterra'], 'Robotallion'],
   ['ryan', 'Ryan', 'Human', ['ventus', 'aquos', 'haos'], 'Foxbat'], ['sarah', 'Sarah', 'Human', ['ventus', 'aquos', 'subterra'], 'Ravenoid'],
-  ['george', 'George', 'Human', ['darkus', 'aquos', 'subterra'], 'Klawgor'], ['ella', 'Ella', 'Vestal', ['pyrus', 'darkus'], 'Reaper'],
-  ['sophie', 'Selene', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Scraper'], ['nico', 'Nico', 'Vestal', ['haos'], 'Fear Ripper'],
-  ['freya', 'Freya', 'Vestal', ['pyrus', 'aquos'], 'Monarus'], ['zoya', 'Zoya', 'Vestal', ['pyrus', 'subterra'], 'Hynoid'],
-  ['xander', 'Xander', 'Vestal', ['ventus', 'aquos'], 'Spindle'], ['heather', 'Heather', 'Human', ['aquos', 'subterra'], 'Gargonoid'],
-  ['brandon', 'Brandon', 'Human', ['pyrus'], 'Saurus'], ['rocco', 'Rocco', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Fencer'],
-  ['otto', 'Otto', 'Vestal', ['darkus', 'aquos', 'haos'], 'Laserman'], ['margaret', 'Margaret', 'Human', ['haos'], 'Warius'],
+  ['george', 'George', 'Human', ['darkus', 'aquos', 'subterra'], 'Klawgor'], ['ella', 'Scarlet', 'Vestal', ['pyrus', 'darkus'], 'Reaper'],
+  ['sophie', 'Dusk', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Scraper'], ['nico', 'Lux', 'Vestal', ['haos'], 'Fear Ripper'],
+  ['freya', 'Steam', 'Vestal', ['pyrus', 'aquos'], 'Monarus'], ['zoya', 'Magma', 'Vestal', ['pyrus', 'subterra'], 'Hynoid'],
+  ['xander', 'Gale', 'Vestal', ['ventus', 'aquos'], 'Spindle'], ['heather', 'Heather', 'Human', ['aquos', 'subterra'], 'Gargonoid'],
+  ['brandon', 'Brandon', 'Human', ['pyrus'], 'Saurus'], ['rocco', 'Grim', 'Vestal', ['darkus', 'ventus', 'subterra'], 'Fencer'],
+  ['otto', 'Eclipse', 'Vestal', ['darkus', 'aquos', 'haos'], 'Laserman'], ['margaret', 'Margaret', 'Human', ['haos'], 'Warius'],
   ['melissa', 'Melissa', 'Human', ['pyrus', 'darkus', 'aquos'], 'Serpenoid'], ['karen', 'Karen', 'Human', ['pyrus', 'darkus', 'haos'], 'Manion'],
-  ['brenda', 'Brenda', 'Human', ['pyrus', 'darkus', 'ventus'], 'Bee Striker'], ['ellie', 'Ellie', 'Vestal', ['aquos', 'subterra'], 'Terrorclaw'],
+  ['brenda', 'Brenda', 'Human', ['pyrus', 'darkus', 'ventus'], 'Bee Striker'], ['ellie', 'Marina', 'Vestal', ['aquos', 'subterra'], 'Terrorclaw'],
   ['amanda', 'Amanda', 'Human', ['haos'], 'Griffon'], ['gary', 'Gary', 'Human', ['pyrus', 'darkus'], 'Falconeer'],
   ['anthony', 'Anthony', 'Human', ['aquos', 'subterra'], 'Stinglash'],
 ];
@@ -183,7 +184,7 @@ const synCount = Object.entries(used).sort((a, b) => a[1] - b[1]);
 // ---------- Story mode: each character's starting level (Billy, Nov 16). From the show's rankings, split in thirds:
 // Classic, end of the first season: Masquerade, Klaus, Chan Lee | the rest Normal; not ranked: Easy.
 // Dan, Shun and Marucho play as their New Vestroia selves. Vexos: Spectra, Gus | Mylene, Volt | Shadow, Lync.
-// Resistance: Dan, Shun | the rest Normal. Interspace brawlers: Xander Hard, Maisie, Richard, Brandon, Otto Normal, the rest Easy.
+// Resistance: Dan, Shun | the rest Normal. Interspace brawlers: Gale (xander) Hard, Ashe (maisie), Richard, Brandon, Eclipse (otto) Normal, the rest Easy.
 const STORY_LEVEL = {   // updated by Billy, Nov 16
   hard: ['masquerade', 'klaus', 'chanlee', 'spectra', 'gus', 'nv_dan', 'nv_shun', 'xander'],
   normal: ['runo', 'julie', 'julio', 'komba', 'billy', 'mylene', 'volt', 'shadow', 'lync', 'mira', 'ace', 'nv_marucho', 'baron',

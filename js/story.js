@@ -1120,7 +1120,7 @@ function nextSeason() {
     const byElo = [...L4].sort((x, y) => B[y].elo - B[x].elo), A = [], Bd = [];
     byElo.forEach((id, i) => ([A, Bd, Bd, A][i % 4]).push(id));   // snake: A B B A ...
     leagues = [nl[0], nl[1], nl[2], A, Bd]; names = ['League 1', 'League 2', 'League 3', 'League 4 · Division A', 'League 4 · Division B']; }
-  // Season 4: Evelyn, Nina, Kala and Olivia join League 4 (Raymond never joins)
+  // Season 4: Raven (evelyn), Onyx, Kala and Olivia join League 4 (Raymond never joins)
   if (n === 4) { SEASON4_NEW.forEach(id => { if (!B[id]) B[id] = newcomerB(id); }); leagues = [nl[0], nl[1], nl[2], [...nl[3], ...SEASON4_NEW.filter(id => !nl[3].includes(id))]]; }
   const fixtures = leagues.map(rounds), days = leagueDaysFor(Math.max(...fixtures.map(f => f.length)));
   save.season = { seed, B, leagues, names, events: season2Events(rng).map(e => ({ ...e, day: e.week * 7 })),
