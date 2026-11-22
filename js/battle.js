@@ -2,6 +2,7 @@
 import { aiGear, ownedForBattle } from './gear.js';
 import { bestOf, attrsOf } from './dual.js';
 import * as THREE from 'three';
+import { fitToy } from './toyfit.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
 import * as R from './rules.js';
@@ -14,7 +15,6 @@ import { AI_TEAMS, UPGRADE_G } from './aiteams.js';
 const CM = 285 / 56;
 const MAT = 28 * CM - 2;               // half-size of the play surface (inside the rails)
 const TOY_D = 3.2 * CM;                // a toy is 3.2 cm across
-const TOY_SCALE = TOY_D / 11.2;        // DS ball model is 11.2 units across closed
 const RADIUS = TOY_D / 2;
 const GATE_W = 7 * CM, GATE_D = 9.4 * CM;   // Gate cards are 7 x 9.4 cm
 const GATE_Z = GATE_D / 2;             // two cards, tips touching at the center
@@ -228,7 +228,7 @@ const mixers = new Set();
 
 async function loadToy(spec) {
   const g = await loader.loadAsync(await pack.url(spec.model));
-  const obj = g.scene; obj.scale.setScalar(TOY_SCALE);
+  const obj = g.scene;
   obj.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   if (spec.attrTexture) {
     const tex = await new THREE.TextureLoader().loadAsync(await pack.url(spec.attrTexture));
@@ -247,20 +247,20 @@ async function loadToy(spec) {
   if (/^(dc|bt)_/.test(spec.id || '') && t.action) {
     // the Maxus Helios pieces and Wired were built as Traps: their clip starts closed and is open by about 34%
     if ((spec.id || '').startsWith('bt_')) { t.from = 0; t.to = 0.999; } else if (/^dc_sp(06_2\d|13)$/.test(spec.id)) { t.from = 0; t.to = 0.34; } else { t.from = 0.22; t.to = 0.46; }
-    obj.scale.setScalar(1); setOpen(t, 0);
-    obj.updateMatrixWorld(true); obj.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
-    const box = new THREE.Box3().setFromObject(obj, true), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
-    const k = TOY_D / Math.max(size.x, size.z);
-    obj.scale.setScalar(k); obj.position.set(-c.x * k, -c.y * k, -c.z * k);
-    // spin around the ball's own center (like the Classic Bakugan): put the offset model inside a wrapper that rolls
-    const spin = new THREE.Group(); holder.add(spin); spin.add(obj); t.obj = spin;
   }
+  // every toy the same size and place (js/toyfit.js, shared with the Bakugan list): the closed ball TOY_D across and
+  // centered; a toy that would float when open (Billy's tt_ models open up from the ball's center) is lowered as it opens
+  t.model = obj;
+  t.fit = fitToy(obj, v => { if (t.action) { t.action.time = (t.from + v * (t.to - t.from)) * t.dur; t.mixer.update(0); } }, TOY_D);
+  // spin around the ball's own center: the centered model sits inside a wrapper that rolls
+  const spin = new THREE.Group(); holder.add(spin); spin.add(obj); t.obj = spin;
   setOpen(t, 0);
   return t;
 }
 function setOpen(t, v) {
   t.open = v;
   if (t.action) { t.action.time = (t.from + v * (t.to - t.from)) * t.dur; t.mixer.update(0); }
+  if (t.fit) t.model.position.y = t.fit.y0 + t.fit.lift * v;
 }
 function animateOpen(t, to, ms = 450) {
   return new Promise(res => { t.anim = { from: t.open, to, t0: performance.now(), ms, res }; });

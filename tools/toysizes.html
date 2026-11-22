@@ -1,0 +1,32 @@
+<!doctype html><html><body>
+<!-- Test page: every toy's raw size and center, closed and open (numbers only, nothing drawn). window.SIZES when done. -->
+<script src="../vendor/jszip.min.js"></script>
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/build/three.module.js", "three/addons/": "../vendor/three/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Pack } from '../js/pack.js';
+import { fitToy } from '../js/toyfit.js';
+const pack = await Pack.fromDevice(), cat = pack.catalog, loader = new GLTFLoader(), out = [];
+const box = o => { o.updateMatrixWorld(true); o.traverse(x => { if (x.isSkinnedMesh) x.skeleton.update(); }); return new THREE.Box3().setFromObject(o, true); };
+const r3 = v => [+v.x.toFixed(3), +v.y.toFixed(3), +v.z.toFixed(3)];
+for (const d of [...cat.toys, ...(cat.traps || [])]) {
+  try {
+    const g = await loader.loadAsync(await pack.url(d.model)), obj = g.scene;
+    let mixer, action, dur, from = 0, to = 0.999;
+    if (g.animations.length) { mixer = new THREE.AnimationMixer(obj); action = mixer.clipAction(g.animations[0]); action.play(); action.paused = true; dur = g.animations[0].duration;
+      if (/^dc_sp(06_2\d|13)$/.test(d.id)) { to = 0.34; } else if (/^dc_sp\d+(_\d+)?$/.test(d.id)) { from = 0.22; to = 0.46; } }
+    const at = v => { if (action) { action.time = (from + v * (to - from)) * dur; mixer.update(0); } };
+    if (new URLSearchParams(location.search).get('fit')) {
+      const f = fitToy(obj, at, 1); at(0); obj.position.y = f.y0; const c0 = box(obj); at(1); obj.position.y = f.y0 + f.lift; const c1 = box(obj);
+      out.push({ id: d.id, name: d.name, closed: r3(c0.getSize(new THREE.Vector3())), closedMinY: +c0.min.y.toFixed(3), openMinY: +c1.min.y.toFixed(3), lift: +f.lift.toFixed(3) }); continue; }
+    at(0); const b0 = box(obj); at(1); const b1 = box(obj);
+    let skinned = 0; obj.traverse(x => { if (x.isSkinnedMesh) skinned++; });
+    out.push({ id: d.id, name: d.name, anims: g.animations.length, skinned, closedSize: r3(b0.getSize(new THREE.Vector3())), closedCenter: r3(b0.getCenter(new THREE.Vector3())),
+      openSize: r3(b1.getSize(new THREE.Vector3())), openCenter: r3(b1.getCenter(new THREE.Vector3())) });
+  } catch (e) { out.push({ id: d.id, err: String(e) }); }
+}
+window.SIZES = out; document.title = 'done';
+</script></body></html>

@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Pack } from './pack.js';
 import { controlOf } from './control.js';
+import { fitToy } from './toyfit.js';
 
 const $ = id => document.getElementById(id);
 const ATTR_COLOR = { pyrus: '#e53935', aquos: '#1e88e5', subterra: '#b07a3c', haos: '#f2e7b8', darkus: '#7b3fa8', ventus: '#3fa34d' };
@@ -25,9 +26,20 @@ camera.position.set(0, 0.35, 3); camera.lookAt(0, 0, 0);
 const pivot = new THREE.Group(); scene.add(pivot);
 const loader = new GLTFLoader();
 
+// one camera for every toy (the closed ball is 1 unit across): it fits anything that spins within FIT_R of the middle;
+// only a toy wider than that open (a long tail) moves the camera back
+const FIT_R = 1.5;
+let fitR = FIT_R;
+function frame() {
+  const halfW = Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect);
+  const halfH = THREE.MathUtils.degToRad(camera.fov / 2);
+  // wide enough for the spin, tall enough for the ground (-0.5) up to about 1.4
+  const dist = Math.max(fitR / Math.tan(halfW), 1.05 / Math.tan(halfH)) * 1.08;
+  camera.position.set(0, 0.45 + dist * 0.08, dist); camera.lookAt(0, 0.4, 0);
+}
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
-  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); frame();
 }
 addEventListener('resize', resize);
 
@@ -48,7 +60,7 @@ renderer.domElement.addEventListener('dblclick', () => { pivot.quaternion.identi
 
 let cur = null;      // { obj, mixer, action, dur, from, to, open, target }
 let loadSeq = 0;
-function setOpen(t, v) { t.open = v; if (t.action) { t.action.time = (t.from + v * (t.to - t.from)) * t.dur; t.mixer.update(0); } }
+function setOpen(t, v) { t.open = v; if (t.action) { t.action.time = (t.from + v * (t.to - t.from)) * t.dur; t.mixer.update(0); } if (t.fit) t.obj.position.y = t.fit.y0 + t.fit.lift * v; }
 function bounds(obj) {
   obj.updateMatrixWorld(true); obj.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
   return new THREE.Box3().setFromObject(obj, true);
@@ -73,15 +85,12 @@ async function show(d, attr) {
     if (/^dc_sp(06_2\d|13)$/.test(d.id)) { t.from = 0; t.to = 0.34; }   // Maxus Helios pieces and Wired: built like Traps, closed at the start
     else if (/^dc_sp\d+(_\d+)?$/.test(d.id) && !MAXUS_G[d.name]) { t.from = 0.22; t.to = 0.46; }   // New Vestroia Bakugan clips roll the ball in first
   }
-  // size and center from the closed ball; leave room for the open model
-  setOpen(t, 0);
-  const box = bounds(obj), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
-  const k = 1 / Math.max(size.x, size.y, size.z, 1e-6);
-  obj.scale.setScalar(k); obj.position.set(-c.x * k, -c.y * k, -c.z * k);
+  // the same size and place as in battles (js/toyfit.js): closed ball 1 unit across, open toys standing on the same ground
+  t.fit = fitToy(obj, v => { if (t.action) { t.action.time = (t.from + v * (t.to - t.from)) * t.dur; t.mixer.update(0); } }, 1);
   setOpen(t, 1);
-  const ob = bounds(obj), osz = ob.getSize(new THREE.Vector3()).length();
-  setOpen(t, t.target);
-  camera.position.set(0, 0.2, Math.max(2.1, osz * 1.45)); camera.lookAt(0, 0, 0);
+  const ob = bounds(obj), xs = Math.max(Math.abs(ob.min.x), Math.abs(ob.max.x)), zs = Math.max(Math.abs(ob.min.z), Math.abs(ob.max.z));
+  fitR = Math.max(FIT_R, 1.1 * Math.max(xs, zs));
+  setOpen(t, t.target); frame();
   if (cur) pivot.remove(cur.obj);
   pivot.add(obj); cur = t;
   $('openBtn').disabled = !t.action; $('openBtn').textContent = t.target ? 'Close' : 'Open';
