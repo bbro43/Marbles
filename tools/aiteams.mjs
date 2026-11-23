@@ -149,6 +149,9 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
       team.abilities = Object.fromEntries(AB_COLORS.map(c => [c, C(h[c][0])]));
       team.extra = Object.fromEntries(AB_COLORS.map(c => [c, h[c].slice(1).map(C)]));
     }
+    // a partner's own boost on Hard (Billy, Nov 22): Jenny's Siege and Jewls's Centipoid play at 340 base, before the level's upgrades
+    const BOOST = { jenny: { Siege: 340 }, jewls: { Centipoid: 340 } };
+    if (lvl === 'hard' && BOOST[id]) for (const x of team.toys) { const to = BOOST[id][x.name]; if (to) x.up = Math.round((to - byName.get(x.name).baseG) / 10); }
     out[id][lvl] = team;
   });
 }

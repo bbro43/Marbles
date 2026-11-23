@@ -1895,7 +1895,8 @@ export const AI_TEAMS = {
     {
      "id": "bb_49",
      "attr": "aquos",
-     "name": "Siege"
+     "name": "Siege",
+     "up": 6
     },
     {
      "id": "tt_10",
@@ -2141,7 +2142,8 @@ export const AI_TEAMS = {
     {
      "id": "bb_47",
      "attr": "subterra",
-     "name": "Centipoid"
+     "name": "Centipoid",
+     "up": 10
     },
     {
      "id": "bt_hynoid",
