@@ -13,14 +13,17 @@ export const SYNTHETIC = [...BANDS.high, ...BANDS.mid, ...BANDS.low];
 // Each synthetic's home attribute, by what it looks like (Billy, Nov 22: the cast carry Bakugan that suit their attribute,
 // like Reaper and Fear Ripper for Masquerade, Wormquake for an earth brawler, Ravenoid for a Ventus one, not an Aquos one).
 // Custom characters aren't held to this: they get the even spread over every synthetic.
-export const HOME = {
-  pyrus: ['Warius', 'Hynoid', 'Falconeer', 'Griffon', 'Saurus'],
-  aquos: ['Limulus', 'Terrorclaw', 'Jelldon', 'Juggernoid', 'Serpenoid'],
-  subterra: ['Wormquake', 'Tuskor', 'Gargonoid', 'Stinglash', 'Goblin Ball'],
-  haos: ['Laserman', 'Fifth Paladin', 'Siege', 'Manion', 'Robotallion'],
-  darkus: ['Reaper', 'Fear Ripper', 'Rattleoid', 'Centipoid'],
-  ventus: ['El Condor', 'Monarus', 'Bee Striker', 'Ravenoid', 'Mantris'],
+// Billy's adjustments (Nov 22): a synthetic may suit two attributes
+const HOME_OF = {
+  Warius: ['pyrus'], Hynoid: ['subterra'], Falconeer: ['ventus', 'pyrus'], Griffon: ['pyrus', 'haos'], Saurus: ['pyrus'], Gargonoid: ['pyrus'],
+  Terrorclaw: ['pyrus', 'aquos'], Limulus: ['aquos'], Jelldon: ['aquos'], Juggernoid: ['aquos'], Serpenoid: ['aquos', 'subterra'],
+  Wormquake: ['subterra'], Tuskor: ['subterra'], Stinglash: ['subterra'], Rattleoid: ['subterra'], Centipoid: ['subterra'],
+  Laserman: ['darkus', 'haos'], Manion: ['haos'], Robotallion: ['haos'], Siege: ['haos'],
+  Reaper: ['darkus'], 'Fear Ripper': ['darkus'], 'Goblin Ball': ['darkus'], 'Fifth Paladin': ['darkus'],
+  'El Condor': ['ventus'], Monarus: ['ventus'], 'Bee Striker': ['ventus'], Ravenoid: ['ventus'], Mantris: ['ventus'],
 };
+export const HOME = {};
+for (const [n, as] of Object.entries(HOME_OF)) for (const a of as) (HOME[a] = HOME[a] || []).push(n);
 // never on a cast deck: Siege and Centipoid are Jenny's and Jewls's own, Fifth Paladin is for custom characters only (Billy, Nov 22)
 const NOT_CAST = new Set(['Siege', 'Centipoid', 'Fifth Paladin']);
 const RANK = Object.fromEntries(SYNTHETIC.map((n, i) => [n, i]));   // 0 = strongest
@@ -61,7 +64,10 @@ export function spread() {
       if (n && Math.abs(bandOf(n) - want) <= 1) { mine.add(n); used[n]++; return n; }
       // none left: reuse one of their attribute already in this deck (from another level), strongest first
       const again = [...mine].filter(n => (HOME[attr] || []).includes(n) && !level.includes(n)).sort((a, b) => RANK[a] - RANK[b])[0];
-      return again || null; };
+      if (again) return again;
+      // still none: any unused one of their attribute, even from another strength band, before one of another attribute
+      if (n) { mine.add(n); used[n]++; return n; }
+      return null; };
     let level = [];   // what this level already holds (a deck never carries the same Bakugan twice in one level)
     const pick = (band, same = []) => { level = same; if (attr) { const c = castPick(band); if (c) return c; }
       const list = BANDS[band].filter(n => !mine.has(n) && !(attr && NOT_CAST.has(n)));
