@@ -4,6 +4,9 @@ import fs from 'fs';
 import { fitsAttrs, abilityScore, lineBlocked, GATE_COLORS, AB_COLORS } from '../js/setup.js';
 import { isCoded, toyMatches } from '../js/abilities.js';
 import { TRAP_SLOTS } from '../js/profiles.js';
+import { spread } from './synth.mjs';
+// every deck's synthetic Bakugan, spread evenly (tools/synth.mjs); the cast keep their partners, the Vexos their Maxus Helios pieces
+const SP = spread().decks;
 const cat = JSON.parse(fs.readFileSync(process.argv[2]));
 const byName = new Map(cat.toys.filter(t => t.baseG).map(t => [t.name, t]));
 // character: attribute (one, or one per difficulty) and the Bakugan used at each difficulty (stronger Bakugan as it goes up)
@@ -47,7 +50,7 @@ const PARTNERS = {
   marucho: ['Preyas', 'Preyas II (Angelo)', 'Preyas II (Diablo)', 'Elfin', 'Dual Elfin'], julie: ['Gorem', 'Hammer Gorem'],
   shun: ['Skyress', 'Storm Skyress', 'Ingram', 'Cosmic Ingram'], masquerade: ['Hydranoid', 'Dual Hydranoid', 'Alpha Hydranoid'], chanlee: ['Fortress'], klaus: ['Sirenoid'],
   julio: ['Tentaclear'], billy: ['Cycloid'], komba: ['Harpus'], marduk: ['Vladitor', 'Battle Ax Vladitor'] /* Marduk is out for now; Vladitor stays his */, jenny: ['Siege'], jewls: ['Centipoid'],
-  christopher: ['Juggernoid'], player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
+  /* christopher (not in the game): Juggernoid is a synthetic now (Billy, Nov 22) */ player: ['Leonidas', 'Omega Leonidas'] /* the DS story hero's partner */, ace: ['Percival', 'Midnight Percival', 'Percival (unidentified form)'], mira: ['Wilda', 'Thunder Wilda'], baron: ['Nemus', 'Mega Nemus'],
   spectra: ['Helios', 'Maxus Helios'], gus: ['Premo Vulcan'], mylene: ['Elico', 'Macubass'], volt: ['Brontes', 'Boriates'], shadow: ['Hades'], lync: ['Altair', 'Wired'],
 };
 // New Vestroia characters' Traps (only they get one). Gus and Lync get Maxus Helios pieces in their attribute.
@@ -83,8 +86,12 @@ function pickGates(names, attr, rank) {
   const gt = {};
   for (const c of GATE_COLORS) {
     let pool = gates.filter(g => g.color === c);
-    if (c === 'gold') { const mine = pool.filter(g => goldFor(g, names)); if (mine.length) pool = mine; else problems.push(`no gold card for ${names.join(', ')}`); }
-    const score = g => (g.bonus[attr] || 0) + (c === 'gold' && goldFor(g, names.slice(0, 1)) ? 1000 : 0);   // the partner's own card first
+    // Gold: the card of a Bakugan they carry (the partner's own first); a deck of synthetics with no Gold card of its own
+    // gets the Gold card best for its attribute and least for the others, like the new brawlers (Billy, Nov 22)
+    let fallback = false;
+    if (c === 'gold') { const mine = pool.filter(g => goldFor(g, names)); if (mine.length) pool = mine; else fallback = true; }
+    const score = fallback ? g => (g.bonus[attr] || 0) * 3 - Object.entries(g.bonus).filter(([x]) => x !== attr).reduce((n, [, v]) => n + v, 0) / 5
+      : g => (g.bonus[attr] || 0) + (c === 'gold' && goldFor(g, names.slice(0, 1)) ? 1000 : 0);   // the partner's own card first
     const r = [...pool].sort((a, b) => score(b) - score(a)), g = r[Math.min(c === 'gold' ? 0 : rank, r.length - 1)];
     gt[c] = { id: g.id, name: g.name };
   }
@@ -94,7 +101,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
   out[id] = { attr: Array.isArray(attrs0) ? attrs0.join('/') : attrs0 };
   Object.keys(LEVELS).forEach((lvl, k) => {
     const { upgrades, rank } = LEVELS[lvl], toys = [], attr = Array.isArray(attrs0) ? attrs0[k] : attrs0;
-    for (const n of tiers[k]) {
+    for (const n of SP[id] ? [tiers[k][0], ...SP[id][lvl]] : tiers[k]) {
       const t = byName.get(n);
       if (!t) { problems.push(`${id} ${lvl}: no Bakugan "${n}"`); continue; }
       if (t.id.startsWith('dc_') && !NEW_VESTROIA.has(id)) problems.push(`${id} ${lvl}: ${n} is a New Vestroia Bakugan`);
@@ -141,8 +148,7 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
   });
 }
 // ---------- Interspace brawlers (story mode): Billy's own characters from his Brawlers sheet.
-// Every Bakugan they carry is synthetic; each brawler's signature is one of the 23 unassigned Bakugan (each used once).
-// The other two are synthetics spread so every one of the 23 shows up about equally. Same Bakugan at every level.
+// Every Bakugan they carry is synthetic, from the even spread in tools/synth.mjs (the 5th column is no longer used).
 const INTERSPACE = [
   ['maisie', 'Ashe', 'Vestal', ['pyrus', 'darkus', 'subterra'], 'Leefram'], ['richard', 'Richard', 'Human', ['pyrus', 'ventus', 'subterra'], 'Robotallion'],
   ['ryan', 'Ryan', 'Human', ['ventus', 'aquos', 'haos'], 'Foxbat'], ['sarah', 'Sarah', 'Human', ['ventus', 'aquos', 'subterra'], 'Ravenoid'],
@@ -157,19 +163,14 @@ const INTERSPACE = [
   ['amanda', 'Amanda', 'Human', ['haos'], 'Griffon'], ['gary', 'Gary', 'Human', ['pyrus', 'darkus'], 'Falconeer'],
   ['anthony', 'Anthony', 'Human', ['aquos', 'subterra'], 'Stinglash'],
 ];
-const SYN = INTERSPACE.map(x => x[4]), used = Object.fromEntries(SYN.map(n => [n, 1]));
-if (new Set(SYN).size !== 23) problems.push('Interspace: signatures are not 23 different Bakugan');
 const inter = {};
 INTERSPACE.forEach(([id, name, species, attrs, sig], i) => {
-  for (const n of SYN) { if (!byName.get(n)) problems.push(`Interspace ${id}: no Bakugan ${n}`); if (ownerOf.has(n)) problems.push(`Interspace ${id}: ${n} is a partner`); }
-  // two more synthetics: least used so far, then a mix of strong and weak so decks stay close in power
-  const rest = SYN.filter(n => n !== sig).sort((a, b) => used[a] - used[b] || ((SYN.indexOf(a) * 7 + i * 3) % 23) - ((SYN.indexOf(b) * 7 + i * 3) % 23));
-  const names = [sig, rest[0], rest[1]]; used[rest[0]]++; used[rest[1]]++;
-  const toyAttr = names.map((n, k) => attrs[k % attrs.length]);
-  inter[id] = { name, species, attrs, signature: sig };
+  // no partner and no Bakugan of their own (Billy, Nov 22): all three are synthetics from the even spread, per level
+  inter[id] = { name, species, attrs, signature: null };
   Object.keys(LEVELS).forEach(lvl => {
-    const { upgrades, rank } = LEVELS[lvl];
-    const team = { attr: attrs[0], upgrades, toys: names.map((n, k) => ({ id: byName.get(n).id, attr: toyAttr[k], name: n })), gates: pickGates(names, attrs[0], rank), abilities: {}, extra: {} };
+    const { upgrades, rank } = LEVELS[lvl], names = SP[id][lvl];
+    for (const n of names) { if (!byName.get(n)) problems.push(`Interspace ${id}: no Bakugan ${n}`); if (ownerOf.has(n)) problems.push(`Interspace ${id}: ${n} is a partner`); }
+    const team = { attr: attrs[0], upgrades, toys: names.map((n, k) => ({ id: byName.get(n).id, attr: byName.get(n).attributes[attrs[k % attrs.length]] ? attrs[k % attrs.length] : Object.keys(byName.get(n).attributes)[0], name: n })), gates: pickGates(names, attrs[0], rank), abilities: {}, extra: {} };
     for (const c of AB_COLORS) {
       let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
       const r = [...pool].sort((a, b) => abilityScore(b, attrs) - abilityScore(a, attrs)), a = r[Math.min(rank, r.length - 1)];
@@ -180,7 +181,6 @@ INTERSPACE.forEach(([id, name, species, attrs, sig], i) => {
     inter[id][lvl] = team;
   });
 });
-const synCount = Object.entries(used).sort((a, b) => a[1] - b[1]);
 // ---------- Story mode: each character's starting level (Billy, Nov 16). From the show's rankings, split in thirds:
 // Classic, end of the first season: Masquerade, Klaus, Chan Lee | the rest Normal; not ranked: Easy.
 // Dan, Shun and Marucho play as their New Vestroia selves. Vexos: Spectra, Gus | Mylene, Volt | Shadow, Lync.
@@ -215,4 +215,4 @@ export const STORY_START = ${JSON.stringify(storyStart)};
 export const INTERSPACE = ${JSON.stringify(inter, null, 1)};
 `);
 function UPG() { return 10; }
-console.log(problems.length ? problems.join('\n') : 'ok', Object.keys(out).length, 'characters,', Object.keys(inter).length, 'Interspace brawlers; synthetic use:', synCount.map(x => x.join(' ')).join(', '));
+console.log(problems.length ? problems.join('\n') : 'ok', Object.keys(out).length, 'characters,', Object.keys(inter).length, 'Interspace brawlers');

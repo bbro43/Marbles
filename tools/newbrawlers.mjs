@@ -9,6 +9,7 @@
 // Attributes are the sheet's. The sheet's cards are mostly not in the game yet, so cards are picked from the game's set
 // like the Season 2 newcomers' (tools/aiteams.mjs). Traps: where the sheet gives one that's in the game.
 import fs from 'fs';
+import { spread } from './synth.mjs';
 import { fitsAttrs, abilityScore, lineBlocked, GATE_COLORS, AB_COLORS } from '../js/setup.js';
 import { isCoded, toyMatches } from '../js/abilities.js';
 const cat = JSON.parse(fs.readFileSync(process.argv[2]));
@@ -23,8 +24,8 @@ const NEW = [
   ['tibor', 'Tibor', 'Gundalian', ['darkus', 'pyrus'], 'Centorrior', 3, 'normal', 'dual'],
   ['zarek', 'Zarek', 'Gundalian', ['aquos', 'ventus'], 'Tayghen', 3, 'normal', 'dual'],
   ['zorro', 'Zorro', 'Gundalian', ['pyrus', 'darkus'], 'Druman', 3, 'normal', 'dual'],
-  ['vasek', 'Vasek', 'Gundalian', ['haos'], 'Limulus', 3, 'normal'],
-  ['vesna', 'Vesna', 'Gundalian', ['pyrus', 'ventus'], 'Jelldon', 3, 'normal'],
+  ['vasek', 'Vasek', 'Gundalian', ['haos'], null, 3, 'normal'],
+  ['vesna', 'Vesna', 'Gundalian', ['pyrus', 'ventus'], null, 3, 'normal'],
   // Neathians (Season 3). The 6 strongest have Billy's partners (Nov 22), in the partner's attribute.
   ['arcadius', 'Arcadius', 'Neathian', ['pyrus'], 'Apollonir', 3, 'normal'],
   ['mousoulios', 'Mousoulios', 'Neathian', ['aquos'], 'Frosch', 3, 'normal'],
@@ -33,15 +34,15 @@ const NEW = [
   ['petronas', 'Petronas', 'Neathian', ['darkus'], 'Exedra', 3, 'normal'],
   ['eudocia', 'Eudocia', 'Neathian', ['ventus'], 'Oberus', 3, 'normal'],
   // Ignatios: Alpha Hydranoid went to Masquerade (Billy, Nov 22) and every tt_ Bakugan has an owner, so his signature is from the regular pool
-  ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], 'Laserman', 3, 'normal'],
+  ['ignatios', 'Ignatios', 'Neathian', ['pyrus'], null, 3, 'normal'],
   // Humans and Vestals
-  ['jason', 'Jason', 'Human', ['ventus'], 'Tuskor', 3, 'easy'],
-  ['evelyn', 'Raven', 'Vestal', ['darkus'], 'Rattleoid', 4, 'easy'],
+  ['jason', 'Jason', 'Human', ['ventus'], null, 3, 'easy'],
+  ['evelyn', 'Raven', 'Vestal', ['darkus'], null, 4, 'easy'],
   // Onyx replaces Nina (Billy, Nov 22): a male Vestal powerhouse, Dryoid his Subterra partner, Normal in Story
   ['onyx', 'Onyx', 'Vestal', ['subterra'], 'Dryoid', 4, 'normal'],
-  ['kala', 'Kala', 'Human', ['aquos'], 'Fifth Paladin', 4, 'easy'],
-  ['olivia', 'Olivia', 'Human', ['subterra'], 'Wormquake', 4, 'easy'],
-  ['raymond', 'Raymond', 'Human', ['subterra', 'haos', 'aquos'], 'Goblin Ball', 0, 'easy'],
+  ['kala', 'Kala', 'Human', ['aquos'], null, 4, 'easy'],
+  ['olivia', 'Olivia', 'Human', ['subterra'], null, 4, 'easy'],
+  ['raymond', 'Raymond', 'Human', ['subterra', 'haos', 'aquos'], null, 0, 'easy'],
 ];
 // the sheet's own Bakugan that are in the game and nobody's partner: used before the shared filler pool
 const SHEET_EXTRA = { brodny: ['Mantris'], pavel: ['El Condor'], petronas: ['Ravenoid'], raymond: ['Robotallion'], tibor: ['Scraper'], zorro: ['Saurus'] };
@@ -68,20 +69,18 @@ function pickGates(names, attr, rank) {
   }
   return gt;
 }
-const used = Object.fromEntries(FILL.map(n => [n, 0])), sigs = new Set();
+const SP = spread().decks, sigs = new Set();
 const out = {}, start = {}, joins = {};
 NEW.forEach(([id, name, species, attrs, sig, season, lvl0, dual], i) => {
-  const s = byName.get(sig); if (!s) problems.push(`${id}: no Bakugan ${sig}`); if (sigs.has(sig)) problems.push(`${id}: ${sig} is someone else's`); sigs.add(sig);
-  const names = [sig];
-  for (const n of SHEET_EXTRA[id] || []) if (names.length < 3 && byName.get(n) && !lineBlocked(names.map(x => ({ id: byName.get(x).id })), byName.get(n).id)) names.push(n);
-  const pool = FILL.filter(n => !names.includes(n) && byName.get(n)).sort((a, b) => used[a] - used[b] || ((FILL.indexOf(a) * 7 + i * 5) % FILL.length) - ((FILL.indexOf(b) * 7 + i * 5) % FILL.length));
-  for (const n of pool) { if (names.length >= 3) break; if (lineBlocked(names.map(x => ({ id: byName.get(x).id })), byName.get(n).id)) continue; names.push(n); }
-  names.slice(1).forEach(n => { if (n in used) used[n]++; });
+  if (sig) { if (!byName.get(sig)) problems.push(`${id}: no Bakugan ${sig}`); if (sigs.has(sig)) problems.push(`${id}: ${sig} is someone else's`); sigs.add(sig); }
+  // a partner (the 12 and Onyx) plus two synthetics, or three synthetics: all from the even spread in tools/synth.mjs, per level
+  const namesAt = lvl => (sig ? [sig] : []).concat(SP[id][lvl]);
   // a Dual Attribute partner (toy's color first): the other two are one of each attribute; otherwise the attributes in turn
-  const toyAttr = dual ? [attrs[0], attrs[0], attrs[1]] : names.map((n, k) => attrs[k % attrs.length]);
-  out[id] = { name, species, attrs, signature: sig, joins: season };
+  const toyAttr = dual ? [attrs[0], attrs[0], attrs[1]] : [0, 1, 2].map(k => attrs[k % attrs.length]);
+  out[id] = { name, species, attrs, signature: sig || null, joins: season };
   start[id] = lvl0; joins[id] = season;
   for (const [lvl, { upgrades, rank }] of Object.entries(LEVELS)) {
+    const names = namesAt(lvl);
     const team = { attr: attrs[0], upgrades, toys: names.map((n, k) => ({ id: byName.get(n).id, attr: byName.get(n).attributes[toyAttr[k]] ? toyAttr[k] : Object.keys(byName.get(n).attributes)[0], name: n })),
       gates: pickGates(names, attrs[0], rank), abilities: {}, extra: {} };
     for (const c of AB_COLORS) {
@@ -109,4 +108,4 @@ Object.assign(STORY_START, ${JSON.stringify(start)});
 `);
 console.log(problems.length ? 'PROBLEMS\n' + problems.join('\n') : 'ok', '| notes:', notes.join('; ') || 'none');
 console.log(Object.entries(out).map(([id, x]) => `${id}: ${x.hard.toys.map(t => t.name + ' ' + t.attr).join(', ')} | gold ${x.hard.gates.gold.name}${x.hard.trap ? ' | trap ' + x.hard.trap.name : ''}`).join('\n'));
-console.log('filler use:', Object.entries(used).filter(([, v]) => v).map(x => x.join(' ')).join(', '));
+const { used: SU } = spread(); console.log('synthetic use (decks):', Object.entries(SU).sort((a, b) => b[1] - a[1]).map(x => x.join(' ')).join(', '));

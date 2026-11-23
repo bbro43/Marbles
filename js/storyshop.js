@@ -6,7 +6,7 @@ import { isCoded } from './abilities.js';
 import { makeRng } from './sim.js';
 
 // Bakugan sold in Interspace: the first game's store Bakugan plus the synthetics, minus brawlers' own partners.
-const NOT_SOLD = new Set(['Juggernoid', 'Centipoid', 'Siege', 'Vladitor', 'Battle Ax Vladitor']);
+const NOT_SOLD = new Set(['Centipoid', 'Siege', 'Vladitor', 'Battle Ax Vladitor']);
 const SYNTHETIC = new Set(['Leefram', 'Robotallion', 'Foxbat', 'Ravenoid', 'Klawgor', 'Reaper', 'Scraper', 'Fear Ripper', 'Monarus', 'Hynoid', 'Spindle',
   'Gargonoid', 'Saurus', 'Fencer', 'Laserman', 'Warius', 'Serpenoid', 'Manion', 'Bee Striker', 'Terrorclaw', 'Griffon', 'Falconeer', 'Stinglash']);
 
