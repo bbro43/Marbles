@@ -44,6 +44,19 @@
   .rows span:last-child { color:#ffd0c8; }
   .fade { transition: opacity .5s; }
   input[type=file] { display:none; }
+  /* Tutorial: a title and a small drawing on the top screen, the words on the bottom */
+  .tut-h { position:absolute; left:0; right:0; top:10px; text-align:center; font: italic 900 15px/18px system-ui,sans-serif; letter-spacing:.5px; color:#fff; text-shadow:0 2px 0 #000, 0 0 4px #000; }
+  .tut-pic { position:absolute; left:16px; right:16px; top:38px; bottom:10px; }
+  .tut-txt { position:absolute; left:14px; right:14px; top:22px; bottom:34px; font: 600 9px/12.5px system-ui,sans-serif; color:#fff; text-shadow:0 1px 0 #000; }
+  .tut-txt p { margin:0 0 5px; } .tut-txt b { color:#ffd36a; }
+  .tut-nav { position:absolute; top:164px; width:58px; height:20px; padding:0; font-size:9px; }
+  .tut-pg { position:absolute; left:0; right:0; top:168px; text-align:center; font: 700 8px/12px system-ui,sans-serif; color:#ffd0c8; pointer-events:none; }
+  .ball { position:absolute; width:22px; height:22px; border-radius:50%; box-shadow: inset -3px -4px 0 #0005, inset 2px 2px 0 #fff6, 0 2px 0 #000; }
+  .ball::after { content:''; position:absolute; left:2px; right:2px; top:9.5px; height:3px; background:#0006; border-radius:2px; }
+  .gcard { position:absolute; width:24px; height:32px; border-radius:2px; box-shadow: inset 0 0 0 2px #fff8, 0 2px 0 #000; }
+  .acard { position:absolute; width:20px; height:28px; border-radius:2px; box-shadow: inset 0 0 0 2px #fff6, 0 2px 0 #000; }
+  .tlbl { position:absolute; font: 800 8px/10px system-ui,sans-serif; color:#fff; text-shadow:0 1px 0 #000; white-space:nowrap; }
+  .tspot { position:absolute; width:22px; height:29px; border:1px dashed #ffffff55; border-radius:2px; }
 </style>
 </head>
 <body>
@@ -69,7 +82,7 @@ async function idbGet(key) { const d = await db(); return new Promise((res, rej)
 
 const $ = id => document.getElementById(id);
 try { sessionStorage.removeItem('marbles-story-in'); } catch {}   // next Story visit walks through the login corridor
-const APP_BUILD = 171;   // bump with CACHE in sw.js on every release
+const APP_BUILD = 172;   // bump with CACHE in sw.js on every release
 const Pack = { zip: null, info: null, cat: null, urls: new Map() };
 let packMsg = 'Getting the asset pack…';
 
@@ -133,13 +146,13 @@ let screen = 'title', timer = null;
 function go(s) { screen = s; clearInterval(timer); timer = null; render(); }
 function render() {
   if (!hasArt() && screen !== 'options') screen = 'options';
-  ({ title, arena, computer, chars, options })[screen]();
+  ({ title, arena, computer, chars, options, tutorial })[screen]();
 }
 
 // ---- title menu (Story / Battle Arena / Tutorial / My Room / Options) with the rotating character ring
 const BTN = [['story', 'Live a season in Bakugan Interspace, one day at a time.', () => { location.href = 'story.html'; }],
   ['arena', 'Practice your Bakugan skills in the Battle Arena.', () => go('arena')],
-  ['tutorial', 'Learn how to play Bakugan. (coming later)', null],
+  ['tutorial', 'Learn how to play Bakugan.', () => { tutPage = 0; go('tutorial'); }],
   ['myroom', 'Go to My Room and get tips, change your deck, and more.', () => { location.href = 'room.html'; }],
   ['options', 'Change the game options.', () => go('options')]];
 const BTN_X = [3, 15, 7, 15, 23];
@@ -288,6 +301,65 @@ function difficulty(c, cpu, done) {
 
 // ---- Options: every setting lives here
 const promptGet = () => { try { return localStorage.getItem('marbles-prompt-abilities') !== '0'; } catch { return true; } };
+// ---- Tutorial (main page): how to play, in short pages. Top screen: a title and a small drawing; bottom: the words.
+let tutPage = 0;
+const AC = { pyrus: '#e0402a', aquos: '#2f7fe0', subterra: '#b8782a', haos: '#f0d040', darkus: '#6a3fa8', ventus: '#2fb060' };
+const ball = (c, x, y) => `<i class="ball" style="left:${x}px;top:${y}px;background:${AC[c] || c}"></i>`;
+const gcard = (bg, x, y) => `<i class="gcard" style="left:${x}px;top:${y}px;background:${bg}"></i>`;
+const acard = (bg, x, y) => `<i class="acard" style="left:${x}px;top:${y}px;background:${bg}"></i>`;
+const lbl = (t, x, y, st = '') => `<span class="tlbl" style="left:${x}px;top:${y}px;${st}">${t}</span>`;
+const GOLD = 'linear-gradient(#ffe89a,#d2a020)', SILVER = 'linear-gradient(#f4f6f8,#9aa3ad)', COPPER = 'linear-gradient(#f3b888,#b0622c)';
+// a field of card spots (6 across, 4 deep), with some cards on it
+const field = (cards = [], balls = []) => { let h = '';
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) h += `<i class="tspot" style="left:${34 + c * 26}px;top:${2 + r * 33}px"></i>`;
+  for (const [c, r, bg] of cards) h += gcard(bg, 33 + c * 26, 1 + r * 33);
+  for (const [c, r, col] of balls) h += ball(col, 34 + c * 26, 6 + r * 33);
+  return h; };
+const TUT = [
+  { h: 'HOW TO PLAY', pic: () => ball('pyrus', 60, 40) + ball('aquos', 100, 52) + ball('haos', 140, 40) + gcard(GOLD, 70, 90) + gcard(SILVER, 104, 96) + gcard(COPPER, 138, 90),
+    t: `<p>In Bakugan you throw your Bakugan onto <b>Gate cards</b> and battle for them.</p><p>These pages cover the rules, the two rule sets (<b>Classic</b> and <b>New Vestroia</b>) and the game's modes.</p><p>Tap <b>NEXT</b> to begin.</p>` },
+  { h: 'YOUR DECK', pic: () => ball('pyrus', 30, 20) + ball('darkus', 58, 20) + ball('ventus', 86, 20) + lbl('3 BAKUGAN', 28, 48) +
+      gcard(GOLD, 128, 12) + gcard(SILVER, 156, 12) + gcard(COPPER, 184, 12) + lbl('3 GATE CARDS', 124, 48) +
+      acard('linear-gradient(#ff7a6a,#c0281c)', 70, 74) + acard('linear-gradient(#7ab0ff,#2058c0)', 96, 74) + acard('linear-gradient(#7ae08a,#20903a)', 122, 74) + lbl('3 ABILITY CARDS', 64, 106),
+    t: `<p>Every brawler brings <b>3 Bakugan</b>, <b>3 Gate cards</b> (one Gold, one Silver, one Copper) and <b>3 Ability cards</b> (one Red, one Blue, one Green).</p><p>Each Bakugan has an <b>attribute</b> and a <b>G-Power</b>, its strength in battle.</p>` },
+  { h: 'ATTRIBUTES', pic: () => Object.keys(AC).map((a, i) => ball(a, 14 + i * 37, 40) + lbl(a.toUpperCase(), 8 + i * 37 + (a.length < 5 ? 4 : 0), 68, 'font-size:7px')).join(''),
+    t: `<p>There are six attributes: <b>Pyrus</b>, <b>Aquos</b>, <b>Subterra</b>, <b>Haos</b>, <b>Darkus</b> and <b>Ventus</b>.</p><p>A Gate card gives a different bonus to each attribute. Pick Gate cards that give your Bakugan's attributes the biggest bonus.</p>` },
+  { h: 'SETTING GATE CARDS', pic: () => field([[2, 1, GOLD], [3, 2, SILVER], [4, 2, COPPER]]),
+    t: `<p>To start, each player sets one Gate card face down in the middle of the field.</p><p>On each of your turns you may set one more, in a free spot that touches a card already on the field. It's your choice: you can skip it.</p>` },
+  { h: 'THROWING', pic: () => field([[2, 1, GOLD], [3, 2, SILVER]], [[3, 2, 'haos']]) + `<span class="tlbl" style="left:186px;top:110px;font-size:16px;transform:rotate(-35deg)">➜</span>` + lbl('YOUR CORNER', 168, 128),
+    t: `<p>Pick a Bakugan, then <b>swipe</b> from your corner and let go. The faster the swipe, the farther it rolls. No steering after you let go.</p><p>It bounces off the rails and other Bakugan, and <b>stands where it stops</b>. Stopping even partly on a Gate card counts as standing on it.</p>` },
+  { h: 'WHERE IT LANDS', pic: () => field([[1, 1, GOLD], [2, 1, SILVER], [3, 1, COPPER]], [[1, 1, 'pyrus'], [3, 1, 'aquos']]) +
+      lbl('EMPTY CARD', 22, 76) + lbl('BATTLE!', 104, 76, 'color:#ffd36a'),
+    t: `<p><b>Off the cards:</b> it goes back to your hand.</p><p><b>On an empty card:</b> it stands there.</p><p><b>On an opponent's Bakugan:</b> a <b>battle</b>!</p><p><b>On your own Bakugan:</b> take the card, or move to a card next to it.</p>` },
+  { h: 'BATTLES', pic: () => ball('pyrus', 46, 24) + ball('aquos', 166, 24) + lbl('340G', 42, 52) + lbl('320G', 162, 52) +
+      lbl('+ GATE BONUS', 30, 70, 'color:#ffd36a') + lbl('+ GATE BONUS', 150, 70, 'color:#ffd36a') + lbl('470G', 42, 92, 'font-size:11px') + lbl('&gt;', 110, 90, 'font-size:14px') + lbl('410G', 162, 92, 'font-size:11px') + lbl('WINNER', 36, 108, 'color:#7affa0'),
+    t: `<p>The Gate card flips over. Then each player may play <b>Ability cards</b> in turn, until both pass.</p><p>Each Bakugan adds the Gate card's bonus for its attribute. The higher <b>G-Power</b> wins the card. A tie: nobody wins it, and it goes back to its owner.</p>` },
+  { h: 'KNOCKOUTS', pic: () => field([[2, 1, GOLD]], [[2, 1, 'darkus']]) + ball('ventus', 150, 60) + `<span class="tlbl" style="left:118px;top:52px;font-size:14px">⟵</span>` + lbl('KNOCKED OFF = CARD WON', 56, 110, 'color:#ffd36a'),
+    t: `<p>Knock an opponent's standing Bakugan <b>off its Gate card</b> and you win that card, whatever its G-Power.</p><p>A Bakugan's <b>Speed</b> is how hard it hits; <b>Defense</b> and <b>Magnet</b> keep it on its card. Your own Bakugan never move when you hit them.</p>` },
+  { h: 'ABILITY CARDS', pic: () => acard('linear-gradient(#ff7a6a,#c0281c)', 70, 30) + acard('linear-gradient(#7ab0ff,#2058c0)', 104, 30) + acard('linear-gradient(#7ae08a,#20903a)', 138, 30) + lbl('ONCE EACH PER MATCH', 64, 70),
+    t: `<p>Most Ability cards are played <b>in a battle</b>, to raise your G-Power or change the rules.</p><p>Some work <b>outside battle</b>: before you throw, or after your Bakugan stops. Tap the <b>Ability cards</b> button, bottom right in a match. Each card can be played once a match.</p>` },
+  { h: 'WINNING: CLASSIC', pic: () => gcard(GOLD, 70, 34) + gcard(SILVER, 104, 34) + gcard(COPPER, 138, 34) + lbl('FIRST TO 3 WINS', 78, 80, 'font-size:10px;color:#ffd36a'),
+    t: `<p>In <b>Classic</b> rules, the first brawler to win <b>3 Gate cards</b> wins the match.</p><p>If the field is empty and nobody has a Gate card left, the most cards won takes it. Equal is a draw.</p>` },
+  { h: 'NEW VESTROIA RULES', pic: () => `<i style="position:absolute;left:30px;top:40px;width:164px;height:12px;border:2px solid #fff;border-radius:3px;background:linear-gradient(90deg,#7affa0 0 62%,#333 62%)"></i>` + lbl('LIFE 500', 92, 58) + lbl('LOSE A BATTLE: LOSE THE DIFFERENCE', 26, 82, 'font-size:7px') + lbl('TRAP · BATTLE GEAR · BAKUNANO', 38, 100, 'font-size:7px;color:#ffd36a'),
+    t: `<p>In <b>New Vestroia</b> rules each brawler has a <b>Life Gauge</b> of 500. Losing a battle costs the difference in G-Power; a knockout costs Life too. <b>0 Life loses.</b></p><p>Gate cards are used up after a battle. A Trap, a Battle Gear or a BakuNano adds a boost to one battle each match.</p>` },
+  { h: 'BATTLE ARENA', pic: () => `<div class="obtn" style="left:40px;top:30px;width:150px">SINGLE PLAYER</div><div class="obtn" style="left:40px;top:58px;width:150px">MULTIPLAYER</div>` + lbl('EASY · NORMAL · HARD', 60, 92, 'color:#ffd36a'),
+    t: `<p><b>Single Player:</b> pick a brawler and a level, <b>Easy</b>, <b>Normal</b> or <b>Hard</b>, and battle the computer. Use the arrows to see more brawlers, including the Interspace pages.</p><p><b>Multiplayer:</b> two players on one device. Choose the Arena and the rules on the top screen.</p>` },
+  { h: 'STORY', pic: () => lbl('MORNING · AFTERNOON · EVENING', 30, 30, 'color:#ffd36a') + lbl('LEAGUE MATCHES · EVENTS', 50, 52) + lbl('SHOP · TEAMS · FRIENDS', 56, 74) + lbl('CLIMB THE LEAGUES', 62, 96, 'font-size:10px;color:#7affa0'),
+    t: `<p>Live a season in <b>Bakugan Interspace</b>, one day at a time. Each day has a Morning, an Afternoon and an Evening.</p><p>Play your <b>league matches</b> and <b>events</b>, challenge brawlers you meet, earn <b>BP</b> for the Shop, make friends, join a team, and climb the leagues.</p>` },
+  { h: 'MY ROOM & OPTIONS', pic: () => ball('subterra', 60, 36) + ball('haos', 100, 36) + ball('ventus', 140, 36) + lbl('DECK · LOOKS · UPGRADES', 52, 76),
+    t: `<p><b>My Room:</b> change your deck, your character's looks and your Bakugan.</p><p><b>Options:</b> turn <b>Prompt Ability Cards</b> on or off (on asks you when a card can be played), and check for a new asset pack.</p><p>Ready? Try a match in the Battle Arena!</p>` },
+];
+function tutorial() {
+  const n = TUT.length, pg = TUT[Math.max(0, Math.min(n - 1, tutPage))], last = tutPage >= n - 1;
+  $('top').innerHTML = img('arena_top', 0, 0) + `<div class="tut-h">${pg.h}</div><div class="tut-pic">${pg.pic()}</div>`;
+  $('bot').innerHTML = img('arena_bot', 0, 0) + `<div class="tut-txt">${pg.t}</div>` +
+    `<button class="obtn tut-nav tap" id="tPrev" style="left:12px">${tutPage ? '◀ BACK' : 'MENU'}</button>` +
+    `<div class="tut-pg">${tutPage + 1} / ${n}</div>` +
+    `<button class="obtn tut-nav tap" id="tNext" style="left:186px">${last ? 'ARENA ▶' : 'NEXT ▶'}</button>`;
+  $('tPrev').onclick = () => { if (tutPage) { tutPage--; render(); } else go('title'); };
+  $('tNext').onclick = () => { if (last) { tutPage = 0; go('arena'); } else { tutPage++; render(); } };
+}
+
 function options() {
   const i = Pack.info;
   const rows = i ? [['App build', APP_BUILD], ['Pack version', i.version], ...Object.entries(i.counts || {})] : [['App build', APP_BUILD], ['Pack', 'not loaded']];

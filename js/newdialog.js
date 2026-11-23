@@ -60,7 +60,7 @@ export const NEW_TALK = {
     theyLost: 'Okay, that was a good trick. I\'m stealing it. Credit to you, of course.',
   },
   vasek: {
-    intro: ['Oh! Hi. Sorry. I\'m supposed to look tough.', 'I\'m Vasek. Haos. Limulus isn\'t a famous partner like the others have, but he\'s mine.',
+    intro: ['Oh! Hi. Sorry. I\'m supposed to look tough.', 'I\'m Vasek. Haos. I don\'t have a partner like the others do. Just synthetics from the Shop. For now.',
       'Kasimir says I need more matches. So... would you battle me?'],
     challenge: 'Can we battle? I worked out a new combo last night.',
     notNow: 'That\'s okay. I\'ll practice more first.',
@@ -116,7 +116,7 @@ export const NEW_TALK = {
     theyLost: 'No mistakes this time. Interesting. I need to watch more closely.',
   },
   eudocia: {
-    intro: ['Brawler. State your name.', 'Thank you. I am Eudocia, officer of the Neathian guard. Ventus, with Oberus.',
+    intro: ['Brawler. You are {you}, correct? Good.', 'I am Eudocia, officer of the Neathian guard. Ventus, with Oberus.',
       'My orders are to learn your rules by competing under them. Will you assist?'],
     challenge: 'A training match, {you}. I am ready when you are.',
     notNow: 'Acknowledged. I will report back later.',
@@ -133,8 +133,8 @@ export const NEW_TALK = {
   },
   // ---- Human (Season 3)
   jason: {
-    intro: ['Hey, have you seen the new guys? There are actual Gundalians here. And Neathians!', 'I\'m Jason, by the way. Ventus. Tuskor\'s my partner.',
-      'I just got bumped into League 4 with all of them. Want a warm-up before I get flattened?'],
+    intro: ['Hey, have you seen the new guys? There are actual Gundalians here. And Neathians!', 'I\'m Jason, by the way. Ventus. No partner yet, just a deck of synthetics I keep swapping around.',
+      'I signed up for League 4 the same week they all showed up. Want a warm-up before I get flattened?'],
     challenge: 'Warm-up match? You\'re way less scary than the new guys.',
     notNow: 'Cool, cool. I\'ll go get flattened by Brodny instead.',
     theyWon: 'No way. I actually won. Okay, I\'m ready for the new guys now.',
@@ -142,7 +142,7 @@ export const NEW_TALK = {
   },
   // ---- Season 4
   evelyn: {   // Raven, Vestal, Darkus
-    intro: ['You\'re {you}. Your win rate goes up in the evening. Did you know that?', 'Raven. Darkus. Rattleoid and I don\'t chase every battle. We pick the ones that matter.',
+    intro: ['You\'re {you}. Your win rate goes up in the evening. Did you know that?', 'Raven. Darkus. I don\'t chase every battle. I pick the ones that matter.',
       'This one might matter. Let\'s find out.'],
     challenge: 'I\'ve run the numbers on you, {you}. Let\'s see if they\'re right.',
     notNow: 'Fine. The numbers will keep.',
@@ -152,13 +152,13 @@ export const NEW_TALK = {
   onyx: {
     intro: ['...You\'re the one people keep talking about.', 'Onyx. Subterra. This is Dryoid.',
       'I don\'t do warm-ups. If we battle, it counts.'],
-    challenge: 'It counts this time too, {you}. Ready?',
+    challenge: 'Every match counts, {you}. Ready?',
     notNow: 'Then don\'t waste my time next time.',
     theyWon: 'That\'s what Dryoid is for.',
     theyLost: '...Nobody does that. Remember this match. I will.',
   },
   kala: {
-    intro: ['Hiii! Are you {you}? Everyone said you were the one to beat. Or one of them.', 'I\'m Kala. Aquos, with Fifth Paladin. I just moved here and I want to battle everybody.',
+    intro: ['Hiii! Are you {you}? Everyone said you were the one to beat. Or one of them.', 'I\'m Kala. Aquos, mostly. I just moved here and I want to battle everybody.',
       'You\'re first on my list! Well, second. The first one said no.'],
     challenge: 'Battle, battle, battle? Please?',
     notNow: 'Aw. Okay! I\'ll ask again tomorrow. And the day after.',
@@ -166,7 +166,7 @@ export const NEW_TALK = {
     theyLost: 'That was amazing. You have to teach me that.',
   },
   olivia: {
-    intro: ['Hold on, I\'m tying my boots. Okay.', 'Olivia. Subterra, with Wormquake. I train outside, before Interspace even opens.',
+    intro: ['Hold on, I\'m tying my shoes. Okay.', 'Olivia. Subterra. I train outside, before Interspace even opens.',
       'I\'m not here to make friends first. I\'m here to get good. Battle?'],
     challenge: 'Got time for a real match? I\'ve been training all week.',
     notNow: 'Fine. More training for me.',
@@ -202,6 +202,6 @@ export const RACE_CLASH = [
   ['g', 'Look who it is. The Neathians, waiting for someone else to make the first move again.'],
   ['n', 'And the Gundalians, making the first move before they know where it goes.'],
   ['g', 'It goes through you. That\'s where.'],
-  ['n', 'Then let the league decide. Not the floor of the arena lobby.'],
-  ['ISA', 'Reminder: challenges are settled in the arenas. Thank you.'],
+  ['n', 'Then let the league decide. Not a shouting match in front of everyone.'],
+  ['ISA', 'Reminder: disagreements in Interspace are settled by match. Thank you.'],
 ];
