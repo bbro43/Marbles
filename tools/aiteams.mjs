@@ -15,7 +15,7 @@ const CH = {
   // A partner is only ever used by its own character, and never in a starter deck (checked below).
   dan:        ['pyrus',    ['Dragonoid', 'Serpenoid', 'Saurus'],        ['Dragonoid', 'Falconeer', 'Griffon'],      ['Delta Dragonoid II', 'Laserman', 'Warius']],
   runo:       ['haos',     ['Tigrerra', 'Saurus', 'Manion'],            ['Tigrerra', 'Ravenoid', 'Monarus'],        ['Blade Tigrerra', 'Laserman', 'Monarus']],
-  marucho:    ['aquos',    ['Preyas'],                                  ['Preyas', 'Preyas II (Diablo)'],          ['Preyas II (Angelo)']],   // partners by level (Billy, Nov 22); the rest are synthetics
+  marucho:    ['aquos',    ['Preyas', 'Juggernoid'],                    ['Preyas', 'Preyas II (Diablo)'],          ['Preyas', 'Preyas II (Angelo)']],   // Billy, Nov 22: Preyas at every level; the third is a synthetic
   julie:      ['subterra', ['Gorem', 'Saurus', 'Robotallion'],          ['Gorem', 'Terrorclaw', 'Gargonoid'],       ['Hammer Gorem', 'Terrorclaw', 'Monarus']],
   shun:       ['ventus',   ['Skyress', 'Ravenoid', 'Manion'],           ['Skyress', 'Falconeer', 'Monarus'],        ['Storm Skyress', 'Monarus', 'Laserman']],
   akira:      ['subterra', ['Saurus', 'Robotallion', 'Stinglash'],      ['Falconeer', 'Terrorclaw', 'Griffon'],     ['Laserman', 'Terrorclaw', 'Warius']],
@@ -102,8 +102,8 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
   Object.keys(LEVELS).forEach((lvl, k) => {
     const { upgrades, rank } = LEVELS[lvl], toys = [], attr = Array.isArray(attrs0) ? attrs0[k] : attrs0;
     // the partner (or partners: Marucho's Normal has two, Billy, Nov 22) first, then the synthetics from the spread, 3 in all
-    let partners = SP[id] ? tiers[k].filter(n => ownerOf.get(n) === (SAME[id] || id)) : null;
-    if (partners && !partners.length) partners = [tiers[k][0]];   // Akira and Shuji: no registered partner, their first Bakugan as before
+    // Marucho keeps his whole list (Juggernoid included); Akira and Shuji have no partner, so all three are synthetics
+    const partners = !SP[id] ? null : id === 'marucho' ? tiers[k] : tiers[k].filter(n => ownerOf.get(n) === (SAME[id] || id));
     // never the same Bakugan twice: a synthetic that repeats the first one is swapped for one from the deck's other levels
     const fill = SP[id] ? [...SP[id][lvl], ...Object.values(SP[id]).flat()].filter((n, j, a) => !partners.includes(n) && a.indexOf(n) === j) : [];
     for (const n of SP[id] ? [...partners, ...fill].slice(0, 3) : tiers[k]) {
@@ -174,7 +174,7 @@ INTERSPACE.forEach(([id, name, species, attrs, sig], i) => {
   inter[id] = { name, species, attrs, signature: null };
   Object.keys(LEVELS).forEach(lvl => {
     const { upgrades, rank } = LEVELS[lvl], names = SP[id][lvl];
-    for (const n of names) { if (!byName.get(n)) problems.push(`Interspace ${id}: no Bakugan ${n}`); if (ownerOf.has(n)) problems.push(`Interspace ${id}: ${n} is a partner`); }
+    for (const n of names) { if (!byName.get(n)) problems.push(`Interspace ${id}: no Bakugan ${n}`); if (ownerOf.has(n) && !['Siege', 'Centipoid'].includes(n)) problems.push(`Interspace ${id}: ${n} is a partner`); }   // Siege and Centipoid may go to custom characters (Billy, Nov 22)
     const team = { attr: attrs[0], upgrades, toys: names.map((n, k) => ({ id: byName.get(n).id, attr: byName.get(n).attributes[attrs[k % attrs.length]] ? attrs[k % attrs.length] : Object.keys(byName.get(n).attributes)[0], name: n })), gates: pickGates(names, attrs[0], rank), abilities: {}, extra: {} };
     for (const c of AB_COLORS) {
       let pool = abilities.filter(a => a.color === c && fitsAttrs(a, attrs)); if (!pool.length) pool = abilities.filter(a => a.color === c);
