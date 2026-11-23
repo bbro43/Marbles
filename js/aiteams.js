@@ -14,14 +14,14 @@ export const AI_TEAMS = {
      "name": "Dragonoid"
     },
     {
-     "id": "bb_56",
+     "id": "bb_40",
      "attr": "pyrus",
-     "name": "Manion"
+     "name": "Robotallion"
     },
     {
-     "id": "bb_50",
+     "id": "tt_18",
      "attr": "pyrus",
-     "name": "Terrorclaw"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
@@ -95,14 +95,14 @@ export const AI_TEAMS = {
      "name": "Dragonoid"
     },
     {
-     "id": "bb_50",
+     "id": "tt_18",
      "attr": "pyrus",
-     "name": "Terrorclaw"
+     "name": "Rattleoid"
     },
     {
-     "id": "tt_19",
+     "id": "tt_06",
      "attr": "pyrus",
-     "name": "El Condor"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
@@ -176,14 +176,14 @@ export const AI_TEAMS = {
      "name": "Delta Dragonoid II"
     },
     {
-     "id": "tt_19",
-     "attr": "pyrus",
-     "name": "El Condor"
-    },
-    {
      "id": "tt_06",
      "attr": "pyrus",
      "name": "Fifth Paladin"
+    },
+    {
+     "id": "bt_bee",
+     "attr": "pyrus",
+     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -260,9 +260,9 @@ export const AI_TEAMS = {
      "name": "Tigrerra"
     },
     {
-     "id": "bb_42",
+     "id": "bb_41",
      "attr": "haos",
-     "name": "Serpenoid"
+     "name": "Saurus"
     },
     {
      "id": "bb_45",
@@ -346,9 +346,9 @@ export const AI_TEAMS = {
      "name": "Griffon"
     },
     {
-     "id": "bb_46",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "Laserman"
+     "name": "Hynoid"
     }
    ],
    "gates": {
@@ -422,14 +422,14 @@ export const AI_TEAMS = {
      "name": "Blade Tigrerra"
     },
     {
-     "id": "bb_46",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "Laserman"
+     "name": "Hynoid"
     },
     {
-     "id": "bb_60",
+     "id": "bb_25",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -506,9 +506,9 @@ export const AI_TEAMS = {
      "name": "Preyas"
     },
     {
-     "id": "bb_39",
+     "id": "bb_42",
      "attr": "aquos",
-     "name": "Juggernoid"
+     "name": "Serpenoid"
     },
     {
      "id": "bb_58",
@@ -592,9 +592,9 @@ export const AI_TEAMS = {
      "name": "Ravenoid"
     },
     {
-     "id": "bt_hynoid",
+     "id": "bt_bee",
      "attr": "aquos",
-     "name": "Hynoid"
+     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -668,14 +668,14 @@ export const AI_TEAMS = {
      "name": "Preyas II (Angelo)"
     },
     {
-     "id": "bt_hynoid",
-     "attr": "aquos",
-     "name": "Hynoid"
-    },
-    {
      "id": "bt_bee",
      "attr": "aquos",
      "name": "Bee Striker"
+    },
+    {
+     "id": "bt_hynoid",
+     "attr": "aquos",
+     "name": "Hynoid"
     }
    ],
    "gates": {
@@ -752,14 +752,14 @@ export const AI_TEAMS = {
      "name": "Gorem"
     },
     {
-     "id": "bb_41",
+     "id": "bb_39",
      "attr": "subterra",
-     "name": "Saurus"
+     "name": "Juggernoid"
     },
     {
-     "id": "tt_11",
+     "id": "tt_18",
      "attr": "subterra",
-     "name": "Mantris"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
@@ -833,14 +833,14 @@ export const AI_TEAMS = {
      "name": "Gorem"
     },
     {
-     "id": "tt_11",
+     "id": "tt_18",
      "attr": "subterra",
-     "name": "Mantris"
+     "name": "Rattleoid"
     },
     {
-     "id": "bb_61",
+     "id": "bb_46",
      "attr": "subterra",
-     "name": "Monarus"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -914,9 +914,9 @@ export const AI_TEAMS = {
      "name": "Hammer Gorem"
     },
     {
-     "id": "bb_61",
+     "id": "bb_46",
      "attr": "subterra",
-     "name": "Monarus"
+     "name": "Laserman"
     },
     {
      "id": "tt_17",
@@ -998,14 +998,14 @@ export const AI_TEAMS = {
      "name": "Skyress"
     },
     {
-     "id": "tt_20",
+     "id": "bb_42",
      "attr": "ventus",
-     "name": "Goblin Ball"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_52",
+     "id": "tt_18",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
@@ -1079,14 +1079,14 @@ export const AI_TEAMS = {
      "name": "Skyress"
     },
     {
-     "id": "bb_52",
+     "id": "tt_18",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Rattleoid"
     },
     {
-     "id": "bb_25",
+     "id": "tt_17",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Wormquake"
     }
    ],
    "gates": {
@@ -1160,14 +1160,14 @@ export const AI_TEAMS = {
      "name": "Storm Skyress"
     },
     {
-     "id": "bb_25",
+     "id": "tt_17",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Wormquake"
     },
     {
-     "id": "tt_10",
+     "id": "tt_19",
      "attr": "ventus",
-     "name": "Limulus"
+     "name": "El Condor"
     }
    ],
    "gates": {
@@ -1244,14 +1244,14 @@ export const AI_TEAMS = {
      "name": "Saurus"
     },
     {
-     "id": "bb_40",
+     "id": "bb_44",
      "attr": "subterra",
-     "name": "Robotallion"
+     "name": "Stinglash"
     },
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "subterra",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
@@ -1325,14 +1325,14 @@ export const AI_TEAMS = {
      "name": "Falconeer"
     },
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "subterra",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     },
     {
-     "id": "bb_48",
+     "id": "bb_25",
      "attr": "subterra",
-     "name": "Fear Ripper"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -1406,14 +1406,14 @@ export const AI_TEAMS = {
      "name": "Laserman"
     },
     {
-     "id": "bb_48",
+     "id": "bb_25",
      "attr": "subterra",
-     "name": "Fear Ripper"
+     "name": "Reaper"
     },
     {
-     "id": "bt_hynoid",
+     "id": "bb_60",
      "attr": "subterra",
-     "name": "Hynoid"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -1490,14 +1490,14 @@ export const AI_TEAMS = {
      "name": "Fear Ripper"
     },
     {
-     "id": "bb_44",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Stinglash"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_43",
+     "id": "bb_58",
      "attr": "subterra",
-     "name": "Falconeer"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
@@ -1571,14 +1571,14 @@ export const AI_TEAMS = {
      "name": "Fear Ripper"
     },
     {
-     "id": "bb_43",
+     "id": "bb_58",
      "attr": "darkus",
-     "name": "Falconeer"
+     "name": "Ravenoid"
     },
     {
-     "id": "tt_06",
+     "id": "tt_10",
      "attr": "darkus",
-     "name": "Fifth Paladin"
+     "name": "Limulus"
     }
    ],
    "gates": {
@@ -1652,14 +1652,14 @@ export const AI_TEAMS = {
      "name": "Warius"
     },
     {
-     "id": "tt_06",
+     "id": "tt_10",
      "attr": "darkus",
-     "name": "Fifth Paladin"
+     "name": "Limulus"
     },
     {
-     "id": "bb_46",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Laserman"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -1736,14 +1736,14 @@ export const AI_TEAMS = {
      "name": "Siege"
     },
     {
-     "id": "tt_21",
+     "id": "tt_20",
      "attr": "aquos",
-     "name": "Jelldon"
+     "name": "Goblin Ball"
     },
     {
-     "id": "tt_16",
+     "id": "bb_52",
      "attr": "aquos",
-     "name": "Tuskor"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -1817,14 +1817,14 @@ export const AI_TEAMS = {
      "name": "Siege"
     },
     {
-     "id": "tt_16",
+     "id": "bb_52",
      "attr": "aquos",
-     "name": "Tuskor"
+     "name": "Gargonoid"
     },
     {
-     "id": "bb_60",
+     "id": "tt_06",
      "attr": "aquos",
-     "name": "Warius"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
@@ -1898,14 +1898,14 @@ export const AI_TEAMS = {
      "name": "Siege"
     },
     {
-     "id": "bb_60",
+     "id": "tt_06",
      "attr": "aquos",
-     "name": "Warius"
+     "name": "Fifth Paladin"
     },
     {
-     "id": "tt_19",
+     "id": "bb_61",
      "attr": "aquos",
-     "name": "El Condor"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -1982,14 +1982,14 @@ export const AI_TEAMS = {
      "name": "Centipoid"
     },
     {
-     "id": "bb_56",
+     "id": "tt_21",
      "attr": "subterra",
-     "name": "Manion"
+     "name": "Jelldon"
     },
     {
-     "id": "bb_50",
+     "id": "bb_58",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
@@ -2063,14 +2063,14 @@ export const AI_TEAMS = {
      "name": "Centipoid"
     },
     {
-     "id": "bb_50",
+     "id": "bb_58",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Ravenoid"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_25",
      "attr": "subterra",
-     "name": "Bee Striker"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -2144,14 +2144,14 @@ export const AI_TEAMS = {
      "name": "Centipoid"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_25",
      "attr": "subterra",
-     "name": "Bee Striker"
+     "name": "Reaper"
     },
     {
-     "id": "bb_61",
+     "id": "bb_60",
      "attr": "subterra",
-     "name": "Monarus"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -2228,9 +2228,9 @@ export const AI_TEAMS = {
      "name": "Cycloid"
     },
     {
-     "id": "bb_42",
+     "id": "bb_44",
      "attr": "subterra",
-     "name": "Serpenoid"
+     "name": "Stinglash"
     },
     {
      "id": "bb_45",
@@ -2395,9 +2395,9 @@ export const AI_TEAMS = {
      "name": "Wormquake"
     },
     {
-     "id": "bb_25",
+     "id": "bb_48",
      "attr": "subterra",
-     "name": "Reaper"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
@@ -2560,9 +2560,9 @@ export const AI_TEAMS = {
      "name": "Ravenoid"
     },
     {
-     "id": "tt_10",
+     "id": "bt_hynoid",
      "attr": "ventus",
-     "name": "Limulus"
+     "name": "Hynoid"
     }
    ],
    "gates": {
@@ -2636,14 +2636,14 @@ export const AI_TEAMS = {
      "name": "Harpus"
     },
     {
-     "id": "tt_10",
+     "id": "bt_hynoid",
      "attr": "ventus",
-     "name": "Limulus"
+     "name": "Hynoid"
     },
     {
-     "id": "bb_48",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Fear Ripper"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -2720,14 +2720,14 @@ export const AI_TEAMS = {
      "name": "Tentaclear"
     },
     {
-     "id": "bb_41",
+     "id": "tt_21",
      "attr": "haos",
-     "name": "Saurus"
+     "name": "Jelldon"
     },
     {
-     "id": "tt_11",
+     "id": "bb_52",
      "attr": "haos",
-     "name": "Mantris"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -2801,14 +2801,14 @@ export const AI_TEAMS = {
      "name": "Tentaclear"
     },
     {
-     "id": "tt_11",
+     "id": "bb_52",
      "attr": "haos",
-     "name": "Mantris"
+     "name": "Gargonoid"
     },
     {
-     "id": "tt_19",
+     "id": "tt_17",
      "attr": "haos",
-     "name": "El Condor"
+     "name": "Wormquake"
     }
    ],
    "gates": {
@@ -2882,9 +2882,9 @@ export const AI_TEAMS = {
      "name": "Tentaclear"
     },
     {
-     "id": "tt_19",
+     "id": "tt_17",
      "attr": "haos",
-     "name": "El Condor"
+     "name": "Wormquake"
     },
     {
      "id": "tt_06",
@@ -2966,14 +2966,14 @@ export const AI_TEAMS = {
      "name": "Fortress"
     },
     {
-     "id": "tt_20",
+     "id": "bb_40",
      "attr": "pyrus",
-     "name": "Goblin Ball"
+     "name": "Robotallion"
     },
     {
-     "id": "bb_52",
+     "id": "bb_50",
      "attr": "pyrus",
-     "name": "Gargonoid"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
@@ -3047,14 +3047,14 @@ export const AI_TEAMS = {
      "name": "Fortress"
     },
     {
-     "id": "bb_52",
+     "id": "bb_50",
      "attr": "pyrus",
-     "name": "Gargonoid"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_46",
+     "id": "bb_61",
      "attr": "pyrus",
-     "name": "Laserman"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -3128,14 +3128,14 @@ export const AI_TEAMS = {
      "name": "Fortress"
     },
     {
-     "id": "bb_46",
+     "id": "bb_61",
      "attr": "pyrus",
-     "name": "Laserman"
+     "name": "Monarus"
     },
     {
-     "id": "bb_60",
+     "id": "bt_bee",
      "attr": "pyrus",
-     "name": "Warius"
+     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -3212,14 +3212,14 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "bb_40",
+     "id": "tt_21",
      "attr": "aquos",
-     "name": "Robotallion"
+     "name": "Jelldon"
     },
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "aquos",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
@@ -3293,14 +3293,14 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "aquos",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     },
     {
-     "id": "bt_hynoid",
+     "id": "tt_06",
      "attr": "aquos",
-     "name": "Hynoid"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
@@ -3374,14 +3374,14 @@ export const AI_TEAMS = {
      "name": "Sirenoid"
     },
     {
-     "id": "bt_hynoid",
+     "id": "tt_06",
      "attr": "aquos",
-     "name": "Hynoid"
+     "name": "Fifth Paladin"
     },
     {
-     "id": "bt_bee",
+     "id": "tt_10",
      "attr": "aquos",
-     "name": "Bee Striker"
+     "name": "Limulus"
     }
    ],
    "gates": {
@@ -3458,9 +3458,9 @@ export const AI_TEAMS = {
      "name": "Hydranoid"
     },
     {
-     "id": "bb_41",
+     "id": "tt_20",
      "attr": "darkus",
-     "name": "Saurus"
+     "name": "Goblin Ball"
     },
     {
      "id": "tt_11",
@@ -3544,9 +3544,9 @@ export const AI_TEAMS = {
      "name": "Mantris"
     },
     {
-     "id": "tt_10",
+     "id": "tt_17",
      "attr": "darkus",
-     "name": "Limulus"
+     "name": "Wormquake"
     }
    ],
    "gates": {
@@ -3620,14 +3620,14 @@ export const AI_TEAMS = {
      "name": "Alpha Hydranoid"
     },
     {
-     "id": "tt_10",
+     "id": "tt_17",
      "attr": "darkus",
-     "name": "Limulus"
+     "name": "Wormquake"
     },
     {
-     "id": "bb_48",
+     "id": "bt_hynoid",
      "attr": "darkus",
-     "name": "Fear Ripper"
+     "name": "Hynoid"
     }
    ],
    "gates": {
@@ -3704,14 +3704,14 @@ export const AI_TEAMS = {
      "name": "Neo Dragonoid"
     },
     {
-     "id": "bb_42",
+     "id": "tt_21",
      "attr": "pyrus",
-     "name": "Serpenoid"
+     "name": "Jelldon"
     },
     {
-     "id": "bb_45",
+     "id": "tt_18",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
@@ -3794,14 +3794,14 @@ export const AI_TEAMS = {
      "name": "Neo Dragonoid"
     },
     {
-     "id": "bb_45",
+     "id": "tt_18",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Rattleoid"
     },
     {
-     "id": "bb_60",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Warius"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -3884,14 +3884,14 @@ export const AI_TEAMS = {
      "name": "Hyper Dragonoid"
     },
     {
+     "id": "bb_46",
+     "attr": "pyrus",
+     "name": "Laserman"
+    },
+    {
      "id": "bb_60",
      "attr": "pyrus",
      "name": "Warius"
-    },
-    {
-     "id": "tt_19",
-     "attr": "pyrus",
-     "name": "El Condor"
     }
    ],
    "gates": {
@@ -3977,9 +3977,9 @@ export const AI_TEAMS = {
      "name": "Ingram"
     },
     {
-     "id": "tt_21",
+     "id": "bb_44",
      "attr": "ventus",
-     "name": "Jelldon"
+     "name": "Stinglash"
     },
     {
      "id": "tt_16",
@@ -4072,9 +4072,9 @@ export const AI_TEAMS = {
      "name": "Tuskor"
     },
     {
-     "id": "bb_25",
+     "id": "bb_60",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Warius"
     }
    ],
    "gates": {
@@ -4157,14 +4157,14 @@ export const AI_TEAMS = {
      "name": "Cosmic Ingram"
     },
     {
-     "id": "bb_25",
+     "id": "bb_60",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Warius"
     },
     {
-     "id": "tt_10",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Limulus"
+     "name": "Laserman"
     }
    ],
    "gates": {
@@ -4250,14 +4250,14 @@ export const AI_TEAMS = {
      "name": "Elfin"
     },
     {
-     "id": "bb_40",
+     "id": "bb_56",
      "attr": "aquos",
-     "name": "Robotallion"
+     "name": "Manion"
     },
     {
-     "id": "tt_18",
+     "id": "bb_58",
      "attr": "aquos",
-     "name": "Rattleoid"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
@@ -4341,14 +4341,14 @@ export const AI_TEAMS = {
      "name": "Elfin"
     },
     {
-     "id": "tt_18",
+     "id": "bb_58",
      "attr": "aquos",
-     "name": "Rattleoid"
+     "name": "Ravenoid"
     },
     {
-     "id": "bb_46",
+     "id": "bb_48",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
@@ -4432,14 +4432,14 @@ export const AI_TEAMS = {
      "name": "Dual Elfin"
     },
     {
-     "id": "bb_46",
+     "id": "bb_48",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Fear Ripper"
     },
     {
-     "id": "bb_60",
+     "id": "tt_10",
      "attr": "aquos",
-     "name": "Warius"
+     "name": "Limulus"
     }
    ],
    "gates": {
@@ -4531,9 +4531,9 @@ export const AI_TEAMS = {
      "name": "Saurus"
     },
     {
-     "id": "tt_11",
+     "id": "tt_18",
      "attr": "darkus",
-     "name": "Mantris"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
@@ -4616,14 +4616,14 @@ export const AI_TEAMS = {
      "name": "Percival"
     },
     {
-     "id": "tt_11",
+     "id": "tt_18",
      "attr": "darkus",
-     "name": "Mantris"
+     "name": "Rattleoid"
     },
     {
-     "id": "tt_17",
+     "id": "tt_19",
      "attr": "darkus",
-     "name": "Wormquake"
+     "name": "El Condor"
     }
    ],
    "gates": {
@@ -4706,14 +4706,14 @@ export const AI_TEAMS = {
      "name": "Midnight Percival"
     },
     {
-     "id": "tt_17",
+     "id": "tt_19",
      "attr": "darkus",
-     "name": "Wormquake"
+     "name": "El Condor"
     },
     {
-     "id": "bb_25",
+     "id": "bt_hynoid",
      "attr": "darkus",
-     "name": "Reaper"
+     "name": "Hynoid"
     }
    ],
    "gates": {
@@ -4799,14 +4799,14 @@ export const AI_TEAMS = {
      "name": "Wilda"
     },
     {
-     "id": "bb_42",
+     "id": "bb_39",
      "attr": "subterra",
-     "name": "Serpenoid"
+     "name": "Juggernoid"
     },
     {
-     "id": "bb_45",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Griffon"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
@@ -4889,9 +4889,9 @@ export const AI_TEAMS = {
      "name": "Wilda"
     },
     {
-     "id": "bb_45",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Griffon"
+     "name": "Gargonoid"
     },
     {
      "id": "tt_06",
@@ -5072,14 +5072,14 @@ export const AI_TEAMS = {
      "name": "Nemus"
     },
     {
-     "id": "tt_21",
+     "id": "tt_20",
      "attr": "haos",
-     "name": "Jelldon"
+     "name": "Goblin Ball"
     },
     {
-     "id": "tt_16",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Tuskor"
+     "name": "Griffon"
     }
    ],
    "gates": {
@@ -5163,14 +5163,14 @@ export const AI_TEAMS = {
      "name": "Nemus"
     },
     {
-     "id": "tt_16",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Tuskor"
+     "name": "Griffon"
     },
     {
-     "id": "bb_61",
+     "id": "tt_10",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Limulus"
     }
    ],
    "gates": {
@@ -5254,14 +5254,14 @@ export const AI_TEAMS = {
      "name": "Mega Nemus"
     },
     {
-     "id": "bb_61",
+     "id": "tt_10",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Limulus"
     },
     {
-     "id": "tt_17",
+     "id": "bt_bee",
      "attr": "haos",
-     "name": "Wormquake"
+     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -7476,25 +7476,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_44",
+     "id": "tt_21",
      "attr": "pyrus",
-     "name": "Stinglash"
+     "name": "Jelldon"
     },
     {
-     "id": "bb_40",
+     "id": "bb_56",
      "attr": "darkus",
-     "name": "Robotallion"
+     "name": "Manion"
     },
     {
-     "id": "bb_43",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Falconeer"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_226",
@@ -7557,25 +7557,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_43",
+     "id": "bb_52",
      "attr": "pyrus",
+     "name": "Gargonoid"
+    },
+    {
+     "id": "bb_43",
+     "attr": "darkus",
      "name": "Falconeer"
     },
     {
-     "id": "tt_18",
-     "attr": "darkus",
-     "name": "Rattleoid"
-    },
-    {
-     "id": "bt_bee",
+     "id": "tt_19",
      "attr": "subterra",
-     "name": "Bee Striker"
+     "name": "El Condor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_207",
@@ -7638,25 +7638,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bt_bee",
+     "id": "tt_19",
      "attr": "pyrus",
-     "name": "Bee Striker"
+     "name": "El Condor"
     },
     {
-     "id": "bb_61",
+     "id": "bb_46",
      "attr": "darkus",
-     "name": "Monarus"
+     "name": "Laserman"
     },
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "subterra",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_216",
@@ -7729,25 +7729,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_21",
+     "id": "tt_20",
      "attr": "pyrus",
-     "name": "Jelldon"
+     "name": "Goblin Ball"
     },
     {
-     "id": "bb_39",
+     "id": "bb_44",
      "attr": "ventus",
-     "name": "Juggernoid"
+     "name": "Stinglash"
     },
     {
-     "id": "tt_16",
+     "id": "tt_11",
      "attr": "subterra",
-     "name": "Tuskor"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_226",
@@ -7810,9 +7810,9 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_16",
+     "id": "tt_11",
      "attr": "pyrus",
-     "name": "Tuskor"
+     "name": "Mantris"
     },
     {
      "id": "bb_58",
@@ -7820,9 +7820,9 @@ export const INTERSPACE = {
      "name": "Ravenoid"
     },
     {
-     "id": "tt_17",
+     "id": "bb_61",
      "attr": "subterra",
-     "name": "Wormquake"
+     "name": "Monarus"
     }
    ],
    "gates": {
@@ -7891,14 +7891,14 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_17",
+     "id": "bb_61",
      "attr": "pyrus",
-     "name": "Wormquake"
+     "name": "Monarus"
     },
     {
-     "id": "bb_25",
+     "id": "tt_06",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Fifth Paladin"
     },
     {
      "id": "bb_58",
@@ -7908,8 +7908,8 @@ export const INTERSPACE = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_216",
@@ -7982,25 +7982,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_56",
+     "id": "tt_20",
      "attr": "ventus",
-     "name": "Manion"
+     "name": "Goblin Ball"
     },
     {
-     "id": "tt_21",
+     "id": "bb_44",
      "attr": "aquos",
-     "name": "Jelldon"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_50",
+     "id": "tt_16",
      "attr": "haos",
-     "name": "Terrorclaw"
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_132",
-     "name": "Manion"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_232",
@@ -8063,25 +8063,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_50",
-     "attr": "ventus",
-     "name": "Terrorclaw"
-    },
-    {
      "id": "tt_16",
-     "attr": "aquos",
+     "attr": "ventus",
      "name": "Tuskor"
     },
     {
-     "id": "tt_10",
+     "id": "bb_45",
+     "attr": "aquos",
+     "name": "Griffon"
+    },
+    {
+     "id": "bb_60",
      "attr": "haos",
-     "name": "Limulus"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_213",
@@ -8144,25 +8144,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_10",
+     "id": "bb_60",
      "attr": "ventus",
+     "name": "Warius"
+    },
+    {
+     "id": "tt_10",
+     "attr": "aquos",
      "name": "Limulus"
     },
     {
-     "id": "bb_48",
-     "attr": "aquos",
-     "name": "Fear Ripper"
-    },
-    {
-     "id": "tt_16",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Tuskor"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_207",
@@ -8235,25 +8235,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_42",
+     "id": "tt_21",
      "attr": "ventus",
-     "name": "Serpenoid"
+     "name": "Jelldon"
     },
     {
-     "id": "tt_20",
+     "id": "bb_41",
      "attr": "aquos",
-     "name": "Goblin Ball"
+     "name": "Saurus"
     },
     {
-     "id": "bb_45",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Griffon"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
      "id": "ds_232",
@@ -8316,9 +8316,9 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_45",
+     "id": "bb_50",
      "attr": "ventus",
-     "name": "Griffon"
+     "name": "Terrorclaw"
     },
     {
      "id": "bb_52",
@@ -8326,15 +8326,15 @@ export const INTERSPACE = {
      "name": "Gargonoid"
     },
     {
-     "id": "tt_19",
+     "id": "bb_48",
      "attr": "subterra",
-     "name": "El Condor"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_213",
@@ -8397,14 +8397,14 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_19",
+     "id": "bb_48",
      "attr": "ventus",
-     "name": "El Condor"
+     "name": "Fear Ripper"
     },
     {
-     "id": "tt_06",
+     "id": "tt_10",
      "attr": "aquos",
-     "name": "Fifth Paladin"
+     "name": "Limulus"
     },
     {
      "id": "bb_52",
@@ -8414,8 +8414,8 @@ export const INTERSPACE = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_207",
@@ -8488,25 +8488,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_39",
+     "id": "bb_40",
      "attr": "darkus",
-     "name": "Juggernoid"
+     "name": "Robotallion"
     },
     {
-     "id": "bb_42",
+     "id": "tt_21",
      "attr": "aquos",
-     "name": "Serpenoid"
+     "name": "Jelldon"
     },
     {
-     "id": "bb_58",
+     "id": "tt_16",
      "attr": "subterra",
-     "name": "Ravenoid"
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_222",
@@ -8569,25 +8569,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_58",
+     "id": "tt_16",
      "attr": "darkus",
-     "name": "Ravenoid"
+     "name": "Tuskor"
     },
     {
-     "id": "bb_45",
+     "id": "bb_52",
      "attr": "aquos",
-     "name": "Griffon"
+     "name": "Gargonoid"
     },
     {
-     "id": "bb_46",
+     "id": "tt_06",
      "attr": "subterra",
-     "name": "Laserman"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_203",
@@ -8650,25 +8650,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_46",
+     "id": "tt_06",
      "attr": "darkus",
-     "name": "Laserman"
+     "name": "Fifth Paladin"
     },
     {
-     "id": "bb_60",
+     "id": "bt_hynoid",
      "attr": "aquos",
-     "name": "Warius"
+     "name": "Hynoid"
     },
     {
-     "id": "bb_45",
+     "id": "bb_52",
      "attr": "subterra",
-     "name": "Griffon"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_214",
@@ -8740,25 +8740,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_41",
+     "id": "bb_56",
      "attr": "pyrus",
+     "name": "Manion"
+    },
+    {
+     "id": "bb_41",
+     "attr": "darkus",
      "name": "Saurus"
     },
     {
-     "id": "bb_44",
-     "attr": "darkus",
-     "name": "Stinglash"
-    },
-    {
-     "id": "tt_11",
+     "id": "bb_45",
      "attr": "pyrus",
-     "name": "Mantris"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_132",
+     "name": "Manion"
     },
     "silver": {
      "id": "ds_226",
@@ -8821,25 +8821,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_11",
+     "id": "bb_45",
      "attr": "pyrus",
+     "name": "Griffon"
+    },
+    {
+     "id": "tt_11",
+     "attr": "darkus",
      "name": "Mantris"
     },
     {
-     "id": "bb_43",
-     "attr": "darkus",
-     "name": "Falconeer"
-    },
-    {
-     "id": "bt_hynoid",
+     "id": "tt_19",
      "attr": "pyrus",
-     "name": "Hynoid"
+     "name": "El Condor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_207",
@@ -8902,25 +8902,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bt_hynoid",
+     "id": "tt_19",
      "attr": "pyrus",
+     "name": "El Condor"
+    },
+    {
+     "id": "bt_hynoid",
+     "attr": "darkus",
      "name": "Hynoid"
     },
     {
-     "id": "bt_bee",
-     "attr": "darkus",
-     "name": "Bee Striker"
-    },
-    {
-     "id": "bb_43",
+     "id": "tt_11",
      "attr": "pyrus",
-     "name": "Falconeer"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_216",
@@ -8993,9 +8993,9 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_20",
+     "id": "bb_44",
      "attr": "darkus",
-     "name": "Goblin Ball"
+     "name": "Stinglash"
     },
     {
      "id": "bb_41",
@@ -9003,15 +9003,15 @@ export const INTERSPACE = {
      "name": "Saurus"
     },
     {
-     "id": "bb_52",
+     "id": "tt_16",
      "attr": "subterra",
-     "name": "Gargonoid"
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_222",
@@ -9074,25 +9074,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_52",
+     "id": "tt_16",
      "attr": "darkus",
-     "name": "Gargonoid"
+     "name": "Tuskor"
     },
     {
-     "id": "tt_11",
+     "id": "tt_18",
      "attr": "ventus",
-     "name": "Mantris"
+     "name": "Rattleoid"
     },
     {
-     "id": "bb_61",
+     "id": "bb_60",
      "attr": "subterra",
-     "name": "Monarus"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_203",
@@ -9155,9 +9155,9 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_61",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Monarus"
+     "name": "Warius"
     },
     {
      "id": "tt_17",
@@ -9165,15 +9165,15 @@ export const INTERSPACE = {
      "name": "Wormquake"
     },
     {
-     "id": "tt_11",
+     "id": "tt_18",
      "attr": "subterra",
-     "name": "Mantris"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_214",
@@ -9244,25 +9244,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
+     "id": "bb_39",
+     "attr": "haos",
+     "name": "Juggernoid"
+    },
+    {
      "id": "bb_40",
      "attr": "haos",
      "name": "Robotallion"
     },
     {
-     "id": "bb_56",
+     "id": "bb_43",
      "attr": "haos",
-     "name": "Manion"
-    },
-    {
-     "id": "tt_18",
-     "attr": "haos",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_119",
+     "name": "Juggernoid"
     },
     "silver": {
      "id": "ds_223",
@@ -9325,25 +9325,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "haos",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     },
     {
-     "id": "bb_50",
+     "id": "tt_11",
      "attr": "haos",
-     "name": "Terrorclaw"
+     "name": "Mantris"
     },
     {
-     "id": "bb_25",
+     "id": "tt_19",
      "attr": "haos",
-     "name": "Reaper"
+     "name": "El Condor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_209",
@@ -9406,25 +9406,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_25",
+     "id": "tt_19",
      "attr": "haos",
-     "name": "Reaper"
+     "name": "El Condor"
     },
     {
-     "id": "tt_10",
+     "id": "bb_48",
      "attr": "haos",
-     "name": "Limulus"
+     "name": "Fear Ripper"
     },
     {
-     "id": "bb_50",
+     "id": "tt_11",
      "attr": "haos",
-     "name": "Terrorclaw"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_203",
@@ -9496,9 +9496,9 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_44",
+     "id": "bb_39",
      "attr": "pyrus",
-     "name": "Stinglash"
+     "name": "Juggernoid"
     },
     {
      "id": "bb_40",
@@ -9506,15 +9506,15 @@ export const INTERSPACE = {
      "name": "Robotallion"
     },
     {
-     "id": "bb_43",
+     "id": "bb_50",
      "attr": "pyrus",
-     "name": "Falconeer"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
+     "id": "ds_119",
+     "name": "Juggernoid"
     },
     "silver": {
      "id": "ds_226",
@@ -9577,9 +9577,9 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_43",
+     "id": "bb_50",
      "attr": "pyrus",
-     "name": "Falconeer"
+     "name": "Terrorclaw"
     },
     {
      "id": "tt_18",
@@ -9587,15 +9587,15 @@ export const INTERSPACE = {
      "name": "Rattleoid"
     },
     {
-     "id": "bb_48",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Fear Ripper"
+     "name": "Laserman"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_207",
@@ -9658,14 +9658,14 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_48",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Fear Ripper"
+     "name": "Laserman"
     },
     {
-     "id": "bt_hynoid",
+     "id": "tt_10",
      "attr": "aquos",
-     "name": "Hynoid"
+     "name": "Limulus"
     },
     {
      "id": "tt_18",
@@ -9675,8 +9675,8 @@ export const INTERSPACE = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_216",
@@ -9748,25 +9748,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_21",
+     "id": "bb_56",
      "attr": "pyrus",
-     "name": "Jelldon"
+     "name": "Manion"
     },
     {
-     "id": "bb_39",
+     "id": "tt_20",
      "attr": "subterra",
-     "name": "Juggernoid"
+     "name": "Goblin Ball"
     },
     {
-     "id": "tt_16",
+     "id": "bb_52",
      "attr": "pyrus",
-     "name": "Tuskor"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_132",
+     "name": "Manion"
     },
     "silver": {
      "id": "ds_226",
@@ -9829,25 +9829,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_16",
+     "id": "bb_52",
      "attr": "pyrus",
+     "name": "Gargonoid"
+    },
+    {
+     "id": "tt_16",
+     "attr": "subterra",
      "name": "Tuskor"
     },
     {
-     "id": "bb_58",
-     "attr": "subterra",
-     "name": "Ravenoid"
-    },
-    {
-     "id": "tt_06",
+     "id": "tt_10",
      "attr": "pyrus",
-     "name": "Fifth Paladin"
+     "name": "Limulus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_207",
@@ -9910,25 +9910,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_06",
+     "id": "tt_10",
      "attr": "pyrus",
+     "name": "Limulus"
+    },
+    {
+     "id": "tt_06",
+     "attr": "subterra",
      "name": "Fifth Paladin"
     },
     {
-     "id": "bb_46",
-     "attr": "subterra",
-     "name": "Laserman"
-    },
-    {
-     "id": "bb_58",
+     "id": "tt_16",
      "attr": "pyrus",
-     "name": "Ravenoid"
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_216",
@@ -10005,14 +10005,14 @@ export const INTERSPACE = {
      "name": "Manion"
     },
     {
-     "id": "tt_21",
+     "id": "bb_41",
      "attr": "aquos",
-     "name": "Jelldon"
+     "name": "Saurus"
     },
     {
-     "id": "bb_50",
+     "id": "tt_16",
      "attr": "ventus",
-     "name": "Terrorclaw"
+     "name": "Tuskor"
     }
    ],
    "gates": {
@@ -10081,25 +10081,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_50",
-     "attr": "ventus",
-     "name": "Terrorclaw"
-    },
-    {
      "id": "tt_16",
-     "attr": "aquos",
+     "attr": "ventus",
      "name": "Tuskor"
     },
     {
-     "id": "bb_60",
+     "id": "bb_45",
+     "attr": "aquos",
+     "name": "Griffon"
+    },
+    {
+     "id": "bt_bee",
      "attr": "ventus",
-     "name": "Warius"
+     "name": "Bee Striker"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_213",
@@ -10162,25 +10162,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_60",
+     "id": "bt_bee",
      "attr": "ventus",
-     "name": "Warius"
+     "name": "Bee Striker"
     },
     {
-     "id": "tt_19",
+     "id": "tt_17",
      "attr": "aquos",
-     "name": "El Condor"
+     "name": "Wormquake"
     },
     {
-     "id": "tt_16",
+     "id": "bb_45",
      "attr": "ventus",
-     "name": "Tuskor"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_134",
-     "name": "Warius"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_207",
@@ -10252,25 +10252,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_42",
-     "attr": "aquos",
-     "name": "Serpenoid"
-    },
-    {
      "id": "tt_20",
-     "attr": "subterra",
+     "attr": "aquos",
      "name": "Goblin Ball"
     },
     {
-     "id": "bb_45",
+     "id": "bb_40",
+     "attr": "subterra",
+     "name": "Robotallion"
+    },
+    {
+     "id": "tt_11",
      "attr": "aquos",
-     "name": "Griffon"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_225",
@@ -10333,25 +10333,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_45",
+     "id": "tt_11",
      "attr": "aquos",
-     "name": "Griffon"
+     "name": "Mantris"
     },
     {
-     "id": "bb_52",
+     "id": "bb_43",
      "attr": "subterra",
-     "name": "Gargonoid"
+     "name": "Falconeer"
     },
     {
-     "id": "bt_bee",
+     "id": "tt_10",
      "attr": "aquos",
-     "name": "Bee Striker"
+     "name": "Limulus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_204",
@@ -10414,25 +10414,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bt_bee",
+     "id": "tt_10",
      "attr": "aquos",
-     "name": "Bee Striker"
+     "name": "Limulus"
     },
     {
-     "id": "bb_61",
+     "id": "bb_48",
      "attr": "subterra",
-     "name": "Monarus"
+     "name": "Fear Ripper"
     },
     {
-     "id": "bb_52",
+     "id": "bb_43",
      "attr": "aquos",
-     "name": "Gargonoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_208",
@@ -10508,9 +10508,9 @@ export const INTERSPACE = {
      "name": "Juggernoid"
     },
     {
-     "id": "bb_42",
+     "id": "bb_44",
      "attr": "pyrus",
-     "name": "Serpenoid"
+     "name": "Stinglash"
     },
     {
      "id": "bb_58",
@@ -10589,14 +10589,14 @@ export const INTERSPACE = {
      "name": "Ravenoid"
     },
     {
-     "id": "bb_45",
+     "id": "bb_52",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Gargonoid"
     },
     {
-     "id": "tt_17",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Wormquake"
+     "name": "Reaper"
     }
    ],
    "gates": {
@@ -10665,25 +10665,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_17",
-     "attr": "pyrus",
-     "name": "Wormquake"
-    },
-    {
      "id": "bb_25",
      "attr": "pyrus",
      "name": "Reaper"
     },
     {
-     "id": "bb_45",
+     "id": "bb_48",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Fear Ripper"
+    },
+    {
+     "id": "bb_52",
+     "attr": "pyrus",
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_216",
@@ -10761,14 +10761,14 @@ export const INTERSPACE = {
      "name": "Manion"
     },
     {
-     "id": "bb_44",
+     "id": "bb_41",
      "attr": "ventus",
-     "name": "Stinglash"
+     "name": "Saurus"
     },
     {
-     "id": "bb_50",
+     "id": "tt_16",
      "attr": "subterra",
-     "name": "Terrorclaw"
+     "name": "Tuskor"
     }
    ],
    "gates": {
@@ -10837,25 +10837,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_50",
+     "id": "tt_16",
      "attr": "darkus",
-     "name": "Terrorclaw"
+     "name": "Tuskor"
     },
     {
-     "id": "bb_43",
+     "id": "bb_45",
      "attr": "ventus",
-     "name": "Falconeer"
+     "name": "Griffon"
     },
     {
-     "id": "tt_06",
+     "id": "bb_61",
      "attr": "subterra",
-     "name": "Fifth Paladin"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_203",
@@ -10918,25 +10918,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_06",
+     "id": "bb_61",
      "attr": "darkus",
-     "name": "Fifth Paladin"
+     "name": "Monarus"
     },
     {
-     "id": "bb_46",
+     "id": "tt_19",
      "attr": "ventus",
-     "name": "Laserman"
+     "name": "El Condor"
     },
     {
-     "id": "bb_43",
+     "id": "bb_45",
      "attr": "subterra",
-     "name": "Falconeer"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_214",
@@ -11009,25 +11009,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_44",
+     "id": "bb_39",
      "attr": "darkus",
-     "name": "Stinglash"
+     "name": "Juggernoid"
     },
     {
-     "id": "bb_40",
+     "id": "bb_42",
      "attr": "aquos",
-     "name": "Robotallion"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_43",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Falconeer"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
+     "id": "ds_119",
+     "name": "Juggernoid"
     },
     "silver": {
      "id": "ds_222",
@@ -11090,25 +11090,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_43",
+     "id": "bb_45",
      "attr": "darkus",
-     "name": "Falconeer"
+     "name": "Griffon"
     },
     {
-     "id": "tt_18",
+     "id": "tt_11",
      "attr": "aquos",
-     "name": "Rattleoid"
+     "name": "Mantris"
     },
     {
-     "id": "bb_61",
+     "id": "bt_bee",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Bee Striker"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_203",
@@ -11171,25 +11171,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_61",
+     "id": "bt_bee",
      "attr": "darkus",
-     "name": "Monarus"
+     "name": "Bee Striker"
     },
     {
-     "id": "tt_17",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Wormquake"
+     "name": "Reaper"
     },
     {
-     "id": "tt_18",
+     "id": "tt_11",
      "attr": "haos",
-     "name": "Rattleoid"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_214",
@@ -11260,9 +11260,9 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_20",
+     "id": "bb_56",
      "attr": "haos",
-     "name": "Goblin Ball"
+     "name": "Manion"
     },
     {
      "id": "bb_41",
@@ -11270,15 +11270,15 @@ export const INTERSPACE = {
      "name": "Saurus"
     },
     {
-     "id": "bb_52",
+     "id": "bb_43",
      "attr": "haos",
-     "name": "Gargonoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_132",
+     "name": "Manion"
     },
     "silver": {
      "id": "ds_223",
@@ -11341,25 +11341,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_52",
+     "id": "bb_43",
      "attr": "haos",
-     "name": "Gargonoid"
+     "name": "Falconeer"
     },
     {
-     "id": "tt_11",
+     "id": "bb_58",
      "attr": "haos",
-     "name": "Mantris"
+     "name": "Ravenoid"
     },
     {
-     "id": "tt_19",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "El Condor"
+     "name": "Hynoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_209",
@@ -11422,25 +11422,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_19",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "El Condor"
+     "name": "Hynoid"
     },
     {
-     "id": "tt_06",
+     "id": "bb_25",
      "attr": "haos",
-     "name": "Fifth Paladin"
+     "name": "Reaper"
     },
     {
-     "id": "tt_11",
+     "id": "bb_58",
      "attr": "haos",
-     "name": "Mantris"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_104",
-     "name": "Blade Tigrerra"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_203",
@@ -11513,25 +11513,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_39",
+     "id": "tt_20",
      "attr": "pyrus",
-     "name": "Juggernoid"
+     "name": "Goblin Ball"
     },
     {
-     "id": "bb_56",
+     "id": "bb_40",
      "attr": "darkus",
-     "name": "Manion"
+     "name": "Robotallion"
     },
     {
-     "id": "bb_58",
+     "id": "bb_50",
      "attr": "aquos",
-     "name": "Ravenoid"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_226",
@@ -11594,25 +11594,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_58",
-     "attr": "pyrus",
-     "name": "Ravenoid"
-    },
-    {
      "id": "bb_50",
-     "attr": "darkus",
+     "attr": "pyrus",
      "name": "Terrorclaw"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_52",
+     "attr": "darkus",
+     "name": "Gargonoid"
+    },
+    {
+     "id": "bb_61",
      "attr": "aquos",
-     "name": "Bee Striker"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_207",
@@ -11675,25 +11675,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bt_bee",
-     "attr": "pyrus",
-     "name": "Bee Striker"
-    },
-    {
      "id": "bb_61",
-     "attr": "darkus",
+     "attr": "pyrus",
      "name": "Monarus"
     },
     {
-     "id": "bb_50",
+     "id": "bt_bee",
+     "attr": "darkus",
+     "name": "Bee Striker"
+    },
+    {
+     "id": "bb_52",
      "attr": "aquos",
-     "name": "Terrorclaw"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_216",
@@ -11766,25 +11766,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_56",
+     "id": "tt_20",
      "attr": "pyrus",
-     "name": "Manion"
+     "name": "Goblin Ball"
     },
     {
-     "id": "tt_21",
+     "id": "bb_42",
      "attr": "darkus",
-     "name": "Jelldon"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_50",
+     "id": "tt_11",
      "attr": "haos",
-     "name": "Terrorclaw"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_132",
-     "name": "Manion"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_226",
@@ -11847,9 +11847,9 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_50",
+     "id": "tt_11",
      "attr": "pyrus",
-     "name": "Terrorclaw"
+     "name": "Mantris"
     },
     {
      "id": "tt_16",
@@ -11857,15 +11857,15 @@ export const INTERSPACE = {
      "name": "Tuskor"
     },
     {
-     "id": "bb_48",
+     "id": "tt_06",
      "attr": "haos",
-     "name": "Fear Ripper"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_207",
@@ -11928,14 +11928,14 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_48",
+     "id": "tt_06",
      "attr": "pyrus",
-     "name": "Fear Ripper"
+     "name": "Fifth Paladin"
     },
     {
-     "id": "bt_hynoid",
+     "id": "tt_17",
      "attr": "darkus",
-     "name": "Hynoid"
+     "name": "Wormquake"
     },
     {
      "id": "tt_16",
@@ -11945,8 +11945,8 @@ export const INTERSPACE = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_102",
+     "name": "Delta Dragonoid II"
     },
     "silver": {
      "id": "ds_216",
@@ -12019,25 +12019,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_44",
+     "id": "tt_21",
      "attr": "pyrus",
+     "name": "Jelldon"
+    },
+    {
+     "id": "bb_44",
+     "attr": "darkus",
      "name": "Stinglash"
     },
     {
-     "id": "tt_20",
-     "attr": "darkus",
-     "name": "Goblin Ball"
-    },
-    {
-     "id": "bb_43",
+     "id": "bb_45",
      "attr": "ventus",
-     "name": "Falconeer"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_226",
@@ -12100,25 +12100,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_43",
+     "id": "bb_45",
      "attr": "pyrus",
-     "name": "Falconeer"
+     "name": "Griffon"
     },
     {
-     "id": "bb_52",
+     "id": "bb_50",
      "attr": "darkus",
-     "name": "Gargonoid"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bt_hynoid",
+     "id": "bb_25",
      "attr": "ventus",
-     "name": "Hynoid"
+     "name": "Reaper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_207",
@@ -12181,25 +12181,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bt_hynoid",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Hynoid"
+     "name": "Reaper"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_60",
      "attr": "darkus",
-     "name": "Bee Striker"
+     "name": "Warius"
     },
     {
-     "id": "bb_52",
+     "id": "bb_50",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_216",
@@ -12271,25 +12271,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_39",
+     "id": "bb_40",
      "attr": "aquos",
-     "name": "Juggernoid"
+     "name": "Robotallion"
     },
     {
-     "id": "tt_20",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Goblin Ball"
+     "name": "Serpenoid"
     },
     {
-     "id": "bb_58",
+     "id": "bb_43",
      "attr": "aquos",
-     "name": "Ravenoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_225",
@@ -12352,25 +12352,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_58",
+     "id": "bb_43",
      "attr": "aquos",
-     "name": "Ravenoid"
+     "name": "Falconeer"
     },
     {
-     "id": "bb_52",
+     "id": "tt_18",
      "attr": "subterra",
-     "name": "Gargonoid"
+     "name": "Rattleoid"
     },
     {
-     "id": "tt_10",
+     "id": "bb_61",
      "attr": "aquos",
-     "name": "Limulus"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_204",
@@ -12433,9 +12433,9 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_10",
+     "id": "bb_61",
      "attr": "aquos",
-     "name": "Limulus"
+     "name": "Monarus"
     },
     {
      "id": "bb_48",
@@ -12443,15 +12443,15 @@ export const INTERSPACE = {
      "name": "Fear Ripper"
     },
     {
-     "id": "bb_52",
+     "id": "tt_18",
      "attr": "aquos",
-     "name": "Gargonoid"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_208",
@@ -12522,25 +12522,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_39",
+     "id": "bb_44",
      "attr": "haos",
-     "name": "Juggernoid"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_42",
+     "id": "tt_21",
      "attr": "haos",
-     "name": "Serpenoid"
+     "name": "Jelldon"
     },
     {
-     "id": "bb_58",
+     "id": "bb_52",
      "attr": "haos",
-     "name": "Ravenoid"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_223",
@@ -12603,25 +12603,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_58",
+     "id": "bb_52",
      "attr": "haos",
-     "name": "Ravenoid"
+     "name": "Gargonoid"
     },
     {
-     "id": "bb_45",
+     "id": "bb_50",
      "attr": "haos",
-     "name": "Griffon"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_60",
+     "id": "tt_17",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Wormquake"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_209",
@@ -12684,9 +12684,9 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_60",
+     "id": "tt_17",
      "attr": "haos",
-     "name": "Warius"
+     "name": "Wormquake"
     },
     {
      "id": "tt_19",
@@ -12694,15 +12694,15 @@ export const INTERSPACE = {
      "name": "El Condor"
     },
     {
-     "id": "bb_45",
+     "id": "bb_50",
      "attr": "haos",
-     "name": "Griffon"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_134",
-     "name": "Warius"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_203",
@@ -12774,25 +12774,25 @@ export const INTERSPACE = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_40",
-     "attr": "pyrus",
-     "name": "Robotallion"
-    },
-    {
      "id": "bb_41",
-     "attr": "darkus",
+     "attr": "pyrus",
      "name": "Saurus"
     },
     {
-     "id": "tt_18",
+     "id": "bb_39",
+     "attr": "darkus",
+     "name": "Juggernoid"
+    },
+    {
+     "id": "tt_16",
      "attr": "pyrus",
-     "name": "Rattleoid"
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
      "id": "ds_226",
@@ -12855,25 +12855,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_18",
+     "id": "tt_16",
      "attr": "pyrus",
-     "name": "Rattleoid"
+     "name": "Tuskor"
     },
     {
-     "id": "tt_11",
+     "id": "bb_43",
      "attr": "darkus",
-     "name": "Mantris"
+     "name": "Falconeer"
     },
     {
-     "id": "tt_19",
+     "id": "bb_60",
      "attr": "pyrus",
-     "name": "El Condor"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_207",
@@ -12936,25 +12936,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_19",
+     "id": "bb_60",
      "attr": "pyrus",
-     "name": "El Condor"
+     "name": "Warius"
     },
     {
-     "id": "tt_06",
+     "id": "bt_bee",
      "attr": "darkus",
-     "name": "Fifth Paladin"
+     "name": "Bee Striker"
     },
     {
-     "id": "tt_11",
+     "id": "bb_43",
      "attr": "pyrus",
-     "name": "Mantris"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_102",
-     "name": "Delta Dragonoid II"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_216",
@@ -13031,14 +13031,14 @@ export const INTERSPACE = {
      "name": "Manion"
     },
     {
-     "id": "bb_44",
+     "id": "bb_40",
      "attr": "subterra",
-     "name": "Stinglash"
+     "name": "Robotallion"
     },
     {
-     "id": "bb_50",
+     "id": "bb_58",
      "attr": "aquos",
-     "name": "Terrorclaw"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
@@ -13107,25 +13107,25 @@ export const INTERSPACE = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_50",
+     "id": "bb_58",
      "attr": "aquos",
-     "name": "Terrorclaw"
+     "name": "Ravenoid"
     },
     {
-     "id": "bb_43",
+     "id": "tt_11",
      "attr": "subterra",
-     "name": "Falconeer"
+     "name": "Mantris"
     },
     {
-     "id": "bb_25",
+     "id": "bb_61",
      "attr": "aquos",
-     "name": "Reaper"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_204",
@@ -13188,25 +13188,25 @@ export const INTERSPACE = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_25",
+     "id": "bb_61",
      "attr": "aquos",
-     "name": "Reaper"
+     "name": "Monarus"
     },
     {
-     "id": "tt_10",
+     "id": "bb_48",
      "attr": "subterra",
-     "name": "Limulus"
+     "name": "Fear Ripper"
     },
     {
-     "id": "bb_43",
+     "id": "tt_11",
      "attr": "aquos",
-     "name": "Falconeer"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_208",

@@ -21,20 +21,20 @@ export const NEW_BRAWLERS = {
      "name": "Tricloid"
     },
     {
-     "id": "bb_41",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Saurus"
+     "name": "Serpenoid"
     },
     {
-     "id": "tt_11",
+     "id": "bb_50",
      "attr": "haos",
-     "name": "Mantris"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_202",
@@ -102,20 +102,20 @@ export const NEW_BRAWLERS = {
      "name": "Tricloid"
     },
     {
-     "id": "tt_11",
+     "id": "bb_50",
      "attr": "subterra",
-     "name": "Mantris"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_25",
+     "id": "tt_17",
      "attr": "haos",
-     "name": "Reaper"
+     "name": "Wormquake"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_208",
@@ -183,9 +183,9 @@ export const NEW_BRAWLERS = {
      "name": "Tricloid"
     },
     {
-     "id": "bb_25",
+     "id": "tt_17",
      "attr": "subterra",
-     "name": "Reaper"
+     "name": "Wormquake"
     },
     {
      "id": "tt_10",
@@ -195,8 +195,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_209",
@@ -274,20 +274,20 @@ export const NEW_BRAWLERS = {
      "name": "Rabeeder"
     },
     {
-     "id": "tt_20",
+     "id": "bb_39",
      "attr": "haos",
-     "name": "Goblin Ball"
+     "name": "Juggernoid"
     },
     {
-     "id": "bb_52",
+     "id": "tt_16",
      "attr": "subterra",
-     "name": "Gargonoid"
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_119",
+     "name": "Juggernoid"
     },
     "silver": {
      "id": "ds_223",
@@ -355,20 +355,20 @@ export const NEW_BRAWLERS = {
      "name": "Rabeeder"
     },
     {
-     "id": "bb_52",
+     "id": "tt_16",
      "attr": "haos",
-     "name": "Gargonoid"
+     "name": "Tuskor"
     },
     {
-     "id": "bb_48",
+     "id": "bb_60",
      "attr": "subterra",
-     "name": "Fear Ripper"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_209",
@@ -436,14 +436,14 @@ export const NEW_BRAWLERS = {
      "name": "Rabeeder"
     },
     {
-     "id": "bb_48",
+     "id": "bb_60",
      "attr": "haos",
-     "name": "Fear Ripper"
+     "name": "Warius"
     },
     {
-     "id": "bt_hynoid",
+     "id": "bb_48",
      "attr": "subterra",
-     "name": "Hynoid"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
@@ -532,15 +532,15 @@ export const NEW_BRAWLERS = {
      "name": "Robotallion"
     },
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "aquos",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_232",
@@ -618,20 +618,20 @@ export const NEW_BRAWLERS = {
      "name": "Hairadee"
     },
     {
-     "id": "tt_18",
+     "id": "bb_43",
      "attr": "ventus",
-     "name": "Rattleoid"
+     "name": "Falconeer"
     },
     {
-     "id": "tt_06",
+     "id": "tt_19",
      "attr": "aquos",
-     "name": "Fifth Paladin"
+     "name": "El Condor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_110",
-     "name": "Storm Skyress"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_213",
@@ -709,20 +709,20 @@ export const NEW_BRAWLERS = {
      "name": "Hairadee"
     },
     {
-     "id": "tt_06",
+     "id": "tt_19",
      "attr": "ventus",
-     "name": "Fifth Paladin"
+     "name": "El Condor"
     },
     {
-     "id": "bb_46",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Reaper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_207",
@@ -810,20 +810,20 @@ export const NEW_BRAWLERS = {
      "name": "Centorrior"
     },
     {
-     "id": "bb_44",
+     "id": "bb_56",
      "attr": "darkus",
-     "name": "Stinglash"
+     "name": "Manion"
     },
     {
-     "id": "bb_43",
+     "id": "tt_11",
      "attr": "pyrus",
-     "name": "Falconeer"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
+     "id": "ds_132",
+     "name": "Manion"
     },
     "silver": {
      "id": "ds_222",
@@ -902,20 +902,20 @@ export const NEW_BRAWLERS = {
      "name": "Centorrior"
     },
     {
-     "id": "bb_43",
+     "id": "tt_11",
      "attr": "darkus",
-     "name": "Falconeer"
+     "name": "Mantris"
     },
     {
-     "id": "bb_60",
+     "id": "bb_61",
      "attr": "pyrus",
-     "name": "Warius"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_134",
-     "name": "Warius"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_203",
@@ -994,20 +994,20 @@ export const NEW_BRAWLERS = {
      "name": "Centorrior"
     },
     {
-     "id": "bb_60",
+     "id": "bb_61",
      "attr": "darkus",
-     "name": "Warius"
+     "name": "Monarus"
     },
     {
-     "id": "tt_19",
+     "id": "bb_48",
      "attr": "pyrus",
-     "name": "El Condor"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_134",
-     "name": "Warius"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_214",
@@ -1096,20 +1096,20 @@ export const NEW_BRAWLERS = {
      "name": "Tayghen"
     },
     {
-     "id": "tt_21",
+     "id": "tt_20",
      "attr": "aquos",
-     "name": "Jelldon"
+     "name": "Goblin Ball"
     },
     {
-     "id": "tt_16",
+     "id": "bb_50",
      "attr": "ventus",
-     "name": "Tuskor"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "cu_008",
-     "name": "Elfin"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_225",
@@ -1177,9 +1177,9 @@ export const NEW_BRAWLERS = {
      "name": "Tayghen"
     },
     {
-     "id": "tt_16",
+     "id": "bb_50",
      "attr": "aquos",
-     "name": "Tuskor"
+     "name": "Terrorclaw"
     },
     {
      "id": "bt_bee",
@@ -1189,8 +1189,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "cu_008",
-     "name": "Elfin"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_204",
@@ -1263,15 +1263,15 @@ export const NEW_BRAWLERS = {
      "name": "Bee Striker"
     },
     {
-     "id": "bb_61",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Monarus"
+     "name": "Laserman"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_208",
@@ -1349,20 +1349,20 @@ export const NEW_BRAWLERS = {
      "name": "Druman"
     },
     {
-     "id": "bb_56",
+     "id": "bb_39",
      "attr": "pyrus",
-     "name": "Manion"
+     "name": "Juggernoid"
     },
     {
-     "id": "bb_50",
+     "id": "bb_58",
      "attr": "darkus",
-     "name": "Terrorclaw"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_132",
-     "name": "Manion"
+     "id": "ds_119",
+     "name": "Juggernoid"
     },
     "silver": {
      "id": "ds_226",
@@ -1430,20 +1430,20 @@ export const NEW_BRAWLERS = {
      "name": "Druman"
     },
     {
-     "id": "bb_50",
+     "id": "bb_58",
      "attr": "pyrus",
-     "name": "Terrorclaw"
+     "name": "Ravenoid"
     },
     {
-     "id": "tt_17",
+     "id": "bb_61",
      "attr": "darkus",
-     "name": "Wormquake"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_207",
@@ -1511,20 +1511,20 @@ export const NEW_BRAWLERS = {
      "name": "Druman"
     },
     {
-     "id": "tt_17",
+     "id": "bb_61",
      "attr": "pyrus",
-     "name": "Wormquake"
+     "name": "Monarus"
     },
     {
-     "id": "bb_25",
+     "id": "bb_48",
      "attr": "darkus",
-     "name": "Reaper"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_128",
+     "name": "Fear Ripper"
     },
     "silver": {
      "id": "ds_216",
@@ -1596,9 +1596,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_41",
+     "id": "tt_20",
      "attr": "haos",
-     "name": "Saurus"
+     "name": "Goblin Ball"
     },
     {
      "id": "bb_39",
@@ -1606,15 +1606,15 @@ export const NEW_BRAWLERS = {
      "name": "Juggernoid"
     },
     {
-     "id": "tt_11",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Mantris"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_223",
@@ -1677,25 +1677,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
+     "id": "bb_45",
+     "attr": "haos",
+     "name": "Griffon"
+    },
+    {
      "id": "tt_11",
      "attr": "haos",
      "name": "Mantris"
     },
     {
-     "id": "bb_58",
+     "id": "tt_10",
      "attr": "haos",
-     "name": "Ravenoid"
-    },
-    {
-     "id": "bt_bee",
-     "attr": "haos",
-     "name": "Bee Striker"
+     "name": "Limulus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_209",
@@ -1758,25 +1758,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bt_bee",
+     "id": "tt_10",
      "attr": "haos",
-     "name": "Bee Striker"
+     "name": "Limulus"
     },
     {
-     "id": "bb_61",
+     "id": "bt_hynoid",
      "attr": "haos",
-     "name": "Monarus"
+     "name": "Hynoid"
     },
     {
-     "id": "bb_58",
+     "id": "tt_11",
      "attr": "haos",
-     "name": "Ravenoid"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_104",
+     "name": "Blade Tigrerra"
     },
     "silver": {
      "id": "ds_203",
@@ -1849,25 +1849,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_44",
-     "attr": "pyrus",
-     "name": "Stinglash"
-    },
-    {
      "id": "bb_40",
-     "attr": "ventus",
+     "attr": "pyrus",
      "name": "Robotallion"
     },
     {
-     "id": "bb_43",
+     "id": "bb_42",
+     "attr": "ventus",
+     "name": "Serpenoid"
+    },
+    {
+     "id": "tt_18",
      "attr": "pyrus",
-     "name": "Falconeer"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_226",
@@ -1930,25 +1930,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_43",
-     "attr": "pyrus",
-     "name": "Falconeer"
-    },
-    {
      "id": "tt_18",
-     "attr": "ventus",
+     "attr": "pyrus",
      "name": "Rattleoid"
     },
     {
-     "id": "bb_46",
+     "id": "bb_58",
+     "attr": "ventus",
+     "name": "Ravenoid"
+    },
+    {
+     "id": "tt_06",
      "attr": "pyrus",
-     "name": "Laserman"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_207",
@@ -2011,25 +2011,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_46",
+     "id": "tt_06",
      "attr": "pyrus",
+     "name": "Fifth Paladin"
+    },
+    {
+     "id": "bb_46",
+     "attr": "ventus",
      "name": "Laserman"
     },
     {
-     "id": "bb_60",
-     "attr": "ventus",
-     "name": "Warius"
-    },
-    {
-     "id": "tt_18",
+     "id": "bb_58",
      "attr": "pyrus",
-     "name": "Rattleoid"
+     "name": "Ravenoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_134",
-     "name": "Warius"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_216",
@@ -2106,20 +2106,20 @@ export const NEW_BRAWLERS = {
      "name": "Apollonir"
     },
     {
-     "id": "bb_42",
+     "id": "tt_21",
      "attr": "pyrus",
-     "name": "Serpenoid"
+     "name": "Jelldon"
     },
     {
-     "id": "bb_45",
+     "id": "bb_50",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_226",
@@ -2187,20 +2187,20 @@ export const NEW_BRAWLERS = {
      "name": "Apollonir"
     },
     {
-     "id": "bb_45",
+     "id": "bb_50",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Terrorclaw"
     },
     {
-     "id": "tt_10",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Limulus"
+     "name": "Laserman"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_207",
@@ -2268,20 +2268,20 @@ export const NEW_BRAWLERS = {
      "name": "Apollonir"
     },
     {
-     "id": "tt_10",
+     "id": "bb_46",
      "attr": "pyrus",
-     "name": "Limulus"
+     "name": "Laserman"
     },
     {
-     "id": "bb_48",
+     "id": "bt_bee",
      "attr": "pyrus",
-     "name": "Fear Ripper"
+     "name": "Bee Striker"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_216",
@@ -2358,20 +2358,20 @@ export const NEW_BRAWLERS = {
      "name": "Frosch"
     },
     {
-     "id": "bb_39",
+     "id": "bb_56",
      "attr": "aquos",
-     "name": "Juggernoid"
+     "name": "Manion"
     },
     {
-     "id": "bb_58",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Ravenoid"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_225",
@@ -2439,20 +2439,20 @@ export const NEW_BRAWLERS = {
      "name": "Frosch"
     },
     {
-     "id": "bb_58",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Ravenoid"
+     "name": "Griffon"
     },
     {
-     "id": "tt_19",
+     "id": "tt_06",
      "attr": "aquos",
-     "name": "El Condor"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_133",
-     "name": "Ravenoid"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_204",
@@ -2520,14 +2520,14 @@ export const NEW_BRAWLERS = {
      "name": "Frosch"
     },
     {
-     "id": "tt_19",
-     "attr": "aquos",
-     "name": "El Condor"
-    },
-    {
      "id": "tt_06",
      "attr": "aquos",
      "name": "Fifth Paladin"
+    },
+    {
+     "id": "bt_hynoid",
+     "attr": "aquos",
+     "name": "Hynoid"
     }
    ],
    "gates": {
@@ -2610,9 +2610,9 @@ export const NEW_BRAWLERS = {
      "name": "Clayf"
     },
     {
-     "id": "bb_41",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Saurus"
+     "name": "Serpenoid"
     },
     {
      "id": "tt_11",
@@ -2622,8 +2622,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_202",
@@ -2696,15 +2696,15 @@ export const NEW_BRAWLERS = {
      "name": "Mantris"
     },
     {
-     "id": "bb_46",
+     "id": "bt_bee",
      "attr": "subterra",
-     "name": "Laserman"
+     "name": "Bee Striker"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_208",
@@ -2772,20 +2772,20 @@ export const NEW_BRAWLERS = {
      "name": "Clayf"
     },
     {
-     "id": "bb_46",
+     "id": "bt_bee",
      "attr": "subterra",
-     "name": "Laserman"
+     "name": "Bee Striker"
     },
     {
-     "id": "bb_60",
+     "id": "bb_61",
      "attr": "subterra",
-     "name": "Warius"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_126",
-     "name": "Laserman"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_209",
@@ -2862,20 +2862,20 @@ export const NEW_BRAWLERS = {
      "name": "Lars Lion"
     },
     {
-     "id": "tt_20",
+     "id": "bb_41",
      "attr": "haos",
-     "name": "Goblin Ball"
+     "name": "Saurus"
     },
     {
-     "id": "bb_52",
+     "id": "bb_43",
      "attr": "haos",
-     "name": "Gargonoid"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
      "id": "ds_223",
@@ -2943,20 +2943,20 @@ export const NEW_BRAWLERS = {
      "name": "Lars Lion"
     },
     {
-     "id": "bb_52",
+     "id": "bb_43",
      "attr": "haos",
-     "name": "Gargonoid"
+     "name": "Falconeer"
     },
     {
-     "id": "bt_hynoid",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Hynoid"
+     "name": "Monarus"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_209",
@@ -3024,20 +3024,20 @@ export const NEW_BRAWLERS = {
      "name": "Lars Lion"
     },
     {
-     "id": "bt_hynoid",
+     "id": "bb_61",
      "attr": "haos",
-     "name": "Hynoid"
+     "name": "Monarus"
     },
     {
-     "id": "bt_bee",
+     "id": "bb_60",
      "attr": "haos",
-     "name": "Bee Striker"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_104",
-     "name": "Blade Tigrerra"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_203",
@@ -3114,20 +3114,20 @@ export const NEW_BRAWLERS = {
      "name": "Exedra"
     },
     {
-     "id": "bb_40",
+     "id": "bb_42",
      "attr": "darkus",
-     "name": "Robotallion"
+     "name": "Serpenoid"
     },
     {
-     "id": "tt_18",
+     "id": "bb_50",
      "attr": "darkus",
-     "name": "Rattleoid"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_222",
@@ -3195,20 +3195,20 @@ export const NEW_BRAWLERS = {
      "name": "Exedra"
     },
     {
-     "id": "tt_18",
+     "id": "bb_50",
      "attr": "darkus",
-     "name": "Rattleoid"
+     "name": "Terrorclaw"
     },
     {
-     "id": "bb_61",
+     "id": "tt_19",
      "attr": "darkus",
-     "name": "Monarus"
+     "name": "El Condor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_203",
@@ -3276,20 +3276,20 @@ export const NEW_BRAWLERS = {
      "name": "Exedra"
     },
     {
-     "id": "bb_61",
+     "id": "tt_19",
      "attr": "darkus",
-     "name": "Monarus"
+     "name": "El Condor"
     },
     {
-     "id": "tt_17",
+     "id": "bb_25",
      "attr": "darkus",
-     "name": "Wormquake"
+     "name": "Reaper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_214",
@@ -3371,15 +3371,15 @@ export const NEW_BRAWLERS = {
      "name": "Stinglash"
     },
     {
-     "id": "bb_43",
+     "id": "tt_18",
      "attr": "ventus",
-     "name": "Falconeer"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_232",
@@ -3447,20 +3447,20 @@ export const NEW_BRAWLERS = {
      "name": "Oberus"
     },
     {
-     "id": "bb_43",
+     "id": "tt_18",
      "attr": "ventus",
-     "name": "Falconeer"
+     "name": "Rattleoid"
     },
     {
-     "id": "bb_25",
+     "id": "bb_60",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Warius"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_123",
-     "name": "Falconeer"
+     "id": "ds_134",
+     "name": "Warius"
     },
     "silver": {
      "id": "ds_213",
@@ -3528,20 +3528,20 @@ export const NEW_BRAWLERS = {
      "name": "Oberus"
     },
     {
-     "id": "bb_25",
+     "id": "bb_60",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Warius"
     },
     {
-     "id": "tt_10",
+     "id": "bb_46",
      "attr": "ventus",
-     "name": "Limulus"
+     "name": "Laserman"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_207",
@@ -3613,25 +3613,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_42",
-     "attr": "pyrus",
-     "name": "Serpenoid"
-    },
-    {
      "id": "bb_56",
      "attr": "pyrus",
      "name": "Manion"
     },
     {
-     "id": "bb_45",
+     "id": "bb_41",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Saurus"
+    },
+    {
+     "id": "tt_16",
+     "attr": "pyrus",
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_122",
-     "name": "Serpenoid"
+     "id": "ds_121",
+     "name": "Saurus"
     },
     "silver": {
      "id": "ds_226",
@@ -3694,25 +3694,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_45",
+     "id": "tt_16",
      "attr": "pyrus",
-     "name": "Griffon"
+     "name": "Tuskor"
     },
     {
-     "id": "bb_50",
+     "id": "bb_52",
      "attr": "pyrus",
-     "name": "Terrorclaw"
+     "name": "Gargonoid"
     },
     {
-     "id": "bb_48",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Fear Ripper"
+     "name": "Reaper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_207",
@@ -3775,25 +3775,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_48",
+     "id": "bb_25",
      "attr": "pyrus",
-     "name": "Fear Ripper"
+     "name": "Reaper"
     },
     {
-     "id": "bt_hynoid",
+     "id": "tt_17",
      "attr": "pyrus",
-     "name": "Hynoid"
+     "name": "Wormquake"
     },
     {
-     "id": "bb_50",
+     "id": "bb_52",
      "attr": "pyrus",
-     "name": "Terrorclaw"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_131",
+     "name": "Gargonoid"
     },
     "silver": {
      "id": "ds_216",
@@ -3865,9 +3865,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_20",
+     "id": "bb_44",
      "attr": "ventus",
-     "name": "Goblin Ball"
+     "name": "Stinglash"
     },
     {
      "id": "tt_21",
@@ -3875,15 +3875,15 @@ export const NEW_BRAWLERS = {
      "name": "Jelldon"
     },
     {
-     "id": "bb_52",
+     "id": "bb_50",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Terrorclaw"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_130",
+     "name": "Terrorclaw"
     },
     "silver": {
      "id": "ds_232",
@@ -3946,25 +3946,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "bb_52",
+     "id": "bb_50",
      "attr": "ventus",
-     "name": "Gargonoid"
+     "name": "Terrorclaw"
     },
     {
-     "id": "tt_16",
+     "id": "bb_43",
      "attr": "ventus",
-     "name": "Tuskor"
+     "name": "Falconeer"
     },
     {
-     "id": "tt_17",
+     "id": "tt_19",
      "attr": "ventus",
-     "name": "Wormquake"
+     "name": "El Condor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_213",
@@ -4027,25 +4027,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_17",
+     "id": "tt_19",
      "attr": "ventus",
-     "name": "Wormquake"
+     "name": "El Condor"
     },
     {
-     "id": "bb_25",
+     "id": "bb_60",
      "attr": "ventus",
-     "name": "Reaper"
+     "name": "Warius"
     },
     {
-     "id": "tt_16",
+     "id": "bb_43",
      "attr": "ventus",
-     "name": "Tuskor"
+     "name": "Falconeer"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_113",
-     "name": "Reaper"
+     "id": "ds_123",
+     "name": "Falconeer"
     },
     "silver": {
      "id": "ds_207",
@@ -4117,25 +4117,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "tt_21",
+     "id": "bb_39",
      "attr": "darkus",
-     "name": "Jelldon"
+     "name": "Juggernoid"
     },
     {
-     "id": "bb_44",
+     "id": "bb_40",
      "attr": "darkus",
-     "name": "Stinglash"
+     "name": "Robotallion"
     },
     {
-     "id": "tt_16",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Tuskor"
+     "name": "Gargonoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_124",
-     "name": "Stinglash"
+     "id": "ds_120",
+     "name": "Robotallion"
     },
     "silver": {
      "id": "ds_222",
@@ -4198,9 +4198,9 @@ export const NEW_BRAWLERS = {
    "upgrades": 5,
    "toys": [
     {
-     "id": "tt_16",
+     "id": "bb_52",
      "attr": "darkus",
-     "name": "Tuskor"
+     "name": "Gargonoid"
     },
     {
      "id": "bb_43",
@@ -4208,9 +4208,9 @@ export const NEW_BRAWLERS = {
      "name": "Falconeer"
     },
     {
-     "id": "bt_hynoid",
+     "id": "tt_17",
      "attr": "darkus",
-     "name": "Hynoid"
+     "name": "Wormquake"
     }
    ],
    "gates": {
@@ -4279,14 +4279,14 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bt_hynoid",
+     "id": "tt_17",
      "attr": "darkus",
-     "name": "Hynoid"
+     "name": "Wormquake"
     },
     {
-     "id": "bt_bee",
+     "id": "tt_19",
      "attr": "darkus",
-     "name": "Bee Striker"
+     "name": "El Condor"
     },
     {
      "id": "bb_43",
@@ -4374,20 +4374,20 @@ export const NEW_BRAWLERS = {
      "name": "Dryoid"
     },
     {
-     "id": "tt_21",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Jelldon"
+     "name": "Serpenoid"
     },
     {
-     "id": "tt_16",
+     "id": "tt_18",
      "attr": "subterra",
-     "name": "Tuskor"
+     "name": "Rattleoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_108",
-     "name": "Hammer Gorem"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_202",
@@ -4455,20 +4455,20 @@ export const NEW_BRAWLERS = {
      "name": "Dryoid"
     },
     {
-     "id": "tt_16",
+     "id": "tt_18",
      "attr": "subterra",
-     "name": "Tuskor"
+     "name": "Rattleoid"
     },
     {
-     "id": "bb_48",
+     "id": "tt_19",
      "attr": "subterra",
-     "name": "Fear Ripper"
+     "name": "El Condor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_208",
@@ -4536,9 +4536,9 @@ export const NEW_BRAWLERS = {
      "name": "Dryoid"
     },
     {
-     "id": "bb_48",
+     "id": "tt_19",
      "attr": "subterra",
-     "name": "Fear Ripper"
+     "name": "El Condor"
     },
     {
      "id": "bt_hynoid",
@@ -4548,8 +4548,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_209",
@@ -4621,14 +4621,14 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_39",
+     "id": "bb_56",
      "attr": "aquos",
-     "name": "Juggernoid"
+     "name": "Manion"
     },
     {
-     "id": "bb_42",
+     "id": "bb_41",
      "attr": "aquos",
-     "name": "Serpenoid"
+     "name": "Saurus"
     },
     {
      "id": "bb_58",
@@ -4638,8 +4638,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_119",
-     "name": "Juggernoid"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_225",
@@ -4707,20 +4707,20 @@ export const NEW_BRAWLERS = {
      "name": "Ravenoid"
     },
     {
-     "id": "bb_45",
+     "id": "tt_16",
      "attr": "aquos",
-     "name": "Griffon"
+     "name": "Tuskor"
     },
     {
-     "id": "tt_06",
+     "id": "bt_hynoid",
      "attr": "aquos",
-     "name": "Fifth Paladin"
+     "name": "Hynoid"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_133",
+     "name": "Ravenoid"
     },
     "silver": {
      "id": "ds_204",
@@ -4783,25 +4783,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_06",
+     "id": "bt_hynoid",
      "attr": "aquos",
-     "name": "Fifth Paladin"
+     "name": "Hynoid"
     },
     {
-     "id": "bb_46",
+     "id": "bb_25",
      "attr": "aquos",
-     "name": "Laserman"
+     "name": "Reaper"
     },
     {
-     "id": "bb_45",
+     "id": "tt_16",
      "attr": "aquos",
-     "name": "Griffon"
+     "name": "Tuskor"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_125",
-     "name": "Griffon"
+     "id": "ds_113",
+     "name": "Reaper"
     },
     "silver": {
      "id": "ds_208",
@@ -4873,14 +4873,14 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_40",
+     "id": "tt_21",
      "attr": "subterra",
-     "name": "Robotallion"
+     "name": "Jelldon"
     },
     {
-     "id": "tt_20",
+     "id": "bb_42",
      "attr": "subterra",
-     "name": "Goblin Ball"
+     "name": "Serpenoid"
     },
     {
      "id": "tt_18",
@@ -4890,8 +4890,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_120",
-     "name": "Robotallion"
+     "id": "ds_122",
+     "name": "Serpenoid"
     },
     "silver": {
      "id": "ds_202",
@@ -4959,20 +4959,20 @@ export const NEW_BRAWLERS = {
      "name": "Rattleoid"
     },
     {
-     "id": "bb_52",
+     "id": "tt_11",
      "attr": "subterra",
-     "name": "Gargonoid"
+     "name": "Mantris"
     },
     {
-     "id": "tt_10",
+     "id": "tt_06",
      "attr": "subterra",
-     "name": "Limulus"
+     "name": "Fifth Paladin"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_131",
-     "name": "Gargonoid"
+     "id": "ds_108",
+     "name": "Hammer Gorem"
     },
     "silver": {
      "id": "ds_208",
@@ -5035,25 +5035,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "tt_10",
+     "id": "tt_06",
      "attr": "subterra",
-     "name": "Limulus"
+     "name": "Fifth Paladin"
     },
     {
-     "id": "bb_48",
+     "id": "bb_61",
      "attr": "subterra",
-     "name": "Fear Ripper"
+     "name": "Monarus"
     },
     {
-     "id": "bb_52",
+     "id": "tt_11",
      "attr": "subterra",
-     "name": "Gargonoid"
+     "name": "Mantris"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_128",
-     "name": "Fear Ripper"
+     "id": "ds_135",
+     "name": "Monarus"
     },
     "silver": {
      "id": "ds_209",
@@ -5127,14 +5127,14 @@ export const NEW_BRAWLERS = {
    "upgrades": 0,
    "toys": [
     {
-     "id": "bb_56",
+     "id": "bb_44",
      "attr": "subterra",
-     "name": "Manion"
+     "name": "Stinglash"
     },
     {
-     "id": "bb_41",
+     "id": "tt_20",
      "attr": "haos",
-     "name": "Saurus"
+     "name": "Goblin Ball"
     },
     {
      "id": "bb_50",
@@ -5144,8 +5144,8 @@ export const NEW_BRAWLERS = {
    ],
    "gates": {
     "gold": {
-     "id": "ds_121",
-     "name": "Saurus"
+     "id": "ds_124",
+     "name": "Stinglash"
     },
     "silver": {
      "id": "ds_202",
@@ -5213,20 +5213,20 @@ export const NEW_BRAWLERS = {
      "name": "Terrorclaw"
     },
     {
-     "id": "tt_11",
+     "id": "bb_45",
      "attr": "haos",
-     "name": "Mantris"
+     "name": "Griffon"
     },
     {
-     "id": "bb_61",
+     "id": "bb_48",
      "attr": "aquos",
-     "name": "Monarus"
+     "name": "Fear Ripper"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_130",
-     "name": "Terrorclaw"
+     "id": "ds_125",
+     "name": "Griffon"
     },
     "silver": {
      "id": "ds_208",
@@ -5289,25 +5289,25 @@ export const NEW_BRAWLERS = {
    "upgrades": 10,
    "toys": [
     {
-     "id": "bb_61",
+     "id": "bb_48",
      "attr": "subterra",
-     "name": "Monarus"
+     "name": "Fear Ripper"
     },
     {
-     "id": "tt_17",
+     "id": "bb_46",
      "attr": "haos",
-     "name": "Wormquake"
+     "name": "Laserman"
     },
     {
-     "id": "tt_11",
+     "id": "bb_45",
      "attr": "aquos",
-     "name": "Mantris"
+     "name": "Griffon"
     }
    ],
    "gates": {
     "gold": {
-     "id": "ds_135",
-     "name": "Monarus"
+     "id": "ds_126",
+     "name": "Laserman"
     },
     "silver": {
      "id": "ds_209",

@@ -32,7 +32,9 @@ export function spread() {
   order.forEach((id, i) => {
     const mine = new Set();
     const pick = band => { const list = BANDS[band].filter(n => !mine.has(n));
-      const n = [...list].sort((a, b) => used[a] - used[b] || ((BANDS[band].indexOf(a) + i * 3) % BANDS[band].length) - ((BANDS[band].indexOf(b) + i * 3) % BANDS[band].length))[0];
+      // ties broken by a hash of the deck and the Bakugan, so no two Bakugan always land in the same decks together
+      const h = n => [...(id + '|' + n)].reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7);
+      const n = [...list].sort((a, b) => used[a] - used[b] || h(a) - h(b))[0];
       mine.add(n); used[n]++; return n; };
     if (slots[id] === 2) { const lo = pick('low'), mi = pick('mid'), hi = pick('high'), hi2 = pick('high');
       out[id] = { easy: [lo, mi], normal: [mi, hi], hard: [hi, hi2] }; }
