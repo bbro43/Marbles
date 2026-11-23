@@ -104,7 +104,9 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
     // the partner (or partners: Marucho's Normal has two, Billy, Nov 22) first, then the synthetics from the spread, 3 in all
     let partners = SP[id] ? tiers[k].filter(n => ownerOf.get(n) === (SAME[id] || id)) : null;
     if (partners && !partners.length) partners = [tiers[k][0]];   // Akira and Shuji: no registered partner, their first Bakugan as before
-    for (const n of SP[id] ? [...partners, ...SP[id][lvl]].slice(0, 3) : tiers[k]) {
+    // never the same Bakugan twice: a synthetic that repeats the first one is swapped for one from the deck's other levels
+    const fill = SP[id] ? [...SP[id][lvl], ...Object.values(SP[id]).flat()].filter((n, j, a) => !partners.includes(n) && a.indexOf(n) === j) : [];
+    for (const n of SP[id] ? [...partners, ...fill].slice(0, 3) : tiers[k]) {
       const t = byName.get(n);
       if (!t) { problems.push(`${id} ${lvl}: no Bakugan "${n}"`); continue; }
       if (t.id.startsWith('dc_') && !NEW_VESTROIA.has(id)) problems.push(`${id} ${lvl}: ${n} is a New Vestroia Bakugan`);

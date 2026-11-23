@@ -1325,14 +1325,14 @@ export const AI_TEAMS = {
      "name": "Falconeer"
     },
     {
-     "id": "bb_43",
-     "attr": "subterra",
-     "name": "Falconeer"
-    },
-    {
      "id": "bb_25",
      "attr": "subterra",
      "name": "Reaper"
+    },
+    {
+     "id": "bb_44",
+     "attr": "subterra",
+     "name": "Stinglash"
     }
    ],
    "gates": {
