@@ -15,7 +15,7 @@ const CH = {
   // A partner is only ever used by its own character, and never in a starter deck (checked below).
   dan:        ['pyrus',    ['Dragonoid', 'Serpenoid', 'Saurus'],        ['Dragonoid', 'Falconeer', 'Griffon'],      ['Delta Dragonoid II', 'Laserman', 'Warius']],
   runo:       ['haos',     ['Tigrerra', 'Saurus', 'Manion'],            ['Tigrerra', 'Ravenoid', 'Monarus'],        ['Blade Tigrerra', 'Laserman', 'Monarus']],
-  marucho:    ['aquos',    ['Preyas', 'Stinglash', 'Serpenoid'],        ['Preyas', 'Stinglash', 'Reaper'],          ['Preyas II (Angelo)', 'Warius', 'Laserman']],
+  marucho:    ['aquos',    ['Preyas'],                                  ['Preyas', 'Preyas II (Diablo)'],          ['Preyas II (Angelo)']],   // partners by level (Billy, Nov 22); the rest are synthetics
   julie:      ['subterra', ['Gorem', 'Saurus', 'Robotallion'],          ['Gorem', 'Terrorclaw', 'Gargonoid'],       ['Hammer Gorem', 'Terrorclaw', 'Monarus']],
   shun:       ['ventus',   ['Skyress', 'Ravenoid', 'Manion'],           ['Skyress', 'Falconeer', 'Monarus'],        ['Storm Skyress', 'Monarus', 'Laserman']],
   akira:      ['subterra', ['Saurus', 'Robotallion', 'Stinglash'],      ['Falconeer', 'Terrorclaw', 'Griffon'],     ['Laserman', 'Terrorclaw', 'Warius']],
@@ -101,12 +101,15 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
   out[id] = { attr: Array.isArray(attrs0) ? attrs0.join('/') : attrs0 };
   Object.keys(LEVELS).forEach((lvl, k) => {
     const { upgrades, rank } = LEVELS[lvl], toys = [], attr = Array.isArray(attrs0) ? attrs0[k] : attrs0;
-    for (const n of SP[id] ? [tiers[k][0], ...SP[id][lvl]] : tiers[k]) {
+    // the partner (or partners: Marucho's Normal has two, Billy, Nov 22) first, then the synthetics from the spread, 3 in all
+    let partners = SP[id] ? tiers[k].filter(n => ownerOf.get(n) === (SAME[id] || id)) : null;
+    if (partners && !partners.length) partners = [tiers[k][0]];   // Akira and Shuji: no registered partner, their first Bakugan as before
+    for (const n of SP[id] ? [...partners, ...SP[id][lvl]].slice(0, 3) : tiers[k]) {
       const t = byName.get(n);
       if (!t) { problems.push(`${id} ${lvl}: no Bakugan "${n}"`); continue; }
       if (t.id.startsWith('dc_') && !NEW_VESTROIA.has(id)) problems.push(`${id} ${lvl}: ${n} is a New Vestroia Bakugan`);
       if (ownerOf.has(n) && ownerOf.get(n) !== (SAME[id] || id)) problems.push(`${id} ${lvl}: ${n} is ${ownerOf.get(n)}'s partner`);
-      if (lineBlocked(toys, t.id)) problems.push(`${id} ${lvl}: ${n} is in the same evolution line as another`);
+      if (lineBlocked(toys, t.id) && !(partners && partners.includes(n))) problems.push(`${id} ${lvl}: ${n} is in the same evolution line as another`);
       toys.push({ id: t.id, attr: t.attributes[attr] ? attr : Object.keys(t.attributes)[0], name: n });
     }
     const attrs = [attr], ranked = (arr, score) => [...arr].sort((a, b) => score(b) - score(a));

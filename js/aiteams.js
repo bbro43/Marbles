@@ -587,14 +587,14 @@ export const AI_TEAMS = {
      "name": "Preyas"
     },
     {
+     "id": "bb_08",
+     "attr": "aquos",
+     "name": "Preyas II (Diablo)"
+    },
+    {
      "id": "bb_58",
      "attr": "aquos",
      "name": "Ravenoid"
-    },
-    {
-     "id": "bt_bee",
-     "attr": "aquos",
-     "name": "Bee Striker"
     }
    ],
    "gates": {
@@ -4341,14 +4341,14 @@ export const AI_TEAMS = {
      "name": "Elfin"
     },
     {
+     "id": "bb_06",
+     "attr": "aquos",
+     "name": "Preyas"
+    },
+    {
      "id": "bb_58",
      "attr": "aquos",
      "name": "Ravenoid"
-    },
-    {
-     "id": "bb_48",
-     "attr": "aquos",
-     "name": "Fear Ripper"
     }
    ],
    "gates": {
@@ -4432,14 +4432,14 @@ export const AI_TEAMS = {
      "name": "Dual Elfin"
     },
     {
+     "id": "bb_06",
+     "attr": "aquos",
+     "name": "Preyas"
+    },
+    {
      "id": "bb_48",
      "attr": "aquos",
      "name": "Fear Ripper"
-    },
-    {
-     "id": "tt_10",
-     "attr": "aquos",
-     "name": "Limulus"
     }
    ],
    "gates": {
