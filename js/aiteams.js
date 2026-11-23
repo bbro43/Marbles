@@ -1901,12 +1901,14 @@ export const AI_TEAMS = {
     {
      "id": "tt_10",
      "attr": "aquos",
-     "name": "Limulus"
+     "name": "Limulus",
+     "up": 4
     },
     {
      "id": "bb_50",
      "attr": "aquos",
-     "name": "Terrorclaw"
+     "name": "Terrorclaw",
+     "up": 4
     }
    ],
    "gates": {
@@ -2142,8 +2144,7 @@ export const AI_TEAMS = {
     {
      "id": "bb_47",
      "attr": "subterra",
-     "name": "Centipoid",
-     "up": 10
+     "name": "Centipoid"
     },
     {
      "id": "bt_hynoid",

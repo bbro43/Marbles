@@ -149,9 +149,11 @@ for (const [id, [attrs0, ...tiers]] of Object.entries(CH)) {
       team.abilities = Object.fromEntries(AB_COLORS.map(c => [c, C(h[c][0])]));
       team.extra = Object.fromEntries(AB_COLORS.map(c => [c, h[c].slice(1).map(C)]));
     }
-    // a partner's own boost on Hard (Billy, Nov 22): Jenny's Siege and Jewls's Centipoid play at 340 base, before the level's upgrades
-    const BOOST = { jenny: { Siege: 340 }, jewls: { Centipoid: 340 } };
+    // a partner's own boost on Hard (Billy, Nov 22): Jenny's Siege plays at 340 base, before the level's upgrades (Jewls's boost was taken off)
+    const BOOST = { jenny: { Siege: 340 } };
     if (lvl === 'hard' && BOOST[id]) for (const x of team.toys) { const to = BOOST[id][x.name]; if (to) x.up = Math.round((to - byName.get(x.name).baseG) / 10); }
+    // Jenny's other two Bakugan on Hard: +4 upgrades each, tuned so she wins about 45% of Hard matches (Billy, Nov 22)
+    if (lvl === 'hard' && id === 'jenny') for (const x of team.toys) if (!BOOST.jenny[x.name]) x.up = 4;
     out[id][lvl] = team;
   });
 }
