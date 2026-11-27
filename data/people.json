@@ -1,0 +1,179 @@
+{
+ "_about": "Which model shows each brawler in The Commons, the team rooms and story scenes. Edit model to change who looks like what; null = not shown. Pick any path from _standins (show cast) or characters/<id>/model.glb (our own characters).",
+ "_standins": [
+  "characters/standins/Ace Grit - New Vestroia - Standin.glb",
+  "characters/standins/Akira - Classic - Standin.glb",
+  "characters/standins/Alice Gehabich - Classic - Standin.glb",
+  "characters/standins/Baron Leltoy - New Vestroia - Standin.glb",
+  "characters/standins/Billy Gilbert - Classic - Standin.glb",
+  "characters/standins/Chan Lee - Classic - Standin.glb",
+  "characters/standins/Dan Kuso - Classic - Standin.glb",
+  "characters/standins/Dan Kuso - New Vestroia - Standin.glb",
+  "characters/standins/Gus Grav - New Vestroia - Standin.glb",
+  "characters/standins/Hal-G - Classic - Standin.glb",
+  "characters/standins/Jenny - Classic - Standin.glb",
+  "characters/standins/Jewls - Classic - Standin.glb",
+  "characters/standins/Julie Makimoto - Classic - Standin.glb",
+  "characters/standins/Julio Santana - Classic - Standin.glb",
+  "characters/standins/Klaus von Hertzon - Classic - Standin.glb",
+  "characters/standins/Komba O'Charlie - Classic - Standin.glb",
+  "characters/standins/Lync Volan - New Vestroia - Standin.glb",
+  "characters/standins/Marduk - Classic - Standin.glb",
+  "characters/standins/Marucho Marukura - Classic - Standin.glb",
+  "characters/standins/Marucho Marukura - New Vestroia - Standin.glb",
+  "characters/standins/Masquerade - Classic - Standin.glb",
+  "characters/standins/Mira Clay - New Vestroia - Standin.glb",
+  "characters/standins/Mylene Pharaoh - New Vestroia - Standin.glb",
+  "characters/standins/Runo Misaki - Classic - Standin.glb",
+  "characters/standins/Shadow Prove - New Vestroia - Standin.glb",
+  "characters/standins/Shuji - Classic - Standin.glb",
+  "characters/standins/Shun Kazami - Classic - Standin.glb",
+  "characters/standins/Shun Kazami - New Vestroia - Standin.glb",
+  "characters/standins/Spectra Phantom - New Vestroia - Standin.glb",
+  "characters/standins/Volt Luster - New Vestroia - Standin.glb"
+ ],
+ "people": {
+  "dan": { "name": "Dan", "model": "characters/standins/Dan Kuso - Classic - Standin.glb"
+  },
+  "runo": { "name": "Runo", "model": "characters/standins/Runo Misaki - Classic - Standin.glb"
+  },
+  "marucho": { "name": "Marucho", "model": "characters/standins/Marucho Marukura - Classic - Standin.glb"
+  },
+  "julie": { "name": "Julie", "model": "characters/standins/Julie Makimoto - Classic - Standin.glb"
+  },
+  "shun": { "name": "Shun", "model": "characters/standins/Shun Kazami - Classic - Standin.glb"
+  },
+  "akira": { "name": "Akira", "model": "characters/standins/Akira - Classic - Standin.glb"
+  },
+  "shuji": { "name": "Shuji", "model": "characters/standins/Shuji - Classic - Standin.glb"
+  },
+  "jenny": { "name": "Jenny", "model": "characters/standins/Jenny - Classic - Standin.glb"
+  },
+  "jewls": { "name": "Jewls", "model": "characters/standins/Jewls - Classic - Standin.glb"
+  },
+  "billy": { "name": "Billy", "model": "characters/standins/Billy Gilbert - Classic - Standin.glb"
+  },
+  "komba": { "name": "Komba", "model": "characters/standins/Komba O'Charlie - Classic - Standin.glb"
+  },
+  "julio": { "name": "Julio", "model": "characters/standins/Julio Santana - Classic - Standin.glb"
+  },
+  "chanlee": { "name": "Chan Lee", "model": "characters/standins/Chan Lee - Classic - Standin.glb"
+  },
+  "klaus": { "name": "Klaus", "model": "characters/standins/Klaus von Hertzon - Classic - Standin.glb"
+  },
+  "masquerade": { "name": "Masquerade", "model": "characters/standins/Masquerade - Classic - Standin.glb"
+  },
+  "nv_dan": { "name": "Dan", "model": "characters/standins/Dan Kuso - New Vestroia - Standin.glb"
+  },
+  "nv_shun": { "name": "Shun", "model": "characters/standins/Shun Kazami - New Vestroia - Standin.glb"
+  },
+  "nv_marucho": { "name": "Marucho", "model": "characters/standins/Marucho Marukura - New Vestroia - Standin.glb"
+  },
+  "ace": { "name": "Ace", "model": "characters/standins/Ace Grit - New Vestroia - Standin.glb"
+  },
+  "mira": { "name": "Mira", "model": "characters/standins/Mira Clay - New Vestroia - Standin.glb"
+  },
+  "baron": { "name": "Baron", "model": "characters/standins/Baron Leltoy - New Vestroia - Standin.glb"
+  },
+  "spectra": { "name": "Spectra", "model": "characters/standins/Spectra Phantom - New Vestroia - Standin.glb"
+  },
+  "mylene": { "name": "Mylene", "model": "characters/standins/Mylene Pharaoh - New Vestroia - Standin.glb"
+  },
+  "volt": { "name": "Volt", "model": "characters/standins/Volt Luster - New Vestroia - Standin.glb"
+  },
+  "gus": { "name": "Gus", "model": "characters/standins/Gus Grav - New Vestroia - Standin.glb"
+  },
+  "shadow": { "name": "Shadow", "model": "characters/standins/Shadow Prove - New Vestroia - Standin.glb"
+  },
+  "lync": { "name": "Lync", "model": "characters/standins/Lync Volan - New Vestroia - Standin.glb"
+  },
+  "maisie": { "name": "Ashe", "model": "characters/maisie/model.glb"
+  },
+  "richard": { "name": "Richard", "model": "characters/richard/model.glb"
+  },
+  "ryan": { "name": "Ryan", "model": "characters/ryan/model.glb"
+  },
+  "sarah": { "name": "Sarah", "model": "characters/sarah/model.glb"
+  },
+  "george": { "name": "George", "model": "characters/george/model.glb"
+  },
+  "ella": { "name": "Scarlet", "model": "characters/ella/model.glb"
+  },
+  "sophie": { "name": "Dusk", "model": "characters/sophie/model.glb"
+  },
+  "nico": { "name": "Lux", "model": "characters/nico/model.glb"
+  },
+  "freya": { "name": "Steam", "model": "characters/freya/model.glb"
+  },
+  "zoya": { "name": "Magma", "model": "characters/zoya/model.glb"
+  },
+  "xander": { "name": "Gale", "model": "characters/xander/model.glb"
+  },
+  "heather": { "name": "Heather", "model": "characters/heather/model.glb"
+  },
+  "brandon": { "name": "Brandon", "model": "characters/brandon/model.glb"
+  },
+  "rocco": { "name": "Grim", "model": "characters/rocco/model.glb"
+  },
+  "otto": { "name": "Eclipse", "model": "characters/otto/model.glb"
+  },
+  "margaret": { "name": "Margaret", "model": "characters/margaret/model.glb"
+  },
+  "melissa": { "name": "Melissa", "model": "characters/melissa/model.glb"
+  },
+  "karen": { "name": "Karen", "model": "characters/karen/model.glb"
+  },
+  "brenda": { "name": "Brenda", "model": "characters/brenda/model.glb"
+  },
+  "ellie": { "name": "Marina", "model": "characters/ellie/model.glb"
+  },
+  "amanda": { "name": "Amanda", "model": "characters/amanda/model.glb"
+  },
+  "gary": { "name": "Gary", "model": "characters/gary/model.glb"
+  },
+  "anthony": { "name": "Anthony", "model": "characters/anthony/model.glb"
+  },
+  "brodny": { "name": "Brodny", "model": "characters/brodny/model.glb"
+  },
+  "kasimir": { "name": "Kasimir", "model": "characters/kasimir/model.glb"
+  },
+  "pavel": { "name": "Pavel", "model": "characters/pavel/model.glb"
+  },
+  "tibor": { "name": "Tibor", "model": "characters/tibor/model.glb"
+  },
+  "zarek": { "name": "Zarek", "model": "characters/zarek/model.glb"
+  },
+  "zorro": { "name": "Zorro", "model": "characters/zorro/model.glb"
+  },
+  "vasek": { "name": "Vasek", "model": "characters/vasek/model.glb"
+  },
+  "vesna": { "name": "Vesna", "model": "characters/vesna/model.glb"
+  },
+  "arcadius": { "name": "Arcadius", "model": "characters/arcadius/model.glb"
+  },
+  "mousoulios": { "name": "Mousoulios", "model": "characters/mousoulios/model.glb"
+  },
+  "demitri": { "name": "Demitri", "model": "characters/demitri/model.glb"
+  },
+  "eirene": { "name": "Eirene", "model": "characters/eirene/model.glb"
+  },
+  "petronas": { "name": "Petronas", "model": "characters/petronas/model.glb"
+  },
+  "eudocia": { "name": "Eudocia", "model": "characters/eudocia/model.glb"
+  },
+  "ignatios": { "name": "Ignatios", "model": "characters/ignatios/model.glb"
+  },
+  "jason": { "name": "Jason", "model": "characters/jason/model.glb"
+  },
+  "evelyn": { "name": "Raven", "model": "characters/evelyn/model.glb"
+  },
+  "onyx": { "name": "Onyx", "model": "characters/onyx/model.glb"
+  },
+  "kala": { "name": "Kala", "model": "characters/kala/model.glb"
+  },
+  "olivia": { "name": "Olivia", "model": "characters/olivia/model.glb"
+  },
+  "raymond": { "name": "Raymond", "model": "characters/raymond/model.glb"
+  }
+ }
+}
