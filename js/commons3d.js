@@ -27,6 +27,7 @@ export const LANDMARKS = [
 ];
 
 const rad = d => d * Math.PI / 180;
+const STAND = { stadium: 19, shop: 13, tower: 9, hall: 15, kiosk: 11, dorm: 10, teams: 14 };   // how far in front of each kind of building people stand
 const at = (ang, dist) => new THREE.Vector3(Math.sin(rad(ang)) * dist, 0, Math.cos(rad(ang)) * dist);
 function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
@@ -328,6 +329,26 @@ export function mountCommons(host, opts) {
     host.appendChild(el);
     const top = new THREE.Box3().setFromObject(g).max.y;
     labels.push({ el, pos: new THREE.Vector3(p.x, top + 2, p.z) });
+  }
+    // people: each brawler stands in front of the place they are at right now (Story's presence list)
+  const loader = new GLTFLoader(), people = [];
+  for (const L of LANDMARKS) {
+    const ids = opts.people?.[L.key] || [];
+    const home = at(L.ang, L.dist - STAND[L.kind]);   // in front of the building, toward the plaza
+    ids.forEach(async (id, i) => {
+      const path = await modelFor(id);
+      if (!path || !opts.url) return;                 // not in people.json, or set to null
+      try {
+        const g = (await loader.loadAsync(await opts.url(path))).scene;
+        const size = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());
+        g.scale.setScalar(3 / size.y);                // everyone about 3 units tall
+        const side = (i - (ids.length - 1) / 2) * 2.2;   // spread out in a row, side by side
+        g.position.copy(home).add(new THREE.Vector3(Math.cos(rad(L.ang)) * side, 0, -Math.sin(rad(L.ang)) * side));
+        g.rotation.y = rad(L.ang) + Math.PI;          // face the plaza, like the buildings
+        g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+        scene.add(g); people.push(g);
+      } catch (e) { console.warn('person', id, e); }
+    });
   }
   // filler: scatter on the rings, keeping clear of landmarks and spokes
   const r = rng(2026), taken = LANDMARKS.map(L => ({ p: at(L.ang, L.dist), r: L.kind === 'stadium' ? 16 : 13 }));
