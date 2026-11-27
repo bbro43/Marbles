@@ -346,7 +346,7 @@ export function mountCommons(host, opts) {
         const side = (i - (ids.length - 1) / 2) * 2.2;   // spread out in a row, side by side
         g.position.copy(home).add(new THREE.Vector3(Math.cos(rad(L.ang)) * side, 0, -Math.sin(rad(L.ang)) * side));
         g.rotation.y = rad(L.ang) + Math.PI;          // face the plaza, like the buildings
-        g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+        g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.userData.key = 'person:' + id; } });   // a tap on any part of them names who it is
         g.userData.rot0 = g.rotation.y; g.userData.ph = Math.random() * 6.28;   // their facing, and their own timing
         scene.add(g); people.push(g);
       } catch (e) { console.warn('person', id, e); }
@@ -387,7 +387,7 @@ export function mountCommons(host, opts) {
     if (was === 1 && moved < 6 && e.type === 'pointerup') {   // a tap: pick a building
       const rc = new THREE.Raycaster(), b = el.getBoundingClientRect();
       rc.setFromCamera(new THREE.Vector2((e.clientX - b.left) / b.width * 2 - 1, -(e.clientY - b.top) / b.height * 2 + 1), cam);
-      const hit = rc.intersectObjects([...boards.map(b => b.m), ...picks], true).find(x => x.object.userData.key);
+      const hit = rc.intersectObjects([...boards.map(b => b.m), ...people, ...picks], true).find(x => x.object.userData.key);   // people first: someone standing in front of a building
       if (hit) opts.onPick(hit.object.userData.key);
     }
   };
