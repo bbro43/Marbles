@@ -340,8 +340,9 @@ export function mountCommons(host, opts) {
       if (!path || !opts.url) return;                 // not in people.json, or set to null
       try {
         const g = (await loader.loadAsync(await opts.url(path))).scene;
-        const size = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());
-        g.scale.setScalar(3 / size.y);                // everyone about 3 units tall
+        g.updateMatrixWorld(true); g.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });   // pose the skeleton before measuring
+        const size = new THREE.Box3().setFromObject(g, true).getSize(new THREE.Vector3());
+        g.scale.setScalar(2 / size.y);                // everyone about 2 units tall (a building floor is 3)
         const side = (i - (ids.length - 1) / 2) * 2.2;   // spread out in a row, side by side
         g.position.copy(home).add(new THREE.Vector3(Math.cos(rad(L.ang)) * side, 0, -Math.sin(rad(L.ang)) * side));
         g.rotation.y = rad(L.ang) + Math.PI;          // face the plaza, like the buildings
