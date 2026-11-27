@@ -371,19 +371,29 @@ export function mountCommons(host, opts) {
   // camera: orbit around the plaza, drag to turn, pinch / wheel to zoom
   const cam = new THREE.PerspectiveCamera(50, w / h, 1, 1200);
   let yaw = opts.yaw ?? 0, dist = 190 * Math.max(1, (h / w) * 0.9), pitch = 0.78;
-  const place = () => { cam.position.set(Math.sin(yaw) * Math.cos(pitch) * dist, Math.sin(pitch) * dist, Math.cos(yaw) * Math.cos(pitch) * dist); cam.lookAt(0, 0, 0); };
+  // the camera circles a point on the ground (tgt): one finger turns around it, two fingers slide it and pinch to zoom
+  const tgt = new THREE.Vector3(), ZMIN = 7, ZMAX = 260;
+  const place = () => { cam.position.set(tgt.x + Math.sin(yaw) * Math.cos(pitch) * dist, Math.sin(pitch) * dist, tgt.z + Math.cos(yaw) * Math.cos(pitch) * dist); cam.lookAt(tgt.x, 1, tgt.z); };
+  // slide the point the camera looks at, by a drag of dx, dy pixels (further away = a bigger step), kept on the island
+  const pan = (dx, dy) => { const k = dist * 0.0016;
+    tgt.x -= (Math.cos(yaw) * dx + Math.sin(yaw) * dy) * k; tgt.z -= (-Math.sin(yaw) * dx + Math.cos(yaw) * dy) * k;
+    const r = Math.hypot(tgt.x, tgt.z); if (r > R * 0.9) tgt.multiplyScalar(R * 0.9 / r); };
   place();
-  const ptr = new Map(); let moved = 0, pinch0 = 0;
+  const ptr = new Map(); let moved = 0, pinch0 = 0, mid0 = null;
   const el = renderer.domElement; el.style.touchAction = 'none';
-  el.addEventListener('pointerdown', e => { ptr.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; if (ptr.size === 2) { const [a, b] = [...ptr.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
+  el.addEventListener('contextmenu', e => e.preventDefault());   // right-drag pans on a computer
+  el.addEventListener('pointerdown', e => { ptr.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; if (ptr.size === 2) { const [a, b] = [...ptr.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } });
   el.addEventListener('pointermove', e => {
     if (!ptr.has(e.pointerId)) return; const [x0, y0] = ptr.get(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]);
-    if (ptr.size === 1) { yaw -= (e.clientX - x0) * 0.008; pitch = Math.min(1.35, Math.max(0.35, pitch + (e.clientY - y0) * 0.004)); moved += Math.abs(e.clientX - x0) + Math.abs(e.clientY - y0); }
-    else if (ptr.size === 2) { const [a, b] = [...ptr.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); dist = Math.min(260, Math.max(80, dist * pinch0 / d)); pinch0 = d; moved = 99; }
+    if (ptr.size === 1 && (e.buttons & 2)) { pan(e.clientX - x0, e.clientY - y0); moved += 99; }   // right mouse button: slide
+    else if (ptr.size === 1) { yaw -= (e.clientX - x0) * 0.008; pitch = Math.min(1.35, Math.max(0.35, pitch + (e.clientY - y0) * 0.004)); moved += Math.abs(e.clientX - x0) + Math.abs(e.clientY - y0); }
+    else if (ptr.size === 2) { const [a, b] = [...ptr.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]), mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      dist = Math.min(ZMAX, Math.max(ZMIN, dist * pinch0 / d)); pinch0 = d;   // pinch: zoom
+      if (mid0) pan(mid[0] - mid0[0], mid[1] - mid0[1]); mid0 = mid; moved = 99; }   // both fingers moving together: slide
     place();
   });
   const up = e => {
-    const was = ptr.size; ptr.delete(e.pointerId);
+    const was = ptr.size; ptr.delete(e.pointerId); if (ptr.size < 2) mid0 = null;
     if (was === 1 && moved < 6 && e.type === 'pointerup') {   // a tap: pick a building
       const rc = new THREE.Raycaster(), b = el.getBoundingClientRect();
       rc.setFromCamera(new THREE.Vector2((e.clientX - b.left) / b.width * 2 - 1, -(e.clientY - b.top) / b.height * 2 + 1), cam);
@@ -392,7 +402,7 @@ export function mountCommons(host, opts) {
     }
   };
   el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-  el.addEventListener('wheel', e => { e.preventDefault(); dist = Math.min(260, Math.max(80, dist * (1 + e.deltaY * 0.001))); place(); }, { passive: false });
+  el.addEventListener('wheel', e => { e.preventDefault(); dist = Math.min(ZMAX, Math.max(ZMIN, dist * (1 + e.deltaY * 0.001))); place(); }, { passive: false });
 
   let alive = true, t0 = performance.now();
   const v = new THREE.Vector3();
