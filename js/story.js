@@ -1089,7 +1089,7 @@ function isaNotice() {
 function mountRoom() {
   const t = myTeam(), ranks = teamRanks(), k = ranks.findIndex(r => r.name === t.name), me = ranks[k];
   const ids = ['you', ...t.ids.filter(id => id !== 'you')];
-  room3d = mountTeamRoom($('room3d'), { name: t.name,
+  room3d = mountTeamRoom($('room3d'), { name: t.name, url: p => PACK.url(p),
     screen: [t.name, k >= 0 ? `Team Ranking: #${k + 1} of ${ranks.length}` : 'Team Ranking: —', `${t.ids.length} members · Avg Elo ${me ? Math.round(me.elo) : '—'}`, `Season ${save.seasonNo || 2} · Day ${save.day + 1}`],
     members: ids.map(id => ({ id, name: id === 'you' ? save.you.name : nameOf(id), sub: id === 'you' ? 'You' : frLevel(id), you: id === 'you' })),
     onPick: id => { if (id === 'you') return; const c = $('mate-' + id); if (!c) return; c.scrollIntoView({ behavior: 'smooth', block: 'center' }); c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 1200); } });

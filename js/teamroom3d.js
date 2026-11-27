@@ -2,6 +2,8 @@
 // One pod per team member (up to 6), each with a name tag. Tap a pod or its tag to pick that teammate. Drag to look around.
 // Built from our own simple shapes.
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { modelFor } from './people.js';
 
 const R = 15, H = 9;   // room radius and height
 const POD_COLORS = [0x39b6ff, 0xf2a33a, 0x6be08f, 0xe07aa8, 0xb48cff, 0xff6b6b];
@@ -31,7 +33,7 @@ function pod(color, you) {
   return g;
 }
 
-// opts: { name, screen: [lines], members: [{ id, name, sub, you }], onPick(id) }. Returns { dispose }.
+// opts: { name, screen: [lines], members: [{ id, name, sub, you }], onPick(id), url(path) }. Returns { dispose }.
 export function mountTeamRoom(host, opts) {
   const w = host.clientWidth, h = host.clientHeight;
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -75,6 +77,21 @@ export function mountTeamRoom(host, opts) {
     el.innerHTML = `<span>${m.name}</span>${m.sub ? `<i>${m.sub}</i>` : ''}`;
     el.onclick = e => { e.stopPropagation(); opts.onPick && opts.onPick(m.id); };
     host.appendChild(el); tags.push({ el, pod: p });
+  });
+  // teammates: each one stands in their own pod, facing the table. The model is a child of the pod, so it floats with it.
+  const loader = new GLTFLoader();
+  members.forEach(async (m, i) => {
+    const path = await modelFor(m.id);
+    if (!path || !opts.url) return;   // no model for this brawler (or you): just the empty pod
+    try {
+      const g = (await loader.loadAsync(await opts.url(path))).scene;
+      g.updateMatrixWorld(true); g.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
+      const box = new THREE.Box3().setFromObject(g, true), size = box.getSize(new THREE.Vector3());
+      const k = 1.9 / size.y; g.scale.setScalar(k);
+      g.position.set(0, 1.18 - box.min.y * k, 0.25);   // feet on the seat cushion, a step toward the open side
+      g.traverse(o => { if (o.isMesh) o.userData.id = m.id; });   // tapping the person picks them, same as the pod
+      pods[i].add(g);
+    } catch (e) { console.warn('teammate', m.id, e); }
   });
   // camera: near the door, looking at the table; drag to turn around the room
   const camera = new THREE.PerspectiveCamera(64, w / h, 0.1, 100);
