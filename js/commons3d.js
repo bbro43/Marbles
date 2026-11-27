@@ -346,6 +346,7 @@ export function mountCommons(host, opts) {
         g.position.copy(home).add(new THREE.Vector3(Math.cos(rad(L.ang)) * side, 0, -Math.sin(rad(L.ang)) * side));
         g.rotation.y = rad(L.ang) + Math.PI;          // face the plaza, like the buildings
         g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+        g.userData.rot0 = g.rotation.y; g.userData.ph = Math.random() * 6.28;   // their facing, and their own timing
         scene.add(g); people.push(g);
       } catch (e) { console.warn('person', id, e); }
     });
@@ -399,6 +400,10 @@ export function mountCommons(host, opts) {
     if (host.hidden || !host.isConnected || document.body.classList.contains('scene-on')) { requestAnimationFrame(frame); return; }   // not on screen, or a scene is playing (the picture freezes): don't draw
     const t = (performance.now() - t0) / 1000;
     fx.ring.rotation.x = Math.PI / 2 + Math.sin(t * 0.7) * 0.25; fx.ring.rotation.z = t * 0.6; fx.core.rotation.y = t; fx.core.position.y = 9 + Math.sin(t * 1.5) * 0.4;
+    for (const g of people) {   // a little life: a slow turn left and right, and a slight sway
+      g.rotation.y = g.userData.rot0 + Math.sin(t * 0.4 + g.userData.ph) * 0.25;
+      g.rotation.z = Math.sin(t * 1.2 + g.userData.ph) * 0.02;
+    }
     for (const b of boards) {   // face the camera, bob gently
       b.grp.quaternion.copy(cam.quaternion);   // always face the screen
       b.m.material.opacity = Math.min(1, Math.max(0.12, (dist - 110) / 60));   // fade out when zoomed in on the plaza
