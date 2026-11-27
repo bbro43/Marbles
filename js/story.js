@@ -909,7 +909,7 @@ function showMap(on, f) {
   const counts = f ? {} : Object.fromEntries(Object.entries(presence()).map(([k, v]) => [k, v.length]));
   if (save.messages.length) counts.messages = Math.min(save.messages.length, 99);
   { const t = myTeam(); if (t && t.ids.length >= TEAM_ROOM) counts.teamroom = t.ids.length; }   // your team room: how many members
-  map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(), people: f ? {} : presence(),
+  map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(), people: f ? {} : presence(), url: p => PACK.url(p),
     onPick: k => { if (k.startsWith('board:')) return boardPopup(k.slice(6)); if (k === 'shop' && !f) { ensureColl(); store(); location.href = 'room.html?story=1'; return; } if (k === 'inventory' && !f) { ensureColl(); store(); location.href = 'room.html?story=1&to=room'; return; } if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
   mapKey = key;
 }

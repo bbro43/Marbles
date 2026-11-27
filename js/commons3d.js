@@ -2,6 +2,8 @@
 // A central plaza with a fountain and a floating ring, ring roads and spoke paths,
 // landmark buildings you tap to visit, and filler buildings around the rings.
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { modelFor } from './people.js';
 
 const R = 100;                       // island radius
 const SKY = {                        // by time slot
