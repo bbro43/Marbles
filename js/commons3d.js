@@ -348,7 +348,7 @@ export function mountCommons(host, opts) {
         g.rotation.y = rad(L.ang) + Math.PI;          // face the plaza, like the buildings
         g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.userData.key = 'person:' + id; } });   // a tap on any part of them names who it is
         g.userData.rot0 = g.rotation.y; g.userData.ph = Math.random() * 6.28;   // their facing, and their own timing
-        scene.add(g); people.push(g);
+        g.userData.id = id; scene.add(g); people.push(g); opts.onPerson?.(id);   // tell Story they're on the island (for the faces row)
       } catch (e) { console.warn('person', id, e); }
     });
   }
@@ -379,10 +379,10 @@ export function mountCommons(host, opts) {
     tgt.x -= (Math.cos(yaw) * dx + Math.sin(yaw) * dy) * k; tgt.z -= (-Math.sin(yaw) * dx + Math.cos(yaw) * dy) * k;
     const r = Math.hypot(tgt.x, tgt.z); if (r > R * 0.9) tgt.multiplyScalar(R * 0.9 / r); };
   place();
-  const ptr = new Map(); let moved = 0, pinch0 = 0, mid0 = null;
+  const ptr = new Map(); let moved = 0, pinch0 = 0, mid0 = null, goal = null;   // goal: where the camera is gliding to (a tapped face)
   const el = renderer.domElement; el.style.touchAction = 'none';
   el.addEventListener('contextmenu', e => e.preventDefault());   // right-drag pans on a computer
-  el.addEventListener('pointerdown', e => { ptr.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; if (ptr.size === 2) { const [a, b] = [...ptr.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } });
+  el.addEventListener('pointerdown', e => { goal = null; ptr.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; if (ptr.size === 2) { const [a, b] = [...ptr.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } });
   el.addEventListener('pointermove', e => {
     if (!ptr.has(e.pointerId)) return; const [x0, y0] = ptr.get(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]);
     if (ptr.size === 1 && (e.buttons & 2)) { pan(e.clientX - x0, e.clientY - y0); moved += 99; }   // right mouse button: slide
@@ -411,6 +411,10 @@ export function mountCommons(host, opts) {
     if (host.hidden || !host.isConnected || document.body.classList.contains('scene-on')) { requestAnimationFrame(frame); return; }   // not on screen, or a scene is playing (the picture freezes): don't draw
     const t = (performance.now() - t0) / 1000;
     fx.ring.rotation.x = Math.PI / 2 + Math.sin(t * 0.7) * 0.25; fx.ring.rotation.z = t * 0.6; fx.core.rotation.y = t; fx.core.position.y = 9 + Math.sin(t * 1.5) * 0.4;
+    if (goal) {   // glide toward a tapped face: a tenth of the way each frame, so it eases in
+      tgt.x += (goal.x - tgt.x) * 0.1; tgt.z += (goal.z - tgt.z) * 0.1; dist += (goal.dist - dist) * 0.1; pitch += (goal.pitch - pitch) * 0.1; place();
+      if (Math.hypot(goal.x - tgt.x, goal.z - tgt.z) < 0.05 && Math.abs(goal.dist - dist) < 0.05) goal = null;
+    }
     for (const g of people) {   // a little life: a slow turn left and right, and a slight sway
       g.rotation.y = g.userData.rot0 + Math.sin(t * 0.4 + g.userData.ph) * 0.25;
       g.rotation.z = Math.sin(t * 1.2 + g.userData.ph) * 0.02;
@@ -437,6 +441,9 @@ export function mountCommons(host, opts) {
   addEventListener('resize', onResize);
   return {
     get yaw() { return yaw; },
+    // who is standing on the island right now (loaded), and gliding the camera to one of them
+    present: () => people.map(g => g.userData.id),
+    focus(id) { const g = people.find(x => x.userData.id === id); if (g) goal = { x: g.position.x, z: g.position.z, dist: 9, pitch: 0.45 }; },
     dispose() { alive = false; removeEventListener('resize', onResize); renderer.dispose(); host.innerHTML = ''; },
   };
 }

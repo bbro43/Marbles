@@ -711,7 +711,8 @@ function render(view = save.view || 'commons') {
     body = `<div class="isa"><div class="isaname">ISA</div><div>${line}</div></div>
       ${f ? `<button class="big" id="playLeague">Play league match: vs ${nameOf(f.opp)}</button>` : ''}
       ${eventCall()}
-      <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button><button data-go="teams">Teams</button><button data-go="brawlers">Brawlers</button></div>`;
+      <div class="grid"><button id="rest">Rest</button><button data-go="calendar">Calendar</button><button data-go="teams">Teams</button><button data-go="brawlers">Brawlers</button></div>
+      ${f ? '' : `<h3 class="herehd">Around The Commons</h3><div class="here" id="hereNow"></div>`}`;
   } else if (view === 'shop') {
     body = shopView();
   } else if (view.startsWith('arena')) {
@@ -904,14 +905,15 @@ function showMap(on, f) {
   const host = $('map'), key = `${save.day}-${save.slot}-${!!f}`;
   if (!on) { host.hidden = true; document.body.appendChild(host); return; }
   host.hidden = false; $('main').firstElementChild.after(host);
-  if (map && mapKey === key) return;
+  if (map && mapKey === key) return void fillHere();   // same island: just refresh the faces row
   const yaw = map?.yaw; if (map) map.dispose();
   const counts = f ? {} : Object.fromEntries(Object.entries(presence()).map(([k, v]) => [k, v.length]));
   if (save.messages.length) counts.messages = Math.min(save.messages.length, 99);
   { const t = myTeam(); if (t && t.ids.length >= TEAM_ROOM) counts.teamroom = t.ids.length; }   // your team room: how many members
-  map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(), people: f ? {} : presence(), url: p => PACK.url(p),
+  map = mountCommons(host, { slot: SLOTS[save.slot], counts, highlight: f ? 'arena1' : null, yaw, boards: boards(), people: f ? {} : presence(), url: p => PACK.url(p), onPerson: () => fillHere(),
     onPick: k => { if (k.startsWith('person:')) return talkTo(k.slice(7)); if (k.startsWith('board:')) return boardPopup(k.slice(6)); if (k === 'shop' && !f) { ensureColl(); store(); location.href = 'room.html?story=1'; return; } if (k === 'inventory' && !f) { ensureColl(); store(); location.href = 'room.html?story=1&to=room'; return; } if (f && k === 'arena1') launch(f.opp, { key: f.key, league: true }); else render(k); } });
   mapKey = key;
+  fillHere();
 }
 // deck editor (the same one as My Room in the main game), limited to what you own
 async function editDeck() {
@@ -945,6 +947,21 @@ function who(place) {
     return `<div class="card"><div><b>${nameOf(id)}</b>${isRival(id) ? ' <span class="lock">Rival</span>' : ''} · ${save.season.names[leagueOf(id)]} · ${b.rec.w}-${b.rec.l}${t ? ` · ${t.name}` : ''} · ${frLevel(id)}</div>
       <div class="say">“${isRival(id) ? `Our record's too close. Let's fix that.` : challengeLine(id)}”</div><button data-challenge="${id}">Challenge</button>
       ${o ? `<div class="note">Trade offer: their <b>${o.get.name}</b> for your <b>${o.give.name}</b>.</div><button data-trade="${id}">Trade</button>` : ''}</div>`; }).join('');
+}
+// the faces row under The Commons: everyone standing on the island right now, with the Battle Arena's face icons.
+// Tap a face and the camera glides to them. Faces: the cast's from the Battle Arena menu, our own characters' from pack 2.
+let hereKey = '';
+function faceOf(id) {
+  const m = (cat.menu?.chars || []).find(c => c.id === id); if (m) return m.face;
+  return (cat.characters || []).find(c => c.kind === 'interspace' && c.id === id)?.face || null;
+}
+async function fillHere() {
+  const box = $('hereNow'); if (!box || !map?.present) return;
+  const ids = map.present().filter(id => faceOf(id)), k = ids.join();
+  if (k === hereKey && box.childElementCount) return; hereKey = k;
+  const urls = await Promise.all(ids.map(id => PACK.url(faceOf(id))));
+  box.innerHTML = ids.map((id, i) => `<button class="face" data-here="${id}" title="${nameOf(id)}"><img src="${urls[i]}" alt=""><span>${nameOf(id)}</span></button>`).join('');
+  box.querySelectorAll('[data-here]').forEach(b => b.onclick = () => map.focus(b.dataset.here));
 }
 // a tap on someone standing in The Commons: they challenge you, as if you'd met them at their place
 function talkTo(id) {
